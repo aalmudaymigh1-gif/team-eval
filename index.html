@@ -382,7 +382,7 @@ video.vid{height:auto;max-height:70vh;background:#000}
 <div class="toast" id="toast"><span id="toastMsg"></span><button id="toastUndo" class="hide">تراجع</button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=8"></script>
+<script src="api.js?v=9"></script>
 <script>
 const BOOT = (function () {
   const q = new URLSearchParams(location.search);
@@ -728,7 +728,9 @@ async function projLocSave(id, lat, lng) {
   catch (e) { const el = $('#plerr'); if (el) el.textContent = e; }
 }
 
-function newItem(dueMode) { return {title: '', note: '', dueMode: dueMode || 'none', due: '', media: [], urgent: false}; }
+function newItem(dueMode) { return {title: '', note: '', dueMode: dueMode || 'none', due: '', media: [], urgent: false, proof: lsGet('tf_proof') || 'photo'}; }
+const PROOFS = [['photo', 'صورة'], ['invoice', 'فاتورة'], ['note', 'ملاحظة']];
+const PROOF_HINT = {photo: 'يصوّر الشغل بعد ما يخلص', invoice: 'يصوّر الفاتورة ويكتب المبلغ والمحل، وتنحسب على مشروع المهمة', note: 'يكتب وش سوّى، بدون صورة'};
 
 function call(fn, ...args) { return callT(30000, fn, ...args); }
 function callT(ms, fn, ...args) {
@@ -1088,7 +1090,7 @@ function taskRowHtml(t, showProj) {
   const today = S.data.today, p = pillOf(t, t.b, false);
   const ring = t.status === 'done' ? 'g' : t.status === 'review' ? 'a' : t.status === 'returned' ? 'r' : '';
   const nm = (t.media || []).length, np = (t.proofs || []).length;
-  const mini = (t.urgent && t.status !== 'done' ? '<span class="mb u">عاجلة</span>' : '') + (nm ? `<span class="mb">شرح ${nm}</span>` : '') + (np ? `<span class="mb">إثبات ${np}</span>` : '');
+  const mini = (t.urgent && t.status !== 'done' ? '<span class="mb u">عاجلة</span>' : '') + (t.proof === 'invoice' ? `<span class="mb">فاتورة${t.inv ? ' ' + money(t.inv.amount) : ''}</span>` : t.proof === 'note' ? '<span class="mb">ملاحظة</span>' : '') + (nm ? `<span class="mb">شرح ${nm}</span>` : '') + (np ? `<span class="mb">إثبات ${np}</span>` : '');
   const when = t.status === 'done' ? 'خلصت ' + dmy(t.doneAt) : t.status === 'review' ? 'انرسلت ' + dmy(t.doneAt) : dueHtml(t, today);
   const meta = [esc(t.ename), showProj ? esc(t.pname || 'عام') : '', when].filter(Boolean).join(' · ');
   return `<div class="tli"><button class="trow2" onclick="openTask('${t.id}')"><span class="ring ${ring}"></span>
@@ -1140,7 +1142,9 @@ function renderTaskDetail() {
       <label class="dp"><span>المشروع</span><select onchange="updTask('${id}',{project:this.value})"><option value="">عام</option>${ps.map(x => `<option value="${x.id}" ${t.project === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
       <label class="dp"><span>الموعد</span><input type="date" class="${t.due && t.due < today && t.status !== 'done' ? 'lt' : ''}" value="${t.due || ''}" onchange="updTask('${id}',{due:this.value})"></label>
       <div class="dp"><span>عاجلة</span><button class="tg ${t.urgent ? 'on u' : ''}" aria-label="عاجلة" onclick="updTask('${id}',{urgent:${t.urgent ? 'false' : 'true'}})"></button></div>
+      <label class="dp"><span>الإثبات</span><select onchange="updTask('${id}',{proof:this.value})" ${t.status === 'open' || t.status === 'returned' ? '' : 'disabled'}>${PROOFS.map(o => `<option value="${o[0]}" ${(t.proof || 'photo') === o[0] ? 'selected' : ''}>${o[1]}</option>`).join('')}</select></label>
     </div>
+    ${t.inv ? `<div class="note ${t.inv.status === 'ok' ? 'good' : 'info'}">${I('receipt', 16)}<div><b>فاتورة ${money(t.inv.amount)} ريال</b>${t.inv.vendor ? ' · ' + esc(t.inv.vendor) : ''} · ${t.inv.paidBy === 'card' ? 'أنا' : t.inv.paidBy === 'own' ? 'من جيبه' : 'من العهدة'}${t.inv.status === 'review' ? ' · تنعتمد مع المهمة' : ''} <button class="lnk dl" onclick="openInvD('${t.inv.id}')">التفاصيل</button></div></div>` : ''}
     ${t.status === 'returned' && t.reason ? `<div class="note bad">${I('rotate-ccw', 16)}<div><b>رجّعتها:</b> ${esc(t.reason)}</div></div>` : ''}
     <div class="lbl">الوصف</div>
     <textarea class="dnote" placeholder="تعليمات أو تفاصيل للموظف…" onchange="updTask('${id}',{note:this.value})">${esc(t.note)}</textarea>
@@ -1188,6 +1192,9 @@ function drawSheet() {
       <label class="qsel">${I('calendar', 15)}<select aria-label="الموعد" onchange="qtDue(this.value)">${[['none', 'بدون موعد'], ['today', 'اليوم'], ['tom', 'بكرة'], ['other', 'تاريخ…']].map(x => `<option value="${x[0]}" ${sel(x[0], it.dueMode)}>${x[1]}</option>`).join('')}</select></label>
     </div>
     ${it.dueMode === 'other' ? `<input type="date" value="${it.due || d.today}" min="${d.today}" onchange="S.tf.items[0].due=this.value">` : ''}
+    <div class="sub" style="margin:2px 0 4px">الإثبات</div>
+    <div class="segc">${PROOFS.map(o => `<button class="${(it.proof || 'photo') === o[0] ? 'on' : ''}" onclick="S.tf.items[0].proof='${o[0]}';lsSet('tf_proof','${o[0]}');drawSheet()">${o[1]}</button>`).join('')}</div>
+    <div class="sub" style="margin:-4px 0 8px">${PROOF_HINT[it.proof || 'photo']}</div>
     <div id="tfMedia_0">${tfMediaHtml(0)}</div>
     ${S.sheetMore ? `<label class="lbl" for="qtNote" style="margin:4px 0 0">الوصف</label><textarea id="qtNote" placeholder="المقاسات عند الحارس…" oninput="S.tf.items[0].note=this.value">${esc(it.note)}</textarea>
       <div class="trow" style="padding:0"><div class="n"><b>عاجلة</b><small>تطلع أول مجموعتها وعليها علامة</small></div><button class="tg ${it.urgent ? 'on u' : ''}" aria-label="عاجلة" onclick="S.tf.items[0].urgent=!S.tf.items[0].urgent;drawSheet()"></button></div>`
@@ -1298,7 +1305,7 @@ async function addTask() {
   S.busy = true;
   const b = $('#tfBtn'); if (b) { b.disabled = true; b.textContent = 'جاري الإضافة…'; }
   try {
-    const items = [{title: it.title, due: itemDue(it), note: it.note, urgent: !!it.urgent, media: it.media.filter(x => x.id).map(x => ({id: x.id, t: x.t}))}];
+    const items = [{title: it.title, due: itemDue(it), note: it.note, urgent: !!it.urgent, proof: it.proof || 'photo', media: it.media.filter(x => x.id).map(x => ({id: x.id, t: x.t}))}];
     S.data = await call('apiTasksAdd', BOOT.key, {emps: tf.emps, project: tf.project || '', items});
     const keep = newItem(it.dueMode); if (it.dueMode === 'other') keep.due = it.due;
     S.tf = {emps: tf.emps, project: tf.project, newP: false, items: [keep]};
@@ -1394,13 +1401,13 @@ function wLeft(until, today) {
 function wBadge(x) {
   const me = BOOT.page === 'admin' && !S.preview;
   let b = '';
-  if (x.kind === 'inv' && x.paidBy === 'card') b = '<span class="cb">' + (me ? 'بطاقتي' : 'بطاقة المدير') + '</span>';
+  if (x.kind === 'inv' && x.paidBy === 'card') b = '<span class="cb">' + (me ? 'أنا' : 'المدير') + '</span>';
   else if (x.kind === 'inv' && x.paidBy === 'own') b = '<span class="ob">' + (me ? 'من جيبه' : 'من جيبي') + '</span>';
   return b + (x.warrantyUntil ? '<span class="wb">ضمان</span>' : '');
 }
 
 function invSt(x, emp) {
-  if (x.kind === 'give') return ['', x.paidBy === 'own' ? (emp ? 'رجعت لك' : 'سداد') : (emp ? 'استلمت عهدة' : 'عهدة')];
+  if (x.kind === 'give') return ['', x.paidBy === 'own' ? (emp ? 'رجعت لك' : 'سداد') : x.paidBy === 'ret' ? (emp ? 'رجّعته للمدير' : 'رجّع الباقي') : (emp ? 'استلمت عهدة' : 'عهدة')];
   if (x.status === 'review') return ['a', emp ? 'تنتظر' : 'تنتظر مراجعتك'];
   if (x.status === 'returned') return ['late', 'رجعت'];
   return ['', 'انعتمدت'];
@@ -1459,7 +1466,7 @@ function prefetchImgs() {
 
 function invRowHtml(x, showEmp) {
   const st = invSt(x, false), armDel = S.armed === 'inv_' + x.id, give = x.kind === 'give';
-  const meta = [showEmp ? esc(x.ename) : '', give ? '' : esc(x.pname || 'عام'), dmy(x.ts)].filter(Boolean).join(' · ');
+  const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', give ? '' : esc(x.pname || 'عام'), x.vendor ? esc(x.vendor) : '', dmy(x.ts)].filter(Boolean).join(' · ');
   return `<div class="ivr ${x.status === 'review' ? 'rv' : ''}">
     <div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}"><bdi dir="ltr">${give ? '+' : ''}${money(x.amount)}</bdi></b></div>
     <div class="tm">${meta}${x.status !== 'ok' || give ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>
@@ -1480,11 +1487,11 @@ function renderInv() {
   const okM = items.filter(x => x.kind === 'inv' && x.status === 'ok' && x.ts.slice(0, 7) === mk);
   const tot = okM.reduce((s, x) => s + x.amount, 0);
   let h = '<div class="ecs">' + d.employees.map(e => {
-    const p = (iv.parts || {})[e.id] || {c: iv.bal[e.id] || 0, t: 0}, n = rv.filter(x => x.emp === e.id).length;
+    const p = (iv.parts || {})[e.id] || {c: iv.bal[e.id] || 0, o: 0}, n = rv.filter(x => x.emp === e.id).length;
     return `<button class="ec" onclick="openSt('${e.id}')">${n ? `<span class="pend">${n} تنتظر</span>` : ''}
-      <b>${esc(e.name)}</b><span class="l">معه</span><span class="v">${money(Math.max(0, p.c))}</span>
-      <span class="o ${p.t > 0 ? 'r' : ''}">${p.t > 0 ? 'له عندك ' + money(p.t) : 'ما له شي عندك'}</span></button>`;
-  }).join('') + '</div>';
+      <b>${esc(e.name)}</b><span class="l">رصيد العهدة</span><span class="v" style="${p.c < 0 ? 'color:#F7C1C1' : ''}"><bdi dir="ltr">${p.c < 0 ? '−' : ''}${money(Math.abs(p.c))}</bdi></span>
+      <span class="o ${p.o > 0 ? 'r' : ''}">${p.o > 0 ? 'له عندك من جيبه ' + money(p.o) : p.c < 0 ? 'صرف أكثر من عهدته' : 'ما له شي عندك'}</span></button>`;
+  }).join('') + '</div>' + `<button class="btn2 cu" style="width:100%;margin-top:10px" onclick="askInvAdd()">${I('plus', 16, 2.5)}أضف فاتورة</button>`;
   const okList = items.filter(x => x.kind === 'inv' && x.status === 'ok');
   if (okList.length) {
     const showAll = !!S.iopen.allinv, list = showAll ? okList : okList.slice(0, 8);
@@ -1537,7 +1544,7 @@ async function invDel(id) {
   catch (e) { S.armed = null; renderInv(); toast(e); }
 }
 function invMiniRow(x, showEmp) {
-  const meta = [showEmp ? esc(x.ename || '') : '', esc(x.pname || 'عام'), dmy(x.ts)].filter(Boolean).join(' · ');
+  const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', esc(x.pname || 'عام'), x.vendor ? esc(x.vendor) : '', dmy(x.ts)].filter(Boolean).join(' · ');
   return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${meta}</div></span><b class="iva">${money(x.amount)} ‹</b></div></button>`;
 }
 function openInvD(id) {
@@ -1546,11 +1553,10 @@ function openInvD(id) {
   const e = d.employees.find(v => v.id === x.emp);
   S.armed = null;
   ovOpen(`<div class="ivd"><h3>${esc(x.desc)}</h3><div class="amt">${money(x.amount)} <small style="font-size:13px;font-weight:500;color:var(--muted)">ريال</small></div>
-    <div class="sub">${esc(e ? e.name : '')} · ${esc(x.pname || 'عام')} · ${dmy(x.ts)}</div>
+    <div class="sub">${esc(e ? e.name : 'أنت')} · ${esc(x.pname || 'عام')}${x.vendor ? ' · ' + esc(x.vendor) : ''} · ${dmy(x.ts)}</div>
     ${x.warrantyUntil ? `<div class="sub" style="margin-top:4px">ضمان لين ${dmy(x.warrantyUntil)} · ${wLeft(x.warrantyUntil, d.today)[1]}</div>` : ''}
     <div class="pgrid" id="ivdph">${x.photos.map(f => `<div class="pph" data-f="${esc(f)}">جاري التحميل…</div>`).join('')}</div>
-    <div class="sub" style="margin:6px 0 4px">دفعها من</div>
-    <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبه'], ['card', 'بطاقتي']].map(o => `<button class="${(x.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="${(x.paidBy || 'cash') === o[0] ? '' : `setPaidBy('${id}','${o[0]}',true)`}">${o[1]}</button>`).join('')}</div>
+    ${x.emp ? `<div class="sub" style="margin:6px 0 4px">دفعها من</div><div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبه'], ['card', 'أنا']].map(o => `<button class="${(x.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="${(x.paidBy || 'cash') === o[0] ? '' : `setPaidBy('${id}','${o[0]}',true)`}">${o[1]}</button>`).join('')}</div>` : '<div class="sub" style="margin:6px 0">دفعتها أنت</div>'}
     <button class="btn2" onclick="askWarranty('${id}')">${x.warrantyUntil ? 'عدّل الضمان' : 'أضف ضمان'}</button>
     <button class="btn2 rd" id="ivddel" onclick="delInvD('${id}')">حذف الفاتورة</button>
     <button class="btn2" style="border:0" onclick="ovClose()">إغلاق</button></div>`);
@@ -1575,23 +1581,24 @@ function renderInvSt(empId) {
   const items = ((d.inv || {}).items || []).filter(x => x.emp === empId).map(x => Object.assign({}, x, {ename: e.name}));
   const gives = items.filter(x => x.kind === 'give'), oks = items.filter(x => x.kind === 'inv' && x.status === 'ok' && x.paidBy !== 'card');
   const rv = items.filter(x => x.kind === 'inv' && x.status === 'review');
-  const p = ((d.inv || {}).parts || {})[empId] || {c: 0, o: 0, t: 0, g: 0, cash: 0, own: 0};
+  const p = ((d.inv || {}).parts || {})[empId] || {c: 0, o: 0, t: 0, g: 0, rt: 0, cash: 0, own: 0};
   const rows = gives.concat(oks).sort((a, b2) => a.ts < b2.ts ? 1 : a.ts > b2.ts ? -1 : 0);
   let h = `<button class="back" onclick="S.iv.st='';renderInv()">${I('arrow-right', 17)}رجوع للفواتير</button>
     <h2 style="margin:10px 0 0;font-size:20px">${esc(e.name)}</h2>
     ${rv.length ? `<div class="sech a">تنتظر اعتمادك<span>${rv.length}</span></div>` + rv.map(x => invRowHtml(x, false)).join('') : ''}
-    <div class="stc"><div class="l">باقي معه</div><div class="v">${money(Math.max(0, p.c))} <small>ريال</small></div>
-    <div class="r"><span>عطيته ${money(p.g)}</span><span>صرف من العهدة ${money(p.cash)}</span></div></div>
-    ${p.t > 0 ? `<div class="stc red"><div class="l">له عندك</div><div class="v">${money(p.t)} <small>ريال</small></div>
-      <div class="r"><span>${p.o > 0 ? 'دفع من جيبه ' + money(p.o) : ''}</span><span>${p.c < 0 ? 'صرف زيادة عن العهدة ' + money(-p.c) : ''}</span></div>
-      <button class="bigdo" onclick="askSdad('${empId}', ${p.t})">${I('check', 15, 2.5)}سدّدته</button></div>` : ''}
-    <button class="bigdo" style="width:100%;justify-content:center;border:0;font-family:inherit;cursor:pointer" onclick="askGive('${empId}')">${I('plus', 15, 2.5)}أعطيته مبلغ</button>`;
+    <div class="stc ${p.c < 0 ? 'red' : ''}"><div class="l">رصيد العهدة</div><div class="v"><bdi dir="ltr">${p.c < 0 ? '−' : ''}${money(Math.abs(p.c))}</bdi> <small>ريال</small></div>
+    <div class="r"><span>عطيته ${money(p.g)}${p.rt ? ' · رجّع ' + money(p.rt) : ''}</span><span>صرف ${money(p.cash)}</span></div>
+    ${p.c < 0 ? '<div class="r" style="margin-top:4px"><span>صرف أكثر من اللي معه</span></div>' : ''}</div>
+    <div class="grid2"><button class="bigdo" style="justify-content:center;border:0;font-family:inherit;cursor:pointer" onclick="askGive('${empId}')">${I('plus', 15, 2.5)}أعطيته</button>
+    <button class="btn2" style="border-radius:999px" onclick="askRet('${empId}', ${Math.max(0, p.c)})">رجّع لي</button></div>
+    ${p.o > 0 ? `<div class="stc red"><div class="l">له عندك من جيبه</div><div class="v">${money(p.o)} <small>ريال</small></div>
+      <button class="bigdo" onclick="askSdad('${empId}', ${p.o})">${I('check', 15, 2.5)}سدّدته</button></div>` : ''}`;
 
   h += `<div class="sech">كشف ${esc(e.name)}</div>`;
   if (!rows.length) return $('#view').innerHTML = h + emptyHtml('wallet', 'ما فيه حركات للحين');
   h += '<div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">' + rows.map(x => x.kind === 'give'
-    ? `<div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${x.paidBy === 'own' ? '<span class="ob">سداد</span>' : ''}<div class="tm">${dmy(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}</div></span>
-        <span style="display:flex;align-items:center;gap:4px"><b class="iva g"><bdi dir="ltr">+${money(x.amount)}</bdi></b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`
+    ? `<div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${x.paidBy === 'own' ? '<span class="ob">سداد</span>' : x.paidBy === 'ret' ? '<span class="ob">رجّع</span>' : ''}<div class="tm">${dmy(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}</div></span>
+        <span style="display:flex;align-items:center;gap:4px"><b class="iva ${x.paidBy === 'ret' ? 'r' : 'g'}"><bdi dir="ltr">${x.paidBy === 'ret' ? '−' : '+'}${money(x.amount)}</bdi></b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`
     : `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmy(x.ts)} · ${esc(x.pname || 'عام')}</div></span><b class="iva r"><bdi dir="ltr">−${money(x.amount)}</bdi> ‹</b></div></button>`).join('') + '</div>';
   $('#view').innerHTML = h;
 }
@@ -1611,6 +1618,50 @@ function askGive(empId) {
 async function doGive(empId) {
   try { S.data = await call('apiInvGive', BOOT.key, empId, $('#ga').value, $('#gn').value, S.gm); ovClose(); renderAdmin(); toast('انحفظ'); }
   catch (e) { $('#gerr').textContent = e; }
+}
+function askRet(empId, amt) {
+  const e = S.data.employees.find(x => x.id === empId);
+  S.gm = S.gm || 'تحويل';
+  ovOpen(`<label class="shh" for="ga">كم رجّع لك ${esc(e ? e.name : '')} من العهدة؟</label>
+    <input id="ga" class="qtt" inputmode="decimal" value="${amt > 0 ? esc(amt) : ''}" placeholder="المبلغ">
+    <div class="segc" id="gmseg" style="margin:10px 0">${['تحويل', 'كاش'].map(m => `<button class="${S.gm === m ? 'on' : ''}" onclick="S.gm='${m}';document.querySelectorAll('#gmseg button').forEach(b=>b.classList.toggle('on',b.textContent==='${m}'))">${m}</button>`).join('')}</div>
+    <input id="gn" placeholder="ملاحظة (اختياري)">
+    <div class="err" id="gerr"></div>
+    <div class="g21"><button class="btn2 cu" onclick="doRet('${empId}')">سجّل</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
+}
+async function doRet(empId) {
+  try { S.data = await call('apiInvGive', BOOT.key, empId, $('#ga').value, $('#gn').value, S.gm, false, true); ovClose(); renderAdmin(); toast('تسجّل اللي رجّعه'); }
+  catch (e) { $('#gerr').textContent = e; }
+}
+function askInvAdd() {
+  const d = S.data, ps = (d.projects || []).filter(p => !p.archived);
+  S.ai = S.ai || {amount: '', vendor: '', desc: '', project: lsGet('tf_proj') || '', emp: '', shots: []};
+  const f = S.ai;
+  ovOpen(`<label class="shh">فاتورة جديدة</label>
+    <div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.ai.amount=this.value"><input placeholder="المحل" value="${esc(f.vendor)}" oninput="S.ai.vendor=this.value"></div>
+    <input placeholder="وش انشرى؟" value="${esc(f.desc)}" oninput="S.ai.desc=this.value">
+    <select aria-label="المشروع" onchange="S.ai.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}<option value="" ${f.project === '' ? 'selected' : ''}>عام</option></select>
+    <div class="sub" style="margin:6px 0 4px">مين دفع؟</div>
+    <div class="segc">${[['', 'أنا']].concat(d.employees.map(e => [e.id, 'عهدة ' + e.name.split(' ')[0]])).map(o => `<button class="${f.emp === o[0] ? 'on' : ''}" onclick="S.ai.emp='${o[0]}';askInvAdd()">${esc(o[1])}</button>`).join('')}</div>
+    <div class="shots">${f.shots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة الفاتورة"><button class="x" onclick="S.ai.shots.splice(${i},1);askInvAdd()" aria-label="حذف الصورة">×</button></div>`).join('')}
+    ${f.shots.length < 3 ? `<label class="madd">${I('camera', 20)}صورة (اختياري)<input type="file" accept="${ACC_IMG}" multiple style="display:none" onchange="pickAi(this)"></label>` : ''}</div>
+    <div class="sub">تنحفظ معتمدة على طول${f.emp ? '، وتنخصم من عهدته' : ''}.</div>
+    <div class="err" id="aierr"></div>
+    <div class="g21"><button class="btn2 cu" id="aibtn" onclick="doInvAdd()">حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
+}
+async function pickAi(input) {
+  const files = Array.from(input.files || []); input.value = '';
+  for (const f of files.slice(0, 3 - S.ai.shots.length)) { try { S.ai.shots.push(await resizeImg(f)); } catch (e) { toast(e); } }
+  askInvAdd();
+}
+async function doInvAdd() {
+  const f = S.ai, b = $('#aibtn');
+  if (b && b.disabled) return;
+  if (b) { b.disabled = true; b.textContent = 'جاري الحفظ…'; }
+  try {
+    S.data = await callT(120000, 'apiInvAddAdmin', BOOT.key, {amount: f.amount, vendor: f.vendor, desc: f.desc, project: f.project, emp: f.emp}, f.shots);
+    S.ai = null; ovClose(); renderAdmin(); toast('انحفظت الفاتورة');
+  } catch (e) { $('#aierr').textContent = e; if (b) { b.disabled = false; b.textContent = 'حفظ'; } }
 }
 function askSdad(empId, amt) {
   const e = S.data.employees.find(x => x.id === empId);
@@ -1661,7 +1712,7 @@ async function setPaidBy(id, by, reopen) {
   try {
     S.data = await call('apiInvPaidBy', BOOT.key, id, by); renderAdmin();
     if (reopen) openInvD(id);
-    toast(by === 'card' ? 'صارت على بطاقتك، وما تنخصم من العهدة' : by === 'own' ? 'صارت من جيبه، وتنضاف للي له عندك' : 'صارت من العهدة');
+    toast(by === 'card' ? 'صارت عليك، وما تنخصم من العهدة' : by === 'own' ? 'صارت من جيبه، وتنضاف للي له عندك' : 'صارت من العهدة');
   } catch (e) { toast(e); }
 }
 async function doWarranty(id, clear) {
@@ -1974,12 +2025,15 @@ function empTasksHtml(d, isPreview) {
 function empCardHtml(t, mode, inGroup) {
   const today = S.empData.today, p = pillOf(t, t.b, true), open = t.status === 'open' || t.status === 'returned';
   let act = '';
-  if (open && mode === 'emp') act = S.doing === t.id ? proofFormHtml(t) : `<label class="bigdo">${I('camera', 15, 2.2)}أنجزتها<input type="file" accept="${ACC_IMG}" capture="environment" style="display:none" onchange="startDone('${t.id}', this)"></label>`;
+  if (open && mode === 'emp') act = S.doing === t.id ? proofFormHtml(t)
+    : t.proof === 'note' ? `<button class="bigdo" style="border:0;font-family:inherit;cursor:pointer" onclick="S.doing='${t.id}';S.shots=[];S.cm='';rerenderEmp()">${I('pencil', 15, 2.2)}أنجزتها</button>`
+    : `<label class="bigdo">${I('camera', 15, 2.2)}${t.proof === 'invoice' ? 'أنجزتها · صوّر الفاتورة' : 'أنجزتها'}<input type="file" accept="${ACC_IMG}" capture="environment" style="display:none" onchange="startDone('${t.id}', this)"></label>`;
   const meta = [inGroup ? '' : (t.pname ? esc(t.pname) : ''), t.status === 'review' ? 'انرسلت ' + dmy(t.doneAt) : dueHtml(t, today)].filter(Boolean).join(' · ');
   return `<div class="ecard ${inGroup ? 'in' : ''} ${t.status === 'returned' ? 'rt' : ''}">
     <div class="th"><span class="tt">${esc(t.title)}</span>${pillHtml(p)}</div>
     ${meta ? `<div class="tm">${meta}</div>` : ''}
     ${t.urgent && open ? '<span class="mb u" style="display:inline-block;margin-top:6px">عاجلة</span>' : ''}
+    ${open && t.proof === 'invoice' ? '<span class="mb" style="display:inline-block;margin-top:6px">إثباتها فاتورة</span>' : open && t.proof === 'note' ? '<span class="mb" style="display:inline-block;margin-top:6px">إثباتها ملاحظة</span>' : ''}
     ${t.status === 'returned' && t.reason ? `<div class="note bad"><div><b>المدير يقول:</b> ${esc(t.reason)}</div></div>` : ''}
     ${t.note && open ? `<div class="enote">${esc(t.note)}</div>` : ''}
     ${open ? mediaHtml(t) : ''}
@@ -1987,13 +2041,24 @@ function empCardHtml(t, mode, inGroup) {
 }
 
 function proofFormHtml(t) {
+  const pf = t.proof || 'photo', max = pf === 'invoice' ? 3 : 5;
+  if (pf === 'note') return `<div class="pform">
+    <textarea placeholder="وش سوّيت؟ (إلزامي)" oninput="S.cm=this.value;const b=document.getElementById('sendb');if(b)b.disabled=this.value.trim().length<3">${esc(S.cm || '')}</textarea>
+    <button class="btn" id="sendb" ${(S.cm || '').trim().length >= 3 && !S.busy ? '' : 'disabled'} onclick="sendDone('${t.id}')">${S.busy ? 'جاري الإرسال…' : I('send', 17) + 'إرسال'}</button>
+    <button class="btn2" style="width:100%;border:0" onclick="S.doing=null;S.cm='';rerenderEmp()">إلغاء</button>
+    <div class="err" id="uperr"></div></div>`;
+  const inv = pf === 'invoice', f = S.dinv || (S.dinv = {amount: '', vendor: '', paidBy: 'cash'});
   return `<div class="pform">
-    <div class="shots">${S.shots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة إثبات"><button class="x" onclick="S.shots.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}
-    ${S.shots.length < 5 ? `<label class="madd">${I('camera', 20)}صورة<input type="file" accept="${ACC_IMG}" multiple style="display:none" onchange="startDone('${t.id}', this)"></label>` : ''}</div>
+    ${inv ? `<div class="sub">فاتورة «${esc(t.title)}» · تنحسب على ${esc(t.pname || 'عام')}</div>` : ''}
+    <div class="shots">${S.shots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة"><button class="x" onclick="S.shots.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}
+    ${S.shots.length < max ? `<label class="madd">${I('camera', 20)}${inv ? 'الفاتورة' : 'صورة'}<input type="file" accept="${ACC_IMG}" multiple style="display:none" onchange="startDone('${t.id}', this)"></label>` : ''}</div>
     ${S.shotLoading ? '<div class="sub">جاري تجهيز الصورة…</div>' : ''}
+    ${inv ? `<div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.dinv.amount=this.value"><input placeholder="المحل" value="${esc(f.vendor)}" oninput="S.dinv.vendor=this.value"></div>
+      <div class="sub" style="margin:4px 0 -2px">دفعت من؟</div>
+      <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'المدير']].map(o => `<button class="${f.paidBy === o[0] ? 'on' : ''}" onclick="S.dinv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>` : ''}
     <input placeholder="تعليق (اختياري)" value="${esc(S.cm || '')}" oninput="S.cm=this.value">
     <button class="btn" ${S.shots.length && !S.busy && !S.shotLoading ? '' : 'disabled'} onclick="sendDone('${t.id}')">${S.busy ? 'جاري الإرسال…' : I('send', 17) + 'إرسال'}</button>
-    <button class="btn2" style="width:100%;border:0" onclick="S.doing=null;S.shots=[];rerenderEmp()">إلغاء</button>
+    <button class="btn2" style="width:100%;border:0" onclick="S.doing=null;S.shots=[];S.dinv=null;rerenderEmp()">إلغاء</button>
     <div class="err" id="uperr"></div></div>`;
 }
 
@@ -2001,7 +2066,7 @@ async function startDone(id, input) {
   const files = Array.from(input.files || []);
   input.value = '';
   if (!files.length) return;
-  if (S.doing !== id) { S.doing = id; S.shots = []; S.cm = ''; }
+  if (S.doing !== id) { S.doing = id; S.shots = []; S.cm = ''; S.dinv = null; }
   S.shotLoading = true; rerenderEmp();
   for (const f of files.slice(0, Math.max(0, 5 - S.shots.length))) {
     try { S.shots.push(await resizeImg(f)); } catch (e) { toast(e); }
@@ -2010,15 +2075,15 @@ async function startDone(id, input) {
 }
 
 function empInvHtml(d, isPreview) {
-  const iv = d.inv || {balance: 0, owed: 0, items: []}, c = iv.c != null ? iv.c : (iv.balance || 0), t = iv.owed != null ? iv.owed : Math.max(0, -c);
-  let h = `<div class="ivbal"><span>العهدة اللي معك</span><b>${money(Math.max(0, c))} <small>ريال</small></b></div>`;
-  if (t > 0) h += `<div class="ivbal" style="background:#A32D2D;margin-top:8px"><span>لك عند المدير</span><b>${money(t)} <small>ريال</small></b></div>`;
+  const iv = d.inv || {balance: 0, o: 0, items: []}, c = iv.c != null ? iv.c : (iv.balance || 0), t = iv.o || 0;
+  let h = `<div class="ivbal" style="${c < 0 ? 'background:#A32D2D' : ''}"><span>${c < 0 ? 'صرفت أكثر من عهدتك' : 'العهدة اللي معك'}</span><b><bdi dir="ltr">${c < 0 ? '−' : ''}${money(Math.abs(c))}</bdi> <small>ريال</small></b></div>`;
+  if (t > 0) h += `<div class="ivbal" style="background:#A32D2D;margin-top:8px"><span>لك عند المدير (من جيبك)</span><b>${money(t)} <small>ريال</small></b></div>`;
   if (!isPreview) h += S.invForm ? invFormHtml(d) : `<button class="bigdo" onclick="S.invForm=true;S.ishots=[];rerenderEmp()">${I('receipt', 15, 2.2)}أرسل فاتورة</button>`;
   const items = iv.items || [];
   if (!items.length) return h + emptyHtml('receipt', 'ما أرسلت فواتير للحين');
   return h + '<div class="card" style="margin-top:14px;padding-top:4px;padding-bottom:4px">' + items.map(x => {
     const st = invSt(x, true), give = x.kind === 'give';
-    return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}"><bdi dir="ltr">${give ? '+' : ''}${money(x.amount)}</bdi></b></div>
+    return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? (x.paidBy === 'ret' ? 'r' : 'g') : ''}"><bdi dir="ltr">${give ? (x.paidBy === 'ret' ? '−' : '+') : ''}${money(x.amount)}</bdi></b></div>
       <div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · '}${dmy(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>
       ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px"><div><b>المدير يقول:</b> ${esc(x.reason)}</div></div>` : ''}
       ${invPhotosHtml(x, BOOT.page === 'admin')}</div>`;
@@ -2034,9 +2099,10 @@ function invFormHtml(d) {
     ${S.ishotLoading ? '<div class="sub">جاري تجهيز الصورة…</div>' : ''}
     <input class="qtt" inputmode="decimal" placeholder="المبلغ بالريال" value="${esc(f.amount)}" oninput="S.inv.amount=this.value">
     <input placeholder="وش اشتريت؟ مثلاً: أفياش وأسلاك" value="${esc(f.desc)}" oninput="S.inv.desc=this.value">
+    <input placeholder="المحل (اختياري)" value="${esc(f.vendor || '')}" oninput="S.inv.vendor=this.value">
     <select aria-label="المشروع" onchange="S.inv.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}<option value="" ${f.project === '' ? 'selected' : ''}>عام</option></select>
     <div class="sub" style="margin:4px 0 -2px">دفعت من؟</div>
-    <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'بطاقة المدير']].map(o => `<button class="${(f.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="S.inv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>
+    <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'المدير']].map(o => `<button class="${(f.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="S.inv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>
     <div class="sub" style="margin-top:-4px">${f.paidBy === 'card' ? 'ما تنخصم من عهدتك' : f.paidBy === 'own' ? 'ترجع لك بعد ما يعتمدها المدير' : 'تنخصم من العهدة اللي معك'}</div>
     <label class="tgl"><span>عليها ضمان؟</span><input type="checkbox" ${f.wOn ? 'checked' : ''} onchange="S.inv.wOn=this.checked;if(this.checked&&!S.inv.w)S.inv.w=12;rerenderEmp()"></label>
     ${f.wOn ? `<div class="wchips">${[[6, '6 أشهر'], [12, 'سنة'], [24, 'سنتين']].map(c => `<button class="${!f.wc && f.w === c[0] ? 'on' : ''}" onclick="S.inv.w=${c[0]};S.inv.wc=false;rerenderEmp()">${c[1]}</button>`).join('')}<button class="${f.wc ? 'on' : ''}" onclick="S.inv.wc=true;rerenderEmp()">غيره</button></div>
@@ -2066,7 +2132,7 @@ async function sendInv() {
   if (S.busy) return;
   S.busy = true; rerenderEmp();
   try {
-    const d = await callT(120000, 'apiInvAdd', BOOT.token, {amount: f.amount, desc: f.desc, project: f.project, warranty: f.wOn ? f.w : 0, paidBy: f.paidBy || 'cash'}, S.ishots);
+    const d = await callT(120000, 'apiInvAdd', BOOT.token, {amount: f.amount, desc: f.desc, project: f.project, vendor: f.vendor || '', warranty: f.wOn ? f.w : 0, paidBy: f.paidBy || 'cash'}, S.ishots);
     S.busy = false; S.invForm = false; S.ishots = []; S.inv = {amount: '', desc: '', project: f.project};
     renderEmp(d, false); toast('انرسلت الفاتورة');
   } catch (e) {
@@ -2094,14 +2160,24 @@ function resizeImg(file, maxD, q) {
 }
 
 async function sendDone(id) {
-  if (!S.shots.length || S.busy) return;
+  const t = (S.empData.tasks || []).find(x => x.id === id) || {}, pf = t.proof || 'photo', err = m => { const el = $('#uperr'); if (el) el.textContent = m; };
+  if (S.busy) return;
+  if (pf === 'note' && (S.cm || '').trim().length < 3) return err('اكتب وش سوّيت');
+  if (pf !== 'note' && !S.shots.length) return err(pf === 'invoice' ? 'صوّر الفاتورة' : 'لازم ترفق صورة');
+  let extra = null;
+  if (pf === 'invoice') {
+    const f = S.dinv || {};
+    if (!(Number(String(f.amount || '').replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/[^\d.]/g, '')) > 0)) return err('اكتب المبلغ');
+    if (!String(f.vendor || '').trim()) return err('اكتب اسم المحل');
+    extra = {amount: f.amount, vendor: f.vendor, paidBy: f.paidBy || 'cash'};
+  }
   S.busy = true; rerenderEmp();
   try {
-    const d = await callT(120000, 'apiTaskDone', BOOT.token, id, S.cm || '', S.shots);
-    S.busy = false; S.doing = null; S.shots = []; S.cm = '';
+    const d = await callT(120000, 'apiTaskDone', BOOT.token, id, S.cm || '', pf === 'note' ? [] : S.shots, extra);
+    S.busy = false; S.doing = null; S.shots = []; S.cm = ''; S.dinv = null;
     renderEmp(d, false); toast('انرسلت، يعطيك العافية');
   } catch (e) {
-    S.busy = false; rerenderEmp(); const el = $('#uperr'); if (el) el.textContent = e;
+    S.busy = false; rerenderEmp(); err(e);
   }
 }
 

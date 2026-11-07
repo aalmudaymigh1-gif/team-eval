@@ -54,7 +54,7 @@
     r.fin = (r.fin || []).map(f => Object.assign({}, f, { amount: Number(f.amount) || 0, months: Number(f.months) || 0 }));
     r.tasks = (r.tasks || []).map(t => {
       const pr = Array.isArray(t.proofs) ? t.proofs : [];
-      return Object.assign({}, t, { photo: pr[0] || '', extra: pr.slice(1), media: Array.isArray(t.media) ? t.media : [], urgent: !!t.urgent });
+      return Object.assign({}, t, { photo: pr[0] || '', extra: pr.slice(1), media: Array.isArray(t.media) ? t.media : [], urgent: !!t.urgent, proof: t.proof || 'photo' });
     });
     r.projects = (r.projects || []).map(p => Object.assign({}, p, { lat: p.lat == null ? null : Number(p.lat), lng: p.lng == null ? null : Number(p.lng) }));
     r.invoices = (r.invoices || []).map(x => Object.assign({}, x, { amount: Math.round((Number(x.amount) || 0) * 100) / 100,
@@ -271,6 +271,10 @@
     });
     return order.map(g => map[g]).sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
   }
+  function taskInv_(id) {
+    const x = RAW.invoices.filter(v => v.task === id).slice(-1)[0];
+    return x ? { id: x.id, amount: x.amount, vendor: x.vendor || '', paidBy: x.paidBy, status: x.status } : null;
+  }
   function tasksFor_(empId, tasks, today, pmap) {
     const mine = tasks.filter(t => t.emp === empId);
     const open = mine.filter(t => t.status !== 'done').sort((a, b) => {
@@ -282,27 +286,29 @@
       id: t.id, title: t.title, due: t.due, note: t.note, status: t.status, doneAt: t.doneAt.slice(0, 10),
       comment: t.comment, hasPhoto: !!t.photo, reason: t.reason, urgent: t.urgent,
       proofs: [t.photo].concat(t.extra || []).filter(Boolean),
-      project: pmap[t.project] ? t.project : '', pname: pmap[t.project] || '', media: t.media,
+      project: pmap[t.project] ? t.project : '', pname: pmap[t.project] || '', media: t.media, proof: t.proof || 'photo',
+      inv: t.proof === 'invoice' ? taskInv_(t.id) : null,
       late: t.status !== 'done' && t.status !== 'review' && !!t.due && t.due < today,
       lateDone: t.status === 'done' && !!t.due && t.doneAt.slice(0, 10) > t.due }));
   }
   /* العهدة: c باقي معه، o له عندك من جيبه، t كل اللي له عندك */
   function invParts_(rows, empId) {
-    let g = 0, sd = 0, cash = 0, own = 0;
+    let g = 0, rt = 0, sd = 0, cash = 0, own = 0;
     rows.forEach(x => {
-      if (x.emp !== empId || x.status !== 'ok') return;
-      if (x.kind === 'give') { if (x.paidBy === 'own') sd += x.amount; else g += x.amount; }
+      if (!x.emp || x.emp !== empId || x.status !== 'ok') return;
+      if (x.kind === 'give') { if (x.paidBy === 'own') sd += x.amount; else if (x.paidBy === 'ret') rt += x.amount; else g += x.amount; }
       else if (x.paidBy === 'own') own += x.amount;
       else if (x.paidBy !== 'card') cash += x.amount;
     });
     const r2 = n => Math.round(n * 100) / 100;
-    const rawO = own - sd, o = Math.max(0, rawO), c = g - cash + Math.max(0, -rawO);
-    return { c: r2(c), o: r2(o), t: r2(o + Math.max(0, -c)), g: r2(g), cash: r2(cash), own: r2(own), sd: r2(sd) };
+    const rawO = own - sd, o = Math.max(0, rawO), c = g - rt - cash + Math.max(0, -rawO);
+    return { c: r2(c), o: r2(o), t: r2(o), g: r2(g), rt: r2(rt), cash: r2(cash), own: r2(own), sd: r2(sd) };
   }
   function invOut_(x, pmap) {
     return { id: x.id, ts: x.ts, emp: x.emp, kind: x.kind, amount: x.amount, desc: x.desc, project: x.project,
       pname: x.project ? (pmap[x.project] || '') : '', nph: x.photos.length, photos: x.photos, status: x.status, reason: x.reason,
-      method: x.method || '', warrantyUntil: x.warrantyUntil || '', paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' };
+      method: x.method || '', warrantyUntil: x.warrantyUntil || '', vendor: x.vendor || '', task: x.task || '',
+      paidBy: ['card', 'own', 'ret'].indexOf(x.paidBy) >= 0 ? x.paidBy : 'cash' };
   }
 
   function empPayload_(emp) {
@@ -546,7 +552,8 @@
         const note = String(it.note || '').trim().slice(0, 1000);
         const media = (it.media || []).filter(m => m && m.id && (m.t === 'i' || m.t === 'v')).slice(0, MAX_MEDIA)
           .map(m => ({ id: String(m.id), t: m.t }));
-        ids.forEach(id => rows.push({ emp: id, title: title, due: due, note: note, project: project, media: media, urgent: !!it.urgent }));
+        const proof = ['invoice', 'note'].indexOf(it.proof) >= 0 ? it.proof : 'photo';
+        ids.forEach(id => rows.push({ emp: id, title: title, due: due, note: note, project: project, media: media, urgent: !!it.urgent, proof: proof }));
       });
       return adminDo(k, 'tasks_add', { rows: rows });
     },
@@ -572,13 +579,15 @@
         a.due = v;
       }
       if (x.urgent !== undefined) a.urgent = !!x.urgent;
+      if (x.proof !== undefined) a.proof = String(x.proof);
       return adminDo(k, 'task_update', a);
     },
 
-    async apiTaskDone(token, id, comment, dataUrls) {
-      const paths = await empUpload(token, dataUrls, 5);
-      if (!paths.length) throw new Error('لازم ترفق صورة');
-      await eexec(token, 'task_done', { id: id, comment: String(comment || ''), proofs: paths });
+    async apiTaskDone(token, id, comment, dataUrls, extra) {
+      const paths = await empUpload(token, dataUrls || [], 5);
+      const x = extra || {}, a = { id: id, comment: String(comment || ''), proofs: paths };
+      if (x.amount !== undefined) { a.amount = cleanAmount_(x.amount); a.vendor = String(x.vendor || '').trim(); a.paidBy = x.paidBy || 'cash'; }
+      await eexec(token, 'task_done', a);
       flush();
       return API.apiEmp(token);
     },
@@ -618,7 +627,7 @@
       const paths = await empUpload(token, dataUrls, 3);
       if (!paths.length) throw new Error('صوّر الفاتورة');
       const w = Math.round(Number(x.warranty) || 0);
-      await eexec(token, 'inv_add', { amount: amount, desc: desc, project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
+      await eexec(token, 'inv_add', { amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
       flush();
       return API.apiEmp(token);
     },
@@ -630,9 +639,18 @@
       return adminDo(k, 'inv_return', { id: id, reason: r });
     },
     async apiInvDelete(k, id) { return adminDo(k, 'inv_del', { id: id }); },
-    async apiInvGive(k, empId, amount, note, method, sdad) {
+    async apiInvGive(k, empId, amount, note, method, sdad, ret) {
       const n = cleanAmount_(amount);
-      return adminDo(k, 'inv_give', { emp: empId, amount: n, note: String(note || '').trim().slice(0, 200), method: String(method || ''), sdad: !!sdad });
+      return adminDo(k, 'inv_give', { emp: empId, amount: n, note: String(note || '').trim().slice(0, 200), method: String(method || ''), sdad: !!sdad, ret: !!ret });
+    },
+    async apiInvAddAdmin(k, x, dataUrls) {
+      const amount = cleanAmount_(x.amount);
+      const desc = String(x.desc || '').trim().slice(0, 200);
+      if (!desc) throw new Error('اكتب وش انشرى');
+      const list = (dataUrls || []).slice(0, 3), paths = [];
+      for (const d of list) paths.push(await API.apiUploadImg(k, d));
+      return adminDo(k, 'inv_add', { emp: x.emp || '', amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: x.project || '',
+        photos: paths, paidBy: x.emp ? 'cash' : 'card' });
     },
     async apiInvEdit(k, id, x) {
       const n = cleanAmount_(x.amount);
