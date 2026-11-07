@@ -495,7 +495,7 @@ video.vid{height:auto;max-height:70vh;background:#000}
 .tab{border:0;background:var(--acc);color:var(--acc-ink);font:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:5px 12px;cursor:pointer;align-self:center;flex:none}
 /* ---------- نظام التصميم (الإصدار 36): مأخوذ من التطبيق المرجع ---------- */
 :root{--bg:#FFFFFF;--surface:#FAFAF9;--fill:#F4F4F2;--fill2:#ECECEA;--line:#EFEFED;--line2:#E4E4E1;--text:#2A2A28;--muted:#8E8E89;--faint:#B9B9B4;
---acc:#BFD06A;--acc-2:#AABE4E;--acc-ink:#FFFFFF;--acc-soft:#F4F7E4;--acc-ring:#E2EAB8;--acc-dk:#7E8F2A;
+--acc:#7FA3C0;--acc-2:#6A8FAE;--acc-ink:#FFFFFF;--acc-soft:#EDF3F8;--acc-ring:#D3E1EC;--acc-dk:#4F7493;
 --green:#4E8A2E;--green-soft:#EEF5E6;--red:#C2463A;--red-soft:#FCEFED;--red-line:#F2CFCA;
 --r:16px;--r2:24px;--sh:none;--sh2:0 12px 40px rgba(42,42,40,.10)}
 html,body,button,input,select,textarea{font-family:'Readex Pro','IBM Plex Sans Arabic',system-ui,sans-serif!important;letter-spacing:.01em}
@@ -552,7 +552,16 @@ input,textarea,select{border-radius:16px!important;background:#fff!important}
 .ti{border-radius:22px}
 .gi{background:var(--fill)!important;color:var(--muted)!important}
 .dock{background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 38%)!important;padding-top:26px!important}
-.fab{bottom:calc(104px + env(safe-area-inset-bottom))!important;background:var(--acc)!important;box-shadow:0 8px 24px rgba(127,143,42,.35)!important}
+.fab{bottom:calc(104px + env(safe-area-inset-bottom))!important;background:var(--acc)!important;box-shadow:0 8px 24px rgba(79,116,147,.30)!important}
+.mn{display:inline-flex;align-items:center;gap:.22em;white-space:nowrap;direction:ltr;unicode-bidi:isolate;color:var(--text)!important;font-size:15px;font-weight:500;letter-spacing:0;font-variant-numeric:tabular-nums;vertical-align:baseline}
+.thero .h1 span.mn,.thero .h2 span.mn,span.mn.mn{color:var(--text)!important;opacity:1}
+span.mn.mn.pos,.thero span.mn.pos{color:var(--green)!important}
+span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
+.mn .rs{height:.78em;width:auto;flex:none;opacity:.9}
+.mn.big{font-size:26px;font-weight:400;gap:.18em}
+.mn.big .rs{height:.66em}
+.mn.t{font-size:inherit;font-weight:500}
+.thero b,.kpi .v,.stc .v,.ivbal b,.ec .v,.ivd .amt{color:var(--text)!important}
 </style>
 </head>
 <body>
@@ -575,8 +584,10 @@ const S = {view:'rec', data:null, emp:null, type:null, crits:[], misses:[], star
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num = n => Math.round(Number(n) || 0).toLocaleString('en-US');
-const sar = n => num(n) + ' ريال';
-const sarS = (n, sg) => '<bdi dir="ltr">' + sg + num(n) + '</bdi> ريال';
+const RS_SVG = '<svg class="rs" viewBox="40 0 1150 1270" aria-hidden="true"><path fill="currentColor" d="M750,1119 C730,1163,716,1211,711,1262 C711,1262,1136,1172,1136,1172 C1156,1127,1169,1079,1174,1028 C1174,1028,750,1119,750,1119Z M1136,901 C1136,901,1136,901,1136,901 C1156,857,1169,809,1174,758 C1174,758,843,828,843,828 C843,828,843,693,843,693 C843,693,1136,631,1136,631 C1156,587,1169,538,1174,488 C1174,488,843,558,843,558 C843,558,843,72,843,72 C793,100,748,138,711,183 C711,183,711,586,711,586 C711,586,579,614,579,614 C579,614,579,6,579,6 C528,34,483,72,447,117 C447,117,447,642,447,642 C447,642,151,705,151,705 C131,750,117,798,112,849 C112,849,447,777,447,777 C447,777,447,948,447,948 C447,948,88,1024,88,1024 C68,1068,55,1117,50,1167 C50,1167,425,1088,425,1088 C456,1081,482,1063,499,1038 C499,1038,568,936,568,936 C568,936,568,936,568,936 C575,926,579,913,579,899 C579,899,579,749,579,749 C579,749,711,721,711,721 C711,721,711,992,711,992 C711,992,1136,901,1136,901Z"/></svg>';
+function M(n, sg, cls) { const v = (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('en-US', {maximumFractionDigits: 2}); return '<span class="mn ' + (cls || '') + (sg === '+' ? ' pos' : sg === '−' ? ' neg' : '') + '" dir="ltr" aria-label="' + (sg || '') + v + ' ريال">' + RS_SVG + (sg || '') + v + '</span>'; }
+const sar = n => M(n);
+const sarS = (n, sg) => M(n, sg);
 const dmy = s => s ? s.slice(8,10) + '/' + s.slice(5,7) + '/' + s.slice(0,4) : '';
 const signed = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n);
 const nqt = n => n === 1 ? 'نقطة' : n === 2 ? 'نقطتين' : n <= 10 ? 'نقاط' : 'نقطة';
@@ -832,7 +843,7 @@ function teamActs(e) {
 }
 function teamRecent(e, track) {
   if (!e.recent.length) return `<div class="tnone">${I('history', 14)}آخر المواقف<span>·</span>ما فيه مواقف مسجلة</div>`;
-  return `<div class="tlbl">${I('history', 14)}آخر المواقف${track ? '' : ' (بالريال)'}</div><div class="tents">${e.recent.map(x => entryHtml(x, true, track)).join('')}</div>`;
+  return `<div class="tlbl">${I('history', 14)}آخر المواقف</div><div class="tents">${e.recent.map(x => entryHtml(x, true, track)).join('')}</div>`;
 }
 function teamBreak(m) {
   return `<div class="tbrk">
@@ -848,8 +859,8 @@ function teamPaid(d, e) {
   return `<div class="card tcard">
     <div class="tmh">${I('user-round', 18)}<b>${esc(e.name)}</b><span class="tbad"><span class="badge late">${I('x', 12, 3)} ${m.misses}</span><span class="badge">${I('star', 12, 2.4)} ${m.stars}</span></span></div>
     <div class="thero">
-      <div class="h1"><span>${I('sparkles', 13)}الحافز الحين</span><b>${num(m.bonus)}<small>ريال</small></b></div>
-      <div class="h2"><span>${I('banknote', 13)}راتب الشهر</span><b>${num(m.total)}<small>ريال</small></b></div>
+      <div class="h1"><span>${I('sparkles', 13)}الحافز الحين</span><b>${M(m.bonus, '', 'big')}</b></div>
+      <div class="h2"><span>${I('banknote', 13)}راتب الشهر</span><b>${M(m.total, '', 'big')}</b></div>
     </div>
     ${teamBreak(m)}
     ${m.improve ? `<div class="note bad">${I('triangle-alert', 16)}<div><b>${esc(m.improve.crit)}:</b> ${esc(m.improve.text)}</div></div>` : ''}
@@ -1122,11 +1133,11 @@ function renderRec() {
   S.misses.forEach(c => { ded += c === TRUST ? st.trust : st.miss; });
   const net = (S.star ? st.star : 0) - ded;
   const label = !S.misses.length && !S.star ? 'كل شي تمام' : 'حفظ التقييم';
-  const empSub = e => e.track ? 'متابعة فقط' : 'حافز الشهر ' + num(e.month.bonus) + ' ريال';
+  const empSub = e => e.track ? 'متابعة فقط' : 'حافز الشهر ' + M(e.month.bonus, '', 't');
   $('#view').innerHTML = `
     <div class="blk"><div class="lab">${I('user', 14)}الموظف</div>
       <div class="emp">${d.employees.map(e => `<button class="empc ${S.emp===e.id?'on':''}" onclick="setEmp('${e.id}')">${esc(e.name)}</button>`).join('')}</div>
-      ${emp.id ? `<div class="empi">${esc(emp.name)} · ${esc(empSub(emp))}</div>` : ''}</div>
+      ${emp.id ? `<div class="empi">${esc(emp.name)} · ${empSub(emp)}</div>` : ''}</div>
     <div class="blk"><div class="lab">${I('calendar', 14)}اليوم</div>
       ${segc([['today','اليوم'],['yest','أمس'],['other','تاريخ ثاني']], S.dateMode, 'setDate')}
       ${S.dateMode==='other' ? `<input type="date" value="${S.date}" max="${d.today}" onchange="S.date=this.value">` : ''}</div>
@@ -1134,7 +1145,7 @@ function renderRec() {
     <div class="blk"><div class="lab">${I('users', 14)}السلوك</div><div class="gcard">${beh.map(c => row(c, 'b')).join('')}</div></div>
     ${S.misses.length ? `<div class="blk"><input placeholder="وش صار؟ (اختياري)" value="${esc(S.note)}" oninput="S.note=this.value"></div>` : ''}
     <div class="blk"><div class="gcard"><div class="gr" onclick="togStar()"><span class="gi s">${I('star', 17, 2.4)}</span>
-      <span class="n">موقف مميز <small>فوق الواجب${trk ? '' : ' · <bdi dir="ltr">+' + st.star + '</bdi> ريال'}</small></span>
+      <span class="n">موقف مميز <small>فوق الواجب${trk ? '' : ' · ' + M(st.star, '+', 't')}</small></span>
       <span class="tg st ${S.star ? 'on' : ''}"></span></div></div>
       ${S.star ? `<input placeholder="وش سوّى؟ مثل: خلّص التشطيب قبل الموعد" value="${esc(S.starNote)}" oninput="S.starNote=this.value" style="margin-top:10px">` : ''}</div>
     <div class="err" id="err"></div>
@@ -1142,7 +1153,7 @@ function renderRec() {
       <div class="sum">
         <span class="badge ${S.misses.length ? 'late' : 'n'}">${I('x', 13, 3)} تقصير ${S.misses.length}</span>
         <span class="badge ${S.star ? '' : 'n'}">${I('star', 13, 2.4)} مميز ${S.star ? 1 : 0}</span>
-        ${trk ? '<span class="badge n">متابعة فقط</span>' : `<span class="badge n">صافي اليوم <bdi dir="ltr">${net > 0 ? '+' : net < 0 ? '−' : ''}${Math.abs(net)}</bdi> ريال</span>`}
+        ${trk ? '<span class="badge n">متابعة فقط</span>' : `<span class="badge n">صافي اليوم ${M(Math.abs(net), net > 0 ? '+' : net < 0 ? '−' : '', 't')}</span>`}
       </div>
       <button class="btn" id="saveBtn" onclick="save()">${I('check', 19, 2.5)}${label}</button></div></div>`;
 }
@@ -1219,7 +1230,7 @@ function entryHtml(x, canDelete, noAmt) {
   const del = canDelete ? `<button class="del ${S.armed===x.id?'arm':''}" onclick="armLog('${x.id}')">${S.armed===x.id?'تأكيد الحذف':I('trash-2', 15)}</button>` : '';
   return `<div class="ent"><div class="ico ${x.type==='+'?'s':'m'}">${I(x.type==='+' ? 'star' : 'x', 15, 2.5)}</div>
     <div class="t"><div>${x.type==='+' ? 'موقف مميز' : x.crits.map(esc).join('، ')}${x.note ? ' — ' + esc(x.note) : ''}</div><div class="d">${dmy(x.date)}</div></div>
-    ${noAmt ? '' : `<div class="p ${x.pts>0?'pos':'neg'}">${signed(x.pts)}</div>`}${del}</div>`;
+    ${noAmt ? '' : `<div class="p">${M(Math.abs(x.pts), x.pts > 0 ? '+' : x.pts < 0 ? '−' : '')}</div>`}${del}</div>`;
 }
 
 async function armLog(id) {
@@ -1356,7 +1367,7 @@ function taskRowHtml(t, showProj) {
   const today = S.data.today, p = pillOf(t, t.b, false);
   const ring = t.status === 'done' ? 'g' : t.status === 'review' ? 'a' : t.status === 'returned' ? 'r' : '';
   const nm = (t.media || []).length, np = (t.proofs || []).length;
-  const mini = (t.urgent && t.status !== 'done' ? '<span class="mb u">عاجلة</span>' : '') + (t.proof === 'invoice' ? `<span class="mb">فاتورة${t.inv ? ' ' + money(t.inv.amount) : ''}</span>` : t.proof === 'note' ? '<span class="mb">ملاحظة</span>' : '') + (nm ? `<span class="mb">شرح ${nm}</span>` : '') + (np ? `<span class="mb">إثبات ${np}</span>` : '');
+  const mini = (t.urgent && t.status !== 'done' ? '<span class="mb u">عاجلة</span>' : '') + (t.proof === 'invoice' ? `<span class="mb">فاتورة${t.inv ? ' ' + M(t.inv.amount, '', 't') : ''}</span>` : t.proof === 'note' ? '<span class="mb">ملاحظة</span>' : '') + (nm ? `<span class="mb">شرح ${nm}</span>` : '') + (np ? `<span class="mb">إثبات ${np}</span>` : '');
   const when = t.status === 'done' ? 'خلصت ' + dmy(t.doneAt) : t.status === 'review' ? 'انرسلت ' + dmy(t.doneAt) : dueHtml(t, today);
   const meta = [esc(t.ename), showProj ? esc(t.pname || 'عام') : '', when].filter(Boolean).join(' · ');
   return `<div class="tli"><button class="trow2" onclick="openTask('${t.id}')"><span class="ring ${ring}"></span>
@@ -1410,7 +1421,7 @@ function renderTaskDetail() {
       <div class="dp"><span>عاجلة</span><button class="tg ${t.urgent ? 'on u' : ''}" aria-label="عاجلة" onclick="updTask('${id}',{urgent:${t.urgent ? 'false' : 'true'}})"></button></div>
       <label class="dp"><span>الإثبات</span><select onchange="updTask('${id}',{proof:this.value})" ${t.status === 'open' || t.status === 'returned' ? '' : 'disabled'}>${PROOFS.map(o => `<option value="${o[0]}" ${(t.proof || 'photo') === o[0] ? 'selected' : ''}>${o[1]}</option>`).join('')}</select></label>
     </div>
-    ${t.inv ? `<div class="note ${t.inv.status === 'ok' ? 'good' : 'info'}">${I('receipt', 16)}<div><b>فاتورة ${money(t.inv.amount)} ريال</b>${t.inv.vendor ? ' · ' + esc(t.inv.vendor) : ''} · ${t.inv.paidBy === 'card' ? 'أنا' : t.inv.paidBy === 'own' ? 'من جيبه' : 'من العهدة'}${t.inv.status === 'review' ? ' · تنعتمد مع المهمة' : ''} <button class="lnk dl" onclick="openInvD('${t.inv.id}')">التفاصيل</button></div></div>` : ''}
+    ${t.inv ? `<div class="note ${t.inv.status === 'ok' ? 'good' : 'info'}">${I('receipt', 16)}<div><b>فاتورة ${M(t.inv.amount, '', 't')}</b>${t.inv.vendor ? ' · ' + esc(t.inv.vendor) : ''} · ${t.inv.paidBy === 'card' ? 'أنا' : t.inv.paidBy === 'own' ? 'من جيبه' : 'من العهدة'}${t.inv.status === 'review' ? ' · تنعتمد مع المهمة' : ''} <button class="lnk dl" onclick="openInvD('${t.inv.id}')">التفاصيل</button></div></div>` : ''}
     ${t.status === 'returned' && t.reason ? `<div class="note bad">${I('rotate-ccw', 16)}<div><b>رجّعتها:</b> ${esc(t.reason)}</div></div>` : ''}
     <div class="lbl">الوصف</div>
     <textarea class="dnote" placeholder="تعليمات أو تفاصيل للموظف…" onchange="updTask('${id}',{note:this.value})">${esc(t.note)}</textarea>
@@ -1734,7 +1745,7 @@ function invRowHtml(x, showEmp) {
   const st = invSt(x, false), armDel = S.armed === 'inv_' + x.id, give = x.kind === 'give';
   const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', give ? '' : esc(x.pname || 'عام'), x.vendor ? esc(x.vendor) : '', dmy(x.ts)].filter(Boolean).join(' · ');
   return `<div class="ivr ${x.status === 'review' ? 'rv' : ''}">
-    <div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}"><bdi dir="ltr">${give ? '+' : ''}${money(x.amount)}</bdi></b></div>
+    <div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}">${M(x.amount, give ? '+' : '')}</b></div>
     <div class="tm">${meta}${x.status !== 'ok' || give ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>
     ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px">${esc(x.reason)}</div>` : ''}
     ${invPhotosHtml(x, true)}
@@ -1755,8 +1766,8 @@ function renderInv() {
   let h = '<div class="ecs">' + d.employees.map(e => {
     const p = (iv.parts || {})[e.id] || {c: iv.bal[e.id] || 0, o: 0}, n = rv.filter(x => x.emp === e.id).length;
     return `<button class="ec" onclick="openSt('${e.id}')">${n ? `<span class="pend">${n} تنتظر</span>` : ''}
-      <b>${esc(e.name)}</b><span class="l">رصيد العهدة</span><span class="v" style="${p.c < 0 ? 'color:#F7C1C1' : ''}"><bdi dir="ltr">${p.c < 0 ? '−' : ''}${money(Math.abs(p.c))}</bdi></span>
-      <span class="o ${p.o > 0 ? 'r' : ''}">${p.o > 0 ? 'له عندك من جيبه ' + money(p.o) : p.c < 0 ? 'صرف أكثر من عهدته' : 'ما له شي عندك'}</span></button>`;
+      <b>${esc(e.name)}</b><span class="l">رصيد العهدة</span><span class="v">${M(Math.abs(p.c), p.c < 0 ? '−' : '', 'big')}</span>
+      <span class="o ${p.o > 0 ? 'r' : ''}">${p.o > 0 ? 'له عندك من جيبه ' + M(p.o, '', 't') : p.c < 0 ? 'صرف أكثر من عهدته' : 'ما له شي عندك'}</span></button>`;
   }).join('') + '</div>' + `<button class="btn2 cu" style="width:100%;margin-top:10px" onclick="askInvAdd()">${I('plus', 16, 2.5)}أضف فاتورة</button>`;
   const okList = items.filter(x => x.kind === 'inv' && x.status === 'ok');
   if (okList.length) {
@@ -1775,10 +1786,10 @@ function renderInv() {
   const groups = {}, keys = [], order = (d.projects || []).map(p => p.id);
   okAll.forEach(x => { const k = x.project || ''; if (!groups[k]) { groups[k] = {name: x.pname || 'عام', all: 0, m: 0, list: []}; keys.push(k); } const g = groups[k]; g.all += x.amount; if (x.ts.slice(0, 7) === mk) { g.m += x.amount; g.list.push(x); } });
   keys.sort((a, b) => (a === '' ? 1e6 : order.indexOf(a)) - (b === '' ? 1e6 : order.indexOf(b)));
-  if (keys.length) h += `<div class="sech">مصاريف المشاريع<span>${money(tot)} ${esc(d.month)}</span></div>` + keys.map(k => {
+  if (keys.length) h += `<div class="sech">مصاريف المشاريع<span>${M(tot, '', 't')} ${esc(d.month)}</span></div>` + keys.map(k => {
     const g = groups[k], on = !!S.iopen['p_' + k];
-    return `<div class="pgrp"><button class="pgh2" onclick="S.iopen['p_${k}']=${on ? 'false' : 'true'};renderInv()"><span>${esc(g.name)}</span><span class="n">${money(g.m)} هالشهر<span class="chev ${on ? 'up' : ''}">${I('arrow-right', 15, 2.5)}</span></span></button>
-      <div class="ivtot">الإجمالي من البداية: <b>${money(g.all)}</b> ريال</div>
+    return `<div class="pgrp"><button class="pgh2" onclick="S.iopen['p_${k}']=${on ? 'false' : 'true'};renderInv()"><span>${esc(g.name)}</span><span class="n">${M(g.m, '', 't')} هالشهر<span class="chev ${on ? 'up' : ''}">${I('arrow-right', 15, 2.5)}</span></span></button>
+      <div class="ivtot">الإجمالي من البداية: <b>${M(g.all, '', 't')}</b></div>
       ${on ? (g.list.length ? g.list.map(x => invRowHtml(x, true)).join('') : '<div class="ivtot">ما فيه فواتير هالشهر</div>') : ''}</div>`;
   }).join('');
   const other = items.filter(x => x.kind === 'inv' && x.status === 'returned').slice(0, 20);
@@ -1811,14 +1822,14 @@ async function invDel(id) {
 }
 function invMiniRow(x, showEmp) {
   const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', esc(x.pname || 'عام'), x.vendor ? esc(x.vendor) : '', dmy(x.ts)].filter(Boolean).join(' · ');
-  return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${meta}</div></span><b class="iva">${money(x.amount)} ‹</b></div></button>`;
+  return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${meta}</div></span><b class="iva">${M(x.amount)} ‹</b></div></button>`;
 }
 function openInvD(id) {
   const d = S.data, x = ((d.inv || {}).items || []).find(v => v.id === id);
   if (!x) return toastErr('الفاتورة غير موجودة، حدّث الصفحة');
   const e = d.employees.find(v => v.id === x.emp);
   S.armed = null;
-  ovOpen(`<div class="ivd"><h3>${esc(x.desc)}</h3><div class="amt">${money(x.amount)} <small style="font-size:13px;font-weight:500;color:var(--muted)">ريال</small></div>
+  ovOpen(`<div class="ivd"><h3>${esc(x.desc)}</h3><div class="amt">${M(x.amount, '', 'big')}</div>
     <div class="sub">${esc(e ? e.name : 'أنت')} · ${esc(x.pname || 'عام')}${x.vendor ? ' · ' + esc(x.vendor) : ''} · ${dmy(x.ts)}</div>
     ${x.warrantyUntil ? `<div class="sub" style="margin-top:4px">ضمان لين ${dmy(x.warrantyUntil)} · ${wLeft(x.warrantyUntil, d.today)[1]}</div>` : ''}
     <div class="pgrid" id="ivdph">${x.photos.map(f => `<div class="pph" data-f="${esc(f)}">جاري التحميل…</div>`).join('')}</div>
@@ -1852,20 +1863,20 @@ function renderInvSt(empId) {
   let h = `<button class="back" onclick="S.iv.st='';renderInv()">${I('arrow-right', 17)}رجوع للفواتير</button>
     <h2 style="margin:10px 0 0;font-size:20px">${esc(e.name)}</h2>
     ${rv.length ? `<div class="sech a">تنتظر اعتمادك<span>${rv.length}</span></div>` + rv.map(x => invRowHtml(x, false)).join('') : ''}
-    <div class="stc ${p.c < 0 ? 'red' : ''}"><div class="l">رصيد العهدة</div><div class="v"><bdi dir="ltr">${p.c < 0 ? '−' : ''}${money(Math.abs(p.c))}</bdi> <small>ريال</small></div>
-    <div class="r"><span>عطيته ${money(p.g)}${p.rt ? ' · رجّع ' + money(p.rt) : ''}</span><span>صرف ${money(p.cash)}</span></div>
+    <div class="stc ${p.c < 0 ? 'red' : ''}"><div class="l">رصيد العهدة</div><div class="v">${M(Math.abs(p.c), p.c < 0 ? '−' : '', 'big')}</div>
+    <div class="r"><span>عطيته ${M(p.g, '', 't')}${p.rt ? ' · رجّع ' + M(p.rt, '', 't') : ''}</span><span>صرف ${M(p.cash, '', 't')}</span></div>
     ${p.c < 0 ? '<div class="r" style="margin-top:4px"><span>صرف أكثر من اللي معه</span></div>' : ''}</div>
     <div class="grid2"><button class="bigdo" style="justify-content:center;border:0;font-family:inherit;cursor:pointer" onclick="askGive('${empId}')">${I('plus', 15, 2.5)}أعطيته</button>
     <button class="btn2" style="border-radius:999px" onclick="askRet('${empId}', ${Math.max(0, p.c)})">رجّع لي</button></div>
-    ${p.o > 0 ? `<div class="stc red"><div class="l">له عندك من جيبه</div><div class="v">${money(p.o)} <small>ريال</small></div>
+    ${p.o > 0 ? `<div class="stc red"><div class="l">له عندك من جيبه</div><div class="v">${M(p.o, '', 'big')}</div>
       <button class="bigdo" onclick="askSdad('${empId}', ${p.o})">${I('check', 15, 2.5)}سدّدته</button></div>` : ''}`;
 
   h += `<div class="sech">كشف ${esc(e.name)}</div>`;
   if (!rows.length) return $('#view').innerHTML = h + emptyHtml('wallet', 'ما فيه حركات للحين');
   h += '<div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">' + rows.map(x => x.kind === 'give'
     ? `<div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${x.paidBy === 'own' ? '<span class="ob">سداد</span>' : x.paidBy === 'ret' ? '<span class="ob">رجّع</span>' : ''}<div class="tm">${dmy(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}</div></span>
-        <span style="display:flex;align-items:center;gap:4px"><b class="iva ${x.paidBy === 'ret' ? 'r' : 'g'}"><bdi dir="ltr">${x.paidBy === 'ret' ? '−' : '+'}${money(x.amount)}</bdi></b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`
-    : `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmy(x.ts)} · ${esc(x.pname || 'عام')}</div></span><b class="iva r"><bdi dir="ltr">−${money(x.amount)}</bdi> ‹</b></div></button>`).join('') + '</div>';
+        <span style="display:flex;align-items:center;gap:4px"><b class="iva ${x.paidBy === 'ret' ? 'r' : 'g'}">${M(x.amount, x.paidBy === 'ret' ? '−' : '+')}</b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`
+    : `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmy(x.ts)} · ${esc(x.pname || 'عام')}</div></span><b class="iva r">${M(x.amount, '−')} ‹</b></div></button>`).join('') + '</div>';
   $('#view').innerHTML = h;
 }
 function giveForm(title, x) {
@@ -2361,10 +2372,10 @@ function rulesHtml(st) {
   st = st || {};
   return `<div style="font-size:14px;margin-top:10px">
     <div>• كل شهر يبدأ الحافز كامل.</div>
-    <div>• كل تقصير ينقص ${st.miss} ريال، والتقصير في الأمانة ينقص ${st.trust} ريال.</div>
+    <div>• كل تقصير ينقص ${M(st.miss, '', 't')}، والتقصير في الأمانة ينقص ${M(st.trust, '', 't')}.</div>
     <div>• نفس التقصير ينحسب مرة وحدة باليوم، واليوم اللي ما فيه تسجيل ينحسب ناجح.</div>
-    <div>• كل موقف مميز فوق الواجب يزيد ${st.star} ريال، لين ${st.starCap} ريال بالشهر.</div>
-    <div>• إذا خلص الشهر بدون ولا تقصير، مكافأة ${st.clean} ريال.</div>
+    <div>• كل موقف مميز فوق الواجب يزيد ${M(st.star, '', 't')}، لين ${M(st.starCap, '', 't')} بالشهر.</div>
+    <div>• إذا خلص الشهر بدون ولا تقصير، مكافأة ${M(st.clean, '', 't')}.</div>
     <div>• الحافز ينصرف مع راتب نفس الشهر، والسلف والراتب المقدم ينخصمون من الراتب.</div>
     <div class="sub" style="margin-top:8px">الأداء: الحضور والمواعيد، جودة الشغل، إدارة العمال، حل المشاكل.<br>السلوك: الأمانة والمصداقية، الاحترام وحسن التعامل، الالتزام بالتعليمات، النظافة، الانضباط والمظهر.</div></div>`;
 }
@@ -2395,14 +2406,14 @@ function empPayHtml(d) {
   const next = m.track
     ? (!m.misses ? `<div class="note good">ما عليك ولا تقصير هالشهر، كمّل كذا</div>` : `<div class="note info">عليك ${m.misses} تقصير هالشهر، ركّز عليها.</div>`)
     : !m.misses
-    ? `<div class="note good">ما عليك ولا تقصير هالشهر، كمّل كذا وتاخذ مكافأة ${st.clean} ريال</div>`
-    : `<div class="note info">كل تقصير ينقص ${st.miss} ريال (الأمانة ${st.trust})، وكل موقف مميز يزيد ${st.star} ريال.</div>`;
+    ? `<div class="note good">ما عليك ولا تقصير هالشهر، كمّل كذا وتاخذ مكافأة ${M(st.clean, '', 't')}</div>`
+    : `<div class="note info">كل تقصير ينقص ${M(st.miss, '', 't')} (الأمانة ${st.trust})، وكل موقف مميز يزيد ${M(st.star, '', 't')}.</div>`;
   const paidRows = d.history.filter(h => h.month !== m.month);
   return `
     <div class="card" style="margin-top:16px">
       <div class="kpis" style="margin-top:0">
         ${m.track ? `<div class="kpi"><div class="k">${I('x', 13, 2.5)}التقصير هالشهر</div><div class="v">${m.misses}</div></div>
-        <div class="kpi"><div class="k">${I('star', 13)}مواقف مميزة</div><div class="v">${m.stars}</div></div>` : `<div class="kpi hero"><div class="k">${I('sparkles', 13)}حافزك الحين</div><div class="v">${num(m.bonus)}<small> ريال</small></div></div>
+        <div class="kpi"><div class="k">${I('star', 13)}مواقف مميزة</div><div class="v">${m.stars}</div></div>` : `<div class="kpi hero"><div class="k">${I('sparkles', 13)}حافزك الحين</div><div class="v">${M(m.bonus, '', 'big')}</div></div>
         <div class="kpi"><div class="k">${I('history', 13)}تقصير · مميز</div><div class="v">${m.misses}<small> ✕</small> ${m.stars}<small> ★</small></div></div>`}
       </div>
       ${m.track ? '' : bonusTable(m)}
@@ -2505,14 +2516,14 @@ async function startDone(id, input) {
 
 function empInvHtml(d, isPreview) {
   const iv = d.inv || {balance: 0, o: 0, items: []}, c = iv.c != null ? iv.c : (iv.balance || 0), t = iv.o || 0;
-  let h = `<div class="ivbal" style="${c < 0 ? 'background:#A32D2D' : ''}"><span>${c < 0 ? 'صرفت أكثر من عهدتك' : 'العهدة اللي معك'}</span><b><bdi dir="ltr">${c < 0 ? '−' : ''}${money(Math.abs(c))}</bdi> <small>ريال</small></b></div>`;
-  if (t > 0) h += `<div class="ivbal" style="background:#A32D2D;margin-top:8px"><span>لك عند المدير (من جيبك)</span><b>${money(t)} <small>ريال</small></b></div>`;
+  let h = `<div class="ivbal" style="${c < 0 ? 'background:#A32D2D' : ''}"><span>${c < 0 ? 'صرفت أكثر من عهدتك' : 'العهدة اللي معك'}</span><b>${M(Math.abs(c), c < 0 ? '−' : '', 'big')}</b></div>`;
+  if (t > 0) h += `<div class="ivbal" style="background:#A32D2D;margin-top:8px"><span>لك عند المدير (من جيبك)</span><b>${M(t, '', 'big')}</b></div>`;
   if (!isPreview) h += S.invForm ? invFormHtml(d) : `<button class="bigdo" onclick="S.invForm=true;S.ishots=[];rerenderEmp()">${I('receipt', 15, 2.2)}أرسل فاتورة</button>`;
   const items = iv.items || [];
   if (!items.length) return h + emptyHtml('receipt', 'ما أرسلت فواتير للحين');
   return h + '<div class="card" style="margin-top:14px;padding-top:4px;padding-bottom:4px">' + items.map(x => {
     const st = invSt(x, true), give = x.kind === 'give';
-    return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? (x.paidBy === 'ret' ? 'r' : 'g') : ''}"><bdi dir="ltr">${give ? (x.paidBy === 'ret' ? '−' : '+') : ''}${money(x.amount)}</bdi></b></div>
+    return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? (x.paidBy === 'ret' ? 'r' : 'g') : ''}">${M(x.amount, give ? (x.paidBy === 'ret' ? '−' : '+') : '')}</b></div>
       <div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · '}${dmy(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>
       ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px"><div><b>المدير يقول:</b> ${esc(x.reason)}</div></div>` : ''}
       ${invPhotosHtml(x, BOOT.page === 'admin')}</div>`;
