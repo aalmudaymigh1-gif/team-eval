@@ -571,8 +571,24 @@ span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=11"></script>
+<script src="api.js?v=38"></script>
 <script>
+const APP_VER = '38';
+let verAt = 0;
+async function checkUpdate(force) {
+  if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
+  if (!force && Date.now() - verAt < 20000) return false;
+  if (S.upN || S.gr || CAM.stream || CAM.shot || S.doing || S.invForm || S.form || S.gform || S.ret || S.sheet || tfFilled().length || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) return false;
+  verAt = Date.now();
+  try {
+    const t = await fetch(location.href.split('#')[0], {cache: 'reload'}).then(r => r.ok ? r.text() : '');
+    const m = /const APP_VER = '([^']+)'/.exec(t);
+    if (!m || m[1] === APP_VER) return false;
+    toastLoad('فيه تحديث جديد، لحظة…');
+    setTimeout(() => location.reload(), 400);
+    return true;
+  } catch (e) { return false; }
+}
 const BOOT = (function () {
   const q = new URLSearchParams(location.search);
   const k = q.get('k') || '', e = q.get('e') || '';
@@ -2629,6 +2645,7 @@ async function refresh(silent) {
   if (S.upN) { if (!silent) toast('انتظر لين يخلص الرفع', null, 'in'); return; }
   if (S.gr) return;
   if (silent && (S.doing || S.invForm || S.form || S.gform || S.ret || S.sheet || tfFilled().length || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || ''))) return;
+  if (await checkUpdate(!silent)) return;
   refreshing = true;
   document.querySelectorAll('.rf').forEach(b => b.classList.add('spin'));
   try {
@@ -2668,7 +2685,7 @@ async function refresh(silent) {
     y0 = null; pulled = 0; ind.style.height = '0';
   }, {passive: true});
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && Date.now() - lastLoad > 60000) refresh(true);
+    if (document.visibilityState === 'visible') { if (Date.now() - lastLoad > 60000) refresh(true); else checkUpdate(); }
   });
   window.addEventListener('error', () => toastErr('صار خطأ، اسحب الصفحة لتحت عشان تحدّث'));
 })();
