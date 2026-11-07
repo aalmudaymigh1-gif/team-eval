@@ -564,6 +564,9 @@ span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 .mn.t{font-size:inherit;font-weight:500}
 .thero b,.kpi .v,.stc .v,.ivbal b,.ec .v,.ivd .amt{color:var(--text)!important}
 .tvseg{margin:14px 0 4px}
+.pgrp.ep .pgh2{background:var(--acc)!important;color:#fff!important;border:0!important;font-size:14px;font-weight:500;padding:10px 14px}
+.pgrp.ep .pgh2 .n{font-size:12px;font-weight:500;background:rgba(255,255,255,.2);color:#fff}
+.ecard .tt{font-size:15px!important;font-weight:500!important}
 </style>
 </head>
 <body>
@@ -575,7 +578,7 @@ span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=38"></script>
 <script>
-const APP_VER = '41';
+const APP_VER = '42';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -2480,7 +2483,7 @@ function empTasksHtml(d, isPreview) {
   if (ret.length) h += `<div class="sech r">رجعت لك</div>` + ret.map(t => empCardHtml(t, mode, false)).join('');
   projGroups(ts.filter(t => t.status === 'open')).forEach((g, i) => {
     const k = g.key || 'gen', on = S.eopen[k] !== undefined ? S.eopen[k] : i === 0;
-    h += `<div class="pgrp"><button class="pgh2" aria-expanded="${on}" onclick="S.eopen['${k}']=${on ? 'false' : 'true'};rerenderEmp()"><span>${esc(g.name)}</span><span class="n">${g.items.length === 1 ? 'مهمة وحدة' : g.items.length === 2 ? 'مهمتين' : g.items.length + ' مهام'}<span class="chev ${on ? 'up' : ''}">${I('arrow-right', 15, 2.5)}</span></span></button>${on ? g.items.map(t => empCardHtml(t, mode, true)).join('') : ''}</div>`;
+    h += `<div class="pgrp ep"><button class="pgh2" aria-expanded="${on}" onclick="S.eopen['${k}']=${on ? 'false' : 'true'};rerenderEmp()"><span>${esc(g.name)}</span><span class="n">${g.items.length === 1 ? 'مهمة وحدة' : g.items.length === 2 ? 'مهمتين' : g.items.length + ' مهام'}<span class="chev ${on ? 'up' : ''}">${I('arrow-right', 15, 2.5)}</span></span></button>${on ? g.items.map(t => empCardHtml(t, mode, true)).join('') : ''}</div>`;
   });
   const rv = ts.filter(t => t.status === 'review');
   if (rv.length) h += `<div class="sech a">انرسلت، تنتظر المدير</div>` + rv.map(t => empCardHtml(t, mode, false)).join('');
