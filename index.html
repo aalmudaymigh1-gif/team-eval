@@ -558,7 +558,8 @@ input,textarea,select{border-radius:16px!important;background:#fff!important}
 span.mn.mn.pos,.thero span.mn.pos{color:var(--green)!important}
 span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 .mn .rs{height:.78em;width:auto;flex:none;opacity:.9}
-.mn.big{font-size:26px;font-weight:400;gap:.18em}
+.mn.big{font-size:18px;font-weight:500;gap:.2em}
+.kpi .v{font-size:18px!important;font-weight:500!important}
 .mn.big .rs{height:.66em}
 .mn.t{font-size:inherit;font-weight:500}
 .thero b,.kpi .v,.stc .v,.ivbal b,.ec .v,.ivd .amt{color:var(--text)!important}
@@ -573,7 +574,7 @@ span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=38"></script>
 <script>
-const APP_VER = '39';
+const APP_VER = '40';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -867,7 +868,7 @@ function teamBreak(m) {
     ${m.deduct ? `<div><span>التقصير (${m.misses})</span><b class="neg">${sarS(m.deduct,'−')}</b></div>` : ''}
     ${m.reward ? `<div><span>مواقف مميزة (${m.stars})</span><b class="pos">${sarS(m.reward,'+')}</b></div>` : ''}
     ${m.clean ? `<div><span>شهر بدون تقصير</span><b class="pos">${sarS(m.clean,'+')}</b></div>` : ''}
-    <div class="tot"><span>الحافز</span><b>${sar(m.bonus)}</b></div>
+    <div class="tot"><span>الحافز</span><b>${M(m.bonus, '', 'pos')}</b></div>
   </div>`;
 }
 function teamPaid(d, e) {
@@ -875,7 +876,7 @@ function teamPaid(d, e) {
   return `<div class="card tcard">
     <div class="tmh">${I('user-round', 18)}<b>${esc(e.name)}</b><span class="tbad"><span class="badge late">${I('x', 12, 3)} ${m.misses}</span><span class="badge">${I('star', 12, 2.4)} ${m.stars}</span></span></div>
     <div class="thero">
-      <div class="h1"><span>${I('sparkles', 13)}الحافز الحين</span><b>${M(m.bonus, '', 'big')}</b></div>
+      <div class="h1"><span>${I('sparkles', 13)}الحافز الحين</span><b>${M(m.bonus, '', 'big pos')}</b></div>
       <div class="h2"><span>${I('banknote', 13)}راتب الشهر</span><b>${M(m.total, '', 'big')}</b></div>
     </div>
     ${teamBreak(m)}
@@ -1149,7 +1150,7 @@ function renderRec() {
   S.misses.forEach(c => { ded += c === TRUST ? st.trust : st.miss; });
   const net = (S.star ? st.star : 0) - ded;
   const label = !S.misses.length && !S.star ? 'كل شي تمام' : 'حفظ التقييم';
-  const empSub = e => e.track ? 'متابعة فقط' : 'حافز الشهر ' + M(e.month.bonus, '', 't');
+  const empSub = e => e.track ? 'متابعة فقط' : 'حافز الشهر ' + M(e.month.bonus, '', 't pos');
   $('#view').innerHTML = `
     <div class="blk"><div class="lab">${I('user', 14)}الموظف</div>
       <div class="emp">${d.employees.map(e => `<button class="empc ${S.emp===e.id?'on':''}" onclick="setEmp('${e.id}')">${esc(e.name)}</button>`).join('')}</div>
@@ -1238,7 +1239,7 @@ function bonusTable(m) {
     ${m.deduct ? `<tr><td class="sub">التقصير (${m.misses})</td><td class="neg">${sarS(m.deduct,'−')}</td></tr>` : ''}
     ${m.reward ? `<tr><td class="sub">مواقف مميزة (${m.stars})</td><td class="pos">${sarS(m.reward,'+')}</td></tr>` : ''}
     ${m.clean ? `<tr><td class="sub">شهر بدون تقصير</td><td class="pos">${sarS(m.clean,'+')}</td></tr>` : ''}
-    <tr class="tot"><td>الحافز</td><td>${sar(m.bonus)}</td></tr>
+    <tr class="tot"><td>الحافز</td><td>${M(m.bonus, '', 'pos')}</td></tr>
   </table>`;
 }
 
@@ -2429,7 +2430,7 @@ function empPayHtml(d) {
     <div class="card" style="margin-top:16px">
       <div class="kpis" style="margin-top:0">
         ${m.track ? `<div class="kpi"><div class="k">${I('x', 13, 2.5)}التقصير هالشهر</div><div class="v">${m.misses}</div></div>
-        <div class="kpi"><div class="k">${I('star', 13)}مواقف مميزة</div><div class="v">${m.stars}</div></div>` : `<div class="kpi hero"><div class="k">${I('sparkles', 13)}حافزك الحين</div><div class="v">${M(m.bonus, '', 'big')}</div></div>
+        <div class="kpi"><div class="k">${I('star', 13)}مواقف مميزة</div><div class="v">${m.stars}</div></div>` : `<div class="kpi hero"><div class="k">${I('sparkles', 13)}حافزك الحين</div><div class="v">${M(m.bonus, '', 'big pos')}</div></div>
         <div class="kpi"><div class="k">${I('history', 13)}تقصير · مميز</div><div class="v">${m.misses}<small> ✕</small> ${m.stars}<small> ★</small></div></div>`}
       </div>
       ${m.track ? '' : bonusTable(m)}
