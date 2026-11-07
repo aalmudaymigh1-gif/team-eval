@@ -358,7 +358,7 @@ video.vid{height:auto;max-height:70vh;background:#000}
 <div class="toast" id="toast"><span id="toastMsg"></span><button id="toastUndo" class="hide">تراجع</button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=4"></script>
+<script src="api.js?v=5"></script>
 <script>
 const BOOT = (function () {
   const q = new URLSearchParams(location.search);
@@ -516,6 +516,7 @@ function renderAdmin() {
     <div class="tabs">${tab('rec','clipboard-check','تقييم')}${tab('team','users','الفريق')}${tab('task','list-checks','المهام')}${tab('inv','receipt','الفواتير')}${tab('fin','wallet','المالية')}${tab('set','settings','الإعدادات')}</div>` + h + `
     <div id="view"></div>`;
   $('#app').innerHTML = h;
+  prefetchImgs();
   ({rec:renderRec, team:renderTeam, task:renderTasks, inv:renderInv, fin:renderFin, set:renderSet})[S.view]();
 }
 
@@ -1077,7 +1078,7 @@ async function openProofs(id) {
 }
 function viewImg(f) {
   if (!S.pc[f] || S.pc[f] === 'loading') return;
-  ovOpen(`<img class="full" src="${S.pc[f]}" alt="صورة إثبات"><button class="btn2" onclick="ovClose()">إغلاق</button>`);
+  showFull(S.pc[f], f, 'صورة إثبات');
 }
 
 /* ---------- الفواتير (المدير) ---------- */
@@ -1124,7 +1125,35 @@ async function openInvPh(id, admin) {
 }
 function viewInvImg(f) {
   if (!S.ic[f] || S.ic[f] === 'loading') return;
-  ovOpen(`<img class="full" src="${S.ic[f]}" alt="صورة الفاتورة"><button class="btn2" onclick="ovClose()">إغلاق</button>`);
+  showFull(S.ic[f], f, 'صورة الفاتورة');
+}
+function showFull(thumb, f, alt) {
+  ovOpen(`<img class="full" id="fullimg" src="${thumb}" alt="${alt}"><button class="btn2" onclick="ovClose()">إغلاق</button>`);
+  fileUrl(f).then(u => {
+    if (u === thumb) return;
+    const big = new Image();
+    big.onload = () => { const el = $('#fullimg'); if (el) el.src = u; };
+    big.src = u;
+  }).catch(() => {});
+}
+let pfT;
+function prefetchImgs() {
+  clearTimeout(pfT);
+  pfT = setTimeout(async () => {
+    try {
+      const admin = BOOT.page === 'admin';
+      const d = admin ? S.data : S.empData;
+      if (!d) return;
+      const invs = admin ? ((d.inv || {}).items || []) : ((d.inv || {}).items || []);
+      const tasks = admin ? (d.employees || []).flatMap(e => e.tasks || []) : (d.tasks || []);
+      const invP = invs.slice(0, 80).flatMap(x => x.photos || []).filter(f => !S.ic[f]);
+      const prP = tasks.filter(t => t.status !== 'done' || admin).slice(0, 60).flatMap(t => t.proofs || []).filter(f => !S.pc[f]);
+      if (!invP.length && !prP.length) return;
+      const m = await API.prefetch(invP.concat(prP));
+      invP.forEach(f => { if (m[f] && !S.ic[f]) S.ic[f] = m[f]; });
+      prP.forEach(f => { if (m[f] && !S.pc[f]) S.pc[f] = m[f]; });
+    } catch (e) {}
+  }, 250);
 }
 
 function invRowHtml(x, showEmp) {
@@ -1515,6 +1544,7 @@ function renderEmp(d, isPreview) {
     <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button>`}</div>${isPreview ? '' : pushHtml()}
     <div class="segc etabs"><button class="${S.etab === 'tasks' ? 'on' : ''}" onclick="S.etab='tasks';rerenderEmp()">مهامي${nOpen ? ' (' + nOpen + ')' : ''}</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">حافزي</button></div>
     ${S.etab === 'inv' ? empInvHtml(d, isPreview) : tasksTab ? empTasksHtml(d, isPreview) : empPayHtml(d)}`;
+  if (!isPreview) prefetchImgs();
 }
 
 function empPayHtml(d) {

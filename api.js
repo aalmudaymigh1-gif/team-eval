@@ -74,15 +74,69 @@
     if (error) throw new Error(friendly(error));
     return path;
   }
-  const urlCache = {};
+  const thumbOf = p => /\.jpg$/.test(p) ? p.replace(/\.jpg$/, '_t.jpg') : '';
+  async function makeThumb(blob) {
+    let src;
+    try { src = await createImageBitmap(blob); } catch (e) {
+      src = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(blob); });
+    }
+    const w = src.width, h = src.height, s = Math.min(1, 480 / Math.max(w, h));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * s)); c.height = Math.max(1, Math.round(h * s));
+    c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+    return new Promise(r => c.toBlob(r, 'image/jpeg', 0.72));
+  }
+  async function putImg(path, blob) {
+    const t = thumbOf(path);
+    const thumbJob = t ? makeThumb(blob).then(tb => tb ? put(t, tb, 'image/jpeg') : null).catch(() => null) : null;
+    await Promise.all([put(path, blob, blob.type), thumbJob]);
+    return path;
+  }
+
+  /* روابط الصور: تنطلب دفعة وحدة وتنحفظ في المتصفح 6 أيام عشان الصورة تنفتح من الكاش */
+  const LS = 'urlc1', TTL = 7 * 86400, KEEP = 6 * 864e5;
+  let UC = {};
+  try { UC = JSON.parse(localStorage.getItem(LS) || '{}') || {}; } catch (e) { UC = {}; }
+  (function prune() { const n = Date.now(); Object.keys(UC).forEach(k => { if (!UC[k] || UC[k].x < n) delete UC[k]; }); })();
+  let saveT;
+  function saveUC() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(LS, JSON.stringify(UC)); } catch (e) {} }, 300); }
+  const fresh = k => UC[k] && UC[k].x > Date.now();
+  async function signMany(paths) {
+    const need = Array.from(new Set(paths.filter(p => p && !fresh(p))));
+    if (!need.length) return;
+    for (let i = 0; i < need.length; i += 100) {
+      const part = need.slice(i, i + 100);
+      const { data, error } = await sb.storage.from(BUCKET).createSignedUrls(part, TTL);
+      if (error) throw new Error('ما قدرت أفتح الملف');
+      const x = Date.now() + KEEP;
+      (data || []).forEach((d, j) => { const p = d.path || part[j]; UC[p] = { u: d.signedUrl || '', x: x }; });
+    }
+    saveUC();
+  }
   async function fileUrl(path) {
     if (!path) throw new Error('ما فيه صورة');
-    const c = urlCache[path];
-    if (c && c.exp > Date.now()) return c.url;
-    const { data, error } = await sb.storage.from(BUCKET).createSignedUrl(path, 3600 * 6);
-    if (error) throw new Error('ما قدرت أفتح الملف');
-    urlCache[path] = { url: data.signedUrl, exp: Date.now() + 3600 * 5 * 1000 };
-    return data.signedUrl;
+    await signMany([path]);
+    if (!UC[path] || !UC[path].u) throw new Error('ما قدرت أفتح الملف');
+    return UC[path].u;
+  }
+  async function imgUrl(path) {
+    if (!path) throw new Error('ما فيه صورة');
+    const t = thumbOf(path);
+    await signMany(t ? [path, t] : [path]);
+    if (t && UC[t] && UC[t].u) return UC[t].u;
+    if (!UC[path] || !UC[path].u) throw new Error('ما قدرت أفتح الملف');
+    return UC[path].u;
+  }
+  async function prefetch(paths) {
+    const ps = Array.from(new Set(paths.filter(Boolean))).slice(0, 150);
+    if (!ps.length) return {};
+    await signMany(ps.concat(ps.map(thumbOf).filter(Boolean)));
+    const out = {};
+    ps.forEach(p => {
+      const t = thumbOf(p), u = (t && UC[t] && UC[t].u) || (UC[p] && UC[p].u) || '';
+      if (u) { out[p] = u; const im = new Image(); im.decoding = 'async'; im.src = u; }
+    });
+    return out;
   }
 
   /* ---------- أدوات ---------- */
@@ -301,7 +355,6 @@
     await loadAdmin(k);
     return adminPayload_();
   }
-  async function fresh(k) { if (!RAW || !RAW.employees.some(e => e.token)) await loadAdmin(k); }
   const empById = id => RAW.employees.filter(e => e.id === id)[0];
 
   async function empUpload(token, dataUrls, max) {
@@ -310,7 +363,7 @@
       const blob = dataUrlBlob(d);
       if (blob.size > 5 * 1024 * 1024) throw new Error('الصورة كبيرة، جرّب وحدة ثانية');
       const r = await eexec(token, 'ticket', {});
-      return put(r.path, blob, blob.type);
+      return putImg(r.path, blob);
     }));
   }
 
@@ -502,17 +555,18 @@
       return API.apiEmp(token);
     },
 
-    async apiProofAdmin(k, id, fid) { return fileUrl(fid); },
-    async apiProofEmp(t, id, fid) { return fileUrl(fid); },
+    async apiProofAdmin(k, id, fid) { return imgUrl(fid); },
+    async apiProofEmp(t, id, fid) { return imgUrl(fid); },
     async apiMediaAdmin(k, taskId, fid) { return fileUrl(fid); },
     async apiMediaEmp(t, taskId, fid) { return fileUrl(fid); },
-    async apiInvImgAdmin(k, id, fid) { return fileUrl(fid); },
-    async apiInvImgEmp(t, id, fid) { return fileUrl(fid); },
+    async apiInvImgAdmin(k, id, fid) { return imgUrl(fid); },
+    async apiInvImgEmp(t, id, fid) { return imgUrl(fid); },
+    prefetch: prefetch,
 
     async apiUploadImg(k, dataUrl) {
       const blob = dataUrlBlob(dataUrl);
       const r = await aexec(k, 'ticket', { kind: 'img', ext: 'jpg' });
-      return put(r.path, blob, blob.type);
+      return putImg(r.path, blob);
     },
 
     async apiUploadVid(k, file) {
