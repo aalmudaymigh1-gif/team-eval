@@ -228,14 +228,14 @@
   }
   function invBal_(rows, empId) {
     return Math.round(rows.reduce((s, x) => {
-      if (x.emp !== empId || x.status !== 'ok') return s;
+      if (x.emp !== empId || x.status !== 'ok' || (x.kind === 'inv' && x.paidBy === 'card')) return s;
       return s + (x.kind === 'give' ? x.amount : -x.amount);
     }, 0) * 100) / 100;
   }
   function invOut_(x, pmap) {
     return { id: x.id, ts: x.ts, emp: x.emp, kind: x.kind, amount: x.amount, desc: x.desc, project: x.project,
       pname: x.project ? (pmap[x.project] || '') : '', nph: x.photos.length, photos: x.photos, status: x.status, reason: x.reason,
-      method: x.method || '', warrantyUntil: x.warrantyUntil || '' };
+      method: x.method || '', warrantyUntil: x.warrantyUntil || '', paidBy: x.paidBy === 'card' ? 'card' : 'cash' };
   }
 
   function empPayload_(emp) {
@@ -536,7 +536,7 @@
       const paths = await empUpload(token, dataUrls, 3);
       if (!paths.length) throw new Error('صوّر الفاتورة');
       const w = Math.round(Number(x.warranty) || 0);
-      await eexec(token, 'inv_add', { amount: amount, desc: desc, project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0 });
+      await eexec(token, 'inv_add', { amount: amount, desc: desc, project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' ? 'card' : 'cash' });
       flush();
       return API.apiEmp(token);
     },
@@ -556,6 +556,7 @@
       const n = cleanAmount_(x.amount);
       return adminDo(k, 'inv_edit', { id: id, amount: n, note: String(x.note || '').trim().slice(0, 200), method: String(x.method || '') });
     },
+    async apiInvPaidBy(k, id, by) { return adminDo(k, 'inv_paidby', { id: id, by: by === 'card' ? 'card' : 'cash' }); },
     async apiInvWarranty(k, id, until) {
       if (until && !/^\d{4}-\d{2}-\d{2}$/.test(until)) throw new Error('التاريخ غير صحيح');
       return adminDo(k, 'inv_warranty', { id: id, until: until || '' });

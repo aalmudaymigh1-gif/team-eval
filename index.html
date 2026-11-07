@@ -332,6 +332,7 @@ video.vid{height:auto;max-height:70vh;background:#000}
 .str{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
 .str:last-child{border-bottom:0}.str .tm{margin-top:2px}
 .str .ed{background:none;border:0;color:var(--muted);padding:4px;cursor:pointer}
+.cb{display:inline-block;background:#EEEDFE;color:#3C3489;border-radius:6px;padding:1px 6px;font-size:11px;font-weight:600;margin-inline-start:4px;vertical-align:1px}
 .wb{display:inline-block;background:#E6F1FB;color:#0C447C;border-radius:6px;padding:1px 6px;font-size:11px;font-weight:600;margin-inline-start:4px;vertical-align:1px}
 .wl{font-size:12.5px;font-weight:600;white-space:nowrap}.wl.ok{color:var(--green)}.wl.soon{color:#B7791F}.wl.end{color:var(--faint)}
 .erow{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:start;cursor:pointer}
@@ -357,7 +358,7 @@ video.vid{height:auto;max-height:70vh;background:#000}
 <div class="toast" id="toast"><span id="toastMsg"></span><button id="toastUndo" class="hide">تراجع</button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=3"></script>
+<script src="api.js?v=4"></script>
 <script>
 const BOOT = (function () {
   const q = new URLSearchParams(location.search);
@@ -1094,7 +1095,7 @@ function wLeft(until, today) {
   const m = Math.floor(n / 30.4);
   return ['ok', 'باقي ' + (m === 1 ? 'شهر' : m === 2 ? 'شهرين' : m + (m <= 10 ? ' أشهر' : ' شهر'))];
 }
-function wBadge(x) { return x.warrantyUntil ? '<span class="wb">ضمان</span>' : ''; }
+function wBadge(x) { return (x.kind === 'inv' && x.paidBy === 'card' ? '<span class="cb">' + (BOOT.page === 'admin' && !S.preview ? 'بطاقتي' : 'بطاقة المدير') + '</span>' : '') + (x.warrantyUntil ? '<span class="wb">ضمان</span>' : ''); }
 
 function invSt(x, emp) {
   if (x.kind === 'give') return ['', emp ? 'استلمت عهدة' : 'عهدة'];
@@ -1135,7 +1136,7 @@ function invRowHtml(x, showEmp) {
     ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px">${esc(x.reason)}</div>` : ''}
     ${invPhotosHtml(x, true)}
     ${x.status === 'review' ? `<div class="grid2" style="margin-top:8px"><button class="btn2 cu" onclick="invApprove('${x.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askInvReturn('${x.id}')">رجّعها</button></div>` : ''}
-    <div class="ilinks">${give ? '' : `<button class="lnk dl" onclick="askWarranty('${x.id}')">${x.warrantyUntil ? 'عدّل الضمان' : 'أضف ضمان'}</button>`}<button class="lnk dl ${armDel ? 'arm' : ''}" onclick="invDel('${x.id}')">${armDel ? 'تأكيد الحذف' : 'حذف'}</button></div>
+    <div class="ilinks">${give ? '' : `<button class="lnk dl" onclick="askWarranty('${x.id}')">${x.warrantyUntil ? 'عدّل الضمان' : 'أضف ضمان'}</button><button class="lnk dl" onclick="setPaidBy('${x.id}', '${x.paidBy === 'card' ? 'cash' : 'card'}')">${x.paidBy === 'card' ? 'خلّها من العهدة' : 'دفعها ببطاقتي'}</button>`}<button class="lnk dl ${armDel ? 'arm' : ''}" onclick="invDel('${x.id}')">${armDel ? 'تأكيد الحذف' : 'حذف'}</button></div>
   </div>`;
 }
 
@@ -1206,8 +1207,8 @@ function openSt(id) { S.iv.st = id; S.armed = null; renderInv(); window.scrollTo
 function renderInvSt(empId) {
   const d = S.data, e = d.employees.find(x => x.id === empId);
   const items = ((d.inv || {}).items || []).filter(x => x.emp === empId).map(x => Object.assign({}, x, {ename: e.name}));
-  const gives = items.filter(x => x.kind === 'give'), oks = items.filter(x => x.kind === 'inv' && x.status === 'ok');
-  const rv = items.filter(x => x.kind === 'inv' && x.status === 'review');
+  const gives = items.filter(x => x.kind === 'give'), oks = items.filter(x => x.kind === 'inv' && x.status === 'ok' && x.paidBy !== 'card');
+  const rv = items.filter(x => x.kind === 'inv' && x.status === 'review' && x.paidBy !== 'card');
   const gT = gives.reduce((s, x) => s + x.amount, 0), sT = oks.reduce((s, x) => s + x.amount, 0), b = Math.round((gT - sT) * 100) / 100;
   const rows = gives.concat(oks).sort((a, b2) => a.ts < b2.ts ? 1 : a.ts > b2.ts ? -1 : 0);
   let h = `<button class="back" onclick="S.iv.st='';renderInv()">${I('arrow-right', 17)}رجوع للفواتير</button>
@@ -1270,6 +1271,10 @@ function askWarranty(id) {
     <div class="err" id="werr"></div>
     <div class="g21"><button class="btn2 cu" onclick="doWarranty('${id}', false)">حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>
     ${x.warrantyUntil ? `<button class="btn2 rd" style="width:100%;margin-top:8px" onclick="doWarranty('${id}', true)">شيل الضمان</button>` : ''}`);
+}
+async function setPaidBy(id, by) {
+  try { S.data = await call('apiInvPaidBy', BOOT.key, id, by); renderAdmin(); toast(by === 'card' ? 'صارت على بطاقتك، وما تنخصم من العهدة' : 'صارت من العهدة'); }
+  catch (e) { toast(e); }
 }
 async function doWarranty(id, clear) {
   const u = clear ? '' : ($('#wd').value || S.wsel || '');
@@ -1637,6 +1642,9 @@ function invFormHtml(d) {
     <input class="qtt" inputmode="decimal" placeholder="المبلغ بالريال" value="${esc(f.amount)}" oninput="S.inv.amount=this.value">
     <input placeholder="وش اشتريت؟ مثلاً: أفياش وأسلاك" value="${esc(f.desc)}" oninput="S.inv.desc=this.value">
     <select aria-label="المشروع" onchange="S.inv.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}<option value="" ${f.project === '' ? 'selected' : ''}>عام</option></select>
+    <div class="sub" style="margin:4px 0 -2px">دفعت من؟</div>
+    <div class="segc">${[['cash', 'العهدة اللي معي'], ['card', 'بطاقة المدير']].map(o => `<button class="${(f.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="S.inv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>
+    ${f.paidBy === 'card' ? '<div class="sub" style="margin-top:-4px">ما تنخصم من عهدتك</div>' : ''}
     <label class="tgl"><span>عليها ضمان؟</span><input type="checkbox" ${f.wOn ? 'checked' : ''} onchange="S.inv.wOn=this.checked;if(this.checked&&!S.inv.w)S.inv.w=12;rerenderEmp()"></label>
     ${f.wOn ? `<div class="wchips">${[[6, '6 أشهر'], [12, 'سنة'], [24, 'سنتين']].map(c => `<button class="${!f.wc && f.w === c[0] ? 'on' : ''}" onclick="S.inv.w=${c[0]};S.inv.wc=false;rerenderEmp()">${c[1]}</button>`).join('')}<button class="${f.wc ? 'on' : ''}" onclick="S.inv.wc=true;rerenderEmp()">غيره</button></div>
       ${f.wc ? `<input inputmode="numeric" placeholder="كم شهر؟" value="${f.w || ''}" oninput="S.inv.w=Number(String(this.value).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)))||0">` : ''}` : ''}
@@ -1665,7 +1673,7 @@ async function sendInv() {
   if (S.busy) return;
   S.busy = true; rerenderEmp();
   try {
-    const d = await callT(120000, 'apiInvAdd', BOOT.token, {amount: f.amount, desc: f.desc, project: f.project, warranty: f.wOn ? f.w : 0}, S.ishots);
+    const d = await callT(120000, 'apiInvAdd', BOOT.token, {amount: f.amount, desc: f.desc, project: f.project, warranty: f.wOn ? f.w : 0, paidBy: f.paidBy || 'cash'}, S.ishots);
     S.busy = false; S.invForm = false; S.ishots = []; S.inv = {amount: '', desc: '', project: f.project};
     renderEmp(d, false); toast('انرسلت الفاتورة');
   } catch (e) {
