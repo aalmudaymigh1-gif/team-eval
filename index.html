@@ -1130,7 +1130,7 @@ function invRowHtml(x, showEmp) {
   const st = invSt(x, false), armDel = S.armed === 'inv_' + x.id, give = x.kind === 'give';
   const meta = [showEmp ? esc(x.ename) : '', give ? '' : esc(x.pname || 'عام'), dmy(x.ts)].filter(Boolean).join(' · ');
   return `<div class="ivr ${x.status === 'review' ? 'rv' : ''}">
-    <div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}">${give ? '+' : ''}${money(x.amount)}</b></div>
+    <div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}"><bdi dir="ltr">${give ? '+' : ''}${money(x.amount)}</bdi></b></div>
     <div class="tm">${meta}${x.status !== 'ok' || give ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>
     ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px">${esc(x.reason)}</div>` : ''}
     ${invPhotosHtml(x, true)}
@@ -1219,8 +1219,8 @@ function renderInvSt(empId) {
   if (!rows.length) return $('#view').innerHTML = h + emptyHtml('wallet', 'ما فيه حركات للحين');
   h += '<div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">' + rows.map(x => x.kind === 'give'
     ? `<div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b><div class="tm">${dmy(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}</div></span>
-        <span style="display:flex;align-items:center;gap:4px"><b class="iva g">+${money(x.amount)}</b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`
-    : `<div class="str" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmy(x.ts)} · ${esc(x.pname || 'عام')}</div></span><b class="iva r">−${money(x.amount)}</b></div>${invPhotosHtml(x, true)}</div>`).join('') + '</div>';
+        <span style="display:flex;align-items:center;gap:4px"><b class="iva g"><bdi dir="ltr">+${money(x.amount)}</bdi></b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`
+    : `<div class="str" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmy(x.ts)} · ${esc(x.pname || 'عام')}</div></span><b class="iva r"><bdi dir="ltr">−${money(x.amount)}</bdi></b></div>${invPhotosHtml(x, true)}</div>`).join('') + '</div>';
   $('#view').innerHTML = h;
 }
 function giveForm(title, x) {
@@ -1620,7 +1620,7 @@ function empInvHtml(d, isPreview) {
   if (!items.length) return h + emptyHtml('receipt', 'ما أرسلت فواتير للحين');
   return h + '<div class="card" style="margin-top:14px;padding-top:4px;padding-bottom:4px">' + items.map(x => {
     const st = invSt(x, true), give = x.kind === 'give';
-    return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}">${give ? '+' : ''}${money(x.amount)}</b></div>
+    return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}"><bdi dir="ltr">${give ? '+' : ''}${money(x.amount)}</bdi></b></div>
       <div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · '}${dmy(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>
       ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px"><div><b>المدير يقول:</b> ${esc(x.reason)}</div></div>` : ''}
       ${invPhotosHtml(x, BOOT.page === 'admin')}</div>`;
