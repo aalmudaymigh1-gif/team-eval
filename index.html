@@ -214,9 +214,6 @@ details summary::-webkit-details-marker{display:none}
 .trow{display:flex;align-items:center;gap:12px;padding:6px 0 12px}
 .trow .n{flex:1}.trow .n b{display:block;font-size:14.5px;font-weight:600}.trow .n small{color:var(--muted);font-size:12px}
 
-.toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(16px);opacity:0;background:#0F1419;color:#fff;border-radius:14px;padding:11px 16px;display:flex;gap:14px;align-items:center;transition:all .25s var(--ease);z-index:30;pointer-events:none;font-weight:500;white-space:nowrap;box-shadow:var(--sh2)}
-.toast.show{opacity:1;transform:translateX(-50%);pointer-events:auto}
-.toast button{background:none;border:0;color:#A9C1E0;font-weight:700;cursor:pointer}
 #busy{position:fixed;top:0;left:0;right:0;height:3px;z-index:40;background:linear-gradient(90deg,transparent,var(--acc),transparent);background-size:200% 100%;opacity:0;transition:opacity .2s;pointer-events:none}
 #busy.on{opacity:1;animation:bz 1s linear infinite}
 @keyframes bz{from{background-position:200% 0}to{background-position:-200% 0}}
@@ -486,13 +483,23 @@ video.vid{height:auto;max-height:70vh;background:#000}
 .gopts button{font:inherit;font-size:15px;text-align:right;border:1.5px solid var(--line2);background:var(--surface);color:var(--text);border-radius:var(--r);padding:13px 14px;cursor:pointer}
 .gopts button:active{background:var(--acc-soft);border-color:var(--acc)}
 .gall{margin:0;padding-right:22px;line-height:1.9;font-size:15px}
+.tst{position:fixed;top:calc(10px + env(safe-area-inset-top));left:0;right:0;height:0;z-index:60;display:flex;justify-content:center;pointer-events:none}
+.ti{position:absolute;top:0;width:min(360px,calc(100% - 24px));display:flex;align-items:flex-start;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:11px 13px;box-shadow:0 10px 30px rgba(15,20,25,.13);transition:transform .55s cubic-bezier(.34,1.56,.64,1),opacity .3s ease;transform-origin:top center;cursor:pointer}
+.tic{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;color:#fff}
+.ti.ok .tic{background:var(--green)}.ti.er .tic{background:var(--red)}.ti.in .tic{background:var(--acc)}
+.ti.ld .tic{border:2.5px solid var(--acc-ring);border-top-color:var(--acc);animation:tspin .8s linear infinite}
+@keyframes tspin{to{transform:rotate(360deg)}}
+.ttx{flex:1;min-width:0;line-height:1.45;padding-top:1px}
+.ttx b{display:block;font-size:14.5px;font-weight:600}
+.ttx small{display:block;font-size:12.5px;color:var(--muted);margin-top:1px}
+.tab{border:0;background:var(--acc);color:var(--acc-ink);font:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:5px 12px;cursor:pointer;align-self:center;flex:none}
 </style>
 </head>
 <body>
 <div id="busy"></div><div id="ptr"></div>
 <div class="wrap" id="app"><div class="load">جاري التحميل…</div></div>
 <div id="ov"></div><button id="fab" class="fab hide" onclick="openSheet()" aria-label="مهمة جديدة"></button>
-<div class="toast" id="toast"><span id="toastMsg"></span><button id="toastUndo" class="hide">تراجع</button></div>
+<div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=11"></script>
@@ -561,7 +568,7 @@ async function enablePush() {
     redrawAny();
     await pushSubscribe();
     toast('تفعّلت الإشعارات');
-  } catch (e) { toast(e && e.message ? e.message : String(e)); }
+  } catch (e) { toastErr(e); }
   PUSH.busy = false;
   redrawAny();
 }
@@ -828,7 +835,7 @@ function renderAttLog(empId) {
 async function delAtt(id) {
   if (S.armed !== 'att_' + id) { S.armed = 'att_' + id; return renderAttLog(S.attLog); }
   try { S.data = await call('apiAttDel', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذف، والتأخير المرتبط فيه انحذف'); }
-  catch (e) { S.armed = null; toast(e); }
+  catch (e) { S.armed = null; toastErr(e); }
 }
 
 /* الإعدادات */
@@ -894,12 +901,13 @@ const PROOF_HINT = {photo: 'يصوّر الشغل بعد ما يخلص', invoice
 function call(fn, ...args) { return callT(30000, fn, ...args); }
 function callT(ms, fn, ...args) {
   setBusy(1);
+  const ld = LD_MSG[fn] ? toastLoad(LD_MSG[fn]) : null;
   return new Promise((res, rej) => {
     let done = false;
-    const t = setTimeout(() => { if (done) return; done = true; setBusy(-1); rej('الاتصال تأخر، اسحب الصفحة لتحت أو اضغط ↻'); }, ms);
+    const t = setTimeout(() => { if (done) return; done = true; setBusy(-1); toastDone(ld); rej('الاتصال تأخر، اسحب الصفحة لتحت أو اضغط ↻'); }, ms);
     Promise.resolve().then(() => API[fn](...args))
-      .then(v => { if (done) return; done = true; clearTimeout(t); setBusy(-1); res(v); })
-      .catch(e => { if (done) return; done = true; clearTimeout(t); setBusy(-1); rej(e && e.message ? e.message : String(e)); });
+      .then(v => { if (done) return; done = true; clearTimeout(t); setBusy(-1); toastDone(ld); res(v); })
+      .catch(e => { if (done) return; done = true; clearTimeout(t); setBusy(-1); toastDone(ld); rej(e && e.message ? e.message : String(e)); });
   });
 }
 
@@ -910,16 +918,71 @@ function setBusy(d) {
   if (b) b.classList.toggle('on', busyN > 0);
 }
 
-let toastT;
-function toast(msg, undo) {
-  $('#toastMsg').textContent = msg;
-  const u = $('#toastUndo');
-  u.classList.toggle('hide', !undo);
-  u.onclick = undo || null;
-  $('#toast').classList.add('show');
-  clearTimeout(toastT);
-  toastT = setTimeout(() => $('#toast').classList.remove('show'), undo ? 6000 : 2500);
+const TST = [];
+const TST_IC = {ok: 'check', er: 'x', in: 'info'};
+function tHtml(t) {
+  return `<span class="tic">${t.type === 'ld' ? '' : I(TST_IC[t.type], 14, 3)}</span><span class="ttx"><b>${esc(t.msg)}</b>${t.desc ? `<small>${esc(t.desc)}</small>` : ''}</span>${t.undo ? '<button class="tab">تراجع</button>' : ''}`;
 }
+function tPaint(t) {
+  t.el.className = 'ti ' + t.type;
+  t.el.innerHTML = tHtml(t);
+  const b = t.el.querySelector('.tab');
+  if (b) b.onclick = ev => { ev.stopPropagation(); const f = t.undo; tKill(t); f(); };
+}
+function tLay() {
+  TST.forEach((t, i) => {
+    t.el.style.transform = 'translateY(' + (i * 10) + 'px) scale(' + (1 - i * 0.05) + ')';
+    t.el.style.opacity = i > 2 ? 0 : 1;
+    t.el.style.zIndex = 60 - i;
+    t.el.style.pointerEvents = i ? 'none' : 'auto';
+  });
+}
+function tKill(t) {
+  const i = TST.indexOf(t);
+  if (i < 0) return;
+  TST.splice(i, 1);
+  clearTimeout(t.h);
+  t.el.style.transform = 'translateY(-110%) scale(.92)';
+  t.el.style.opacity = 0;
+  setTimeout(() => t.el.remove(), 450);
+  tLay();
+}
+function tTime(t) { clearTimeout(t.h); if (t.type !== 'ld') t.h = setTimeout(() => tKill(t), t.undo ? 6000 : t.type === 'er' ? 4500 : 2600); }
+function tNew(type, msg, desc, undo) {
+  const box = $('#tst');
+  const t = {type, msg: String(msg == null ? '' : msg), desc: desc || '', undo: undo || null, el: document.createElement('div')};
+  tPaint(t);
+  t.el.style.transform = 'translateY(-110%) scale(.92)';
+  t.el.style.opacity = 0;
+  t.el.onclick = () => { if (t.type !== 'ld') tKill(t); };
+  box.appendChild(t.el);
+  TST.unshift(t);
+  requestAnimationFrame(() => requestAnimationFrame(tLay));
+  tTime(t);
+  return t;
+}
+function toast(msg, undo, type, desc) {
+  type = type || 'ok';
+  const ld = TST.find(t => t.type === 'ld' && t.fin);
+  if (ld) {
+    Object.assign(ld, {type, msg: String(msg == null ? '' : msg), desc: desc || '', undo: undo || null, fin: false});
+    tPaint(ld);
+    ld.el.animate([{transform: ld.el.style.transform + ' scale(1.05)'}, {transform: ld.el.style.transform}], {duration: 380, easing: 'cubic-bezier(.34,1.56,.64,1)'});
+    tTime(ld);
+    return ld;
+  }
+  return tNew(type, msg, desc, undo);
+}
+function toastErr(e) {
+  const m = String(e && e.message ? e.message : e == null ? '' : e);
+  const i = m.indexOf('، ');
+  return i > 0 && i < 40 ? toast(m.slice(0, i), null, 'er', m.slice(i + 2)) : toast(m, null, 'er');
+}
+function toastLoad(msg) { return tNew('ld', msg); }
+function toastDone(t) { if (!t) return; t.fin = true; setTimeout(() => { if (t.type === 'ld') tKill(t); }, 700); }
+function toastClear() { TST.slice().forEach(tKill); }
+const LD_MSG = {apiAttHome: 'جاري التسجيل…', apiAttIn: 'جاري التسجيل…', apiAttOut: 'جاري التسجيل…', apiUploadImg: 'جاري رفع الصورة…', apiUploadVid: 'جاري رفع الفيديو…',
+  apiInvAddAdmin: 'جاري حفظ الفاتورة…', apiInvAdd: 'جاري إرسال الفاتورة…', apiTaskDone: 'جاري إرسال الإثبات…'};
 
 function empLink(t) { return BOOT.url + '?e=' + t; }
 function adminLink(k) { return BOOT.url + '?k=' + k; }
@@ -934,7 +997,7 @@ function copy(text) {
 function fallbackCopy(text, done) {
   const t = document.createElement('textarea');
   t.value = text; document.body.appendChild(t); t.select();
-  try { document.execCommand('copy'); done(); } catch (e) { toast('انسخ الرابط يدويًا'); }
+  try { document.execCommand('copy'); done(); } catch (e) { toast('انسخ الرابط يدويًا', null, 'in'); }
   t.remove();
 }
 function wa(text) { window.open(WA_URL + encodeURIComponent(text), '_blank'); }
@@ -1064,9 +1127,9 @@ async function save() {
 
 async function undoLast() {
   if (!S.lastId) return;
-  $('#toast').classList.remove('show');
+  toastClear();
   try { S.data = await call('apiDelete', BOOT.key, S.lastId); S.lastId = null; renderAdmin(); toast('انحذف'); }
-  catch (e) { toast(e); }
+  catch (e) { toastErr(e); }
 }
 
 /* ---------- الفريق ---------- */
@@ -1102,12 +1165,12 @@ function entryHtml(x, canDelete, noAmt) {
 async function armLog(id) {
   if (S.armed !== id) { S.armed = id; rerender(); return; }
   try { S.data = await call('apiDelete', BOOT.key, id); S.armed = null; rerender(); toast('انحذف'); }
-  catch (e) { S.armed = null; rerender(); toast(e); }
+  catch (e) { S.armed = null; rerender(); toastErr(e); }
 }
 
 async function preview(id) {
   try { S.preview = await call('apiPreview', BOOT.key, id); renderAdmin(); window.scrollTo(0,0); }
-  catch (e) { toast(e); }
+  catch (e) { toastErr(e); }
 }
 function closePreview() { S.preview = null; renderAdmin(); window.scrollTo(0,0); }
 
@@ -1246,7 +1309,7 @@ function openTask(id) { S.td = id; S.armed = null; renderAdmin(); window.scrollT
 function closeTask() { S.td = null; S.armed = null; renderAdmin(); window.scrollTo(0, 0); }
 async function approveTask(id) {
   try { S.data = await call('apiTaskApprove', BOOT.key, id); renderAdmin(); toast('اعتمدتها'); }
-  catch (e) { toast(e); }
+  catch (e) { toastErr(e); }
 }
 function askReturn(id) {
   ovOpen(`<label class="shh" for="rr">وش الناقص؟</label>
@@ -1265,11 +1328,11 @@ async function doReturn(id) {
 async function closeByAdmin(id) {
   if (S.armed !== 'close_' + id) { S.armed = 'close_' + id; renderAdmin(); return; }
   try { S.data = await call('apiTaskClose', BOOT.key, id); S.armed = null; renderAdmin(); toast('تسجلت إنها خلصت'); }
-  catch (e) { S.armed = null; renderAdmin(); toast(e); }
+  catch (e) { S.armed = null; renderAdmin(); toastErr(e); }
 }
 async function updTask(id, x) {
   try { S.data = await call('apiTaskUpdate', BOOT.key, id, x); renderAdmin(); toast('انحفظ'); }
-  catch (e) { toast(e); renderAdmin(); }
+  catch (e) { toastErr(e); renderAdmin(); }
 }
 
 function renderTaskDetail() {
@@ -1313,7 +1376,7 @@ function ovOpen(html) {
 function ovClose() { if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); S.sheet = false; }
 function openSheet() {
   const d = S.data, tf = S.tf;
-  if (!d.employees.length) return toast('أضف موظف من الإعدادات أول');
+  if (!d.employees.length) return toast('أضف موظف من الإعدادات أول', null, 'in');
   const ids = d.employees.map(e => e.id);
   tf.emps = tf.emps.filter(x => ids.includes(x));
   if (!tf.emps.length) { const last = lsGet('tf_emp'); tf.emps = [ids.includes(last) ? last : ids[0]]; }
@@ -1486,7 +1549,7 @@ async function openMedia(id, admin) {
   redrawTasks(admin);
   await Promise.all(need.map(async x => {
     try { S.mc[x.id] = BOOT.page === 'admin' ? await call('apiMediaAdmin', BOOT.key, id, x.id) : await call('apiMediaEmp', BOOT.token, id, x.id); }
-    catch (e) { delete S.mc[x.id]; toast(e); }
+    catch (e) { delete S.mc[x.id]; toastErr(e); }
   }));
   redrawTasks(admin);
 }
@@ -1500,7 +1563,7 @@ function findTask(id) {
 async function delTask(id) {
   if (S.armed !== 'task_' + id) { S.armed = 'task_' + id; renderAdmin(); return; }
   try { S.data = await call('apiTaskDelete', BOOT.key, id); S.armed = null; S.td = null; renderAdmin(); toast('انحذفت'); }
-  catch (e) { S.armed = null; renderAdmin(); toast(e); }
+  catch (e) { S.armed = null; renderAdmin(); toastErr(e); }
 }
 
 function proofHtml(t) {
@@ -1517,7 +1580,7 @@ async function openProofs(id) {
   redrawAny();
   await Promise.all(need.map(async f => {
     try { S.pc[f] = BOOT.page === 'admin' ? await call('apiProofAdmin', BOOT.key, id, f) : await call('apiProofEmp', BOOT.token, id, f); }
-    catch (e) { delete S.pc[f]; toast(e); }
+    catch (e) { delete S.pc[f]; toastErr(e); }
   }));
   redrawAny();
 }
@@ -1570,7 +1633,7 @@ async function openInvPh(id, admin) {
   redrawAny();
   await Promise.all(need.map(async f => {
     try { S.ic[f] = admin ? await call('apiInvImgAdmin', BOOT.key, id, f) : await call('apiInvImgEmp', BOOT.token, id, f); }
-    catch (e) { delete S.ic[f]; toast(e); }
+    catch (e) { delete S.ic[f]; toastErr(e); }
   }));
   redrawAny();
 }
@@ -1666,7 +1729,7 @@ function renderInv() {
 
 async function invApprove(id) {
   try { S.data = await call('apiInvApprove', BOOT.key, id); renderAdmin(); toast('اعتمدتها'); }
-  catch (e) { toast(e); }
+  catch (e) { toastErr(e); }
 }
 function askInvReturn(id) {
   ovOpen(`<label class="shh" for="ir">وش الغلط في الفاتورة؟</label>
@@ -1684,7 +1747,7 @@ async function doInvReturn(id) {
 async function invDel(id) {
   if (S.armed !== 'inv_' + id) { S.armed = 'inv_' + id; renderInv(); return; }
   try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذفت'); }
-  catch (e) { S.armed = null; renderInv(); toast(e); }
+  catch (e) { S.armed = null; renderInv(); toastErr(e); }
 }
 function invMiniRow(x, showEmp) {
   const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', esc(x.pname || 'عام'), x.vendor ? esc(x.vendor) : '', dmy(x.ts)].filter(Boolean).join(' · ');
@@ -1692,7 +1755,7 @@ function invMiniRow(x, showEmp) {
 }
 function openInvD(id) {
   const d = S.data, x = ((d.inv || {}).items || []).find(v => v.id === id);
-  if (!x) return toast('الفاتورة غير موجودة، حدّث الصفحة');
+  if (!x) return toastErr('الفاتورة غير موجودة، حدّث الصفحة');
   const e = d.employees.find(v => v.id === x.emp);
   S.armed = null;
   ovOpen(`<div class="ivd"><h3>${esc(x.desc)}</h3><div class="amt">${money(x.amount)} <small style="font-size:13px;font-weight:500;color:var(--muted)">ريال</small></div>
@@ -1716,7 +1779,7 @@ async function delInvD(id) {
   const b = $('#ivddel');
   if (S.armed !== 'ivd_' + id) { S.armed = 'ivd_' + id; if (b) { b.textContent = 'متأكد؟ اضغط مرة ثانية للحذف'; b.classList.add('arm'); } return; }
   try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; ovClose(); renderAdmin(); toast('انحذفت'); }
-  catch (e) { S.armed = null; toast(e); }
+  catch (e) { S.armed = null; toastErr(e); }
 }
 function openSt(id) { S.iv.st = id; S.armed = null; renderInv(); window.scrollTo(0, 0); }
 function renderInvSt(empId) {
@@ -1794,7 +1857,7 @@ function askInvAdd() {
 }
 async function pickAi(input) {
   const files = Array.from(input.files || []); input.value = '';
-  for (const f of files.slice(0, 3 - S.ai.shots.length)) { try { S.ai.shots.push(await resizeImg(f)); } catch (e) { toast(e); } }
+  for (const f of files.slice(0, 3 - S.ai.shots.length)) { try { S.ai.shots.push(await resizeImg(f)); } catch (e) { toastErr(e); } }
   askInvAdd();
 }
 async function doInvAdd() {
@@ -1856,7 +1919,7 @@ async function setPaidBy(id, by, reopen) {
     S.data = await call('apiInvPaidBy', BOOT.key, id, by); renderAdmin();
     if (reopen) openInvD(id);
     toast(by === 'card' ? 'صارت عليك، وما تنخصم من العهدة' : by === 'own' ? 'صارت من جيبه، وتنضاف للي له عندك' : 'صارت من العهدة');
-  } catch (e) { toast(e); }
+  } catch (e) { toastErr(e); }
 }
 async function doWarranty(id, clear) {
   const u = clear ? '' : ($('#wd').value || S.wsel || '');
@@ -1959,7 +2022,7 @@ async function pay(emp, month) {
   if (S.armed !== k) { S.armed = k; renderFin(); return; }
   const v = $('#pay_' + emp + month).value;
   try { S.data = await call('apiPay', BOOT.key, {emp, month, amount: v}); S.armed = null; renderAdmin(); toast('تسجل الصرف'); }
-  catch (e) { S.armed = null; renderFin(); toast(e); }
+  catch (e) { S.armed = null; renderFin(); toastErr(e); }
 }
 
 function txText(t) {
@@ -1980,7 +2043,7 @@ function txHtml(t, canDelete) {
 async function armTx(id) {
   if (S.armed !== 'tx_' + id) { S.armed = 'tx_' + id; renderFin(); return; }
   try { S.data = await call('apiFinDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذف'); }
-  catch (e) { S.armed = null; renderFin(); toast(e); }
+  catch (e) { S.armed = null; renderFin(); toastErr(e); }
 }
 
 /* ---------- الإعدادات ---------- */
@@ -2049,7 +2112,7 @@ async function sendGuide() {
 async function delGuide(id) {
   if (S.armed !== 'gd_' + id) { S.armed = 'gd_' + id; renderTeam(); return; }
   try { S.data = await call('apiGuideDel', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذف التوجيه'); }
-  catch (e) { S.armed = null; renderTeam(); toast(e); }
+  catch (e) { S.armed = null; renderTeam(); toastErr(e); }
 }
 async function toggleGuide(id) {
   const e = empById(id);
@@ -2118,14 +2181,14 @@ function nextPoint() {
 function answerGuide(i) { finishGuide(i); }
 async function finishGuide(ans) {
   const r = S.gr;
-  if (S.empPreview) { toast('هذي معاينة، ما ينحفظ شي'); return closeGuide(); }
+  if (S.empPreview) { toast('هذي معاينة، ما ينحفظ شي', null, 'in'); return closeGuide(); }
   const secs = Math.round((Date.now() - r.t0) / 1000);
   try {
     const res = await call('apiGuideDone', BOOT.token, r.id, secs, ans);
     S.empData = res.data;
     if (res.ok) { S.gr = null; rerenderEmp(); window.scrollTo(0, 0); toast('تم، يعطيك العافية'); }
-    else { r.i = 0; r.stage = 'points'; r.t0 = Date.now(); renderGuide(); window.scrollTo(0, 0); toast('الجواب غلط، اقرا النقاط مرة ثانية'); }
-  } catch (e) { toast(e); }
+    else { r.i = 0; r.stage = 'points'; r.t0 = Date.now(); renderGuide(); window.scrollTo(0, 0); toastErr('الجواب غلط، اقرا النقاط مرة ثانية'); }
+  } catch (e) { toastErr(e); }
 }
 
 function renderSet() {
@@ -2231,7 +2294,7 @@ async function newAdmin() {
     BOOT.key = r.key; S.armed = null;
     $('#view').innerHTML = `<div class="card"><b>رابطك الجديد</b><div class="sub" style="margin-top:6px">احذف الأيقونة القديمة من الشاشة الرئيسية، وافتح هذا الرابط وأضفه من جديد.</div>
       <div class="link">${esc(adminLink(r.key))}</div><a class="btn2" href="${esc(adminLink(r.key))}">افتح الرابط الجديد</a></div>`;
-  } catch (e) { toast(e); }
+  } catch (e) { toastErr(e); }
 }
 
 function rulesHtml(st) {
@@ -2375,7 +2438,7 @@ async function startDone(id, input) {
   if (S.doing !== id) { S.doing = id; S.shots = []; S.cm = ''; S.dinv = null; }
   S.shotLoading = true; rerenderEmp();
   for (const f of files.slice(0, Math.max(0, 5 - S.shots.length))) {
-    try { S.shots.push(await resizeImg(f)); } catch (e) { toast(e); }
+    try { S.shots.push(await resizeImg(f)); } catch (e) { toastErr(e); }
   }
   S.shotLoading = false; rerenderEmp();
 }
@@ -2424,7 +2487,7 @@ async function pickInv(input) {
   if (!files.length) return;
   S.ishotLoading = true; rerenderEmp();
   for (const f of files.slice(0, Math.max(0, 3 - S.ishots.length))) {
-    try { S.ishots.push(await resizeImg(f, 1600, 0.8)); } catch (e) { toast(e); }
+    try { S.ishots.push(await resizeImg(f, 1600, 0.8)); } catch (e) { toastErr(e); }
   }
   S.ishotLoading = false; rerenderEmp();
 }
@@ -2492,7 +2555,7 @@ async function sendDone(id) {
 let lastLoad = Date.now(), refreshing = false;
 async function refresh(silent) {
   if (refreshing || S.busy) return;
-  if (S.upN) { if (!silent) toast('انتظر لين يخلص الرفع'); return; }
+  if (S.upN) { if (!silent) toast('انتظر لين يخلص الرفع', null, 'in'); return; }
   if (S.gr) return;
   if (silent && (S.doing || S.invForm || S.form || S.gform || S.ret || S.sheet || tfFilled().length || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || ''))) return;
   refreshing = true;
@@ -2510,7 +2573,7 @@ async function refresh(silent) {
     lastLoad = Date.now();
     if (!silent) toast('تحدّثت');
   } catch (e) {
-    toast('ما قدرت أحدّث، تأكد من النت');
+    toastErr('ما قدرت أحدّث، تأكد من النت');
   } finally {
     refreshing = false;
     document.querySelectorAll('.rf').forEach(b => b.classList.remove('spin'));
@@ -2536,7 +2599,7 @@ async function refresh(silent) {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible' && Date.now() - lastLoad > 60000) refresh(true);
   });
-  window.addEventListener('error', () => toast('صار خطأ، اسحب الصفحة لتحت عشان تحدّث'));
+  window.addEventListener('error', () => toastErr('صار خطأ، اسحب الصفحة لتحت عشان تحدّث'));
 })();
 
 if (BOOT.page === 'admin') loadAdmin();
