@@ -427,6 +427,13 @@ video.vid{height:auto;max-height:70vh;background:#000}
 .tst b{font-size:17px;font-weight:700;color:var(--text)}
 .tat a.lnk{text-decoration:none}
 
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.grid3 .btn2{padding:10px 6px;font-size:13.5px}
+.btn2.dedb{color:var(--red);border-color:var(--red-line);background:var(--red-soft)}
+.ctitle .ci.dedi{background:var(--red-soft);color:var(--red)}
+.dedch{display:flex;gap:6px;flex-wrap:wrap}
+.dedch button{font:inherit;font-size:13px;font-weight:600;border-radius:999px;padding:6px 14px;border:1.5px solid var(--line2);background:var(--surface);color:var(--text);cursor:pointer}
+.dedch button.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
 </style>
 </head>
 <body>
@@ -436,7 +443,7 @@ video.vid{height:auto;max-height:70vh;background:#000}
 <div class="toast" id="toast"><span id="toastMsg"></span><button id="toastUndo" class="hide">تراجع</button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=9"></script>
+<script src="api.js?v=10"></script>
 <script>
 const BOOT = (function () {
   const q = new URLSearchParams(location.search);
@@ -1819,9 +1826,10 @@ function renderFin() {
       ${e.loans.length ? `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('hand-coins', 14)}السلف</div>
         ${e.loans.map(l => `<div class="row"><span>سلفة ${sar(l.amount)} <span class="sub">· ${dmy(l.date)}</span></span><span class="sub">باقي ${sar(l.remaining)}</span></div>`).join('')}` : ''}
       <div class="hair"></div>
-      ${f ? formHtml(e, f) : `<div class="grid2">
+      ${f ? formHtml(e, f) : `<div class="grid3">
         <button class="btn2" onclick="openForm('${e.id}','loan')">${I('hand-coins', 16)}سلفة</button>
-        <button class="btn2" onclick="openForm('${e.id}','adv')">${I('banknote', 16)}راتب مقدم</button></div>`}
+        <button class="btn2" onclick="openForm('${e.id}','adv')">${I('banknote', 16)}راتب مقدم</button>
+        <button class="btn2 dedb" onclick="openForm('${e.id}','ded')">${I('receipt', 16)}خصم</button></div>`}
       ${e.tx.length ? `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('receipt', 14)}آخر الحركات</div>${e.tx.map(t => txHtml(t, true)).join('')}` : ''}
     </div>`;
   }).join('');
@@ -1832,7 +1840,7 @@ function payHtml(e, u) {
   return `<div class="hair"></div>
     <div class="row" style="margin-bottom:6px"><b>راتب ${esc(u.label)}</b><span class="badge a">ما انصرف</span></div>
     ${salaryTable(u)}
-    ${u.warn10 ? `<div class="note bad">${I('triangle-alert', 16)}قسط السلفة أكثر من 10% من الراتب. نظام العمل يطلب موافقة مكتوبة من الموظف على الخصم.</div>` : ''}
+    ${u.warn10 ? `<div class="note bad">${I('triangle-alert', 16)}قسط السلفة والخصم أكثر من 10% من الراتب. نظام العمل يطلب موافقة مكتوبة من الموظف على الخصم.</div>` : ''}
     ${u.net < 0 ? `<div class="note bad">الخصومات أكبر من الراتب.</div>` : ''}
     <div class="grid2" style="margin-top:10px;align-items:center">
       <input id="pay_${e.id}${u.month}" type="number" inputmode="numeric" value="${Math.max(0,u.net)}">
@@ -1847,11 +1855,26 @@ function salaryTable(u) {
     ${u.track ? '' : `<tr><td class="sub">الحافز</td><td class="pos">${sarS(u.bonus,'+')}</td></tr>`}
     ${u.advance ? `<tr><td class="sub">راتب مقدم</td><td class="neg">${sarS(u.advance,'−')}</td></tr>` : ''}
     ${u.inst ? `<tr><td class="sub">قسط السلفة</td><td class="neg">${sarS(u.inst,'−')}</td></tr>` : ''}
+    ${(u.deds || []).map(x => `<tr><td class="sub">خصم · ${esc(x.note)}</td><td class="neg">${sarS(x.amount,'−')}</td></tr>`).join('')}
     <tr class="tot"><td>الصافي</td><td>${sar(u.net)}</td></tr>
   </table>`;
 }
 
+function dedFormHtml(f) {
+  const oth = f.reason === 'other';
+  return `<div class="ctitle" style="font-size:15px"><span class="ci dedi">${I('receipt', 16)}</span>خصم من الراتب</div>
+    <div class="field" style="margin-top:10px"><span>المبلغ (ريال)</span><input id="f_amount" type="number" inputmode="numeric" value="${esc(f.amount || '')}" oninput="S.form.amount=this.value"></div>
+    <div class="field"><span>السبب</span><div class="dedch">
+      <button class="${oth ? '' : 'on'}" onclick="S.form.reason='net';renderFin()">باقة انترنت</button>
+      <button class="${oth ? 'on' : ''}" onclick="S.form.reason='other';renderFin()">سبب ثاني</button></div></div>
+    ${oth ? `<div class="field"><span>اكتب السبب</span><input id="f_note" value="${esc(f.note || '')}" oninput="S.form.note=this.value"></div>` : ''}
+    <div class="sub" style="margin-bottom:10px">ينخصم من راتب هالشهر، ويشوفه الموظف في صفحته.</div>
+    <div class="grid2"><button class="btn2 cu" onclick="saveFin()">${I('check', 16, 2.5)}حفظ</button><button class="btn2" onclick="S.form=null;renderFin()">إلغاء</button></div>
+    <div class="err" id="ferr"></div>`;
+}
+
 function formHtml(e, f) {
+  if (f.kind === 'ded') return dedFormHtml(f);
   const loan = f.kind === 'loan';
   return `<div class="ctitle" style="font-size:15px"><span class="ci">${I(loan ? 'hand-coins' : 'banknote', 16)}</span>${loan ? 'سلفة جديدة' : 'راتب مقدم'}</div>
     <div class="grid2" style="margin-top:10px">
@@ -1867,10 +1890,12 @@ function formHtml(e, f) {
     <div class="err" id="ferr"></div>`;
 }
 
-function openForm(emp, kind) { S.form = {emp, kind, start:'next'}; S.armed = null; renderFin(); }
+function openForm(emp, kind) { S.form = {emp, kind, start:'next', reason:'net'}; S.armed = null; renderFin(); }
 
 async function saveFin() {
-  const x = {emp:S.form.emp, kind:S.form.kind, start:S.form.start, amount:$('#f_amount').value, note:$('#f_note').value};
+  const x = {emp:S.form.emp, kind:S.form.kind, start:S.form.start, amount:$('#f_amount').value, note:$('#f_note') ? $('#f_note').value : ''};
+  if (S.form.kind === 'ded' && S.form.reason !== 'other') x.note = 'باقة انترنت';
+  if (S.form.kind === 'ded' && !x.note.trim()) return $('#ferr').textContent = 'اكتب سبب الخصم';
   if (S.form.kind === 'loan') x.months = $('#f_months').value;
   if (!(Number(x.amount) > 0)) return $('#ferr').textContent = 'اكتب المبلغ';
   try { S.data = await call('apiFinAdd', BOOT.key, x); S.form = null; renderAdmin(); toast('انحفظ'); }
@@ -1888,13 +1913,14 @@ async function pay(emp, month) {
 function txText(t) {
   if (t.kind === 'loan') return 'سلفة على ' + t.months + ' ' + (t.months <= 10 ? 'شهور' : 'شهر') + ' · الخصم من ' + t.label;
   if (t.kind === 'adv') return 'راتب مقدم من راتب ' + t.label;
+  if (t.kind === 'ded') return 'خصم من راتب ' + t.label;
   return 'صرف راتب ' + t.label;
 }
 
 function txHtml(t, canDelete) {
   const id = 'tx_' + t.id;
   const del = canDelete ? `<button class="del ${S.armed===id?'arm':''}" onclick="armTx('${t.id}')">${S.armed===id?'تأكيد الحذف':I('trash-2', 15)}</button>` : '';
-  return `<div class="ent"><div class="ico f">${I(t.kind==='pay' ? 'check' : t.kind==='loan' ? 'hand-coins' : 'banknote', 15, 2.2)}</div>
+  return `<div class="ent"><div class="ico f">${I(t.kind==='pay' ? 'check' : t.kind==='loan' ? 'hand-coins' : t.kind==='ded' ? 'receipt' : 'banknote', 15, 2.2)}</div>
     <div class="t"><div>${esc(txText(t))}${t.note ? ' — ' + esc(t.note) : ''}</div><div class="d">${dmy(t.date)}</div></div>
     <div class="p amt">${sar(t.amount)}</div>${del}</div>`;
 }

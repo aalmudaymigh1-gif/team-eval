@@ -235,16 +235,18 @@
       const d = pay.details;
       return { month: mk, label: monthLabel_(mk), paid: true, paidAmount: pay.amount, paidDate: pay.date, payId: pay.id,
         base: d.base, bonus: d.bonus, points: d.points, target: d.target, max: d.max,
-        advance: d.advance, inst: d.inst, loanParts: d.loanParts || {}, net: d.net, warn10: false, track: !!emp.track };
+        advance: d.advance, inst: d.inst, deds: d.deds || [], loanParts: d.loanParts || {}, net: d.net, warn10: false, track: !!emp.track };
     }
     const c = calcMonth_(emp, logs, mk);
     const advance = fin.filter(f => f.kind === 'adv' && f.emp === emp.id && f.month === mk).reduce((s, f) => s + f.amount, 0);
     const due = loanDue_(emp, fin, mk);
+    const deds = fin.filter(f => f.kind === 'ded' && f.emp === emp.id && f.month === mk).map(f => ({ note: f.note, amount: f.amount }));
+    const dedT = deds.reduce((s, f) => s + f.amount, 0);
     return { month: mk, label: monthLabel_(mk), paid: false,
       base: emp.salary, bonus: c.bonus, points: c.points, target: 20, max: c.max,
-      advance: advance, inst: due.total, loanParts: due.parts,
-      net: emp.salary + c.bonus - advance - due.total,
-      warn10: due.total > emp.salary * 0.1, track: !!emp.track };
+      advance: advance, inst: due.total, deds: deds, loanParts: due.parts,
+      net: emp.salary + c.bonus - advance - due.total - dedT,
+      warn10: due.total + dedT > emp.salary * 0.1, track: !!emp.track };
   }
   function loanBalances_(emp, fin) {
     const pays = fin.filter(f => f.kind === 'pay' && f.emp === emp.id);
@@ -482,6 +484,11 @@
         let month = now;
         while (isPaid_(fin, emp.id, month)) month = nextMonth_(month);
         a = { date: RAW.today, emp: emp.id, kind: 'adv', amount: amount, months: 0, start: '', month: month, note: note };
+      } else if (x.kind === 'ded') {
+        if (!note.trim()) throw new Error('اكتب سبب الخصم');
+        let month = now;
+        while (isPaid_(fin, emp.id, month)) month = nextMonth_(month);
+        a = { date: RAW.today, emp: emp.id, kind: 'ded', amount: amount, months: 0, start: '', month: month, note: note.trim() };
       } else throw new Error('نوع غير معروف');
       return adminDo(k, 'fin_add', a);
     },
@@ -497,7 +504,7 @@
       const paid = x.amount === '' || x.amount == null ? f.net : Math.round(Number(x.amount));
       if (!(paid >= 0)) throw new Error('المبلغ غير صحيح');
       const details = { base: f.base, bonus: f.bonus, points: f.points, target: f.target, max: f.max,
-        advance: f.advance, inst: f.inst, loanParts: f.loanParts, net: f.net };
+        advance: f.advance, inst: f.inst, deds: f.deds, loanParts: f.loanParts, net: f.net };
       return adminDo(k, 'fin_add', { date: RAW.today, emp: emp.id, kind: 'pay', amount: paid, months: 0, start: '', month: mk,
         note: String(x.note || '').slice(0, 200), details: details });
     },
@@ -507,7 +514,7 @@
       const fin = RAW.fin;
       const r = fin.filter(f => f.id === id)[0];
       if (!r) throw new Error('الحركة غير موجودة');
-      if (r.kind === 'adv' && isPaid_(fin, r.emp, r.month)) throw new Error('الشهر انصرف، احذف الصرف أول');
+      if ((r.kind === 'adv' || r.kind === 'ded') && isPaid_(fin, r.emp, r.month)) throw new Error('الشهر انصرف، احذف الصرف أول');
       if (r.kind === 'loan' && fin.some(f => f.kind === 'pay' && f.emp === r.emp && f.details && f.details.loanParts && f.details.loanParts[r.id])) {
         throw new Error('فيه أقساط من هالسلفة انخصمت، احذف الصرف أول');
       }
