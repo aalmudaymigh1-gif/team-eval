@@ -434,6 +434,58 @@ video.vid{height:auto;max-height:70vh;background:#000}
 .dedch{display:flex;gap:6px;flex-wrap:wrap}
 .dedch button{font:inherit;font-size:13px;font-weight:600;border-radius:999px;padding:6px 14px;border:1.5px solid var(--line2);background:var(--surface);color:var(--text);cursor:pointer}
 .dedch button.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.gsh{display:flex;align-items:center;gap:6px;font-weight:700;color:var(--text);font-size:13px}
+.gnew{display:flex;align-items:center;gap:4px;font-size:13px}
+.gcard{padding:14px}
+.gch{display:flex;align-items:flex-start;gap:10px}
+.gti{flex:1;min-width:0}
+.gti b{display:block;font-size:15px;line-height:1.4}
+.gti small{color:var(--muted);font-size:12px}
+.grd{border-top:1px solid var(--line);margin-top:10px;padding-top:10px}
+.grn{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.grn b{font-size:13.5px}
+.grn .badge{font-size:11px;padding:2px 8px}
+.gst{width:100%;font-size:12px;color:var(--muted)}
+.gpts{margin-top:10px;font-size:13px}
+.gpts summary{color:var(--acc);font-weight:600;cursor:pointer;font-size:12.5px}
+.gpts ol{margin:8px 0 0;padding-right:20px;line-height:1.7}
+.gq{margin-top:8px;background:var(--fill);border-radius:var(--r);padding:10px 12px}
+.gq b{display:block;margin-bottom:4px}
+.gq div{color:var(--muted);display:flex;align-items:center;gap:5px}
+.gq div.ok{color:var(--green);font-weight:600}
+.gpi{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.gpi i{font-style:normal;min-width:22px;height:22px;border-radius:7px;background:var(--acc-soft);color:var(--acc);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.gpi input{flex:1;min-width:0}
+.gpi>button{background:none;border:0;color:var(--faint);padding:4px;cursor:pointer}
+.gpi .gr{width:24px;height:24px;min-height:0;min-width:0;align-self:center;line-height:0;box-sizing:border-box;border-radius:50%;border:2px solid var(--line2);background:var(--surface);display:flex;align-items:center;justify-content:center;padding:0;color:#fff;flex:none}
+.gpi.go.on .gr{background:var(--green);border-color:var(--green)}
+.gadd{display:inline-flex;align-items:center;gap:4px;font-size:13px}
+.gban{width:100%;display:flex;align-items:center;gap:12px;text-align:right;border:0;border-radius:var(--r2);padding:14px;margin-top:14px;background:linear-gradient(150deg,var(--acc),var(--acc-2));color:#fff;cursor:pointer;font:inherit;box-shadow:var(--sh)}
+.gbi{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex:none}
+.gbt{flex:1;min-width:0}
+.gbt small{display:block;font-size:12px;opacity:.75}
+.gbt b{font-size:15.5px}
+.grow{width:100%;display:flex;align-items:center;gap:10px;background:none;border:0;font:inherit;color:var(--text);padding:12px 0;text-align:right;cursor:pointer}
+.grow+.grow{border-top:1px solid var(--line)}
+.grow span{flex:1;font-size:14px}
+.grow svg:first-child{color:var(--green)}
+.grow svg:last-child{color:var(--faint)}
+.gread{margin-top:12px;padding:18px 16px}
+.gtag{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);font-weight:600}
+.gread h2{margin:6px 0 12px;font-size:19px;line-height:1.4}
+.gbar{height:5px;background:var(--fill);border-radius:3px;margin-bottom:14px;overflow:hidden}
+.gbar div{height:100%;background:var(--green);border-radius:3px;transition:width .3s var(--ease)}
+.gdone{display:flex;gap:8px;align-items:flex-start;color:var(--muted);font-size:13.5px;padding:7px 0;border-bottom:1px solid var(--line)}
+.gdone svg{color:var(--green);flex:none;margin-top:3px}
+.gcur{background:var(--acc-soft);border-radius:var(--r);padding:16px 14px;margin-top:12px;font-size:17px;font-weight:600;line-height:1.7}
+.gcur small{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-bottom:4px}
+.gok{width:100%;margin-top:14px}
+.gok:disabled{opacity:.45;cursor:default}
+.gqt{font-size:17px;font-weight:700;line-height:1.6;margin-bottom:12px}
+.gopts{display:flex;flex-direction:column;gap:8px}
+.gopts button{font:inherit;font-size:15px;text-align:right;border:1.5px solid var(--line2);background:var(--surface);color:var(--text);border-radius:var(--r);padding:13px 14px;cursor:pointer}
+.gopts button:active{background:var(--acc-soft);border-color:var(--acc)}
+.gall{margin:0;padding-right:22px;line-height:1.9;font-size:15px}
 </style>
 </head>
 <body>
@@ -443,7 +495,7 @@ video.vid{height:auto;max-height:70vh;background:#000}
 <div class="toast" id="toast"><span id="toastMsg"></span><button id="toastUndo" class="hide">تراجع</button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=10"></script>
+<script src="api.js?v=11"></script>
 <script>
 const BOOT = (function () {
   const q = new URLSearchParams(location.search);
@@ -1027,7 +1079,7 @@ function renderTeam() {
   const paid = d.employees.filter(e => !e.month.track), track = d.employees.filter(e => e.month.track);
   let h = '<div style="height:12px"></div>' + paid.map(e => teamPaid(d, e)).join('');
   if (track.length) h += `<div class="tsec"><span class="badge wait">متابعة فقط</span><span>${track.length} ${track.length === 1 ? 'موظف' : 'موظفين'}</span></div><div class="card tgroup">${track.map(e => teamTrackRow(d, e)).join('')}</div>`;
-  $('#view').innerHTML = h;
+  $('#view').innerHTML = h + guidesHtml(d);
 }
 
 function bonusTable(m) {
@@ -1933,6 +1985,149 @@ async function armTx(id) {
 
 /* ---------- الإعدادات ---------- */
 
+ICONS['map-pin'] = '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/> <circle cx="12" cy="10" r="3"/>';
+ICONS['chevron-left'] = '<path d="m15 18-6-6 6-6"/>';
+
+/* ---------- التوجيهات: عند المدير ---------- */
+function gDur(s) { return s < 60 ? s + ' ثانية' : Math.round(s / 60) + ' ' + (Math.round(s / 60) <= 10 ? 'دقايق' : 'دقيقة'); }
+function gReadLine(r, hasQ) {
+  if (r.done) return `<span class="badge">قراه</span><div class="gst">${dmy(r.done.slice(0, 10))} ${t12(r.done)} · ${gDur(r.secs)}${hasQ ? ' · ' + (r.wrong ? 'جاوب غلط ' + (r.wrong === 1 ? 'مرة' : r.wrong + ' مرات') + ' وبعدين صح' : 'جاوب صح') : ''}</div>`;
+  if (r.opened) return `<span class="badge wait">فتحه وما خلّصه</span><div class="gst">فتحه ${t12(r.opened)}${r.wrong ? ' · جاوب غلط ' + (r.wrong === 1 ? 'مرة' : r.wrong + ' مرات') : ''}</div>`;
+  return `<span class="badge late">ما فتحه</span><div class="gst">انرسل ${dmy(r.sent.slice(0, 10))} ${t12(r.sent)}</div>`;
+}
+function guidesHtml(d) {
+  const on = d.employees.filter(e => e.guide), gs = d.guides || [];
+  if (!on.length && !gs.length) return '';
+  const f = S.gform;
+  let h = `<div class="tsec"><span class="gsh">${I('clipboard-list', 15)}التوجيهات</span>${f || !on.length ? '' : `<button class="lnk gnew" onclick="openGForm()">${I('plus', 15)}توجيه جديد</button>`}</div>`;
+  if (f) h += gFormHtml(d, on, f);
+  if (!gs.length && !f) return h + `<div class="card"><div class="tnone" style="margin:0">${I('clipboard-list', 14)}ما فيه توجيهات للحين</div></div>`;
+  h += gs.map(g => {
+    const arm = S.armed === 'gd_' + g.id;
+    return `<div class="card gcard">
+      <div class="gch"><div class="gti"><b>${esc(g.title)}</b><small>${dmy(g.ts.slice(0, 10))} · ${g.points.length} ${g.points.length === 1 ? 'نقطة' : g.points.length === 2 ? 'نقطتين' : 'نقاط'}${g.q ? ' · فيه سؤال' : ''}</small></div>
+        <button class="del ${arm ? 'arm' : ''}" onclick="delGuide('${g.id}')">${arm ? 'تأكيد الحذف' : I('trash-2', 15)}</button></div>
+      ${g.reads.map(r => `<div class="grd"><div class="grn"><b>${esc(r.name)}</b>${gReadLine(r, !!g.q)}</div></div>`).join('')}
+      <details class="gpts"><summary>النقاط${g.q ? ' والسؤال' : ''}</summary><ol>${g.points.map(p => `<li>${esc(p)}</li>`).join('')}</ol>
+        ${g.q ? `<div class="gq"><b>${esc(g.q.text)}</b>${g.q.opts.map((o, i) => `<div class="${String(i) === String(g.q.ok) ? 'ok' : ''}">${String(i) === String(g.q.ok) ? I('check', 13, 3) : ''}${esc(o)}</div>`).join('')}</div>` : ''}</details>
+    </div>`;
+  }).join('');
+  return h;
+}
+function gFormHtml(d, on, f) {
+  return `<div class="card gform">
+    ${ctitle('clipboard-list', 'توجيه جديد')}
+    <div class="field" style="margin-top:12px"><span>العنوان</span><input id="g_title" value="${esc(f.title)}" oninput="S.gform.title=this.value" placeholder="مثلاً: ترتيب الموقع آخر اليوم"></div>
+    <div class="field"><span>النقاط (كل نقطة سطر قصير)</span>
+      ${f.points.map((p, i) => `<div class="gpi"><i>${i + 1}</i><input value="${esc(p)}" oninput="S.gform.points[${i}]=this.value">${f.points.length > 1 ? `<button onclick="gPt(${i})" aria-label="شيل">${I('x', 15)}</button>` : ''}</div>`).join('')}
+      ${f.points.length < 20 ? `<button class="lnk gadd" onclick="gPt(-1)">${I('plus', 14)}نقطة</button>` : ''}</div>
+    <div class="trow"><div class="n"><b>سؤال في الآخر</b><small>للتوجيهات المهمة، ولازم يجاوب صح</small></div><button class="tg ${f.q ? 'on' : ''}" onclick="S.gform.q=!S.gform.q;renderTeam()" aria-label="سؤال"></button></div>
+    ${f.q ? `<div class="field"><span>السؤال</span><input value="${esc(f.qt)}" oninput="S.gform.qt=this.value"></div>
+      <div class="field"><span>الخيارات (اضغط الدائرة على الجواب الصح)</span>
+      ${f.opts.map((o, i) => `<div class="gpi go ${f.ok === i ? 'on' : ''}"><button class="gr" onclick="S.gform.ok=${i};renderTeam()" aria-label="الجواب الصح">${f.ok === i ? I('check', 13, 3) : ''}</button><input value="${esc(o)}" oninput="S.gform.opts[${i}]=this.value"></div>`).join('')}</div>` : ''}
+    <div class="field"><span>لمين</span><div class="dedch">${on.map(e => `<button class="${f.emps.indexOf(e.id) >= 0 ? 'on' : ''}" onclick="gEmp('${e.id}')">${esc(e.name)}</button>`).join('')}</div></div>
+    <div class="grid2"><button class="btn2 cu" onclick="sendGuide()">${I('send', 16)}أرسل</button><button class="btn2" onclick="S.gform=null;renderTeam()">إلغاء</button></div>
+    <div class="err" id="gerr"></div>
+  </div>`;
+}
+function openGForm() {
+  S.gform = {title: '', points: ['', ''], q: false, qt: '', opts: ['', '', ''], ok: -1, emps: S.data.employees.filter(e => e.guide).map(e => e.id)};
+  S.armed = null; renderTeam();
+  setTimeout(() => { const x = $('#g_title'); if (x) x.focus(); }, 50);
+}
+function gPt(i) { const p = S.gform.points; if (i < 0) p.push(''); else p.splice(i, 1); renderTeam(); }
+function gEmp(id) { const a = S.gform.emps, i = a.indexOf(id); if (i >= 0) a.splice(i, 1); else a.push(id); renderTeam(); }
+async function sendGuide() {
+  const f = S.gform;
+  const x = {title: f.title, points: f.points, emps: f.emps, q: f.q ? {text: f.qt, opts: f.opts, ok: f.ok} : null};
+  if (!f.title.trim()) return $('#gerr').textContent = 'اكتب عنوان التوجيه';
+  if (!f.points.some(p => p.trim())) return $('#gerr').textContent = 'اكتب نقطة وحدة على الأقل';
+  if (f.q && f.ok < 0) return $('#gerr').textContent = 'اضغط الدائرة جنب الجواب الصح';
+  try { S.data = await call('apiGuideAdd', BOOT.key, x); S.gform = null; renderAdmin(); toast('انرسل التوجيه'); }
+  catch (e) { $('#gerr').textContent = e; }
+}
+async function delGuide(id) {
+  if (S.armed !== 'gd_' + id) { S.armed = 'gd_' + id; renderTeam(); return; }
+  try { S.data = await call('apiGuideDel', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذف التوجيه'); }
+  catch (e) { S.armed = null; renderTeam(); toast(e); }
+}
+async function toggleGuide(id) {
+  const e = empById(id);
+  try { S.data = await call('apiGuideToggle', BOOT.key, id, !e.guide); renderAdmin(); toast(!e.guide ? 'تفعّلت التوجيهات له' : 'انطفت التوجيهات له'); }
+  catch (err) { $('#e_' + id).textContent = err; }
+}
+
+/* ---------- التوجيهات: عند الموظف ---------- */
+function guideBannerHtml(d) {
+  if (!d.guideOn) return '';
+  return (d.guides || []).filter(g => !g.done).map(g => `<button class="gban" onclick="openGuide('${g.id}')">
+    <span class="gbi">${I('clipboard-list', 20)}</span><span class="gbt"><small>توجيه جديد من المدير</small><b>${esc(g.title)}</b></span>${I('chevron-left', 18)}</button>`).join('');
+}
+function guideDoneHtml(d) {
+  const done = (d.guides || []).filter(g => g.done);
+  if (!d.guideOn || !done.length) return '';
+  return `<div class="sech">التوجيهات</div><div class="card" style="padding:4px 14px">${done.map(g => `<button class="grow" onclick="openGuide('${g.id}')">
+    ${I('circle-check', 17)}<span>${esc(g.title)}</span>${I('chevron-left', 16)}</button>`).join('')}</div>`;
+}
+function gWait(p) { return Math.max(3, Math.min(12, Math.ceil(String(p).length / 12) + 2)); }
+function openGuide(id) {
+  const g = (S.empData.guides || []).find(x => x.id === id);
+  if (!g) return;
+  S.gr = {id: id, i: 0, stage: 'points', t0: Date.now(), review: !!g.done};
+  if (!g.done && !S.empPreview) API.apiGuideOpen(BOOT.token, id).catch(() => {});
+  renderGuide(); window.scrollTo(0, 0);
+}
+function closeGuide() { clearInterval(S.grT); S.gr = null; rerenderEmp(); window.scrollTo(0, 0); }
+function renderGuide() {
+  clearInterval(S.grT);
+  const r = S.gr, g = (S.empData.guides || []).find(x => x.id === r.id);
+  if (!g) { S.gr = null; return rerenderEmp(); }
+  const n = g.points.length;
+  let body;
+  if (r.review) {
+    body = `<ol class="gall">${g.points.map(p => `<li>${esc(p)}</li>`).join('')}</ol><button class="btn2" style="width:100%;margin-top:14px" onclick="closeGuide()">رجوع</button>`;
+  } else if (r.stage === 'q') {
+    body = `<div class="gbar"><div style="width:100%"></div></div>
+      <div class="gqt">${esc(g.q.text)}</div>
+      <div class="gopts">${g.q.opts.map((o, i) => `<button onclick="answerGuide(${i})">${esc(o)}</button>`).join('')}</div>`;
+  } else {
+    r.left = gWait(g.points[r.i]);
+    body = `<div class="gbar"><div style="width:${Math.round(r.i / (n + (g.q ? 1 : 0)) * 100)}%"></div></div>
+      ${g.points.slice(0, r.i).map(p => `<div class="gdone">${I('check', 15, 3)}<span>${esc(p)}</span></div>`).join('')}
+      <div class="gcur"><small>${r.i + 1} من ${n}</small>${esc(g.points[r.i])}</div>
+      <button class="btn2 cu gok" id="gok" disabled onclick="nextPoint()">فهمت (بعد ${r.left} ثواني)</button>`;
+    S.grT = setInterval(() => {
+      r.left--;
+      const b = $('#gok');
+      if (!b) return clearInterval(S.grT);
+      if (r.left > 0) b.textContent = 'فهمت (بعد ' + r.left + ' ثواني)';
+      else { clearInterval(S.grT); b.disabled = false; b.innerHTML = I('check', 16, 2.5) + 'فهمت'; }
+    }, 1000);
+  }
+  $('#app').innerHTML = `<button class="back" onclick="closeGuide()">${I('arrow-right', 17)}رجوع</button>
+    <div class="card gread"><div class="gtag">${I('clipboard-list', 14)}توجيه من المدير</div><h2>${esc(g.title)}</h2>${body}</div>`;
+}
+function nextPoint() {
+  const r = S.gr, g = (S.empData.guides || []).find(x => x.id === r.id);
+  if (r.left > 0) return;
+  r.i++;
+  if (r.i < g.points.length) return renderGuide();
+  if (g.q) { r.stage = 'q'; return renderGuide(); }
+  finishGuide(null);
+}
+function answerGuide(i) { finishGuide(i); }
+async function finishGuide(ans) {
+  const r = S.gr;
+  if (S.empPreview) { toast('هذي معاينة، ما ينحفظ شي'); return closeGuide(); }
+  const secs = Math.round((Date.now() - r.t0) / 1000);
+  try {
+    const res = await call('apiGuideDone', BOOT.token, r.id, secs, ans);
+    S.empData = res.data;
+    if (res.ok) { S.gr = null; rerenderEmp(); window.scrollTo(0, 0); toast('تم، يعطيك العافية'); }
+    else { r.i = 0; r.stage = 'points'; r.t0 = Date.now(); renderGuide(); window.scrollTo(0, 0); toast('الجواب غلط، اقرا النقاط مرة ثانية'); }
+  } catch (e) { toast(e); }
+}
+
 function renderSet() {
   const d = S.data;
   const form = (e) => `<div class="card">
@@ -1944,6 +2139,7 @@ function renderSet() {
       </div>
       <div class="trow"><div class="n"><b>متابعة فقط</b><small>يتابع تقييمه بدون حافز</small></div><button class="tg ${e.track?'on':''}" onclick="toggleTrack('${e.id}')" aria-label="متابعة فقط"></button></div>
       <div class="trow"><div class="n"><b>حضور وانصراف</b><small>يصوّر لما يطلع من البيت ولما يوصل المشروع ولما يطلع منه</small></div><button class="tg ${e.attend?'on':''}" onclick="toggleAtt('${e.id}')" aria-label="حضور وانصراف"></button></div>
+      <div class="trow"><div class="n"><b>التوجيهات</b><small>يوصله توجيهاتك ويقراها نقطة نقطة</small></div><button class="tg ${e.guide?'on':''}" onclick="toggleGuide('${e.id}')" aria-label="التوجيهات"></button></div>
       <div class="grid2"><button class="btn2" onclick="saveEmp('${e.id}')">حفظ</button>
       <button class="btn2 ${S.armed==='tok_'+e.id?'arm':''}" onclick="newToken('${e.id}')">${S.armed==='tok_'+e.id?'تأكيد: الرابط القديم يوقف':'رابط جديد له'}</button></div>
       <div class="err" id="e_${e.id}"></div></div>`;
@@ -2064,9 +2260,9 @@ function renderEmp(d, isPreview) {
   const tasksTab = S.etab === 'tasks';
   $('#app').innerHTML = `
     ${isPreview ? `<button class="back" onclick="closePreview()">${I('arrow-right', 17)}رجوع للفريق</button><div class="note info">${I('eye', 16)}هذي معاينة، والموظف يشوف نفس الصفحة.</div>` : ''}
-    <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button>`}</div>${isPreview ? '' : pushHtml()}${tasksTab ? attCardHtml(d, isPreview) : ''}
+    <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button>`}</div>${isPreview ? '' : pushHtml()}${tasksTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) : ''}
     <div class="segc etabs"><button class="${S.etab === 'tasks' ? 'on' : ''}" onclick="S.etab='tasks';rerenderEmp()">مهامي${nOpen ? ' (' + nOpen + ')' : ''}</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">حافزي</button></div>
-    ${S.etab === 'inv' ? empInvHtml(d, isPreview) : tasksTab ? empTasksHtml(d, isPreview) : empPayHtml(d)}`;
+    ${S.etab === 'inv' ? empInvHtml(d, isPreview) : tasksTab ? empTasksHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
   if (!isPreview) prefetchImgs();
 }
 
@@ -2297,7 +2493,8 @@ let lastLoad = Date.now(), refreshing = false;
 async function refresh(silent) {
   if (refreshing || S.busy) return;
   if (S.upN) { if (!silent) toast('انتظر لين يخلص الرفع'); return; }
-  if (silent && (S.doing || S.invForm || S.form || S.ret || S.sheet || tfFilled().length || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || ''))) return;
+  if (S.gr) return;
+  if (silent && (S.doing || S.invForm || S.form || S.gform || S.ret || S.sheet || tfFilled().length || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || ''))) return;
   refreshing = true;
   document.querySelectorAll('.rf').forEach(b => b.classList.add('spin'));
   try {

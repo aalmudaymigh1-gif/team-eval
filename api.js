@@ -40,6 +40,8 @@
   }
   const aexec = (k, op, a) => rpc('admin_exec', { k: k, op: op, a: a || {} });
   const eexec = (t, op, a) => rpc('emp_exec', { t: t, op: op, a: a || {} });
+  const gadmin = (k, op, a) => rpc('guide_admin', { k: k, op: op, a: a || {} });
+  const gemp = (t, op, a) => rpc('guide_emp', { t: t, op: op, a: a || {} });
 
   let RAW = null;
   async function loadAdmin(k) { RAW = norm(await rpc('admin_raw', { k: k })); return RAW; }
@@ -47,7 +49,9 @@
 
   function norm(r) {
     r.employees = (r.employees || []).map(e => ({ id: e.id, name: e.name, salary: Number(e.salary) || 0, max: Number(e.max) || 0,
-      token: e.token || '', active: e.active !== false, track: !!e.track, attend: !!e.attend }));
+      token: e.token || '', active: e.active !== false, track: !!e.track, attend: !!e.attend, guide: !!e.guide }));
+    r.guides = (r.guides || []).map(g => Object.assign({}, g, { points: Array.isArray(g.points) ? g.points : [], q: g.q && typeof g.q === 'object' ? g.q : null }));
+    r.greads = (r.greads || []).map(x => Object.assign({}, x, { secs: Number(x.secs) || 0, wrong: Number(x.wrong) || 0 }));
     r.attendance = (r.attendance || []).map(x => Object.assign({}, x, { homeLat: x.homeLat == null ? null : Number(x.homeLat), homeLng: x.homeLng == null ? null : Number(x.homeLng), inLat: x.inLat == null ? null : Number(x.inLat), inLng: x.inLng == null ? null : Number(x.inLng),
       outLat: x.outLat == null ? null : Number(x.outLat), outLng: x.outLng == null ? null : Number(x.outLng), late: Number(x.late) || 0 }));
     r.logs = r.logs || [];
@@ -335,6 +339,12 @@
       rules: settings_(),
       projects: RAW.projects.filter(p => !p.archived).map(p => ({ id: p.id, name: p.name, lat: p.lat, lng: p.lng })),
       attend: !!emp.attend,
+      guideOn: !!emp.guide,
+      guides: RAW.guides.map(g => {
+        const r = RAW.greads.filter(x => x.guide === g.id && x.emp === emp.id)[0] || {};
+        return { id: g.id, ts: g.ts, title: g.title, points: g.points, q: g.q ? { text: g.q.text || '', opts: g.q.opts || [] } : null,
+          done: r.done || '', opened: r.opened || '' };
+      }).filter(g => RAW.greads.some(x => x.guide === g.id && x.emp === emp.id)),
       att: RAW.attendance.filter(x => x.emp === emp.id),
       attCfg: attCfg_(),
       inv: Object.assign(invParts_(inv, emp.id), { balance: invParts_(inv, emp.id).c, owed: invParts_(inv, emp.id).t,
@@ -354,6 +364,8 @@
       inv: { bal: bal, parts: parts, items: RAW.invoices.slice().reverse().slice(0, 400).map(x => invOut_(x, pmap)) },
       attendance: RAW.attendance,
       attCfg: attCfg_(),
+      guides: RAW.guides.map(g => ({ id: g.id, ts: g.ts, title: g.title, points: g.points, q: g.q,
+        reads: RAW.greads.filter(x => x.guide === g.id).map(x => Object.assign({ name: (empById(x.emp) || {}).name || '' }, x)) })),
       projects: projects.map(p => ({ id: p.id, name: p.name, archived: p.archived, lat: p.lat, lng: p.lng,
         open: tasks.filter(t => t.project === p.id && t.status !== 'done' && empIds.indexOf(t.emp) >= 0).length })),
       criteria: CRITERIA.map(c => ({ n: c.n, s: c.s, short: c.short })),
@@ -365,7 +377,7 @@
         const mine = logs.filter(l => l.emp === e.id);
         const unpaid = monthsRange_(startMonth_(e, logs, fin), now).filter(mk => !isPaid_(fin, e.id, mk));
         return {
-          id: e.id, name: e.name, salary: e.salary, max: e.max, token: e.token, track: e.track, attend: e.attend,
+          id: e.id, name: e.name, salary: e.salary, max: e.max, token: e.token, track: e.track, attend: e.attend, guide: e.guide,
           month: calcMonth_(e, logs, now),
           recent: groups_(mine).slice(0, 15),
           unpaid: unpaid.map(mk => finMonth_(e, fin, logs, mk)),
@@ -683,6 +695,36 @@
     async apiAttHome(token, dataUrl, pos) { return attDo(token, 'att_home', dataUrl, pos, ''); },
     async apiAttIn(token, dataUrl, pos, project) { return attDo(token, 'att_in', dataUrl, pos, project); },
     async apiAttOut(token, dataUrl, pos) { return attDo(token, 'att_out', dataUrl, pos, ''); },
+    async apiGuideAdd(k, x) {
+      const title = String(x.title || '').trim().slice(0, 120);
+      if (!title) throw new Error('اكتب عنوان التوجيه');
+      const points = (x.points || []).map(t => String(t || '').trim().slice(0, 400)).filter(Boolean).slice(0, 20);
+      if (!points.length) throw new Error('اكتب نقطة وحدة على الأقل');
+      let q = null;
+      if (x.q) {
+        const text = String(x.q.text || '').trim().slice(0, 200);
+        const opts = (x.q.opts || []).map(t => String(t || '').trim().slice(0, 120));
+        const ok = Number(x.q.ok);
+        if (!text) throw new Error('اكتب السؤال');
+        if (opts.filter(Boolean).length < 2) throw new Error('اكتب خيارين على الأقل');
+        if (!(ok >= 0) || !opts[ok]) throw new Error('حدد الجواب الصح');
+        const keep = opts.map((t, i) => ({ t: t, i: i })).filter(o => o.t);
+        q = { text: text, opts: keep.map(o => o.t), ok: String(keep.findIndex(o => o.i === ok)) };
+      }
+      const emps = (x.emps || []).filter(Boolean);
+      if (!emps.length) throw new Error('اختر الموظف');
+      await gadmin(k, 'add', { title: title, points: points, q: q, emps: emps });
+      flush();
+      await loadAdmin(k);
+      return adminPayload_();
+    },
+    async apiGuideDel(k, id) { await gadmin(k, 'del', { id: id }); await loadAdmin(k); return adminPayload_(); },
+    async apiGuideToggle(k, empId, on) { await gadmin(k, 'emp_guide', { emp: empId, on: !!on }); await loadAdmin(k); return adminPayload_(); },
+    async apiGuideOpen(token, id) { await gemp(token, 'open', { id: id }); return true; },
+    async apiGuideDone(token, id, secs, ans) {
+      const r = await gemp(token, 'done', { id: id, secs: Math.round(Number(secs) || 0), ans: ans == null ? '' : String(ans) });
+      return { ok: !!(r && r.ok), data: await API.apiEmp(token) };
+    },
     async apiAttToggle(k, empId, on) { return adminDo(k, 'att_toggle', { emp: empId, on: !!on }); },
     async apiProjLoc(k, id, lat, lng) { return adminDo(k, 'proj_loc', { id: id, lat: lat == null ? '' : String(lat), lng: lng == null ? '' : String(lng) }); },
     async apiAttDel(k, id) { return adminDo(k, 'att_del', { id: id }); },
