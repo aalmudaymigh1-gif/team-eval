@@ -146,6 +146,7 @@ input[type=date]{color-scheme:light;margin-top:8px}
 .note.good{background:var(--green-soft);color:#14532D}
 .note.bad{background:var(--red-soft);color:#7A1C14}
 .note.info{background:var(--acc-soft);color:#1E3354}
+.note.warn{background:#FEF3E2;color:#854F0B}
 .note b{font-weight:600}
 
 .ent{display:flex;gap:10px;padding:11px 0;border-top:1px solid var(--line);align-items:flex-start}
@@ -325,6 +326,21 @@ select:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-ring)}
 .tabs button{font-size:11.5px}
 .shot .x{position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:15px;line-height:26px;padding:0;cursor:pointer}
 video.vid{height:auto;max-height:70vh;background:#000}
+.stc{background:var(--acc);color:#fff;border-radius:16px;padding:14px 16px;margin:12px 0}
+.stc .l{font-size:12.5px;opacity:.85}.stc .v{font-size:26px;font-weight:700;margin:2px 0 6px}.stc .v small{font-size:13px;font-weight:500;opacity:.8}
+.stc .r{display:flex;justify-content:space-between;font-size:12.5px;opacity:.92}
+.str{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.str:last-child{border-bottom:0}.str .tm{margin-top:2px}
+.str .ed{background:none;border:0;color:var(--muted);padding:4px;cursor:pointer}
+.wb{display:inline-block;background:#E6F1FB;color:#0C447C;border-radius:6px;padding:1px 6px;font-size:11px;font-weight:600;margin-inline-start:4px;vertical-align:1px}
+.wl{font-size:12.5px;font-weight:600;white-space:nowrap}.wl.ok{color:var(--green)}.wl.soon{color:#B7791F}.wl.end{color:var(--faint)}
+.erow{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:start;cursor:pointer}
+.ilinks{display:flex;gap:16px}
+.wchips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.wchips button{border:1px solid var(--line2);background:var(--surface);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--text)}
+.wchips button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.tgl{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:14px}
+.tgl input{width:20px;height:20px;accent-color:var(--acc)}
 .pushb{background:#EEF2F7;border-radius:14px;padding:12px 14px;margin:0 0 14px}
 .pushb .ph1{display:flex;gap:10px;align-items:flex-start;color:var(--acc)}
 .pushb b{display:block;font-size:14px;font-weight:600}
@@ -341,7 +357,7 @@ video.vid{height:auto;max-height:70vh;background:#000}
 <div class="toast" id="toast"><span id="toastMsg"></span><button id="toastUndo" class="hide">تراجع</button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=2"></script>
+<script src="api.js?v=3"></script>
 <script>
 const BOOT = (function () {
   const q = new URLSearchParams(location.search);
@@ -1066,6 +1082,20 @@ function viewImg(f) {
 /* ---------- الفواتير (المدير) ---------- */
 
 const money = n => (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('en-US', {maximumFractionDigits: 2});
+function addMonths(d, m) {
+  const x = new Date(d.slice(0, 10) + 'T12:00:00Z'); const day = x.getUTCDate();
+  x.setUTCMonth(x.getUTCMonth() + m); if (x.getUTCDate() < day) x.setUTCDate(0);
+  return x.toISOString().slice(0, 10);
+}
+function wLeft(until, today) {
+  const n = Math.round((new Date(until + 'T12:00:00Z') - new Date(today + 'T12:00:00Z')) / 864e5);
+  if (n < 0) return ['end', 'انتهى'];
+  if (n <= 30) return ['soon', n === 0 ? 'ينتهي اليوم' : 'باقي ' + n + ' يوم'];
+  const m = Math.floor(n / 30.4);
+  return ['ok', 'باقي ' + (m === 1 ? 'شهر' : m === 2 ? 'شهرين' : m + (m <= 10 ? ' أشهر' : ' شهر'))];
+}
+function wBadge(x) { return x.warrantyUntil ? '<span class="wb">ضمان</span>' : ''; }
+
 function invSt(x, emp) {
   if (x.kind === 'give') return ['', emp ? 'استلمت عهدة' : 'عهدة'];
   if (x.status === 'review') return ['a', emp ? 'تنتظر' : 'تنتظر مراجعتك'];
@@ -1100,16 +1130,18 @@ function invRowHtml(x, showEmp) {
   const st = invSt(x, false), armDel = S.armed === 'inv_' + x.id, give = x.kind === 'give';
   const meta = [showEmp ? esc(x.ename) : '', give ? '' : esc(x.pname || 'عام'), dmy(x.ts)].filter(Boolean).join(' · ');
   return `<div class="ivr ${x.status === 'review' ? 'rv' : ''}">
-    <div class="th"><span class="tt">${esc(x.desc)}</span><b class="iva ${give ? 'g' : ''}">${give ? '+' : ''}${money(x.amount)}</b></div>
-    <div class="tm">${meta}${x.status !== 'ok' || give ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}</div>
+    <div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}">${give ? '+' : ''}${money(x.amount)}</b></div>
+    <div class="tm">${meta}${x.status !== 'ok' || give ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>
     ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px">${esc(x.reason)}</div>` : ''}
     ${invPhotosHtml(x, true)}
     ${x.status === 'review' ? `<div class="grid2" style="margin-top:8px"><button class="btn2 cu" onclick="invApprove('${x.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askInvReturn('${x.id}')">رجّعها</button></div>` : ''}
-    <button class="lnk dl ${armDel ? 'arm' : ''}" onclick="invDel('${x.id}')">${armDel ? 'تأكيد الحذف' : 'حذف'}</button>
+    <div class="ilinks">${give ? '' : `<button class="lnk dl" onclick="askWarranty('${x.id}')">${x.warrantyUntil ? 'عدّل الضمان' : 'أضف ضمان'}</button>`}<button class="lnk dl ${armDel ? 'arm' : ''}" onclick="invDel('${x.id}')">${armDel ? 'تأكيد الحذف' : 'حذف'}</button></div>
   </div>`;
 }
 
 function renderInv() {
+  if (S.iv.st && S.data.employees.some(e => e.id === S.iv.st)) return renderInvSt(S.iv.st);
+  S.iv.st = '';
   const d = S.data, iv = d.inv || {items: [], bal: {}}, mk = d.today.slice(0, 7);
   const name = id => { const e = d.employees.find(x => x.id === id); return e ? e.name : ''; };
   const items = iv.items.map(x => Object.assign({}, x, {ename: name(x.emp)}));
@@ -1122,9 +1154,16 @@ function renderInv() {
   if (rv.length) h += `<div class="sech a">تنتظر مراجعتك<span>${rv.length}</span></div>` + rv.map(x => invRowHtml(x, true)).join('');
   h += `<div class="sech">العهدة</div><div class="card" style="margin-top:6px">` + d.employees.map(e => {
     const b = iv.bal[e.id] || 0;
-    return `<div class="row" style="padding:8px 0"><span><b>${esc(e.name)}</b><br><span class="sub">${b > 0 ? 'معه' : b < 0 ? 'له عندك' : 'ما فيه رصيد'}</span></span>
+    return `<div class="row" style="padding:8px 0"><button class="erow" style="width:auto;flex:1" onclick="openSt('${e.id}')"><span><b>${esc(e.name)}</b><br><span class="sub">${b > 0 ? 'معه' : b < 0 ? 'له عندك' : 'ما فيه رصيد'} · كشف العهدة ‹</span></span></button>
       <span style="display:flex;align-items:center;gap:10px"><b class="iva ${b < 0 ? 'r' : ''}" style="font-size:18px">${money(Math.abs(b))}</b><button class="btn2" style="padding:7px 12px;font-size:13px" onclick="askGive('${e.id}')">${I('plus', 14, 2.5)}أعطيته</button></span></div>`;
   }).join('<div class="hair"></div>') + `</div>`;
+  const ws = items.filter(x => x.kind === 'inv' && x.status !== 'returned' && x.warrantyUntil).sort((a, b) => a.warrantyUntil < b.warrantyUntil ? -1 : 1);
+  if (ws.length) {
+    const live = ws.filter(x => x.warrantyUntil >= d.today), old = ws.filter(x => x.warrantyUntil < d.today);
+    const wrow = x => { const w = wLeft(x.warrantyUntil, d.today); return `<div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b><div class="tm">${esc(x.pname || 'عام')} · ${esc(x.ename)} · ${dmy(x.ts)}</div>${invPhotosHtml(x, true)}</span><span class="wl ${w[0]}">${w[1]}</span></div>`; };
+    h += `<div class="sech">الضمانات<span>${live.length}</span></div><div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${live.map(wrow).join('') || '<div class="sub" style="padding:12px 0">ما فيه ضمان شغال</div>'}
+      ${old.length ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.iopen.wold=!S.iopen.wold;renderInv()">${S.iopen.wold ? 'إخفاء المنتهية' : 'المنتهية (' + old.length + ')'}</button>${S.iopen.wold ? old.map(wrow).join('') : ''}` : ''}</div>`;
+  }
   const okAll = items.filter(x => x.kind === 'inv' && x.status === 'ok');
   const groups = {}, keys = [], order = (d.projects || []).map(p => p.id);
   okAll.forEach(x => { const k = x.project || ''; if (!groups[k]) { groups[k] = {name: x.pname || 'عام', all: 0, m: 0, list: []}; keys.push(k); } const g = groups[k]; g.all += x.amount; if (x.ts.slice(0, 7) === mk) { g.m += x.amount; g.list.push(x); } });
@@ -1135,8 +1174,8 @@ function renderInv() {
       <div class="ivtot">الإجمالي من البداية: <b>${money(g.all)}</b> ريال</div>
       ${on ? (g.list.length ? g.list.map(x => invRowHtml(x, true)).join('') : '<div class="ivtot">ما فيه فواتير هالشهر</div>') : ''}</div>`;
   }).join('');
-  const other = items.filter(x => x.kind === 'give' || x.status === 'returned').slice(0, 20);
-  if (other.length) h += `<button class="dtog" onclick="S.iv.f=S.iv.f?'':'o';renderInv()">${S.iv.f ? 'إخفاء' : 'العهد والفواتير المرجّعة (' + other.length + ')'}</button>` + (S.iv.f ? other.map(x => invRowHtml(x, true)).join('') : '');
+  const other = items.filter(x => x.kind === 'inv' && x.status === 'returned').slice(0, 20);
+  if (other.length) h += `<button class="dtog" onclick="S.iv.f=S.iv.f?'':'o';renderInv()">${S.iv.f ? 'إخفاء' : 'الفواتير المرجّعة (' + other.length + ')'}</button>` + (S.iv.f ? other.map(x => invRowHtml(x, true)).join('') : '');
   if (!items.length) h += emptyHtml('receipt', 'ما فيه فواتير للحين. الموظف يرسلها من صفحته');
   $('#view').innerHTML = h;
 }
@@ -1163,18 +1202,80 @@ async function invDel(id) {
   try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذفت'); }
   catch (e) { S.armed = null; renderInv(); toast(e); }
 }
+function openSt(id) { S.iv.st = id; S.armed = null; renderInv(); window.scrollTo(0, 0); }
+function renderInvSt(empId) {
+  const d = S.data, e = d.employees.find(x => x.id === empId);
+  const items = ((d.inv || {}).items || []).filter(x => x.emp === empId).map(x => Object.assign({}, x, {ename: e.name}));
+  const gives = items.filter(x => x.kind === 'give'), oks = items.filter(x => x.kind === 'inv' && x.status === 'ok');
+  const rv = items.filter(x => x.kind === 'inv' && x.status === 'review');
+  const gT = gives.reduce((s, x) => s + x.amount, 0), sT = oks.reduce((s, x) => s + x.amount, 0), b = Math.round((gT - sT) * 100) / 100;
+  const rows = gives.concat(oks).sort((a, b2) => a.ts < b2.ts ? 1 : a.ts > b2.ts ? -1 : 0);
+  let h = `<button class="back" onclick="S.iv.st='';renderInv()">${I('arrow-right', 17)}رجوع للفواتير</button>
+    <div class="stc"><div class="l">${b >= 0 ? 'باقي معه' : 'له عندك'}</div><div class="v">${money(Math.abs(b))} <small>ريال</small></div>
+    <div class="r"><span>عطيته ${money(gT)}</span><span>صرف ${money(sT)}</span></div></div>
+    <button class="bigdo" style="width:100%;justify-content:center;border:0;font-family:inherit;cursor:pointer" onclick="askGive('${empId}')">${I('plus', 15, 2.5)}أعطيته مبلغ</button>`;
+  if (rv.length) h += `<div class="note warn" style="margin-top:12px">${rv.length === 1 ? 'فاتورة' : rv.length + ' فواتير'} بـ ${money(rv.reduce((s, x) => s + x.amount, 0))} ريال تنتظر اعتمادك، وما تنخصم إلا بعده.</div>` + rv.map(x => invRowHtml(x, false)).join('');
+  h += `<div class="sech">كشف ${esc(e.name)}</div>`;
+  if (!rows.length) return $('#view').innerHTML = h + emptyHtml('wallet', 'ما فيه حركات للحين');
+  h += '<div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">' + rows.map(x => x.kind === 'give'
+    ? `<div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b><div class="tm">${dmy(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}</div></span>
+        <span style="display:flex;align-items:center;gap:4px"><b class="iva g">+${money(x.amount)}</b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`
+    : `<div class="str" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmy(x.ts)} · ${esc(x.pname || 'عام')}</div></span><b class="iva r">−${money(x.amount)}</b></div>${invPhotosHtml(x, true)}</div>`).join('') + '</div>';
+  $('#view').innerHTML = h;
+}
+function giveForm(title, x) {
+  S.gm = (x && x.method) || S.gm || 'تحويل';
+  return `<label class="shh" for="ga">${title}</label>
+    <input id="ga" class="qtt" inputmode="decimal" placeholder="1000" value="${x ? esc(x.amount) : ''}">
+    <div class="segc" id="gmseg" style="margin:10px 0">${['تحويل', 'كاش'].map(m => `<button class="${S.gm === m ? 'on' : ''}" onclick="S.gm='${m}';document.querySelectorAll('#gmseg button').forEach(b=>b.classList.toggle('on',b.textContent==='${m}'))">${m}</button>`).join('')}</div>
+    <input id="gn" placeholder="ملاحظة (اختياري)" value="${x && x.desc !== 'عهدة' ? esc(x.desc) : ''}">
+    <div class="err" id="gerr"></div>`;
+}
 function askGive(empId) {
   const e = S.data.employees.find(x => x.id === empId);
-  ovOpen(`<label class="shh" for="ga">كم أعطيت ${esc(e ? e.name : '')}؟</label>
-    <input id="ga" class="qtt" inputmode="decimal" placeholder="1000">
-    <input id="gn" placeholder="ملاحظة (اختياري)">
-    <div class="err" id="gerr"></div>
-    <div class="g21"><button class="btn2 cu" onclick="doGive('${empId}')">حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
+  ovOpen(giveForm('كم أعطيت ' + esc(e ? e.name : '') + '؟') + `<div class="g21"><button class="btn2 cu" onclick="doGive('${empId}')">حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
   setTimeout(() => { const i = $('#ga'); if (i) i.focus(); }, 80);
 }
 async function doGive(empId) {
-  try { S.data = await call('apiInvGive', BOOT.key, empId, $('#ga').value, $('#gn').value); ovClose(); renderAdmin(); toast('انحفظت العهدة'); }
+  try { S.data = await call('apiInvGive', BOOT.key, empId, $('#ga').value, $('#gn').value, S.gm); ovClose(); renderAdmin(); toast('انحفظ'); }
   catch (e) { $('#gerr').textContent = e; }
+}
+function askGiveEdit(id) {
+  const x = ((S.data.inv || {}).items || []).find(v => v.id === id);
+  if (!x) return;
+  S.armed = null;
+  ovOpen(giveForm('تعديل المبلغ', x) + `<div class="g21"><button class="btn2 cu" onclick="doGiveEdit('${id}')">حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>
+    <button class="btn2 rd" id="gdel" style="width:100%;margin-top:8px" onclick="delGive('${id}')">حذف المبلغ</button>`);
+}
+async function doGiveEdit(id) {
+  try { S.data = await call('apiInvEdit', BOOT.key, id, {amount: $('#ga').value, note: $('#gn').value, method: S.gm}); ovClose(); renderAdmin(); toast('انحفظ'); }
+  catch (e) { $('#gerr').textContent = e; }
+}
+async function delGive(id) {
+  const b = $('#gdel');
+  if (S.armed !== 'give_' + id) { S.armed = 'give_' + id; if (b) { b.textContent = 'متأكد؟ اضغط مرة ثانية للحذف'; b.classList.add('arm'); } return; }
+  try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; ovClose(); renderAdmin(); toast('انحذف'); }
+  catch (e) { S.armed = null; $('#gerr').textContent = e; }
+}
+function askWarranty(id) {
+  const x = ((S.data.inv || {}).items || []).find(v => v.id === id);
+  if (!x) return;
+  const from = x.ts.slice(0, 10);
+  S.wsel = x.warrantyUntil || '';
+  const chip = (m, t) => { const u = addMonths(from, m); return `<button class="${S.wsel === u ? 'on' : ''}" onclick="S.wsel='${u}';$('#wd').value='${u}';document.querySelectorAll('.wchips button').forEach(b=>b.classList.remove('on'));this.classList.add('on')">${t}</button>`; };
+  ovOpen(`<label class="shh">ضمان «${esc(x.desc)}»</label><div class="sub">من تاريخ الشراء ${dmy(from)}</div>
+    <div class="wchips">${chip(6, '6 أشهر')}${chip(12, 'سنة')}${chip(24, 'سنتين')}</div>
+    <label class="sub" for="wd">أو اختر تاريخ نهاية الضمان</label>
+    <input id="wd" type="date" value="${esc(S.wsel)}" onchange="S.wsel=this.value;document.querySelectorAll('.wchips button').forEach(b=>b.classList.remove('on'))">
+    <div class="err" id="werr"></div>
+    <div class="g21"><button class="btn2 cu" onclick="doWarranty('${id}', false)">حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>
+    ${x.warrantyUntil ? `<button class="btn2 rd" style="width:100%;margin-top:8px" onclick="doWarranty('${id}', true)">شيل الضمان</button>` : ''}`);
+}
+async function doWarranty(id, clear) {
+  const u = clear ? '' : ($('#wd').value || S.wsel || '');
+  if (!clear && !u) { $('#werr').textContent = 'اختر المدة أو التاريخ'; return; }
+  try { S.data = await call('apiInvWarranty', BOOT.key, id, u); ovClose(); renderAdmin(); toast(clear ? 'انشال الضمان' : 'انحفظ الضمان'); }
+  catch (e) { $('#werr').textContent = e; }
 }
 
 /* ---------- المالية ---------- */
@@ -1519,8 +1620,8 @@ function empInvHtml(d, isPreview) {
   if (!items.length) return h + emptyHtml('receipt', 'ما أرسلت فواتير للحين');
   return h + '<div class="card" style="margin-top:14px;padding-top:4px;padding-bottom:4px">' + items.map(x => {
     const st = invSt(x, true), give = x.kind === 'give';
-    return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}</span><b class="iva ${give ? 'g' : ''}">${give ? '+' : ''}${money(x.amount)}</b></div>
-      <div class="tm">${give ? '' : esc(x.pname || 'عام') + ' · '}${dmy(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span></div>
+    return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}">${give ? '+' : ''}${money(x.amount)}</b></div>
+      <div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · '}${dmy(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>
       ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px"><div><b>المدير يقول:</b> ${esc(x.reason)}</div></div>` : ''}
       ${invPhotosHtml(x, BOOT.page === 'admin')}</div>`;
   }).join('') + '</div>';
@@ -1536,6 +1637,9 @@ function invFormHtml(d) {
     <input class="qtt" inputmode="decimal" placeholder="المبلغ بالريال" value="${esc(f.amount)}" oninput="S.inv.amount=this.value">
     <input placeholder="وش اشتريت؟ مثلاً: أفياش وأسلاك" value="${esc(f.desc)}" oninput="S.inv.desc=this.value">
     <select aria-label="المشروع" onchange="S.inv.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}<option value="" ${f.project === '' ? 'selected' : ''}>عام</option></select>
+    <label class="tgl"><span>عليها ضمان؟</span><input type="checkbox" ${f.wOn ? 'checked' : ''} onchange="S.inv.wOn=this.checked;if(this.checked&&!S.inv.w)S.inv.w=12;rerenderEmp()"></label>
+    ${f.wOn ? `<div class="wchips">${[[6, '6 أشهر'], [12, 'سنة'], [24, 'سنتين']].map(c => `<button class="${!f.wc && f.w === c[0] ? 'on' : ''}" onclick="S.inv.w=${c[0]};S.inv.wc=false;rerenderEmp()">${c[1]}</button>`).join('')}<button class="${f.wc ? 'on' : ''}" onclick="S.inv.wc=true;rerenderEmp()">غيره</button></div>
+      ${f.wc ? `<input inputmode="numeric" placeholder="كم شهر؟" value="${f.w || ''}" oninput="S.inv.w=Number(String(this.value).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)))||0">` : ''}` : ''}
     <button class="btn" ${S.busy || S.ishotLoading ? 'disabled' : ''} onclick="sendInv()">${S.busy ? 'جاري الإرسال…' : I('send', 17) + 'إرسال'}</button>
     <button class="btn2" style="width:100%;border:0" onclick="S.invForm=false;S.ishots=[];rerenderEmp()">إلغاء</button>
     <div class="err" id="ierr"></div></div>`;
@@ -1557,10 +1661,11 @@ async function sendInv() {
   if (!S.ishots.length) { err().textContent = 'صوّر الفاتورة'; return; }
   if (!(Number(String(f.amount).replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/[^\d.]/g, '')) > 0)) { err().textContent = 'اكتب المبلغ'; return; }
   if (!f.desc.trim()) { err().textContent = 'اكتب وش اشتريت'; return; }
+  if (f.wOn && !(f.w >= 1 && f.w <= 120)) { err().textContent = 'اكتب مدة الضمان بالأشهر'; return; }
   if (S.busy) return;
   S.busy = true; rerenderEmp();
   try {
-    const d = await callT(120000, 'apiInvAdd', BOOT.token, {amount: f.amount, desc: f.desc, project: f.project}, S.ishots);
+    const d = await callT(120000, 'apiInvAdd', BOOT.token, {amount: f.amount, desc: f.desc, project: f.project, warranty: f.wOn ? f.w : 0}, S.ishots);
     S.busy = false; S.invForm = false; S.ishots = []; S.inv = {amount: '', desc: '', project: f.project};
     renderEmp(d, false); toast('انرسلت الفاتورة');
   } catch (e) {

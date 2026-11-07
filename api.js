@@ -234,7 +234,8 @@
   }
   function invOut_(x, pmap) {
     return { id: x.id, ts: x.ts, emp: x.emp, kind: x.kind, amount: x.amount, desc: x.desc, project: x.project,
-      pname: x.project ? (pmap[x.project] || '') : '', nph: x.photos.length, photos: x.photos, status: x.status, reason: x.reason };
+      pname: x.project ? (pmap[x.project] || '') : '', nph: x.photos.length, photos: x.photos, status: x.status, reason: x.reason,
+      method: x.method || '', warrantyUntil: x.warrantyUntil || '' };
   }
 
   function empPayload_(emp) {
@@ -534,7 +535,8 @@
       if (!desc) throw new Error('اكتب وش اشتريت');
       const paths = await empUpload(token, dataUrls, 3);
       if (!paths.length) throw new Error('صوّر الفاتورة');
-      await eexec(token, 'inv_add', { amount: amount, desc: desc, project: String(x.project || ''), photos: paths });
+      const w = Math.round(Number(x.warranty) || 0);
+      await eexec(token, 'inv_add', { amount: amount, desc: desc, project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0 });
       flush();
       return API.apiEmp(token);
     },
@@ -546,9 +548,17 @@
       return adminDo(k, 'inv_return', { id: id, reason: r });
     },
     async apiInvDelete(k, id) { return adminDo(k, 'inv_del', { id: id }); },
-    async apiInvGive(k, empId, amount, note) {
+    async apiInvGive(k, empId, amount, note, method) {
       const n = cleanAmount_(amount);
-      return adminDo(k, 'inv_give', { emp: empId, amount: n, note: String(note || '').trim().slice(0, 200) });
+      return adminDo(k, 'inv_give', { emp: empId, amount: n, note: String(note || '').trim().slice(0, 200), method: String(method || '') });
+    },
+    async apiInvEdit(k, id, x) {
+      const n = cleanAmount_(x.amount);
+      return adminDo(k, 'inv_edit', { id: id, amount: n, note: String(x.note || '').trim().slice(0, 200), method: String(x.method || '') });
+    },
+    async apiInvWarranty(k, id, until) {
+      if (until && !/^\d{4}-\d{2}-\d{2}$/.test(until)) throw new Error('التاريخ غير صحيح');
+      return adminDo(k, 'inv_warranty', { id: id, until: until || '' });
     },
 
     async pushKey() {
