@@ -335,6 +335,9 @@ video.vid{height:auto;max-height:70vh;background:#000}
 .cb{display:inline-block;background:#EEEDFE;color:#3C3489;border-radius:6px;padding:1px 6px;font-size:11px;font-weight:600;margin-inline-start:4px;vertical-align:1px}
 .wb{display:inline-block;background:#E6F1FB;color:#0C447C;border-radius:6px;padding:1px 6px;font-size:11px;font-weight:600;margin-inline-start:4px;vertical-align:1px}
 .wl{font-size:12.5px;font-weight:600;white-space:nowrap}.wl.ok{color:var(--green)}.wl.soon{color:#B7791F}.wl.end{color:var(--faint)}
+.ivd h3{margin:0;font-size:17px}.ivd .amt{font-size:22px;font-weight:700;margin:4px 0 2px}
+.ivd .pgrid{margin:10px 0}.ivd .btn2{width:100%;margin-top:8px}
+.strb{width:100%;background:none;border:0;font:inherit;color:inherit;text-align:start;cursor:pointer;padding:0}
 .erow{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:start;cursor:pointer}
 .ilinks{display:flex;gap:16px}
 .wchips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
@@ -1187,6 +1190,12 @@ function renderInv() {
     return `<div class="row" style="padding:8px 0"><button class="erow" style="width:auto;flex:1" onclick="openSt('${e.id}')"><span><b>${esc(e.name)}</b><br><span class="sub">${b > 0 ? 'معه' : b < 0 ? 'له عندك' : 'ما فيه رصيد'} · كشف العهدة ‹</span></span></button>
       <span style="display:flex;align-items:center;gap:10px"><b class="iva ${b < 0 ? 'r' : ''}" style="font-size:18px">${money(Math.abs(b))}</b><button class="btn2" style="padding:7px 12px;font-size:13px" onclick="askGive('${e.id}')">${I('plus', 14, 2.5)}أعطيته</button></span></div>`;
   }).join('<div class="hair"></div>') + `</div>`;
+  const okList = items.filter(x => x.kind === 'inv' && x.status === 'ok');
+  if (okList.length) {
+    const showAll = !!S.iopen.allinv, list = showAll ? okList : okList.slice(0, 8);
+    h += `<div class="sech">آخر الفواتير<span>${okList.length}</span></div><div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${list.map(x => invMiniRow(x, true)).join('')}
+      ${okList.length > 8 ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.iopen.allinv=!S.iopen.allinv;renderInv()">${showAll ? 'أقل' : 'كل الفواتير (' + okList.length + ')'}</button>` : ''}</div>`;
+  }
   const ws = items.filter(x => x.kind === 'inv' && x.status !== 'returned' && x.warrantyUntil).sort((a, b) => a.warrantyUntil < b.warrantyUntil ? -1 : 1);
   if (ws.length) {
     const live = ws.filter(x => x.warrantyUntil >= d.today), old = ws.filter(x => x.warrantyUntil < d.today);
@@ -1232,6 +1241,39 @@ async function invDel(id) {
   try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذفت'); }
   catch (e) { S.armed = null; renderInv(); toast(e); }
 }
+function invMiniRow(x, showEmp) {
+  const meta = [showEmp ? esc(x.ename || '') : '', esc(x.pname || 'عام'), dmy(x.ts)].filter(Boolean).join(' · ');
+  return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${meta}</div></span><b class="iva">${money(x.amount)} ‹</b></div></button>`;
+}
+function openInvD(id) {
+  const d = S.data, x = ((d.inv || {}).items || []).find(v => v.id === id);
+  if (!x) return toast('الفاتورة غير موجودة، حدّث الصفحة');
+  const e = d.employees.find(v => v.id === x.emp), card = x.paidBy === 'card';
+  S.armed = null;
+  ovOpen(`<div class="ivd"><h3>${esc(x.desc)}</h3><div class="amt">${money(x.amount)} <small style="font-size:13px;font-weight:500;color:var(--muted)">ريال</small></div>
+    <div class="sub">${esc(e ? e.name : '')} · ${esc(x.pname || 'عام')} · ${dmy(x.ts)}</div>
+    ${x.warrantyUntil ? `<div class="sub" style="margin-top:4px">ضمان لين ${dmy(x.warrantyUntil)} · ${wLeft(x.warrantyUntil, d.today)[1]}</div>` : ''}
+    <div class="pgrid" id="ivdph">${x.photos.map(f => `<div class="pph" data-f="${esc(f)}">جاري التحميل…</div>`).join('')}</div>
+    <div class="sub" style="margin:6px 0 4px">دفعها من</div>
+    <div class="segc"><button class="${card ? '' : 'on'}" onclick="${card ? `setPaidBy('${id}','cash',true)` : ''}">العهدة</button><button class="${card ? 'on' : ''}" onclick="${card ? '' : `setPaidBy('${id}','card',true)`}">بطاقتي</button></div>
+    <button class="btn2" onclick="askWarranty('${id}')">${x.warrantyUntil ? 'عدّل الضمان' : 'أضف ضمان'}</button>
+    <button class="btn2 rd" id="ivddel" onclick="delInvD('${id}')">حذف الفاتورة</button>
+    <button class="btn2" style="border:0" onclick="ovClose()">إغلاق</button></div>`);
+  x.photos.forEach(async f => {
+    try {
+      const u = S.ic[f] && S.ic[f] !== 'loading' ? S.ic[f] : await call('apiInvImgAdmin', BOOT.key, id, f);
+      S.ic[f] = u;
+      const el = document.querySelector('#ivdph [data-f="' + f + '"]');
+      if (el) el.outerHTML = `<img src="${u}" alt="صورة الفاتورة" onclick="showFull('${u}','${f}','صورة الفاتورة')">`;
+    } catch (err) {}
+  });
+}
+async function delInvD(id) {
+  const b = $('#ivddel');
+  if (S.armed !== 'ivd_' + id) { S.armed = 'ivd_' + id; if (b) { b.textContent = 'متأكد؟ اضغط مرة ثانية للحذف'; b.classList.add('arm'); } return; }
+  try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; ovClose(); renderAdmin(); toast('انحذفت'); }
+  catch (e) { S.armed = null; toast(e); }
+}
 function openSt(id) { S.iv.st = id; S.armed = null; renderInv(); window.scrollTo(0, 0); }
 function renderInvSt(empId) {
   const d = S.data, e = d.employees.find(x => x.id === empId);
@@ -1250,7 +1292,7 @@ function renderInvSt(empId) {
   h += '<div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">' + rows.map(x => x.kind === 'give'
     ? `<div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b><div class="tm">${dmy(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}</div></span>
         <span style="display:flex;align-items:center;gap:4px"><b class="iva g"><bdi dir="ltr">+${money(x.amount)}</bdi></b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`
-    : `<div class="str" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmy(x.ts)} · ${esc(x.pname || 'عام')}</div></span><b class="iva r"><bdi dir="ltr">−${money(x.amount)}</bdi></b></div>${invPhotosHtml(x, true)}</div>`).join('') + '</div>';
+    : `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmy(x.ts)} · ${esc(x.pname || 'عام')}</div></span><b class="iva r"><bdi dir="ltr">−${money(x.amount)}</bdi> ‹</b></div></button>`).join('') + '</div>';
   $('#view').innerHTML = h;
 }
 function giveForm(title, x) {
@@ -1301,9 +1343,12 @@ function askWarranty(id) {
     <div class="g21"><button class="btn2 cu" onclick="doWarranty('${id}', false)">حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>
     ${x.warrantyUntil ? `<button class="btn2 rd" style="width:100%;margin-top:8px" onclick="doWarranty('${id}', true)">شيل الضمان</button>` : ''}`);
 }
-async function setPaidBy(id, by) {
-  try { S.data = await call('apiInvPaidBy', BOOT.key, id, by); renderAdmin(); toast(by === 'card' ? 'صارت على بطاقتك، وما تنخصم من العهدة' : 'صارت من العهدة'); }
-  catch (e) { toast(e); }
+async function setPaidBy(id, by, reopen) {
+  try {
+    S.data = await call('apiInvPaidBy', BOOT.key, id, by); renderAdmin();
+    if (reopen) openInvD(id);
+    toast(by === 'card' ? 'صارت على بطاقتك، وما تنخصم من العهدة' : 'صارت من العهدة');
+  } catch (e) { toast(e); }
 }
 async function doWarranty(id, clear) {
   const u = clear ? '' : ($('#wd').value || S.wsel || '');
