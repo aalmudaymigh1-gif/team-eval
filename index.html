@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#1F3A5F">
+<meta name="theme-color" content="#FFFFFF">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <title>تقييم الفريق</title>
@@ -20,7 +20,7 @@
 })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#FFFFFF;--surface:#FFFFFF;--fill:#F3F4F6;--fill2:#EBEDF0;--line:#EDEFF2;--line2:#E3E6EA;--text:#0F1419;--muted:#6B7280;--faint:#9CA3AF;
 --acc:#1F3A5F;--acc-2:#2C5282;--acc-ink:#FFFFFF;--acc-soft:#EEF3F9;--acc-ring:#DCE6F2;
@@ -493,6 +493,66 @@ video.vid{height:auto;max-height:70vh;background:#000}
 .ttx b{display:block;font-size:14.5px;font-weight:600}
 .ttx small{display:block;font-size:12.5px;color:var(--muted);margin-top:1px}
 .tab{border:0;background:var(--acc);color:var(--acc-ink);font:inherit;font-size:13px;font-weight:600;border-radius:9px;padding:5px 12px;cursor:pointer;align-self:center;flex:none}
+/* ---------- نظام التصميم (الإصدار 36): مأخوذ من التطبيق المرجع ---------- */
+:root{--bg:#FFFFFF;--surface:#FAFAF9;--fill:#F4F4F2;--fill2:#ECECEA;--line:#EFEFED;--line2:#E4E4E1;--text:#2A2A28;--muted:#8E8E89;--faint:#B9B9B4;
+--acc:#BFD06A;--acc-2:#AABE4E;--acc-ink:#FFFFFF;--acc-soft:#F4F7E4;--acc-ring:#E2EAB8;--acc-dk:#7E8F2A;
+--green:#4E8A2E;--green-soft:#EEF5E6;--red:#C2463A;--red-soft:#FCEFED;--red-line:#F2CFCA;
+--r:16px;--r2:24px;--sh:none;--sh2:0 12px 40px rgba(42,42,40,.10)}
+html,body,button,input,select,textarea{font-family:'Readex Pro','IBM Plex Sans Arabic',system-ui,sans-serif!important;letter-spacing:.01em}
+body{font-weight:300;padding-bottom:calc(env(safe-area-inset-bottom) + 190px)}
+b,strong{font-weight:500}
+h1{font-size:30px;font-weight:400;letter-spacing:0}
+.top{padding-top:34px}
+.top .sub{color:var(--acc-dk);font-size:14px;font-weight:400}
+.rf{border:0!important;background:none!important;box-shadow:none!important;color:var(--muted)}
+/* شريط التنقل تحت */
+.tabs{position:fixed!important;top:auto!important;bottom:0;left:0;right:0;margin:0!important;padding:14px 24px calc(18px + env(safe-area-inset-bottom))!important;background:#fff!important;border-radius:30px 30px 0 0;box-shadow:0 -6px 30px rgba(42,42,40,.06);z-index:20;gap:0!important;justify-content:space-between}
+.tabs button{background:none!important;color:var(--faint)!important;font-size:0!important;padding:6px 0 12px!important;position:relative;border-radius:0!important}
+.tabs button svg{width:24px;height:24px;stroke-width:1.5}
+.tabs button.on{color:var(--text)!important}
+.tabs button.on:after{content:'';position:absolute;bottom:0;left:50%;width:7px;height:7px;margin-left:-3.5px;border-radius:50%;background:var(--acc)}
+.dock,.save{bottom:calc(84px + env(safe-area-inset-bottom))!important;background:transparent!important;border:0!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+/* البطاقات */
+.card{background:var(--surface);border:1px solid var(--line2);border-radius:var(--r2);box-shadow:none;padding:18px}
+.ctitle{font-weight:500;font-size:16px}
+.ctitle .ci{background:none!important;color:var(--muted)!important;width:auto;height:auto}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:18px}
+.kpi.hero,.thero .h1{background:#fff!important;color:var(--text)!important;border:1px solid var(--line)}
+.kpi.hero .k,.thero .h1 span{color:var(--muted)!important}
+.kpi.hero .v small,.thero .h1 small,.thero small{color:var(--acc-dk)!important}
+.kpi .v,.thero b{font-weight:400!important}
+.thero .h2{background:#fff!important;border:1px solid var(--line)}
+.tbrk{background:#fff;border:1px solid var(--line);border-radius:18px;padding:6px 14px}
+.tat{background:#fff!important;border:1px solid var(--line);border-radius:18px!important}
+.tacts{border:1px solid var(--line2)!important;border-radius:999px!important;background:#fff}
+.tacts button{font-weight:400!important}
+.tacts button svg,.tmh>svg{color:var(--muted)!important}
+.tgroup{background:var(--surface)}
+.tst b{font-weight:400!important}
+/* الأزرار والكبسولات */
+.empc,.dedch button,.wchips button{border:1px solid var(--line2)!important;background:#fff!important;color:var(--muted)!important;font-weight:400!important;padding:8px 20px!important}
+.empc.on,.dedch button.on,.wchips button.on{background:var(--acc)!important;border-color:var(--acc)!important;color:#fff!important}
+.segc{background:none!important;padding:0!important;gap:8px!important;justify-content:flex-start}
+.segc button{flex:0 0 auto!important;border:1px solid var(--line2)!important;background:#fff!important;border-radius:999px!important;padding:8px 20px!important;color:var(--muted)!important;font-weight:400!important}
+.segc button.on{background:var(--acc)!important;border-color:var(--acc)!important;color:#fff!important;box-shadow:none!important}
+.btn2{border-radius:999px!important;border:1px solid var(--line2)!important;background:#fff;font-weight:400}
+.btn2.cu,.bigdo,.save .btn,.dock .btn{background:var(--acc)!important;border-color:var(--acc)!important;color:#fff!important;border-radius:18px!important;font-weight:500!important}
+.badge,.pill{font-weight:500;border-radius:999px}
+.badge.wait{background:var(--acc-soft);color:var(--acc-dk)}
+.tg.on{background:var(--acc)}
+.attgo{background:var(--acc)!important;border-radius:var(--r2)!important}
+.pgh2,.ivbal,.ec,.stc{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--line2)}
+.gban{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--line2)!important;box-shadow:none!important}
+.gbi{background:var(--acc-soft)!important;color:var(--acc-dk)}
+.gbt small{color:var(--muted)!important;opacity:1}
+.note.info{background:var(--fill);color:var(--muted)}
+.sech{font-weight:500}
+.ent{border-top-color:var(--line)}
+input,textarea,select{border-radius:16px!important;background:#fff!important}
+.ti{border-radius:22px}
+.gi{background:var(--fill)!important;color:var(--muted)!important}
+.dock{background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 38%)!important;padding-top:26px!important}
+.fab{bottom:calc(104px + env(safe-area-inset-bottom))!important;background:var(--acc)!important;box-shadow:0 8px 24px rgba(127,143,42,.35)!important}
 </style>
 </head>
 <body>
