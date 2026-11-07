@@ -4,6 +4,11 @@
   const SB_KEY = 'sb_publishable_QS6Ujy65uyr2MQJUT-691g_2vkeRKxP';
   const sb = supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
   const BUCKET = 'files';
+  const FN_URL = SB_URL + '/functions/v1/push';
+  const NOTIFY = ['tasks_add', 'task_return', 'inv_approve', 'inv_return'];
+  function flush() {
+    fetch(FN_URL, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: '{"op":"flush"}', keepalive: true }).catch(() => {});
+  }
 
   const TRUST = 'الأمانة والمصداقية';
   const STAR_CRIT = 'موقف مميز';
@@ -289,7 +294,12 @@
     };
   }
 
-  async function adminDo(k, op, a) { await aexec(k, op, a); await loadAdmin(k); return adminPayload_(); }
+  async function adminDo(k, op, a) {
+    await aexec(k, op, a);
+    if (NOTIFY.indexOf(op) >= 0) flush();
+    await loadAdmin(k);
+    return adminPayload_();
+  }
   async function fresh(k) { if (!RAW || !RAW.employees.some(e => e.token)) await loadAdmin(k); }
   const empById = id => RAW.employees.filter(e => e.id === id)[0];
 
@@ -487,6 +497,7 @@
       const paths = await empUpload(token, dataUrls, 5);
       if (!paths.length) throw new Error('لازم ترفق صورة');
       await eexec(token, 'task_done', { id: id, comment: String(comment || ''), proofs: paths });
+      flush();
       return API.apiEmp(token);
     },
 
@@ -524,6 +535,7 @@
       const paths = await empUpload(token, dataUrls, 3);
       if (!paths.length) throw new Error('صوّر الفاتورة');
       await eexec(token, 'inv_add', { amount: amount, desc: desc, project: String(x.project || ''), photos: paths });
+      flush();
       return API.apiEmp(token);
     },
 
@@ -537,6 +549,17 @@
     async apiInvGive(k, empId, amount, note) {
       const n = cleanAmount_(amount);
       return adminDo(k, 'inv_give', { emp: empId, amount: n, note: String(note || '').trim().slice(0, 200) });
+    },
+
+    async pushKey() {
+      const r = await fetch(FN_URL, { headers: { apikey: SB_KEY } });
+      const j = await r.json().catch(() => ({}));
+      if (!j.pub) throw new Error('خدمة الإشعارات ما ردّت، جرّب بعدين');
+      return j.pub;
+    },
+
+    async pushSave(cred, page, sub) {
+      return page === 'admin' ? aexec(cred, 'push_sub', sub) : eexec(cred, 'push_sub', sub);
     },
 
     async apiEmp(token) {
