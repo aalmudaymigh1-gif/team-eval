@@ -563,18 +563,19 @@ span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 .mn.big .rs{height:.66em}
 .mn.t{font-size:inherit;font-weight:500}
 .thero b,.kpi .v,.stc .v,.ivbal b,.ec .v,.ivd .amt{color:var(--text)!important}
+.tvseg{margin:14px 0 4px}
 </style>
 </head>
 <body>
 <div id="busy"></div><div id="ptr"></div>
 <div class="wrap" id="app"><div class="load">جاري التحميل…</div></div>
-<div id="ov"></div><button id="fab" class="fab hide" onclick="openSheet()" aria-label="مهمة جديدة"></button>
+<div id="ov"></div><button id="fab" class="fab hide" onclick="S.tview === 'g' ? openGForm() : openSheet()" aria-label="إضافة"></button>
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=38"></script>
 <script>
-const APP_VER = '40';
+const APP_VER = '41';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -1230,7 +1231,7 @@ function renderTeam() {
   const paid = d.employees.filter(e => !e.month.track), track = d.employees.filter(e => e.month.track);
   let h = '<div style="height:12px"></div>' + paid.map(e => teamPaid(d, e)).join('');
   if (track.length) h += `<div class="tsec"><span class="badge wait">متابعة فقط</span><span>${track.length} ${track.length === 1 ? 'موظف' : 'موظفين'}</span></div><div class="card tgroup">${track.map(e => teamTrackRow(d, e)).join('')}</div>`;
-  $('#view').innerHTML = h + guidesHtml(d);
+  $('#view').innerHTML = h;
 }
 
 function bonusTable(m) {
@@ -1337,13 +1338,22 @@ function tqMatch(t) {
   return true;
 }
 
+function tvSeg(d) {
+  const n = (d.guides || []).filter(g => g.reads.some(r => !r.done)).length;
+  return `<div class="segc tvseg"><button class="${S.tview !== 'g' ? 'on' : ''}" onclick="S.tview='t';S.gform=null;renderTasks()">المهام</button><button class="${S.tview === 'g' ? 'on' : ''}" onclick="S.tview='g';renderTasks()">التوجيهات${n ? ' (' + n + ')' : ''}</button></div>`;
+}
 function renderTasks() {
   if (S.td) return renderTaskDetail();
+  if (S.tview === 'g') {
+    $('#view').innerHTML = tvSeg(S.data) + guidesHtml(S.data);
+    const fb = $('#fab'); fb.innerHTML = I('plus', 26, 2.5); fb.classList.toggle('hide', !!S.gform || !S.data.employees.some(e => e.guide));
+    return;
+  }
   loadTq();
   const d = S.data, q = S.tq;
   const empOpts = '<option value="all">كل الموظفين</option>' + d.employees.map(e => `<option value="${e.id}" ${q.emp === e.id ? 'selected' : ''}>${esc(e.name)}</option>`).join('');
   const projOpts = `<option value="all">كل المشاريع</option><option value="gen" ${q.proj === 'gen' ? 'selected' : ''}>عام</option>` + (d.projects || []).map(p => `<option value="${p.id}" ${q.proj === p.id ? 'selected' : ''}>${esc(p.name)}${p.archived ? ' (مؤرشف)' : ''}</option>`).join('');
-  $('#view').innerHTML = `
+  $('#view').innerHTML = tvSeg(d) + `
     ${q.search ? `<input id="tqs" class="tqs" type="search" placeholder="ابحث بالعنوان أو الوصف أو المشروع" value="${esc(q.q)}" oninput="S.tq.q=this.value;drawTaskList()">` : ''}
     <div class="scards" id="tcards"></div>
     <div class="tfil">
@@ -2148,11 +2158,11 @@ function gReadLine(r, hasQ) {
 }
 function guidesHtml(d) {
   const on = d.employees.filter(e => e.guide), gs = d.guides || [];
-  if (!on.length && !gs.length) return '';
+  if (!on.length && !gs.length) return '<div class="card" style="margin-top:12px">' + emptyHtml('clipboard-list', 'شغّل «التوجيهات» لموظف من الإعدادات أول') + '</div>';
   const f = S.gform;
-  let h = `<div class="tsec"><span class="gsh">${I('clipboard-list', 15)}التوجيهات</span>${f || !on.length ? '' : `<button class="lnk gnew" onclick="openGForm()">${I('plus', 15)}توجيه جديد</button>`}</div>`;
+  let h = '<div style="height:10px"></div>';
   if (f) h += gFormHtml(d, on, f);
-  if (!gs.length && !f) return h + `<div class="card"><div class="tnone" style="margin:0">${I('clipboard-list', 14)}ما فيه توجيهات للحين</div></div>`;
+  if (!gs.length && !f) return h + '<div class="card">' + emptyHtml('clipboard-list', 'ما فيه توجيهات للحين، اضغط + وأرسل أول توجيه') + '</div>';
   h += gs.map(g => {
     const arm = S.armed === 'gd_' + g.id;
     return `<div class="card gcard">
@@ -2172,22 +2182,22 @@ function gFormHtml(d, on, f) {
     <div class="field"><span>النقاط (كل نقطة سطر قصير)</span>
       ${f.points.map((p, i) => `<div class="gpi"><i>${i + 1}</i><input value="${esc(p)}" oninput="S.gform.points[${i}]=this.value">${f.points.length > 1 ? `<button onclick="gPt(${i})" aria-label="شيل">${I('x', 15)}</button>` : ''}</div>`).join('')}
       ${f.points.length < 20 ? `<button class="lnk gadd" onclick="gPt(-1)">${I('plus', 14)}نقطة</button>` : ''}</div>
-    <div class="trow"><div class="n"><b>سؤال في الآخر</b><small>للتوجيهات المهمة، ولازم يجاوب صح</small></div><button class="tg ${f.q ? 'on' : ''}" onclick="S.gform.q=!S.gform.q;renderTeam()" aria-label="سؤال"></button></div>
+    <div class="trow"><div class="n"><b>سؤال في الآخر</b><small>للتوجيهات المهمة، ولازم يجاوب صح</small></div><button class="tg ${f.q ? 'on' : ''}" onclick="S.gform.q=!S.gform.q;renderTasks()" aria-label="سؤال"></button></div>
     ${f.q ? `<div class="field"><span>السؤال</span><input value="${esc(f.qt)}" oninput="S.gform.qt=this.value"></div>
       <div class="field"><span>الخيارات (اضغط الدائرة على الجواب الصح)</span>
-      ${f.opts.map((o, i) => `<div class="gpi go ${f.ok === i ? 'on' : ''}"><button class="gr" onclick="S.gform.ok=${i};renderTeam()" aria-label="الجواب الصح">${f.ok === i ? I('check', 13, 3) : ''}</button><input value="${esc(o)}" oninput="S.gform.opts[${i}]=this.value"></div>`).join('')}</div>` : ''}
+      ${f.opts.map((o, i) => `<div class="gpi go ${f.ok === i ? 'on' : ''}"><button class="gr" onclick="S.gform.ok=${i};renderTasks()" aria-label="الجواب الصح">${f.ok === i ? I('check', 13, 3) : ''}</button><input value="${esc(o)}" oninput="S.gform.opts[${i}]=this.value"></div>`).join('')}</div>` : ''}
     <div class="field"><span>لمين</span><div class="dedch">${on.map(e => `<button class="${f.emps.indexOf(e.id) >= 0 ? 'on' : ''}" onclick="gEmp('${e.id}')">${esc(e.name)}</button>`).join('')}</div></div>
-    <div class="grid2"><button class="btn2 cu" onclick="sendGuide()">${I('send', 16)}أرسل</button><button class="btn2" onclick="S.gform=null;renderTeam()">إلغاء</button></div>
+    <div class="grid2"><button class="btn2 cu" onclick="sendGuide()">${I('send', 16)}أرسل</button><button class="btn2" onclick="S.gform=null;renderTasks()">إلغاء</button></div>
     <div class="err" id="gerr"></div>
   </div>`;
 }
 function openGForm() {
   S.gform = {title: '', points: ['', ''], q: false, qt: '', opts: ['', '', ''], ok: -1, emps: S.data.employees.filter(e => e.guide).map(e => e.id)};
-  S.armed = null; renderTeam();
+  S.armed = null; renderTasks();
   setTimeout(() => { const x = $('#g_title'); if (x) x.focus(); }, 50);
 }
-function gPt(i) { const p = S.gform.points; if (i < 0) p.push(''); else p.splice(i, 1); renderTeam(); }
-function gEmp(id) { const a = S.gform.emps, i = a.indexOf(id); if (i >= 0) a.splice(i, 1); else a.push(id); renderTeam(); }
+function gPt(i) { const p = S.gform.points; if (i < 0) p.push(''); else p.splice(i, 1); renderTasks(); }
+function gEmp(id) { const a = S.gform.emps, i = a.indexOf(id); if (i >= 0) a.splice(i, 1); else a.push(id); renderTasks(); }
 async function sendGuide() {
   const f = S.gform;
   const x = {title: f.title, points: f.points, emps: f.emps, q: f.q ? {text: f.qt, opts: f.opts, ok: f.ok} : null};
@@ -2198,9 +2208,9 @@ async function sendGuide() {
   catch (e) { $('#gerr').textContent = e; }
 }
 async function delGuide(id) {
-  if (S.armed !== 'gd_' + id) { S.armed = 'gd_' + id; renderTeam(); return; }
+  if (S.armed !== 'gd_' + id) { S.armed = 'gd_' + id; renderTasks(); return; }
   try { S.data = await call('apiGuideDel', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذف التوجيه'); }
-  catch (e) { S.armed = null; renderTeam(); toastErr(e); }
+  catch (e) { S.armed = null; renderTasks(); toastErr(e); }
 }
 async function toggleGuide(id) {
   const e = empById(id);
