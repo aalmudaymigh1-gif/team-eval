@@ -72,11 +72,13 @@ h1{font-size:27px;font-weight:700;letter-spacing:-.5px;margin:0;line-height:1.25
 .hair{border-top:1px solid var(--line);margin:14px 0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
-.emp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.empc{border:1.5px solid var(--line2);background:var(--surface);border-radius:var(--r2);padding:12px 14px;text-align:right;cursor:pointer;transition:all .2s var(--ease)}
+.emp{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -2px;padding:0 2px}
+.emp::-webkit-scrollbar{display:none}
+.empi{margin-top:8px;font-size:12.5px;color:var(--muted)}
+.empc{flex:none;border:1.5px solid var(--line2);background:var(--surface);border-radius:999px;padding:7px 16px;font:inherit;font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;cursor:pointer;transition:all .2s var(--ease)}
 .empc:active{transform:scale(.98)}
 .empc b{display:block;font-size:15px;font-weight:600}.empc small{color:var(--muted);font-size:12px}
-.empc.on{border-color:var(--acc);background:var(--acc-soft);box-shadow:0 0 0 3px var(--acc-ring)}
+.empc.on{border-color:var(--acc);background:var(--acc);color:var(--acc-ink)}
 
 .segc{display:flex;background:var(--fill);border-radius:var(--r);padding:3px;gap:2px}
 .segc button{flex:1;border:0;background:none;padding:9px 4px;border-radius:10px;font-size:14px;color:#4B5563;cursor:pointer;transition:all .2s var(--ease);white-space:nowrap}
@@ -373,6 +375,58 @@ video.vid{height:auto;max-height:70vh;background:#000}
 .pushb .bigdo{width:100%;justify-content:center;margin-top:10px;border:0;cursor:pointer;font-family:inherit}
 .pushb .later{display:block;margin:8px auto 0;background:none;border:0;color:var(--muted);font-size:12px;font-family:inherit;cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.tcard{padding:14px}
+.tmh{display:flex;align-items:center;gap:8px;min-height:34px}
+.tmh>svg{color:var(--acc);flex:none}
+.tmh>b{font-size:16px;font-weight:700;flex:1;min-width:0;line-height:1.3}
+.tbad{display:flex;gap:5px}
+.tbad .badge{font-size:11.5px;padding:2px 8px}
+.thero{display:grid;grid-template-columns:1.25fr 1fr;gap:8px;margin-top:12px}
+.thero>div{border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.thero span{font-size:11.5px;display:flex;align-items:center;gap:5px}
+.thero b{font-size:24px;font-weight:700;letter-spacing:-.3px;line-height:1.2}
+.thero small{font-size:12px;font-weight:500;margin-right:4px}
+.thero .h1{background:linear-gradient(150deg,var(--acc),var(--acc-2));color:#fff}
+.thero .h1 span,.thero .h1 small{color:rgba(255,255,255,.75)}
+.thero .h2{background:var(--fill)}
+.thero .h2 span,.thero .h2 small{color:var(--muted)}
+.thero .h2 b{font-size:20px;margin-top:auto}
+.tbrk{margin-top:10px;font-size:13px}
+.tbrk>div{display:flex;justify-content:space-between;padding:5px 2px}
+.tbrk span{color:var(--muted)}
+.tbrk b{font-weight:600}
+.tbrk .tot{border-top:1px solid var(--line2);margin-top:3px;padding-top:7px}
+.tbrk .tot span{color:var(--text);font-weight:700}
+.tbrk .tot b{font-weight:700;font-size:14px}
+.tat{margin-top:12px;background:var(--fill);border-radius:var(--r);padding:10px 12px}
+.tath{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--muted);flex-wrap:wrap}
+.tath svg{color:var(--faint)}
+.tatst{margin-right:auto;display:flex;gap:4px;flex-wrap:wrap}
+.tath .badge{font-size:11px;padding:2px 8px}
+.tatl{font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:6px}
+.tat .atph img,.tat .atph .pph{width:52px;height:52px}
+.tatk{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.tatk .lnk{padding-top:4px}
+.tgo{margin-right:auto;font-size:12.5px}
+.tacts{display:grid;grid-template-columns:repeat(3,1fr);margin-top:12px;border:1.5px solid var(--line2);border-radius:var(--r);overflow:hidden}
+.tacts button{background:none;border:0;font:inherit;font-size:12px;font-weight:500;color:var(--text);padding:9px 2px;display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;white-space:nowrap}
+.tacts button+button{border-right:1px solid var(--line2)}
+.tacts button svg{color:var(--acc)}
+.tacts button:active{background:var(--fill)}
+.tlbl{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);font-weight:600;margin:14px 0 2px}
+.tlbl svg,.tnone svg{color:var(--faint)}
+.tents .ent{padding:9px 0}
+.tnone{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--faint);margin-top:11px}
+.tnone span{opacity:.6}
+.tsec{display:flex;align-items:center;justify-content:space-between;margin:18px 4px 8px;font-size:12px;color:var(--muted)}
+.tgroup{padding:0 14px}
+.tmrow{padding:14px 0}
+.tmrow+.tmrow{border-top:1px solid var(--line)}
+.tst{display:flex;gap:14px}
+.tst>span{display:flex;flex-direction:column;align-items:center;font-size:10.5px;color:var(--muted);line-height:1.25}
+.tst b{font-size:17px;font-weight:700;color:var(--text)}
+.tat a.lnk{text-decoration:none}
+
 </style>
 </head>
 <body>
@@ -623,25 +677,71 @@ function attLinks(r) {
   if (r.outLat != null) a.push(`<a class="lnk dl" href="${mapUrl(r.outLat, r.outLng)}" target="_blank" rel="noopener">موقع الطلوع</a>`);
   return a.join('');
 }
-function attTeamHtml(d) {
-  const es = d.employees.filter(e => e.attend);
-  if (!es.length) return '';
+function attBlock(d, e) {
+  if (!e.attend) return '';
   const cfg = d.attCfg || {start: '07:00', grace: 15}, off = isOff(d.today), alertAt = addMin(cfg.start, 30), now = nowHM();
-  return `<div class="card">${ctitle('map-pin', 'حضور اليوم', off ? '<span class="badge n">الجمعة إجازة</span>' : '')}` + es.map(e => {
-    const r = (d.attendance || []).find(x => x.emp === e.id && x.date === d.today);
-    let st, line = '';
-    if (!r) {
-      st = off ? '<span class="badge n">إجازة</span>' : now >= alertAt ? '<span class="badge late">ما طلع من البيت</span>' : '<span class="badge n">ما طلع للحين</span>';
-    } else {
-      st = r.out ? '<span class="badge n">خلّص</span>' : r.in ? '<span class="badge">في الشغل</span>' : '<span class="badge wait">في الطريق</span>';
-      if (r.late) st += ` <span class="badge late">متأخر ${r.late} د</span>`;
-      if (r.in) st += ' ' + attFlag(r, d.projects);
-      line = attRowLines(r, d.projects);
-    }
-    return `<div class="atr"><div style="flex:1"><b>${esc(e.name)}</b> ${st}<div class="sub" style="line-height:1.8">${line}</div>
-      ${r ? `<div class="atph">${attPhotoHtml(r.homePhoto)}${attPhotoHtml(r.inPhoto)}${attPhotoHtml(r.outPhoto)}</div>` : ''}
-      <div class="ilinks" style="margin-top:6px;flex-wrap:wrap">${r ? attLinks(r) : ''}<button class="lnk dl" onclick="openAttLog('${e.id}')">سجل الحضور ‹</button></div></div></div>`;
-  }).join('') + '</div>';
+  const r = (d.attendance || []).find(x => x.emp === e.id && x.date === d.today);
+  let st, line = '';
+  if (!r) {
+    st = off ? '<span class="badge n">إجازة</span>' : now >= alertAt ? '<span class="badge late">ما طلع من البيت</span>' : '<span class="badge n">ما طلع للحين</span>';
+  } else {
+    st = r.out ? '<span class="badge n">خلّص</span>' : r.in ? '<span class="badge">في الشغل</span>' : '<span class="badge wait">في الطريق</span>';
+    if (r.late) st += ` <span class="badge late">متأخر ${r.late} د</span>`;
+    if (r.in) st += ' ' + attFlag(r, d.projects);
+    line = attRowLines(r, d.projects);
+  }
+  return `<div class="tat">
+    <div class="tath">${I('map-pin', 15)}<span>حضور اليوم</span>${off ? '<span class="badge n">الجمعة إجازة</span>' : ''}<span class="tatst">${st}</span></div>
+    ${line ? `<div class="tatl">${line}</div>` : ''}
+    ${r ? `<div class="atph">${attPhotoHtml(r.homePhoto)}${attPhotoHtml(r.inPhoto)}${attPhotoHtml(r.outPhoto)}</div>` : ''}
+    <div class="tatk">${r ? attLinks(r) : ''}<button class="lnk tgo" onclick="openAttLog('${e.id}')">سجل الحضور ‹</button></div>
+  </div>`;
+}
+function teamActs(e) {
+  return `<div class="tacts">
+    <button onclick="waEmp('${e.id}')">${I('send', 15)}رابطه واتساب</button>
+    <button onclick="copyEmp('${e.id}')">${I('copy', 15)}نسخ رابطه</button>
+    <button onclick="preview('${e.id}')">${I('eye', 15)}معاينة صفحته</button>
+  </div>`;
+}
+function teamRecent(e, track) {
+  if (!e.recent.length) return `<div class="tnone">${I('history', 14)}آخر المواقف<span>·</span>ما فيه مواقف مسجلة</div>`;
+  return `<div class="tlbl">${I('history', 14)}آخر المواقف${track ? '' : ' (بالريال)'}</div><div class="tents">${e.recent.map(x => entryHtml(x, true, track)).join('')}</div>`;
+}
+function teamBreak(m) {
+  return `<div class="tbrk">
+    <div><span>الحافز الأساسي</span><b>${sar(m.base)}</b></div>
+    ${m.deduct ? `<div><span>التقصير (${m.misses})</span><b class="neg">${sarS(m.deduct,'−')}</b></div>` : ''}
+    ${m.reward ? `<div><span>مواقف مميزة (${m.stars})</span><b class="pos">${sarS(m.reward,'+')}</b></div>` : ''}
+    ${m.clean ? `<div><span>شهر بدون تقصير</span><b class="pos">${sarS(m.clean,'+')}</b></div>` : ''}
+    <div class="tot"><span>الحافز</span><b>${sar(m.bonus)}</b></div>
+  </div>`;
+}
+function teamPaid(d, e) {
+  const m = e.month;
+  return `<div class="card tcard">
+    <div class="tmh">${I('user-round', 18)}<b>${esc(e.name)}</b><span class="tbad"><span class="badge late">${I('x', 12, 3)} ${m.misses}</span><span class="badge">${I('star', 12, 2.4)} ${m.stars}</span></span></div>
+    <div class="thero">
+      <div class="h1"><span>${I('sparkles', 13)}الحافز الحين</span><b>${num(m.bonus)}<small>ريال</small></b></div>
+      <div class="h2"><span>${I('banknote', 13)}راتب الشهر</span><b>${num(m.total)}<small>ريال</small></b></div>
+    </div>
+    ${teamBreak(m)}
+    ${m.improve ? `<div class="note bad">${I('triangle-alert', 16)}<div><b>${esc(m.improve.crit)}:</b> ${esc(m.improve.text)}</div></div>` : ''}
+    ${attBlock(d, e)}
+    ${teamActs(e)}
+    ${teamRecent(e, false)}
+  </div>`;
+}
+function teamTrackRow(d, e) {
+  const m = e.month;
+  return `<div class="tmrow">
+    <div class="tmh">${I('user-round', 18)}<b>${esc(e.name)}</b>
+      <span class="tst"><span><b>${m.misses}</b>التقصير هالشهر</span><span><b>${m.stars}</b>مواقف مميزة</span></span></div>
+    ${m.improve ? `<div class="note bad">${I('triangle-alert', 16)}<div><b>${esc(m.improve.crit)}:</b> ${esc(m.improve.text)}</div></div>` : ''}
+    ${attBlock(d, e)}
+    ${teamActs(e)}
+    ${teamRecent(e, true)}
+  </div>`;
 }
 function openAttLog(id) { S.attLog = id; S.armed = null; renderTeam(); window.scrollTo(0, 0); }
 function renderAttLog(empId) {
@@ -807,7 +907,7 @@ function renderAdmin() {
       <button class="btn2" onclick="copyAdmin()">نسخ الرابط</button></div></div>`;
   }
   const tab = (v, ic, t) => `<button class="${S.view===v?'on':''}" onclick="go('${v}')">${I(ic, 16)}${t}</button>`;
-  h = `<div class="top"><div><h1>تقييم الفريق</h1><div class="sub">${esc(dayLabel(d.today))}</div></div><button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>${pushHtml()}
+  h = `<div class="top"><div><h1>إدارة الشغل</h1><div class="sub">${esc(dayLabel(d.today))}</div></div><button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>${pushHtml()}
     <div class="tabs">${tab('rec','clipboard-check','تقييم')}${tab('team','users','الفريق')}${tab('task','list-checks','المهام')}${tab('inv','receipt','الفواتير')}${tab('fin','wallet','المالية')}${tab('set','settings','الإعدادات')}</div>` + h + `
     <div id="view"></div>`;
   $('#app').innerHTML = h;
@@ -843,7 +943,8 @@ function renderRec() {
   const empSub = e => e.track ? 'متابعة فقط' : 'حافز الشهر ' + num(e.month.bonus) + ' ريال';
   $('#view').innerHTML = `
     <div class="blk"><div class="lab">${I('user', 14)}الموظف</div>
-      <div class="emp">${d.employees.map(e => `<button class="empc ${S.emp===e.id?'on':''}" onclick="setEmp('${e.id}')"><b>${esc(e.name)}</b><small>${esc(empSub(e))}</small></button>`).join('')}</div></div>
+      <div class="emp">${d.employees.map(e => `<button class="empc ${S.emp===e.id?'on':''}" onclick="setEmp('${e.id}')">${esc(e.name)}</button>`).join('')}</div>
+      ${emp.id ? `<div class="empi">${esc(emp.name)} · ${esc(empSub(emp))}</div>` : ''}</div>
     <div class="blk"><div class="lab">${I('calendar', 14)}اليوم</div>
       ${segc([['today','اليوم'],['yest','أمس'],['other','تاريخ ثاني']], S.dateMode, 'setDate')}
       ${S.dateMode==='other' ? `<input type="date" value="${S.date}" max="${d.today}" onchange="S.date=this.value">` : ''}</div>
@@ -916,27 +1017,10 @@ function renderTeam() {
   if (!d.employees.length) { $('#view').innerHTML = '<div class="card" style="margin-top:16px">' + emptyHtml('users', 'ما فيه موظفين، أضفهم من الإعدادات') + '</div>'; return; }
   if (S.attLog) return renderAttLog(S.attLog);
   setTimeout(loadAttPhotos, 0);
-  $('#view').innerHTML = '<div style="height:12px"></div>' + attTeamHtml(d) + d.employees.map(e => {
-    const m = e.month;
-    const kpis = m.track
-      ? `<div class="kpi"><div class="k">${I('x', 13, 2.5)}التقصير هالشهر</div><div class="v">${m.misses}</div></div>
-        <div class="kpi"><div class="k">${I('star', 13)}مواقف مميزة</div><div class="v">${m.stars}</div></div>`
-      : `<div class="kpi hero"><div class="k">${I('sparkles', 13)}الحافز الحين</div><div class="v">${num(m.bonus)}<small> ريال</small></div></div>
-        <div class="kpi"><div class="k">${I('banknote', 13)}راتب الشهر</div><div class="v">${num(m.total)}<small> ريال</small></div></div>`;
-    return `<div class="card">
-      ${ctitle('user-round', esc(e.name), m.track ? '<span class="badge wait">متابعة فقط</span>' : `<span class="badge late">${I('x', 12, 3)} ${m.misses}</span> <span class="badge">${I('star', 12, 2.4)} ${m.stars}</span>`)}
-      <div class="kpis">${kpis}</div>
-      ${m.track ? '' : bonusTable(m)}
-      ${m.improve ? `<div class="note bad">${I('triangle-alert', 16)}<div><b>${esc(m.improve.crit)}:</b> ${esc(m.improve.text)}</div></div>` : ''}
-      <div class="grid2" style="margin-top:14px">
-        <button class="btn2" onclick="waEmp('${e.id}')">${I('send', 16)}رابطه واتساب</button>
-        <button class="btn2" onclick="copyEmp('${e.id}')">${I('copy', 16)}نسخ رابطه</button>
-      </div>
-      <button class="btn2 soft" style="width:100%;margin-top:8px" onclick="preview('${e.id}')">${I('eye', 16)}معاينة صفحته</button>
-      <div class="lbl">${I('history', 14)}آخر المواقف${m.track ? '' : ' (بالريال)'}</div>
-      ${e.recent.length ? e.recent.map(x => entryHtml(x, true, m.track)).join('') : emptyHtml('inbox', 'ما فيه مواقف مسجلة')}
-    </div>`;
-  }).join('');
+  const paid = d.employees.filter(e => !e.month.track), track = d.employees.filter(e => e.month.track);
+  let h = '<div style="height:12px"></div>' + paid.map(e => teamPaid(d, e)).join('');
+  if (track.length) h += `<div class="tsec"><span class="badge wait">متابعة فقط</span><span>${track.length} ${track.length === 1 ? 'موظف' : 'موظفين'}</span></div><div class="card tgroup">${track.map(e => teamTrackRow(d, e)).join('')}</div>`;
+  $('#view').innerHTML = h;
 }
 
 function bonusTable(m) {
