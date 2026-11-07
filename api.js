@@ -48,7 +48,7 @@
   function norm(r) {
     r.employees = (r.employees || []).map(e => ({ id: e.id, name: e.name, salary: Number(e.salary) || 0, max: Number(e.max) || 0,
       token: e.token || '', active: e.active !== false, track: !!e.track, attend: !!e.attend }));
-    r.attendance = (r.attendance || []).map(x => Object.assign({}, x, { inLat: x.inLat == null ? null : Number(x.inLat), inLng: x.inLng == null ? null : Number(x.inLng),
+    r.attendance = (r.attendance || []).map(x => Object.assign({}, x, { homeLat: x.homeLat == null ? null : Number(x.homeLat), homeLng: x.homeLng == null ? null : Number(x.homeLng), inLat: x.inLat == null ? null : Number(x.inLat), inLng: x.inLng == null ? null : Number(x.inLng),
       outLat: x.outLat == null ? null : Number(x.outLat), outLng: x.outLng == null ? null : Number(x.outLng), late: Number(x.late) || 0 }));
     r.logs = r.logs || [];
     r.fin = (r.fin || []).map(f => Object.assign({}, f, { amount: Number(f.amount) || 0, months: Number(f.months) || 0 }));
@@ -655,6 +655,7 @@
       return page === 'admin' ? aexec(cred, 'push_sub', sub) : eexec(cred, 'push_sub', sub);
     },
 
+    async apiAttHome(token, dataUrl, pos) { return attDo(token, 'att_home', dataUrl, pos, ''); },
     async apiAttIn(token, dataUrl, pos, project) { return attDo(token, 'att_in', dataUrl, pos, project); },
     async apiAttOut(token, dataUrl, pos) { return attDo(token, 'att_out', dataUrl, pos, ''); },
     async apiAttToggle(k, empId, on) { return adminDo(k, 'att_toggle', { emp: empId, on: !!on }); },
