@@ -339,6 +339,11 @@ video.vid{height:auto;max-height:70vh;background:#000}
 .wl{font-size:12.5px;font-weight:600;white-space:nowrap}.wl.ok{color:var(--green)}.wl.soon{color:#B7791F}.wl.end{color:var(--faint)}
 .ivd h3{margin:0;font-size:17px}.ivd .amt{font-size:22px;font-weight:700;margin:4px 0 2px}
 .ivd .pgrid{margin:10px 0}.ivd .btn2{width:100%;margin-top:8px}
+.ecs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.ec{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:1px;background:var(--acc);color:#fff;border:0;border-radius:16px;padding:14px;font:inherit;text-align:start;cursor:pointer;min-height:118px}
+.ec b{font-size:16px;margin-top:14px;font-weight:700}.ec .l{font-size:12px;opacity:.8;margin-top:4px}.ec .v{font-size:22px;font-weight:700;line-height:1.2}
+.ec .o{font-size:12px;opacity:.7;margin-top:2px}.ec .o.r{opacity:1;color:#F7C1C1;font-weight:600}
+.ec .pend{position:absolute;top:10px;left:10px;background:#EF9F27;color:#412402;border-radius:999px;padding:2px 8px;font-size:11.5px;font-weight:700}
 .strb{width:100%;background:none;border:0;font:inherit;color:inherit;text-align:start;cursor:pointer;padding:0}
 .erow{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:start;cursor:pointer}
 .ilinks{display:flex;gap:16px}
@@ -1189,17 +1194,12 @@ function renderInv() {
   const rv = items.filter(x => x.kind === 'inv' && x.status === 'review');
   const okM = items.filter(x => x.kind === 'inv' && x.status === 'ok' && x.ts.slice(0, 7) === mk);
   const tot = okM.reduce((s, x) => s + x.amount, 0);
-  let h = `<div class="scards" style="margin-top:14px">
-      <div class="sc a ${rv.length ? '' : 'z'}"><b>${rv.length}</b><span>تنتظر مراجعتك</span></div>
-      <div class="sc n"><b>${money(tot)}</b><span>مصاريف ${esc(d.month)}</span></div></div>`;
-  if (rv.length) h += `<div class="sech a">تنتظر مراجعتك<span>${rv.length}</span></div>` + rv.map(x => invRowHtml(x, true)).join('');
-  h += `<div class="sech">العهدة</div><div class="card" style="margin-top:6px">` + d.employees.map(e => {
-    const p = (iv.parts || {})[e.id] || {c: iv.bal[e.id] || 0, t: 0}, c = p.c, t = p.t;
-    const b = c > 0 ? c : -t;
-    const sub = c > 0 ? 'معه' + (t > 0 ? ' · له عندك ' + money(t) : '') : t > 0 ? 'له عندك' : 'ما فيه رصيد';
-    return `<div class="row" style="padding:8px 0"><button class="erow" style="width:auto;flex:1" onclick="openSt('${e.id}')"><span><b>${esc(e.name)}</b><br><span class="sub">${sub} · كشف العهدة ‹</span></span></button>
-      <span style="display:flex;align-items:center;gap:10px"><b class="iva ${b < 0 ? 'r' : ''}" style="font-size:18px">${money(Math.abs(b))}</b><button class="btn2" style="padding:7px 12px;font-size:13px" onclick="askGive('${e.id}')">${I('plus', 14, 2.5)}أعطيته</button></span></div>`;
-  }).join('<div class="hair"></div>') + `</div>`;
+  let h = '<div class="ecs">' + d.employees.map(e => {
+    const p = (iv.parts || {})[e.id] || {c: iv.bal[e.id] || 0, t: 0}, n = rv.filter(x => x.emp === e.id).length;
+    return `<button class="ec" onclick="openSt('${e.id}')">${n ? `<span class="pend">${n} تنتظر</span>` : ''}
+      <b>${esc(e.name)}</b><span class="l">معه</span><span class="v">${money(Math.max(0, p.c))}</span>
+      <span class="o ${p.t > 0 ? 'r' : ''}">${p.t > 0 ? 'له عندك ' + money(p.t) : 'ما له شي عندك'}</span></button>`;
+  }).join('') + '</div>';
   const okList = items.filter(x => x.kind === 'inv' && x.status === 'ok');
   if (okList.length) {
     const showAll = !!S.iopen.allinv, list = showAll ? okList : okList.slice(0, 8);
@@ -1217,7 +1217,7 @@ function renderInv() {
   const groups = {}, keys = [], order = (d.projects || []).map(p => p.id);
   okAll.forEach(x => { const k = x.project || ''; if (!groups[k]) { groups[k] = {name: x.pname || 'عام', all: 0, m: 0, list: []}; keys.push(k); } const g = groups[k]; g.all += x.amount; if (x.ts.slice(0, 7) === mk) { g.m += x.amount; g.list.push(x); } });
   keys.sort((a, b) => (a === '' ? 1e6 : order.indexOf(a)) - (b === '' ? 1e6 : order.indexOf(b)));
-  if (keys.length) h += `<div class="sech">مصاريف المشاريع</div>` + keys.map(k => {
+  if (keys.length) h += `<div class="sech">مصاريف المشاريع<span>${money(tot)} ${esc(d.month)}</span></div>` + keys.map(k => {
     const g = groups[k], on = !!S.iopen['p_' + k];
     return `<div class="pgrp"><button class="pgh2" onclick="S.iopen['p_${k}']=${on ? 'false' : 'true'};renderInv()"><span>${esc(g.name)}</span><span class="n">${money(g.m)} هالشهر<span class="chev ${on ? 'up' : ''}">${I('arrow-right', 15, 2.5)}</span></span></button>
       <div class="ivtot">الإجمالي من البداية: <b>${money(g.all)}</b> ريال</div>
@@ -1289,17 +1289,19 @@ function renderInvSt(empId) {
   const d = S.data, e = d.employees.find(x => x.id === empId);
   const items = ((d.inv || {}).items || []).filter(x => x.emp === empId).map(x => Object.assign({}, x, {ename: e.name}));
   const gives = items.filter(x => x.kind === 'give'), oks = items.filter(x => x.kind === 'inv' && x.status === 'ok' && x.paidBy !== 'card');
-  const rv = items.filter(x => x.kind === 'inv' && x.status === 'review' && x.paidBy !== 'card');
+  const rv = items.filter(x => x.kind === 'inv' && x.status === 'review');
   const p = ((d.inv || {}).parts || {})[empId] || {c: 0, o: 0, t: 0, g: 0, cash: 0, own: 0};
   const rows = gives.concat(oks).sort((a, b2) => a.ts < b2.ts ? 1 : a.ts > b2.ts ? -1 : 0);
   let h = `<button class="back" onclick="S.iv.st='';renderInv()">${I('arrow-right', 17)}رجوع للفواتير</button>
+    <h2 style="margin:10px 0 0;font-size:20px">${esc(e.name)}</h2>
+    ${rv.length ? `<div class="sech a">تنتظر اعتمادك<span>${rv.length}</span></div>` + rv.map(x => invRowHtml(x, false)).join('') : ''}
     <div class="stc"><div class="l">باقي معه</div><div class="v">${money(Math.max(0, p.c))} <small>ريال</small></div>
     <div class="r"><span>عطيته ${money(p.g)}</span><span>صرف من العهدة ${money(p.cash)}</span></div></div>
     ${p.t > 0 ? `<div class="stc red"><div class="l">له عندك</div><div class="v">${money(p.t)} <small>ريال</small></div>
       <div class="r"><span>${p.o > 0 ? 'دفع من جيبه ' + money(p.o) : ''}</span><span>${p.c < 0 ? 'صرف زيادة عن العهدة ' + money(-p.c) : ''}</span></div>
       <button class="bigdo" onclick="askSdad('${empId}', ${p.t})">${I('check', 15, 2.5)}سدّدته</button></div>` : ''}
     <button class="bigdo" style="width:100%;justify-content:center;border:0;font-family:inherit;cursor:pointer" onclick="askGive('${empId}')">${I('plus', 15, 2.5)}أعطيته مبلغ</button>`;
-  if (rv.length) h += `<div class="note warn" style="margin-top:12px">${rv.length === 1 ? 'فاتورة' : rv.length + ' فواتير'} بـ ${money(rv.reduce((s, x) => s + x.amount, 0))} ريال تنتظر اعتمادك، وما تنخصم إلا بعده.</div>` + rv.map(x => invRowHtml(x, false)).join('');
+
   h += `<div class="sech">كشف ${esc(e.name)}</div>`;
   if (!rows.length) return $('#view').innerHTML = h + emptyHtml('wallet', 'ما فيه حركات للحين');
   h += '<div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">' + rows.map(x => x.kind === 'give'
