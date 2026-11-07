@@ -339,6 +339,17 @@ video.vid{height:auto;max-height:70vh;background:#000}
 .wl{font-size:12.5px;font-weight:600;white-space:nowrap}.wl.ok{color:var(--green)}.wl.soon{color:#B7791F}.wl.end{color:var(--faint)}
 .ivd h3{margin:0;font-size:17px}.ivd .amt{font-size:22px;font-weight:700;margin:4px 0 2px}
 .ivd .pgrid{margin:10px 0}.ivd .btn2{width:100%;margin-top:8px}
+.attgo{width:100%;display:flex;flex-direction:column;align-items:center;gap:2px;background:#3B6D11;color:#fff;border:0;border-radius:18px;padding:18px;margin:12px 0 4px;font:inherit;cursor:pointer}
+.attgo b{font-size:22px}.attgo span{font-size:12.5px;opacity:.85}
+.attc{background:#EAF3DE;border:1px solid #C0DD97;color:#27500A;border-radius:16px;padding:12px 14px;margin:12px 0 4px}
+.attc .r1{display:flex;justify-content:space-between;gap:8px;font-size:13px}.attc .el{font-size:26px;font-weight:700;margin:4px 0 8px}
+.attc.done{background:var(--fill);border-color:var(--line2);color:var(--text)}.attc.done .el{margin-bottom:0}
+.attout{width:100%;background:#A32D2D;color:#fff;border:0;border-radius:999px;padding:11px;font:inherit;font-weight:600;cursor:pointer}
+.cam video,.camimg{width:100%;border-radius:14px;background:#000;display:block;max-height:56vh;object-fit:cover;margin-top:8px}
+.cam video{transform:scaleX(-1)}.cam .btn{margin-top:12px}.cam select{margin-top:4px}
+.atr{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}.atr:last-child{border-bottom:0}
+.atr .badge{margin-top:0;font-size:11px;padding:2px 8px}
+.atph{display:flex;gap:6px;margin-top:6px}.atph img,.atph .pph{width:58px;height:58px;border-radius:10px;object-fit:cover;aspect-ratio:auto;cursor:pointer}
 .ecs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
 .ec{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:1px;background:var(--acc);color:#fff;border:0;border-radius:16px;padding:14px;font:inherit;text-align:start;cursor:pointer;min-height:118px}
 .ec b{font-size:16px;margin-top:14px;font-weight:700}.ec .l{font-size:12px;opacity:.8;margin-top:4px}.ec .v{font-size:22px;font-weight:700;line-height:1.2}
@@ -368,7 +379,7 @@ video.vid{height:auto;max-height:70vh;background:#000}
 <div class="toast" id="toast"><span id="toastMsg"></span><button id="toastUndo" class="hide">تراجع</button></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=6"></script>
+<script src="api.js?v=7"></script>
 <script>
 const BOOT = (function () {
   const q = new URLSearchParams(location.search);
@@ -443,6 +454,256 @@ if ('serviceWorker' in navigator && BOOT.page !== 'denied') {
     if (PUSH.ok && Notification.permission === 'granted') pushSubscribe().catch(() => {});
   }).catch(() => {});
   navigator.serviceWorker.addEventListener('message', ev => { if (ev.data && ev.data.type === 'refresh' && typeof refresh === 'function') refresh(); });
+}
+
+/* ---------- الحضور والانصراف ---------- */
+ICONS['map-pin'] = '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/> <circle cx="12" cy="10" r="3"/>';
+function t12(s) { if (!s) return ''; const h = Number(s.slice(11, 13)), m = s.slice(14, 16); return (h % 12 || 12) + ':' + m + (h < 12 ? ' ص' : ' م'); }
+function hrs(ms) { const m = Math.max(0, Math.round(ms / 60000)); return Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'); }
+function nowHM() { return new Intl.DateTimeFormat('en-GB', {timeZone: 'Asia/Riyadh', hour: '2-digit', minute: '2-digit', hour12: false}).format(new Date()); }
+function addMin(hm, n) { const t = Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3, 5)) + n; return String(Math.floor(t / 60) % 24).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
+function distM(a1, o1, a2, o2) {
+  const R = 6371000, r = x => x * Math.PI / 180, da = r(a2 - a1), dn = r(o2 - o1);
+  const h = Math.sin(da / 2) ** 2 + Math.cos(r(a1)) * Math.cos(r(a2)) * Math.sin(dn / 2) ** 2;
+  return Math.round(2 * R * Math.asin(Math.sqrt(h)));
+}
+function mapUrl(lat, lng) { return 'https:' + SL2 + 'maps.google.com/?q=' + lat + ',' + lng; }
+function projOf(ps, id) { return (ps || []).find(p => p.id === id) || null; }
+function isOff(day) { return new Date(day + 'T12:00:00Z').getUTCDay() === 5; }
+function attFlag(r, ps) {
+  if (r.inLat == null) return '<span class="badge a">بدون موقع</span>';
+  const p = projOf(ps, r.project);
+  if (p && p.lat != null) { const m = distM(r.inLat, r.inLng, p.lat, p.lng); if (m > 300) return `<span class="badge late">بعيد عن المشروع ${m > 999 ? (m / 1000).toFixed(1) + ' كم' : m + ' م'}</span>`; }
+  return '';
+}
+
+/* عند الموظف */
+function attCardHtml(d, isPreview) {
+  if (!d.attend) return '';
+  const r = (d.att || []).find(x => x.date === d.today);
+  if (!r) return isPreview ? '<div class="note info" style="margin-top:12px">ما سجّل وصوله اليوم</div>'
+    : `<button class="attgo" onclick="openCam('in')">${I('map-pin', 26)}<b>وصلت</b><span>صورة سيلفي + موقعك</span></button>`;
+  const p = projOf(d.projects, r.project), pn = p ? p.name : '';
+  if (!r.out) return `<div class="attc"><div class="r1"><span>وصلت ${t12(r.in)}</span><span>${esc(pn)}</span></div>
+    <div class="el" id="attEl" data-ms="${r.inMs}">${hrs(Date.now() - r.inMs)} ساعة</div>
+    ${isPreview ? '' : `<button class="attout" onclick="openCam('out')">طلعت</button>`}</div>`;
+  return `<div class="attc done"><div class="r1"><span>وصلت ${t12(r.in)} · طلعت ${t12(r.out)}</span><span>${esc(pn)}</span></div><div class="el">${hrs(r.outMs - r.inMs)} ساعة</div></div>`;
+}
+setInterval(() => { const el = document.getElementById('attEl'); if (el) el.textContent = hrs(Date.now() - Number(el.dataset.ms)) + ' ساعة'; }, 30000);
+
+const CAM = {stream: null, mode: 'in', shot: null, pos: null, posErr: '', posWait: false, proj: '', manual: false};
+function camStop() { if (CAM.stream) { CAM.stream.getTracks().forEach(t => t.stop()); CAM.stream = null; } }
+function getPos() {
+  CAM.pos = null; CAM.posErr = '';
+  if (!navigator.geolocation) { CAM.posErr = 'الجوال ما يدعم تحديد الموقع'; return; }
+  CAM.posWait = true;
+  navigator.geolocation.getCurrentPosition(
+    p => { CAM.posWait = false; CAM.pos = {lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy}; camRefresh(); },
+    e => { CAM.posWait = false; CAM.posErr = e.code === 1 ? 'ما سمحت بالموقع' : 'ما قدرنا نحدد الموقع'; camRefresh(); },
+    {enableHighAccuracy: true, timeout: 20000, maximumAge: 0});
+}
+async function openCam(mode) {
+  camStop();
+  CAM.mode = mode; CAM.shot = null; CAM.manual = false;
+  ovOpen(`<div class="cam"><b class="shh">${mode === 'in' ? 'صوّر نفسك عشان تسجّل وصولك' : 'صوّر نفسك عشان تسجّل طلوعك'}</b>
+    <video id="camv" autoplay playsinline muted></video><div class="err" id="camerr"></div>
+    <button class="btn" id="snapb" onclick="snapCam()">${I('camera', 18)}صوّر</button>
+    <button class="btn2" style="width:100%;border:0" onclick="ovClose()">إلغاء</button></div>`);
+  getPos();
+  try {
+    CAM.stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user', width: {ideal: 1280}, height: {ideal: 1280}}, audio: false});
+    const v = $('#camv');
+    if (!v) return camStop();
+    v.srcObject = CAM.stream;
+    await v.play().catch(() => {});
+  } catch (e) {
+    const el = $('#camerr'); if (el) el.textContent = 'ما انفتحت الكاميرا. اسمح للتطبيق يستخدم الكاميرا من إعدادات الجوال، وافتحه من الأيقونة';
+    const b = $('#snapb'); if (b) b.disabled = true;
+  }
+}
+function autoProj(d) {
+  if (!CAM.pos) return '';
+  let best = null, bd = 1e12;
+  (d.projects || []).forEach(p => { if (p.lat == null) return; const m = distM(CAM.pos.lat, CAM.pos.lng, p.lat, p.lng); if (m < bd) { bd = m; best = p; } });
+  return best && bd <= 1000 ? best.id : '';
+}
+function snapCam() {
+  const v = $('#camv');
+  if (!v || !v.videoWidth) return;
+  const s = Math.min(1, 1080 / Math.max(v.videoWidth, v.videoHeight));
+  const c = document.createElement('canvas');
+  c.width = Math.round(v.videoWidth * s); c.height = Math.round(v.videoHeight * s);
+  c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+  CAM.shot = c; camStop();
+  const d = S.empData;
+  if (CAM.mode === 'in') CAM.proj = autoProj(d) || lsGet('att_proj') || ((d.projects || [])[0] || {}).id || '';
+  camConfirm();
+}
+function locText() {
+  if (CAM.pos) {
+    let t = 'الموقع: تم ✓';
+    if (CAM.mode === 'in') { const p = projOf(S.empData.projects, CAM.proj); if (p && p.lat != null) { const m = distM(CAM.pos.lat, CAM.pos.lng, p.lat, p.lng); if (m > 300) t += ' · بعيد عن المشروع ' + m + ' م'; } }
+    return t;
+  }
+  return CAM.posWait ? 'جاري تحديد الموقع…' : (CAM.posErr || 'ما قدرنا نحدد الموقع') + '، وبينسجل بدون موقع';
+}
+function camConfirm() {
+  const d = S.empData, ps = d.projects || [];
+  ovOpen(`<div class="cam"><img class="camimg" src="${CAM.shot.toDataURL('image/jpeg', 0.7)}" alt="صورتك">
+    ${CAM.mode === 'in' ? `<label class="sub" for="camproj" style="display:block;margin-top:10px">المشروع</label>
+      <select id="camproj" onchange="CAM.proj=this.value;CAM.manual=true;camRefresh()"><option value="">بدون مشروع</option>${ps.map(p => `<option value="${p.id}" ${CAM.proj === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>` : ''}
+    <div class="sub" id="camloc" style="margin-top:8px">${locText()}</div><div class="err" id="camerr"></div>
+    <button class="btn" id="camsend" onclick="sendAtt()">${I('check', 18, 2.5)}${CAM.mode === 'in' ? 'سجّل وصولي' : 'سجّل طلوعي'}</button>
+    <button class="btn2" style="width:100%;border:0" onclick="openCam(CAM.mode)">أعد التصوير</button></div>`);
+}
+function camRefresh() {
+  if (CAM.mode === 'in' && !CAM.manual && CAM.shot) { const a = autoProj(S.empData); if (a) { CAM.proj = a; const s = $('#camproj'); if (s) s.value = a; } }
+  const el = $('#camloc'); if (el) el.textContent = locText();
+}
+async function sendAtt() {
+  const b = $('#camsend');
+  if (!CAM.shot || (b && b.disabled)) return;
+  if (b) { b.disabled = true; b.textContent = 'جاري التسجيل…'; }
+  for (let i = 0; i < 20 && CAM.posWait; i++) await new Promise(r => setTimeout(r, 500));
+  const d = S.empData, src = CAM.shot, c = document.createElement('canvas');
+  c.width = src.width; c.height = src.height;
+  const g = c.getContext('2d');
+  g.drawImage(src, 0, 0);
+  const p = projOf(d.projects, CAM.proj), bh = Math.round(c.height * 0.1);
+  g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillRect(0, c.height - bh, c.width, bh);
+  g.fillStyle = '#fff'; g.direction = 'rtl'; g.textAlign = 'right'; g.textBaseline = 'middle';
+  g.font = '600 ' + Math.round(bh * 0.34) + 'px "IBM Plex Sans Arabic", sans-serif';
+  g.fillText((CAM.mode === 'in' ? 'وصول' : 'طلوع') + ' · ' + nowHM() + ' · ' + dmy(d.today), c.width - bh * 0.3, c.height - bh * 0.68);
+  g.font = Math.round(bh * 0.28) + 'px "IBM Plex Sans Arabic", sans-serif';
+  g.fillText(d.name + (p ? ' · ' + p.name : '') + (CAM.pos ? '' : ' · بدون موقع'), c.width - bh * 0.3, c.height - bh * 0.3);
+  try {
+    const url = c.toDataURL('image/jpeg', 0.82);
+    const r = CAM.mode === 'in' ? await callT(120000, 'apiAttIn', BOOT.token, url, CAM.pos, CAM.proj) : await callT(120000, 'apiAttOut', BOOT.token, url, CAM.pos);
+    if (CAM.mode === 'in' && CAM.proj) lsSet('att_proj', CAM.proj);
+    ovClose(); renderEmp(r, false); toast(CAM.mode === 'in' ? 'تسجّل وصولك' : 'تسجّل طلوعك، يعطيك العافية');
+  } catch (e) {
+    const el = $('#camerr'); if (el) el.textContent = e;
+    if (b) { b.disabled = false; b.textContent = 'جرّب مرة ثانية'; }
+  }
+}
+
+/* عند المدير: حضور اليوم */
+function attPhotoHtml(path) { return path ? `<div class="pph" data-att="${esc(path)}">…</div>` : ''; }
+function loadAttPhotos() {
+  document.querySelectorAll('[data-att]').forEach(async el => {
+    const f = el.dataset.att;
+    try {
+      const u = await API.attPhoto(f);
+      if (!el.isConnected) return;
+      el.outerHTML = `<img src="${u}" alt="صورة الحضور" onclick="showFull('${u}','${f}','صورة الحضور')">`;
+    } catch (e) {}
+  });
+}
+function attTeamHtml(d) {
+  const es = d.employees.filter(e => e.attend);
+  if (!es.length) return '';
+  const cfg = d.attCfg || {start: '07:00', grace: 15}, off = isOff(d.today), lateAt = addMin(cfg.start, cfg.grace), now = nowHM();
+  return `<div class="card">${ctitle('map-pin', 'حضور اليوم', off ? '<span class="badge n">الجمعة إجازة</span>' : '')}` + es.map(e => {
+    const r = (d.attendance || []).find(x => x.emp === e.id && x.date === d.today);
+    let st, line = '';
+    if (!r) {
+      st = off ? '<span class="badge n">إجازة</span>' : now >= lateAt ? '<span class="badge late">ما سجّل</span>' : '<span class="badge n">ما وصل للحين</span>';
+      if (!off && now >= lateAt) line = 'الدوام يبدأ ' + t12('0000-00-00 ' + cfg.start);
+    } else {
+      const p = projOf(d.projects, r.project);
+      st = r.out ? '<span class="badge n">طلع</span>' : '<span class="badge">في الشغل</span>';
+      line = 'وصل ' + t12(r.in) + (r.out ? ' · طلع ' + t12(r.out) + ' · ' + hrs(r.outMs - r.inMs) + ' ساعة' : ' · ' + hrs(Date.now() - r.inMs) + ' ساعة') + (p ? ' · ' + esc(p.name) : '');
+      if (r.late) st += ` <span class="badge late">متأخر ${r.late} د</span>`;
+      st += ' ' + attFlag(r, d.projects);
+    }
+    return `<div class="atr"><div style="flex:1"><b>${esc(e.name)}</b> ${st}<div class="sub">${line}</div>
+      ${r ? `<div class="atph">${attPhotoHtml(r.inPhoto)}${attPhotoHtml(r.outPhoto)}</div>` : ''}
+      <div class="ilinks" style="margin-top:6px">${r && r.inLat != null ? `<a class="lnk dl" href="${mapUrl(r.inLat, r.inLng)}" target="_blank" rel="noopener">الخريطة</a>` : ''}<button class="lnk dl" onclick="openAttLog('${e.id}')">سجل الحضور ‹</button></div></div></div>`;
+  }).join('') + '</div>';
+}
+function openAttLog(id) { S.attLog = id; S.armed = null; renderTeam(); window.scrollTo(0, 0); }
+function renderAttLog(empId) {
+  const d = S.data, e = d.employees.find(x => x.id === empId);
+  if (!e) { S.attLog = null; return renderTeam(); }
+  const list = (d.attendance || []).filter(x => x.emp === empId), mk = d.today.slice(0, 7), mon = list.filter(x => x.date.slice(0, 7) === mk);
+  const lateN = mon.filter(x => x.late > 0).length, tot = mon.reduce((s, x) => s + (x.outMs ? x.outMs - x.inMs : 0), 0);
+  let h = `<button class="back" onclick="S.attLog=null;renderTeam()">${I('arrow-right', 17)}رجوع للفريق</button>
+    <h2 style="margin:10px 0 0;font-size:20px">سجل حضور ${esc(e.name)}</h2>
+    <div class="scards" style="margin-top:12px"><div class="sc n"><b>${mon.length}</b><span>يوم حضور ${esc(d.month)}</span></div>
+    <div class="sc ${lateN ? 'a' : 'n'}"><b>${lateN}</b><span>مرات تأخير</span></div></div>
+    <div class="sub" style="margin:8px 2px">مجموع الساعات هالشهر: <b>${hrs(tot)}</b></div>`;
+  if (!list.length) return $('#view').innerHTML = h + emptyHtml('map-pin', 'ما سجّل حضور للحين');
+  h += '<div class="card" style="padding-top:2px;padding-bottom:2px">' + list.map(r => {
+    const p = projOf(d.projects, r.project), arm = S.armed === 'att_' + r.id;
+    return `<div class="atr"><div style="flex:1"><b>${esc(dayLabel(r.date))}</b> ${r.late ? `<span class="badge late">متأخر ${r.late} د</span>` : ''} ${attFlag(r, d.projects)}
+      <div class="sub">وصل ${t12(r.in)}${r.out ? ' · طلع ' + t12(r.out) + ' · ' + hrs(r.outMs - r.inMs) + ' ساعة' : ' · ما سجّل طلوع'}${p ? ' · ' + esc(p.name) : ''}</div>
+      <div class="atph">${attPhotoHtml(r.inPhoto)}${attPhotoHtml(r.outPhoto)}</div>
+      <div class="ilinks" style="margin-top:6px">${r.inLat != null ? `<a class="lnk dl" href="${mapUrl(r.inLat, r.inLng)}" target="_blank" rel="noopener">موقع الوصول</a>` : ''}${r.outLat != null ? `<a class="lnk dl" href="${mapUrl(r.outLat, r.outLng)}" target="_blank" rel="noopener">موقع الطلوع</a>` : ''}
+      <button class="lnk dl ${arm ? 'arm' : ''}" onclick="delAtt('${r.id}')">${arm ? 'تأكيد الحذف' : 'حذف'}</button></div></div></div>`;
+  }).join('') + '</div>';
+  $('#view').innerHTML = h;
+  loadAttPhotos();
+}
+async function delAtt(id) {
+  if (S.armed !== 'att_' + id) { S.armed = 'att_' + id; return renderAttLog(S.attLog); }
+  try { S.data = await call('apiAttDel', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذف، والتأخير المرتبط فيه انحذف'); }
+  catch (e) { S.armed = null; toast(e); }
+}
+
+/* الإعدادات */
+function attSetCard(d) {
+  const c = d.attCfg || {start: '07:00', grace: 15, auto: true};
+  if (S.attAuto == null) S.attAuto = c.auto;
+  return `<div class="card">${ctitle('clock', 'الحضور والانصراف')}
+    <div class="grid2" style="margin-top:10px">
+      <div class="field"><span>بداية الدوام</span><input id="at_start" type="time" value="${esc(c.start)}"></div>
+      <div class="field"><span>سماح التأخير (دقيقة)</span><input id="at_grace" type="number" inputmode="numeric" value="${c.grace}"></div>
+    </div>
+    <div class="trow"><div class="n"><b>التأخير ينحسب تقصير</b><small>يتسجّل «الحضور والمواعيد» تلقائي لو تأخر بعد السماح</small></div><button class="tg ${S.attAuto ? 'on' : ''}" onclick="S.attAuto=!S.attAuto;this.classList.toggle('on',S.attAuto)" aria-label="التأخير ينحسب تقصير"></button></div>
+    <div class="sub" style="margin:-4px 0 10px">الجمعة إجازة. ولو ما سجّل لين نص ساعة بعد بداية الدوام يجيك إشعار.</div>
+    <button class="btn2 cu" style="width:100%" onclick="saveAttSet()">${I('check', 16, 2.5)}حفظ</button><div class="err" id="aterr"></div></div>`;
+}
+async function saveAttSet() {
+  try { S.data = await call('apiAttSettings', BOOT.key, {start: $('#at_start').value, grace: $('#at_grace').value, auto: S.attAuto}); S.attAuto = null; renderAdmin(); toast('انحفظ'); }
+  catch (e) { $('#aterr').textContent = e; }
+}
+async function toggleAtt(id) {
+  const e = empById(id);
+  try { S.data = await call('apiAttToggle', BOOT.key, id, !e.attend); renderAdmin(); toast(!e.attend ? 'تفعّل الحضور له' : 'انطفى الحضور له'); }
+  catch (err) { $('#e_' + id).textContent = err; }
+}
+function parseLoc(s) {
+  s = String(s || '').replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c));
+  const m = s.match(/@(-?\d+\.\d+),\s*(-?\d+\.\d+)/) || s.match(/[?&](?:q|query|ll)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/) || s.match(/^\s*(-?\d+\.\d+)\s*[,،]\s*(-?\d+\.\d+)\s*$/);
+  return m ? {lat: Number(m[1]), lng: Number(m[2])} : null;
+}
+function askProjLoc(id) {
+  const p = (S.data.projects || []).find(x => x.id === id);
+  if (!p) return;
+  ovOpen(`<label class="shh">موقع «${esc(p.name)}»</label>
+    <div class="sub" style="margin-bottom:10px">${p.lat != null ? `محدد ✓ · <a class="cu" href="${mapUrl(p.lat, p.lng)}" target="_blank" rel="noopener">شوفه على الخريطة</a>` : 'ما تحدد للحين'}</div>
+    <button class="btn" onclick="projLocHere('${id}')">${I('map-pin', 18)}أنا في المشروع الحين، خذ موقعي</button>
+    <div class="sub" style="margin:12px 0 4px">أو الصق الإحداثيات أو رابط خرائط قوقل الطويل (اللي فيه @ ورقمين)</div>
+    <input id="plin" placeholder="24.7136, 46.6753">
+    <div class="err" id="plerr"></div>
+    <div class="g21"><button class="btn2 cu" onclick="projLocPaste('${id}')">حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>
+    ${p.lat != null ? `<button class="btn2 rd" style="width:100%;margin-top:8px" onclick="projLocSave('${id}', null, null)">شيل الموقع</button>` : ''}`);
+}
+function projLocHere(id) {
+  if (!navigator.geolocation) { $('#plerr').textContent = 'الجوال ما يدعم تحديد الموقع'; return; }
+  $('#plerr').textContent = 'جاري تحديد موقعك…';
+  navigator.geolocation.getCurrentPosition(p => projLocSave(id, p.coords.latitude, p.coords.longitude),
+    e => { $('#plerr').textContent = e.code === 1 ? 'اسمح بالموقع من إعدادات الجوال' : 'ما قدرنا نحدد الموقع، جرّب مرة ثانية'; },
+    {enableHighAccuracy: true, timeout: 20000, maximumAge: 0});
+}
+function projLocPaste(id) {
+  const v = parseLoc($('#plin').value);
+  if (!v) { $('#plerr').textContent = 'ما قدرت أقرا الموقع. الروابط المختصرة ما تنفع، الصق الإحداثيات مثل 24.7136, 46.6753'; return; }
+  projLocSave(id, v.lat, v.lng);
+}
+async function projLocSave(id, lat, lng) {
+  try { S.data = await call('apiProjLoc', BOOT.key, id, lat, lng); ovClose(); renderAdmin(); toast(lat == null ? 'انشال الموقع' : 'انحفظ موقع المشروع'); }
+  catch (e) { const el = $('#plerr'); if (el) el.textContent = e; }
 }
 
 function newItem(dueMode) { return {title: '', note: '', dueMode: dueMode || 'none', due: '', media: [], urgent: false}; }
@@ -533,7 +794,7 @@ function renderAdmin() {
 const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 const MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 function dayLabel(s) { if (!s) return ''; const d = new Date(s + 'T12:00:00'); return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_AR[d.getMonth()] + ' ' + d.getFullYear(); }
-function go(v) { S.view = v; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); window.scrollTo(0,0); }
+function go(v) { S.view = v; S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); window.scrollTo(0,0); }
 function rerender() { renderAdmin(); }
 
 /* ---------- تسجيل ---------- */
@@ -629,7 +890,9 @@ async function undoLast() {
 function renderTeam() {
   const d = S.data;
   if (!d.employees.length) { $('#view').innerHTML = '<div class="card" style="margin-top:16px">' + emptyHtml('users', 'ما فيه موظفين، أضفهم من الإعدادات') + '</div>'; return; }
-  $('#view').innerHTML = '<div style="height:12px"></div>' + d.employees.map(e => {
+  if (S.attLog) return renderAttLog(S.attLog);
+  setTimeout(loadAttPhotos, 0);
+  $('#view').innerHTML = '<div style="height:12px"></div>' + attTeamHtml(d) + d.employees.map(e => {
     const m = e.month;
     const kpis = m.track
       ? `<div class="kpi"><div class="k">${I('x', 13, 2.5)}التقصير هالشهر</div><div class="v">${m.misses}</div></div>
@@ -878,7 +1141,7 @@ function ovOpen(html) {
   o.innerHTML = `<div class="ovl ${again ? 'na' : ''}" onclick="if(event.target===this)ovClose()"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div></div>`;
   o.classList.add('on');
 }
-function ovClose() { const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); S.sheet = false; }
+function ovClose() { if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); S.sheet = false; }
 function openSheet() {
   const d = S.data, tf = S.tf;
   if (!d.employees.length) return toast('أضف موظف من الإعدادات أول');
@@ -1497,6 +1760,7 @@ function renderSet() {
         <div class="field"><span>الحافز الأساسي (ريال)</span><input id="m_${e.id}" type="number" inputmode="numeric" value="${e.max||''}"></div>
       </div>
       <div class="trow"><div class="n"><b>متابعة فقط</b><small>يتابع تقييمه بدون حافز</small></div><button class="tg ${e.track?'on':''}" onclick="toggleTrack('${e.id}')" aria-label="متابعة فقط"></button></div>
+      <div class="trow"><div class="n"><b>حضور وانصراف</b><small>يسجّل وصوله وطلوعه بسيلفي وموقع</small></div><button class="tg ${e.attend?'on':''}" onclick="toggleAtt('${e.id}')" aria-label="حضور وانصراف"></button></div>
       <div class="grid2"><button class="btn2" onclick="saveEmp('${e.id}')">حفظ</button>
       <button class="btn2 ${S.armed==='tok_'+e.id?'arm':''}" onclick="newToken('${e.id}')">${S.armed==='tok_'+e.id?'تأكيد: الرابط القديم يوقف':'رابط جديد له'}</button></div>
       <div class="err" id="e_${e.id}"></div></div>`;
@@ -1511,6 +1775,7 @@ function renderSet() {
       </div>
       <button class="btn2 cu" style="width:100%" onclick="saveTarget()">${I('check', 16, 2.5)}حفظ</button>
       <div class="err" id="terr"></div></div>
+    ${attSetCard(d)}
     ${projectsCard(d)}
     ${d.employees.map(form).join('')}
     <div class="card">${ctitle('plus', 'إضافة موظف')}
@@ -1533,6 +1798,7 @@ function projectsCard(d) {
     <div class="sub" style="margin:4px 0 6px">لما يخلص المشروع أرشفه، يختفي من الاختيار ومهامه تبقى محفوظة.</div>
     ${act.map(p => `<div class="prow"><input id="pn_${p.id}" value="${esc(p.name)}">
       <button class="del" onclick="saveProj('${p.id}')">${I('check', 15)}حفظ</button>
+      <button class="del" onclick="askProjLoc('${p.id}')">${I('map-pin', 15)}${p.lat != null ? 'الموقع ✓' : 'الموقع'}</button>
       <button class="del" onclick="archProj('${p.id}', true)">${I('archive', 15)}أرشفة</button></div>
       ${p.open ? `<div class="sub" style="margin:-4px 0 4px">${p.open} مهام مطلوبة</div>` : ''}`).join('')}
     <div class="inrow"><input id="pn_new" placeholder="اسم مشروع جديد" onkeydown="if(event.key==='Enter')addProject('set')"><button class="btn2 cu" onclick="addProject('set')">${I('plus', 16, 2.5)}إضافة</button></div>
@@ -1615,7 +1881,7 @@ function renderEmp(d, isPreview) {
   const tasksTab = S.etab === 'tasks';
   $('#app').innerHTML = `
     ${isPreview ? `<button class="back" onclick="closePreview()">${I('arrow-right', 17)}رجوع للفريق</button><div class="note info">${I('eye', 16)}هذي معاينة، والموظف يشوف نفس الصفحة.</div>` : ''}
-    <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button>`}</div>${isPreview ? '' : pushHtml()}
+    <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button>`}</div>${isPreview ? '' : pushHtml()}${tasksTab ? attCardHtml(d, isPreview) : ''}
     <div class="segc etabs"><button class="${S.etab === 'tasks' ? 'on' : ''}" onclick="S.etab='tasks';rerenderEmp()">مهامي${nOpen ? ' (' + nOpen + ')' : ''}</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">حافزي</button></div>
     ${S.etab === 'inv' ? empInvHtml(d, isPreview) : tasksTab ? empTasksHtml(d, isPreview) : empPayHtml(d)}`;
   if (!isPreview) prefetchImgs();

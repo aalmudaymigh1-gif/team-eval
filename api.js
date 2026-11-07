@@ -47,14 +47,16 @@
 
   function norm(r) {
     r.employees = (r.employees || []).map(e => ({ id: e.id, name: e.name, salary: Number(e.salary) || 0, max: Number(e.max) || 0,
-      token: e.token || '', active: e.active !== false, track: !!e.track }));
+      token: e.token || '', active: e.active !== false, track: !!e.track, attend: !!e.attend }));
+    r.attendance = (r.attendance || []).map(x => Object.assign({}, x, { inLat: x.inLat == null ? null : Number(x.inLat), inLng: x.inLng == null ? null : Number(x.inLng),
+      outLat: x.outLat == null ? null : Number(x.outLat), outLng: x.outLng == null ? null : Number(x.outLng), late: Number(x.late) || 0 }));
     r.logs = r.logs || [];
     r.fin = (r.fin || []).map(f => Object.assign({}, f, { amount: Number(f.amount) || 0, months: Number(f.months) || 0 }));
     r.tasks = (r.tasks || []).map(t => {
       const pr = Array.isArray(t.proofs) ? t.proofs : [];
       return Object.assign({}, t, { photo: pr[0] || '', extra: pr.slice(1), media: Array.isArray(t.media) ? t.media : [], urgent: !!t.urgent });
     });
-    r.projects = r.projects || [];
+    r.projects = (r.projects || []).map(p => Object.assign({}, p, { lat: p.lat == null ? null : Number(p.lat), lng: p.lng == null ? null : Number(p.lng) }));
     r.invoices = (r.invoices || []).map(x => Object.assign({}, x, { amount: Math.round((Number(x.amount) || 0) * 100) / 100,
       photos: Array.isArray(x.photos) ? x.photos : [] }));
     return r;
@@ -162,6 +164,10 @@
     const g = (k, d) => { const v = s[k]; return v == null || v === '' || !isFinite(Number(v)) ? d : Number(v); };
     return { miss: g('MISS_SAR', DEF.miss), trust: g('TRUST_SAR', DEF.trust), star: g('STAR_SAR', DEF.star),
       starCap: g('STAR_CAP', DEF.starCap), clean: g('CLEAN_SAR', DEF.clean) };
+  }
+  function attCfg_() {
+    const s = RAW.settings || {};
+    return { start: s.WORK_START || '07:00', grace: Number(s.GRACE_MIN || 15), auto: (s.ATT_AUTO || '1') === '1' };
   }
   function projMap_(ps) { const m = {}; ps.forEach(p => { m[p.id] = p.name; }); return m; }
   function isPaid_(fin, empId, mk) { return fin.some(f => f.kind === 'pay' && f.emp === empId && f.month === mk); }
@@ -319,7 +325,10 @@
       loans: loanBalances_(emp, fin),
       tx: txList_(fin.filter(f => f.emp === emp.id)).slice(0, 30),
       rules: settings_(),
-      projects: RAW.projects.filter(p => !p.archived).map(p => ({ id: p.id, name: p.name })),
+      projects: RAW.projects.filter(p => !p.archived).map(p => ({ id: p.id, name: p.name, lat: p.lat, lng: p.lng })),
+      attend: !!emp.attend,
+      att: RAW.attendance.filter(x => x.emp === emp.id),
+      attCfg: attCfg_(),
       inv: Object.assign(invParts_(inv, emp.id), { balance: invParts_(inv, emp.id).c, owed: invParts_(inv, emp.id).t,
         items: inv.slice().reverse().slice(0, 60).map(x => invOut_(x, pmap)) })
     };
@@ -335,7 +344,9 @@
     emps.forEach(e => { parts[e.id] = invParts_(RAW.invoices, e.id); bal[e.id] = parts[e.id].c; });
     return {
       inv: { bal: bal, parts: parts, items: RAW.invoices.slice().reverse().slice(0, 400).map(x => invOut_(x, pmap)) },
-      projects: projects.map(p => ({ id: p.id, name: p.name, archived: p.archived,
+      attendance: RAW.attendance,
+      attCfg: attCfg_(),
+      projects: projects.map(p => ({ id: p.id, name: p.name, archived: p.archived, lat: p.lat, lng: p.lng,
         open: tasks.filter(t => t.project === p.id && t.status !== 'done' && empIds.indexOf(t.emp) >= 0).length })),
       criteria: CRITERIA.map(c => ({ n: c.n, s: c.s, short: c.short })),
       today: todayS,
@@ -346,7 +357,7 @@
         const mine = logs.filter(l => l.emp === e.id);
         const unpaid = monthsRange_(startMonth_(e, logs, fin), now).filter(mk => !isPaid_(fin, e.id, mk));
         return {
-          id: e.id, name: e.name, salary: e.salary, max: e.max, token: e.token, track: e.track,
+          id: e.id, name: e.name, salary: e.salary, max: e.max, token: e.token, track: e.track, attend: e.attend,
           month: calcMonth_(e, logs, now),
           recent: groups_(mine).slice(0, 15),
           unpaid: unpaid.map(mk => finMonth_(e, fin, logs, mk)),
@@ -366,6 +377,14 @@
   }
   const empById = id => RAW.employees.filter(e => e.id === id)[0];
 
+  async function attDo(token, op, dataUrl, pos, project) {
+    const paths = await empUpload(token, [dataUrl], 1);
+    const p = pos || {};
+    await eexec(token, op, { photo: paths[0], lat: p.lat == null ? '' : String(p.lat), lng: p.lng == null ? '' : String(p.lng),
+      acc: p.acc == null ? '' : String(Math.round(p.acc)), project: project || '' });
+    flush();
+    return API.apiEmp(token);
+  }
   async function empUpload(token, dataUrls, max) {
     const list = (Array.isArray(dataUrls) ? dataUrls : [dataUrls]).filter(Boolean).slice(0, max);
     return Promise.all(list.map(async d => {
@@ -635,6 +654,20 @@
     async pushSave(cred, page, sub) {
       return page === 'admin' ? aexec(cred, 'push_sub', sub) : eexec(cred, 'push_sub', sub);
     },
+
+    async apiAttIn(token, dataUrl, pos, project) { return attDo(token, 'att_in', dataUrl, pos, project); },
+    async apiAttOut(token, dataUrl, pos) { return attDo(token, 'att_out', dataUrl, pos, ''); },
+    async apiAttToggle(k, empId, on) { return adminDo(k, 'att_toggle', { emp: empId, on: !!on }); },
+    async apiProjLoc(k, id, lat, lng) { return adminDo(k, 'proj_loc', { id: id, lat: lat == null ? '' : String(lat), lng: lng == null ? '' : String(lng) }); },
+    async apiAttDel(k, id) { return adminDo(k, 'att_del', { id: id }); },
+    async apiAttSettings(k, x) {
+      const st = String(x.start || '');
+      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(st)) throw new Error('وقت بداية الدوام غير صحيح');
+      const g = Math.round(Number(x.grace));
+      if (!(g >= 0 && g <= 180)) throw new Error('السماح بالدقائق من 0 إلى 180');
+      return adminDo(k, 'settings_save', { WORK_START: st, GRACE_MIN: String(g), ATT_AUTO: x.auto ? '1' : '0' });
+    },
+    attPhoto: imgUrl,
 
     async apiEmp(token) {
       await loadEmp(token);
