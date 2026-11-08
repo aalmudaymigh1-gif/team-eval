@@ -669,6 +669,9 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .tbr .ch{color:var(--faint);display:flex}
 .tsb{margin-top:12px}.tsb .tbl2{margin-top:0}
 .imp{display:flex;gap:7px;align-items:flex-start;margin-top:12px;font-size:13px;line-height:1.7;color:var(--muted)}.imp svg{color:var(--red);flex:none;margin-top:3px}.imp b{color:var(--text);font-weight:500}
+
+/* الإصدار 55: برواز حول كل موظف (اسمه وفروعه)، ومهامه في صفحته */
+.tfr{border:1px solid var(--line2);border-radius:22px;padding:0 12px 12px;margin-top:14px}.tfr .tbh{margin-top:12px}
 </style>
 </head>
 <body>
@@ -680,7 +683,7 @@ b,strong,th,h2,h3,h4{font-weight:600}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=50"></script>
 <script>
-const APP_VER = '54';
+const APP_VER = '55';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -1428,12 +1431,12 @@ function renderTeam() {
   const d = S.data;
   if (!d.employees.length) { $('#view').innerHTML = '<div class="card" style="margin-top:16px">' + emptyHtml('users', 'ما فيه موظفين، أضفهم من الإعدادات') + '</div>'; return; }
   if (S.attLog) return renderAttLog(S.attLog);
+  if (S.td) return renderTaskDetail();
   const e = S.tsub && empById(S.tsub.id);
   $('#view').innerHTML = e ? teamSub(d, e, S.tsub.k) : d.employees.map(x => teamEmp(d, x)).join('');
 }
 function tsub(id, k) { S.tsub = id ? {id: id, k: k} : null; S.armed = null; renderTeam(); toTop(); }
 function rateEmp(id) { go('rec'); setEmp(id); }
-function empTasks(id) { Object.assign(S.tq, {emp: id, f: ''}); saveTq(); go('task'); }
 function tbRow(icon, k, v, on) {
   return `<button class="tbr" onclick="${on}"><span class="ic">${I(icon, 16)}</span><span class="k">${k}</span><span class="v">${v}</span><span class="ch">${I('chevron-left', 16)}</span></button>`;
 }
@@ -1450,13 +1453,27 @@ function teamEmp(d, e) {
   const rv = ts.filter(t => t.status === 'review').length, op = ts.filter(t => t.status === 'open' || t.status === 'returned').length, lt = ts.filter(t => t.late).length;
   const tv = [rv ? rv + ' تنتظرك' : '', op ? op + ' مفتوحة' : '', lt ? `<span class="lt">${lt} متأخرة</span>` : ''].filter(Boolean).join(' · ');
   const lv = [m.misses ? m.misses + ' تقصير' : '', m.stars ? m.stars + ' مميز' : ''].filter(Boolean).join(' · ');
-  return `<div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span></div><button class="rate" onclick="rateEmp('${e.id}')">${I('clipboard-check', 14)}قيّمه</button></div>
-    <div class="tbl2">${m.track ? '' : tbRow('sparkles', 'الحافز', M(m.bonus, '', 'pos'), `tsub('${e.id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${e.id}')`) : ''}${tbRow('list-checks', 'المهام', tv || 'ما عنده', `empTasks('${e.id}')`)}${tbRow('history', 'المواقف', lv || 'ما فيه', `tsub('${e.id}','log')`)}${tbRow('link', 'رابط صفحته', '', `tsub('${e.id}','link')`)}</div>`;
+  return `<div class="tfr"><div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span></div><button class="rate" onclick="rateEmp('${e.id}')">${I('clipboard-check', 14)}قيّمه</button></div>
+    <div class="tbl2">${m.track ? '' : tbRow('sparkles', 'الحافز', M(m.bonus, '', 'pos'), `tsub('${e.id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${e.id}')`) : ''}${tbRow('list-checks', 'المهام', tv || 'ما عنده', `tsub('${e.id}','tasks')`)}${tbRow('history', 'المواقف', lv || 'ما فيه', `tsub('${e.id}','log')`)}${tbRow('link', 'رابط صفحته', '', `tsub('${e.id}','link')`)}</div></div>`;
+}
+function teamTasksHtml(d, e) {
+  const list = allTasks().filter(t => t.emp === e.id);
+  list.forEach(t => { t.b = tBucket(t, d.today); });
+  const rv = list.filter(t => t.b === 'review').sort(byUrgent), done = list.filter(t => t.b === 'done');
+  let h = '';
+  if (rv.length) h += `<div class="sech a">تنتظر مراجعتك<span>${rv.length}</span></div>` + rv.map(t => taskRowHtml(t, true)).join('');
+  projGroups(list.filter(t => t.b === 'open')).forEach(g => {
+    h += `<div class="pgrp ep"><div class="pgh2"><span>${esc(g.name)}</span><span class="n">${g.items.length === 1 ? 'مهمة وحدة' : g.items.length === 2 ? 'مهمتين' : g.items.length + ' مهام'}</span></div>${g.items.map(t => taskRowHtml(t, false)).join('')}</div>`;
+  });
+  if (!h) h = emptyHtml('check-check', 'ما عنده مهام مفتوحة');
+  if (done.length) h += `<button class="dtog" onclick="S.tdone=!S.tdone;renderTeam()">${S.tdone ? 'إخفاء اللي خلصت' : 'خلصت مؤخرًا (' + done.length + ')'}</button>` + (S.tdone ? done.map(t => taskRowHtml(t, true)).join('') : '');
+  return '<div class="tsb">' + h + '</div>';
 }
 function teamSub(d, e, k) {
   const m = e.month, nm = esc(shortName(e.name));
   let h = `<button class="back" onclick="tsub(null)">${I('arrow-right', 17)}الفريق</button>`;
   if (k === 'bonus') return h + `<h2>حافز ${nm}</h2><div class="tsb">${teamBreak(m)}${impHtml(m)}</div>`;
+  if (k === 'tasks') return h + `<h2>مهام ${nm}</h2>` + teamTasksHtml(d, e);
   if (k === 'log') return h + `<h2>مواقف ${nm}</h2><div class="tsb">${impHtml(m)}${e.recent.length ? '<div class="tents">' + e.recent.map(x => entryHtml(x, true, m.track)).join('') + '</div>' : emptyHtml('history', 'ما فيه مواقف مسجلة')}</div>`;
   return h + `<h2>رابط ${nm}</h2><div class="tsb"><div class="tbl2">${tbRow('send', 'أرسله واتساب', '', `waEmp('${e.id}')`)}${tbRow('copy', 'انسخ الرابط', '', `copyEmp('${e.id}')`)}${tbRow('eye', 'شوف صفحته', '', `preview('${e.id}')`)}</div></div>`;
 }
@@ -1667,7 +1684,7 @@ function renderTaskDetail() {
   const today = d.today, b = tBucket(t, today), p = pillOf(t, b, false);
   const ps = (d.projects || []).filter(x => !x.archived || x.id === t.project);
   const id = t.id, np = (t.proofs || []).length, armDel = S.armed === 'task_' + id;
-  $('#view').innerHTML = `<button class="back" onclick="closeTask()">${I('arrow-right', 17)}المهام</button>
+  $('#view').innerHTML = `<button class="back" onclick="closeTask()">${I('arrow-right', 17)}${S.view === 'team' && S.tsub ? 'مهام ' + esc(shortName((empById(S.tsub.id) || {}).name || '')) : 'المهام'}</button>
     <div class="dhead"><input class="dtitle" value="${esc(t.title)}" aria-label="عنوان المهمة" onchange="updTask('${id}',{title:this.value})">${pillHtml(p)}</div>
     <div class="dprops">
       <label class="dp"><span>الموظف</span><select onchange="updTask('${id}',{emp:this.value})">${d.employees.map(e => `<option value="${e.id}" ${t.emp === e.id ? 'selected' : ''}>${esc(e.name)}</option>`).join('')}</select></label>
@@ -3134,7 +3151,7 @@ function subHead() {
     h1.textContent = h2.textContent;
     const fx = h2.parentNode.classList.contains('fxh') ? h2.parentNode : null, sp = fx && fx.querySelector('span');
     if (fx && (!sp || /^\d*$/.test(sp.textContent.trim()))) fx.remove(); else h2.remove();
-  } else if (S.view === 'task' && S.td) h1.textContent = 'تفاصيل المهمة';
+  } else if (S.td) h1.textContent = 'تفاصيل المهمة';
   top.classList.add('subp');
   h1.parentNode.insertBefore(back, h1);
 }
