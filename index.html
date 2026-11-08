@@ -645,6 +645,13 @@ img.ph{cursor:zoom-in}
 .fxbt button.rd{color:var(--red)}
 .fxl .str .tm{font-size:12px}
 body.kb .tabs,body.kb .fab{opacity:0!important;pointer-events:none!important;transform:translateY(24px)!important}
+
+/* الإصدار 52: صف المهمة سطرين، والرقمين كبسولات */
+.trow2 .tm .tu{color:var(--red);font-weight:600}
+.trow2 .tm .dlate{color:var(--red)}
+.scards{display:flex!important;gap:8px;margin-top:12px}
+.sc{flex:1;flex-direction:row!important;align-items:center!important;justify-content:center;gap:8px;min-height:44px!important;padding:0 14px!important;border-radius:999px!important}
+.sc b{font-size:17px!important;line-height:1!important}.sc span{font-size:13.5px!important}
 </style>
 </head>
 <body>
@@ -656,7 +663,7 @@ body.kb .tabs,body.kb .fab{opacity:0!important;pointer-events:none!important;tra
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=50"></script>
 <script>
-const APP_VER = '51';
+const APP_VER = '52';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -1345,7 +1352,7 @@ function renderAdmin() {
       <button class="btn2" onclick="copyAdmin()">نسخ الرابط</button></div></div>`;
   }
   const tab = (v, ic, t) => `<button class="${S.view===v?'on':''}" onclick="go('${v}')">${I(ic, 16)}${t}</button>`;
-  h = `<div class="top"><div><h1>إدارة الشغل</h1><div class="sub">${esc(dayLabel(d.today))}</div></div><button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>${pushHtml()}
+  h = `<div class="top"><div><h1>${({rec:'التقييم',team:'الفريق',task:'المهام',fin:'المالية',set:'الإعدادات'})[S.view] || 'إدارة الشغل'}</h1><div class="sub">${esc(dayLabel(d.today))}</div></div><button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>${pushHtml()}
     <div class="tabs">${tab('rec','clipboard-check','تقييم')}${tab('team','users','الفريق')}${tab('task','list-checks','المهام')}${tab('fin','wallet','المالية')}${tab('set','settings','الإعدادات')}</div>` + h + `
     <div id="view"></div>`;
   $('#app').innerHTML = h;
@@ -1627,12 +1634,13 @@ function taskRowHtml(t, showProj) {
   const today = S.data.today, p = pillOf(t, t.b, false);
   const ring = t.status === 'done' ? 'g' : t.status === 'review' ? 'a' : t.status === 'returned' ? 'r' : '';
   const nm = mOf(t).length, np = (t.proofs || []).length;
-  const mini = (t.urgent && t.status !== 'done' ? '<span class="mb u">عاجلة</span>' : '') + (t.proof === 'invoice' ? `<span class="mb">فاتورة${t.inv ? ' ' + M(t.inv.amount, '', 't') : ''}</span>` : t.proof === 'note' ? '<span class="mb">ملاحظة</span>' : '') + (nm ? `<span class="mb">شرح ${nm}</span>` : '') + (vOf(t) ? '<span class="mb">صوت</span>' : '') + (np ? `<span class="mb">إثبات ${np}</span>` : '');
+  const tags = [t.proof === 'invoice' ? 'فاتورة' + (t.inv ? ' ' + M(t.inv.amount, '', 't') : '') : t.proof === 'note' ? 'ملاحظة' : '', nm ? 'شرح ' + nm : '', vOf(t) ? 'صوت' : '', np ? 'إثبات ' + np : ''];
+  const sn = shortName(t.ename), en = S.data.employees.filter(e => shortName(e.name) === sn).length > 1 ? t.ename : sn;
   const when = t.status === 'done' ? 'خلصت ' + dmy(t.doneAt) : t.status === 'review' ? 'انرسلت ' + dmy(t.doneAt) : dueHtml(t, today);
-  const meta = [esc(t.ename), showProj ? esc(t.pname || 'عام') : '', when].filter(Boolean).join(' · ');
+  const meta = [t.urgent && t.status !== 'done' ? '<b class="tu">عاجلة</b>' : '', esc(en), showProj ? esc(t.pname || 'عام') : '', when].concat(tags).filter(Boolean).join(' · ');
   return `<div class="tli"><button class="trow2" onclick="openTask('${t.id}')"><span class="ring ${ring}"></span>
     <span class="tb"><span class="th"><span class="tt ${t.status === 'done' ? 'd' : ''}">${esc(t.title)}</span>${pillHtml(p)}</span>
-    <span class="tm">${meta}</span>${mini ? `<span class="mbs">${mini}</span>` : ''}</span></button>
+    <span class="tm">${meta}</span></span></button>
     ${t.status === 'review' ? `<div class="racts">${t.comment ? `<div class="note good" style="margin:0 0 8px">${esc(t.comment)}</div>` : ''}<div class="grid2"><button class="btn2 cu" onclick="approveTask('${t.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askReturn('${t.id}')">رجّعها</button></div></div>` : ''}</div>`;
 }
 
@@ -2111,7 +2119,7 @@ function renderFin() {
   const rv = c.items.filter(x => x.kind === 'inv' && x.status === 'review');
   const owe = d.employees.filter(e => ((c.parts[e.id] || {}).o || 0) > 0);
   const cnt = (n, one, two, many) => n === 1 ? one : n === 2 ? two : n + ' ' + many;
-  let h = `<div class="fxh"><h2>المالية</h2><span>${esc(d.month)}</span></div>
+  let h = `<div class="fxh"><span>${esc(d.month)}</span></div>
     <div class="fxs">
       <div><b>رواتب ما انصرفت</b>${M(unpaid)}<small>${nUn ? nUn + ' من ' + d.employees.length + ' موظفين' : 'كلها انصرفت'}</small></div>
       <div><b>عهد عند الموظفين</b>${M(cust)}<small>${withC.length ? esc(withC.map(e => shortName(e.name)).join('، ')) : 'ما عند أحد عهدة'}</small></div>
