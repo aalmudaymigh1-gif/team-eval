@@ -583,6 +583,11 @@ span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 .vpl .rm{color:var(--muted);background:none;border:0;padding:4px;cursor:pointer;font:inherit;font-size:12.5px;display:flex}.vpl .rm.arm{color:var(--red);font-weight:600}
 .vpl .vup{font-size:12px;color:var(--muted)}
 .vcap{font-size:12px;color:var(--muted);margin-top:6px}
+#app{min-height:100vh}
+html.lock,html.lock body{overflow:hidden}
+.sheet{overscroll-behavior:contain}
+.tabs,.fab{transition:opacity .18s,transform .18s}
+body.kb .tabs,body.kb .fab{opacity:0!important;pointer-events:none!important;transform:translateY(24px)!important}
 </style>
 </head>
 <body>
@@ -594,7 +599,7 @@ span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=45"></script>
 <script>
-const APP_VER = '45';
+const APP_VER = '46';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -1636,8 +1641,9 @@ function ovOpen(html) {
   const o = $('#ov'), again = o.classList.contains('on');
   o.innerHTML = `<div class="ovl ${again ? 'na' : ''}" onclick="if(event.target===this)ovClose()"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div></div>`;
   o.classList.add('on');
+  document.documentElement.classList.add('lock');
 }
-function ovClose() { if (S.rec && S.rec.where === 'tf') recStop(true); vStopIf('tf'); if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); S.sheet = false; }
+function ovClose() { if (S.rec && S.rec.where === 'tf') recStop(true); vStopIf('tf'); if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); document.documentElement.classList.remove('lock'); S.sheet = false; }
 function openSheet() {
   const d = S.data, tf = S.tf;
   if (!d.employees.length) return toast('أضف موظف من الإعدادات أول', null, 'in');
@@ -2853,7 +2859,9 @@ async function refresh(silent) {
 (function () {
   let y0 = null, pulled = 0;
   const ind = document.getElementById('ptr');
-  window.addEventListener('touchstart', e => { y0 = window.scrollY <= 0 ? e.touches[0].clientY : null; pulled = 0; }, {passive: true});
+  const ptrOk = e => !(document.documentElement.classList.contains('lock') || document.body.classList.contains('kb') || S.rec || S.gr || S.sheet || CAM.stream
+    || (e.target && e.target.closest && e.target.closest('#ov')));
+  window.addEventListener('touchstart', e => { y0 = window.scrollY <= 0 && ptrOk(e) ? e.touches[0].clientY : null; pulled = 0; }, {passive: true});
   window.addEventListener('touchmove', e => {
     if (y0 === null) return;
     pulled = e.touches[0].clientY - y0;
@@ -2866,7 +2874,39 @@ async function refresh(silent) {
     if (y0 !== null && pulled > 110) refresh();
     y0 = null; pulled = 0; ind.style.height = '0';
   }, {passive: true});
+  const isField = el => !!el && (el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable
+    || (el.tagName === 'INPUT' && !/^(checkbox|radio|button|submit|reset|file|range|color|image|hidden)$/i.test(el.type || '')));
+  const SA = !!(navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches));
+  let maxH = window.innerHeight, kbT = null, healT = null;
+  const kbOn = () => document.body.classList.contains('kb');
+  function heal() {
+    const vv = window.visualViewport;
+    const off = SA ? (maxH - window.innerHeight > 4 || (vv && (vv.offsetTop > 1 || window.innerHeight - vv.height > 4))) : !!(vv && vv.offsetTop > 1);
+    if (!off || kbOn() || isField(document.activeElement)) return;
+    const y = window.scrollY, app = document.getElementById('app');
+    app.style.display = 'none';
+    void app.offsetHeight;
+    app.style.display = '';
+    window.scrollTo(0, y);
+  }
+  const healSoon = ms => { clearTimeout(healT); healT = setTimeout(heal, ms); };
+  window.addEventListener('resize', () => { if (SA && !kbOn()) { maxH = Math.max(maxH, window.innerHeight); healSoon(200); } });
+  window.addEventListener('orientationchange', () => { setTimeout(() => { maxH = window.innerHeight; }, 400); });
+  if (SA && window.visualViewport) window.visualViewport.addEventListener('resize', () => { if (!kbOn()) healSoon(200); });
+  let kbIv = null;
+  const kbOff = () => { clearInterval(kbIv); kbIv = null; if (!kbOn()) return; document.body.classList.remove('kb'); healSoon(60); setTimeout(heal, 450); };
+  document.addEventListener('focusin', e => {
+    if (!isField(e.target)) return;
+    clearTimeout(kbT); document.body.classList.add('kb');
+    if (!kbIv) kbIv = setInterval(() => { if (!isField(document.activeElement)) kbOff(); }, 600);
+  });
+  document.addEventListener('focusout', e => {
+    if (!isField(e.target)) return;
+    clearTimeout(kbT);
+    kbT = setTimeout(() => { if (!isField(document.activeElement)) kbOff(); }, 160);
+  });
   document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') healSoon(300);
     if (document.visibilityState === 'hidden' && S.rec) recStop();
     if (document.visibilityState === 'visible') { if (Date.now() - lastLoad > 60000) refresh(true); else checkUpdate(); }
   });
