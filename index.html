@@ -566,7 +566,8 @@ span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 .tvseg{margin:14px 0 4px}
 .pgrp.ep .pgh2{background:var(--acc)!important;color:#fff!important;border:0!important;font-size:14px;font-weight:500;padding:10px 14px}
 .pgrp.ep .pgh2 .n{font-size:12px;font-weight:500;background:rgba(255,255,255,.2);color:#fff}
-.ecard .tt{font-size:15px!important;font-weight:500!important}
+.ecard .tt,.trow2 .tt{font-size:15px!important;font-weight:300!important}
+.kpi .v small.gstar,.kpi .k .gstar{color:var(--amber)!important}.kpi .k .gstar{display:inline-flex}
 </style>
 </head>
 <body>
@@ -578,7 +579,7 @@ span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=38"></script>
 <script>
-const APP_VER = '43';
+const APP_VER = '44';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -878,7 +879,7 @@ function teamBreak(m) {
 function teamPaid(d, e) {
   const m = e.month;
   return `<div class="card tcard">
-    <div class="tmh">${I('user-round', 18)}<b>${esc(e.name)}</b><span class="tbad"><span class="badge late">${I('x', 12, 3)} ${m.misses}</span><span class="badge">${I('star', 12, 2.4)} ${m.stars}</span></span></div>
+    <div class="tmh">${I('user-round', 18)}<b>${esc(e.name)}</b><span class="tbad"><span class="badge late">${I('x', 12, 3)} ${m.misses}</span><span class="badge a">${I('star', 12, 2.4)} ${m.stars}</span></span></div>
     <div class="thero">
       <div class="h1"><span>${I('sparkles', 13)}الحافز الحين</span><b>${M(m.bonus, '', 'big pos')}</b></div>
       <div class="h2"><span>${I('banknote', 13)}راتب الشهر</span><b>${M(m.total, '', 'big')}</b></div>
@@ -2443,8 +2444,8 @@ function empPayHtml(d) {
     <div class="card" style="margin-top:16px">
       <div class="kpis" style="margin-top:0">
         ${m.track ? `<div class="kpi"><div class="k">${I('x', 13, 2.5)}التقصير هالشهر</div><div class="v">${m.misses}</div></div>
-        <div class="kpi"><div class="k">${I('star', 13)}مواقف مميزة</div><div class="v">${m.stars}</div></div>` : `<div class="kpi hero"><div class="k">${I('sparkles', 13)}حافزك الحين</div><div class="v">${M(m.bonus, '', 'big pos')}</div></div>
-        <div class="kpi"><div class="k">${I('history', 13)}تقصير · مميز</div><div class="v">${m.misses}<small> ✕</small> ${m.stars}<small> ★</small></div></div>`}
+        <div class="kpi"><div class="k"><span class="gstar">${I('star', 13)}</span>مواقف مميزة</div><div class="v">${m.stars}</div></div>` : `<div class="kpi hero"><div class="k">${I('sparkles', 13)}حافزك الحين</div><div class="v">${M(m.bonus, '', 'big pos')}</div></div>
+        <div class="kpi"><div class="k">${I('history', 13)}تقصير · مميز</div><div class="v">${m.misses}<small> ✕</small> ${m.stars}<small class="gstar"> ★</small></div></div>`}
       </div>
       ${m.track ? '' : bonusTable(m)}
       ${next}
