@@ -672,6 +672,17 @@ b,strong,th,h2,h3,h4{font-weight:600}
 
 /* الإصدار 55: برواز حول كل موظف (اسمه وفروعه)، ومهامه في صفحته */
 .tfr{border:1px solid var(--line2);border-radius:22px;padding:0 12px 12px;margin-top:14px}.tfr .tbh{margin-top:12px}
+
+/* الإصدار 56: قفل مجموعة المشروع، وترتيب الفريق، وقوائم المالية بيضا بدال الأشرطة الزرقا */
+
+.fseg{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 0}.fseg .lnk{padding:0;display:flex;align-items:center;gap:5px;flex:none}
+.fxs div{background:#fff!important}.fxa{background:#fff!important;border-color:var(--line2)!important}.fxa .r+.r{border-top-color:var(--line)!important}
+.fxl2{margin-top:10px}
+.tbr.ar{opacity:.6}.tbr.ordr{cursor:default}.tbr.ordr:active{background:none}
+.tbr .ord{display:flex;gap:6px;flex:none}.tbr .ord button{width:34px;height:34px;border-radius:10px;border:0;background:var(--fill);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer}.tbr .ord button[disabled]{opacity:.3}
+
+.fxt.tord{margin:12px 2px 0}
+.pgh2 .pge{display:flex;align-items:center;gap:8px;flex:none}.pgh2 .cg{display:flex;transition:transform .2s var(--ease);transform:rotate(-90deg)}.pgrp.cl .pgh2 .cg{transform:none}
 </style>
 </head>
 <body>
@@ -681,9 +692,9 @@ b,strong,th,h2,h3,h4{font-weight:600}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=50"></script>
+<script src="api.js?v=56"></script>
 <script>
-const APP_VER = '55';
+const APP_VER = '56';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -1332,7 +1343,7 @@ function mountTabs() {
   if (old) old.remove();
   if (t) { t.id = 'tabsDock'; document.body.appendChild(t); }
 }
-function go(v) { S.tsub = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false}); S.view = v; S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
+function go(v) { S.tsub = null; S.tord = false; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false}); S.view = v; S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
 function rerender() { renderAdmin(); }
 
 /* ---------- تسجيل ---------- */
@@ -1433,7 +1444,23 @@ function renderTeam() {
   if (S.attLog) return renderAttLog(S.attLog);
   if (S.td) return renderTaskDetail();
   const e = S.tsub && empById(S.tsub.id);
-  $('#view').innerHTML = e ? teamSub(d, e, S.tsub.k) : d.employees.map(x => teamEmp(d, x)).join('');
+  if (e) { $('#view').innerHTML = teamSub(d, e, S.tsub.k); return; }
+  const es = d.employees;
+  if (S.tord && es.length > 1) {
+    $('#view').innerHTML = `<div class="fxt tord"><span>رتّبهم مثل ما تبي، والترتيب يمشي على التطبيق كله</span><button class="dn" onclick="S.tord=false;renderTeam()">تم</button></div>`
+      + '<div class="tbl2 fxl2">' + es.map((x, i) => `<div class="tbr ordr"><span class="ic">${I('user-round', 16)}</span><span class="k">${esc(x.name)}</span><span class="ord"><button ${i === 0 ? 'disabled' : ''} onclick="empMove('${x.id}',-1)" aria-label="فوق">${SV_UP}</button><button ${i === es.length - 1 ? 'disabled' : ''} onclick="empMove('${x.id}',1)" aria-label="تحت">${SV_DN}</button></span></div>`).join('') + '</div>';
+    return;
+  }
+  $('#view').innerHTML = (es.length > 1 ? `<div class="fxt tord"><span></span><button onclick="S.tord=true;renderTeam()">${I('list-checks', 16)}رتّب</button></div>` : '') + es.map(x => teamEmp(d, x)).join('');
+}
+async function empMove(id, dir) {
+  const es = S.data.employees.slice(), i = es.findIndex(x => x.id === id), j = i + dir;
+  if (i < 0 || j < 0 || j >= es.length) return;
+  const t = es[i]; es[i] = es[j]; es[j] = t;
+  S.data.employees = es;
+  renderTeam();
+  try { S.data = await call('apiEmpOrder', BOOT.key, es.map(x => x.id)); renderTeam(); }
+  catch (e) { toastErr(e); refresh(true); }
 }
 function tsub(id, k) { S.tsub = id ? {id: id, k: k} : null; S.armed = null; renderTeam(); toTop(); }
 function rateEmp(id) { go('rec'); setEmp(id); }
@@ -1463,7 +1490,7 @@ function teamTasksHtml(d, e) {
   let h = '';
   if (rv.length) h += `<div class="sech a">تنتظر مراجعتك<span>${rv.length}</span></div>` + rv.map(t => taskRowHtml(t, true)).join('');
   projGroups(list.filter(t => t.b === 'open')).forEach(g => {
-    h += `<div class="pgrp ep"><div class="pgh2"><span>${esc(g.name)}</span><span class="n">${g.items.length === 1 ? 'مهمة وحدة' : g.items.length === 2 ? 'مهمتين' : g.items.length + ' مهام'}</span></div>${g.items.map(t => taskRowHtml(t, false)).join('')}</div>`;
+    h += pgrpHtml(g);
   });
   if (!h) h = emptyHtml('check-check', 'ما عنده مهام مفتوحة');
   if (done.length) h += `<button class="dtog" onclick="S.tdone=!S.tdone;renderTeam()">${S.tdone ? 'إخفاء اللي خلصت' : 'خلصت مؤخرًا (' + done.length + ')'}</button>` + (S.tdone ? done.map(t => taskRowHtml(t, true)).join('') : '');
@@ -1626,7 +1653,7 @@ function drawTaskList() {
   const rv = list.filter(t => t.b === 'review').sort(byUrgent);
   if (rv.length && q.f !== 'open') h += `<div class="sech a">تنتظر مراجعتك<span>${rv.length}</span></div>` + rv.map(t => taskRowHtml(t, true)).join('');
   if (q.f !== 'review') projGroups(list.filter(t => t.b === 'open')).forEach(g => {
-    h += `<div class="pgrp ep"><div class="pgh2"><span>${esc(g.name)}</span><span class="n">${g.items.length === 1 ? 'مهمة وحدة' : g.items.length === 2 ? 'مهمتين' : g.items.length + ' مهام'}</span></div>${g.items.map(t => taskRowHtml(t, false)).join('')}</div>`;
+    h += pgrpHtml(g);
   });
   const done = list.filter(t => t.b === 'done');
   if (!h && !(done.length && !q.f)) h = emptyHtml('check-check', tqActive() ? 'ما فيه مهام بهالفلاتر' : 'ما فيه مهام مفتوحة. اضغط + وأضف أول مهمة');
@@ -1634,6 +1661,13 @@ function drawTaskList() {
   el.innerHTML = h;
 }
 
+/* الإصدار 56: مجموعة المشروع في المهام تنقفل وتنفتح بالضغط على شريطها، ويتذكرها */
+function grpClosed() { if (!S.gcl) { try { S.gcl = JSON.parse(lsGet('gcl') || '{}'); } catch (e) { S.gcl = {}; } } return S.gcl; }
+function togGrp(k) { const c = grpClosed(); if (c[k]) delete c[k]; else c[k] = 1; lsSet('gcl', JSON.stringify(c)); if (S.view === 'team') renderTeam(); else drawTaskList(); }
+function pgrpHtml(g) {
+  const cl = !!grpClosed()[g.key], n = g.items.length;
+  return `<div class="pgrp ep ${cl ? 'cl' : ''}"><button class="pgh2" onclick="togGrp('${esc(g.key)}')" aria-expanded="${!cl}"><span>${esc(g.name)}</span><span class="pge"><span class="n">${n === 1 ? 'مهمة وحدة' : n === 2 ? 'مهمتين' : n + ' مهام'}</span><span class="cg">${I('chevron-left', 16)}</span></span></button>${cl ? '' : g.items.map(t => taskRowHtml(t, false)).join('')}</div>`;
+}
 function taskRowHtml(t, showProj) {
   const today = S.data.today, p = pillOf(t, t.b, false);
   const ring = t.status === 'done' ? 'g' : t.status === 'review' ? 'a' : t.status === 'returned' ? 'r' : '';
@@ -2134,23 +2168,28 @@ function renderFin() {
   owe.forEach(e => acts.push(`<button class="r" onclick="openSt('${e.id}')"><span class="dt"></span>${esc(shortName(e.name))} له عندك من جيبه<em>${M(c.parts[e.id].o, '', 't')}${I('chevron-left', 15)}</em></button>`));
   if (acts.length) h += `<div class="fxa">${acts.join('')}</div>`;
   const seg = S.fx.seg === 'p' ? 'p' : 'e';
-  h += `<div class="segc" style="margin:4px 0 6px"><button class="${seg === 'e' ? 'on' : ''}" onclick="S.fx.seg='e';S.fx.ord=false;renderFin()">الموظفين</button><button class="${seg === 'p' ? 'on' : ''}" onclick="S.fx.seg='p';renderFin()">المشاريع</button></div>`;
+  const nAct = (d.projects || []).filter(p => !p.archived).length;
+  h += `<div class="fseg"><div class="segc"><button class="${seg === 'e' ? 'on' : ''}" onclick="S.fx.seg='e';S.fx.ord=false;renderFin()">الموظفين</button><button class="${seg === 'p' ? 'on' : ''}" onclick="S.fx.seg='p';renderFin()">المشاريع</button></div>${seg === 'p' && nAct > 1 && !S.fx.ord ? `<button class="lnk" onclick="S.fx.ord=true;renderFin()">${I('list-checks', 15)}رتّب</button>` : ''}</div>`;
   if (seg === 'e') {
-    h += d.employees.length ? d.employees.map(e => `<button class="fxn" onclick="openSt('${e.id}')">${esc(e.name)}<span class="cv">${I('chevron-left', 16)}</span></button>`).join('') : emptyHtml('users', 'ما فيه موظفين. أضفهم من الإعدادات');
+    const ev = e => { const pt = c.parts[e.id] || {}, v = [];
+      if ((pt.c || 0) < 0) v.push(`<span class="lt">عهدة ${M(pt.c, '', 't')}</span>`); else if (pt.c > 0) v.push('عهدة ' + M(pt.c, '', 't'));
+      if (pt.o > 0) v.push(`<span class="lt">له ${M(pt.o, '', 't')}</span>`);
+      return v.join(' · ') || 'ما معه عهدة'; };
+    h += d.employees.length ? '<div class="tbl2 fxl2">' + d.employees.map(e => tbRow('user-round', esc(e.name), ev(e), `openSt('${e.id}')`)).join('') + '</div>' : emptyHtml('users', 'ما فيه موظفين. أضفهم من الإعدادات');
   } else {
     const act = (d.projects || []).filter(p => !p.archived);
     if (S.fx.ord && act.length > 1) {
       h += `<div class="fxt"><span>رتّبها مثل ما تبي، والترتيب يمشي على المهام بعد</span><button class="dn" onclick="S.fx.ord=false;renderFin()">تم</button></div>`
-        + act.map((p, i) => `<div class="fxn"><span>${esc(p.name)}</span><span class="ord"><button ${i === 0 ? 'disabled' : ''} onclick="projMove('${p.id}',-1)" aria-label="فوق">${SV_UP}</button><button ${i === act.length - 1 ? 'disabled' : ''} onclick="projMove('${p.id}',1)" aria-label="تحت">${SV_DN}</button></span></div>`).join('');
+        + '<div class="tbl2 fxl2">' + act.map((p, i) => `<div class="tbr ordr"><span class="ic">${I('folder', 16)}</span><span class="k">${esc(p.name)}</span><span class="ord"><button ${i === 0 ? 'disabled' : ''} onclick="projMove('${p.id}',-1)" aria-label="فوق">${SV_UP}</button><button ${i === act.length - 1 ? 'disabled' : ''} onclick="projMove('${p.id}',1)" aria-label="تحت">${SV_DN}</button></span></div>`).join('') + '</div>';
     } else {
       const used = new Set(c.items.filter(x => x.kind === 'inv').map(x => x.project || ''));
       const spent = {}; c.items.forEach(x => { if (x.kind === 'inv' && x.status === 'ok') { const k = x.project || ''; spent[k] = (spent[k] || 0) + x.amount; } });
       const tail = k => `<span class="am">${M(spent[k] || 0, '', 't')}<span class="cv">${I('chevron-left', 16)}</span></span>`;
       const arch = (d.projects || []).filter(p => p.archived && used.has(p.id));
-      if (act.length > 1) h += `<div class="fxt"><span></span><button onclick="S.fx.ord=true;renderFin()">${I('list-checks', 16)}رتّب</button></div>`;
-      h += act.map(p => `<button class="fxn" onclick="openFinProj('${p.id}')">${esc(p.name)}${tail(p.id)}</button>`).join('')
-        + (used.has('') ? `<button class="fxn ar" onclick="openFinProj('')">بدون مشروع${tail('')}</button>` : '')
-        + arch.map(p => `<button class="fxn ar" onclick="openFinProj('${p.id}')">${esc(p.name)} · مؤرشف${tail(p.id)}</button>`).join('');
+      const pr = (k, nm, cls) => tbRow('folder', nm, M(spent[k] || 0, '', 't'), `openFinProj('${k}')`).replace('class="tbr"', 'class="tbr' + (cls ? ' ' + cls : '') + '"');
+      h += '<div class="tbl2 fxl2">' + act.map(p => pr(p.id, esc(p.name))).join('')
+        + (used.has('') ? pr('', 'بدون مشروع', 'ar') : '')
+        + arch.map(p => pr(p.id, esc(p.name) + ' · مؤرشف', 'ar')).join('') + '</div>';
     }
   }
   $('#view').innerHTML = h;

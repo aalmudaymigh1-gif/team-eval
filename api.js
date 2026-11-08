@@ -544,6 +544,12 @@
       return { id: r.id, data: adminPayload_() };
     },
 
+    async apiEmpOrder(k, ids) {
+      if (!Array.isArray(ids) || !ids.length) throw new Error('ما فيه ترتيب');
+      await rpc('emp_order', { k: k, ids: ids.map(String) });
+      await loadAdmin(k);
+      return adminPayload_();
+    },
     async apiProjOrder(k, ids) {
       if (!Array.isArray(ids) || !ids.length) throw new Error('ما فيه ترتيب');
       return adminDo(k, 'proj_order', { ids: ids.map(String) });
