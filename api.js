@@ -566,7 +566,8 @@
       const ids = (x.emps || []).filter((id, i, a) => a.indexOf(id) === i && act.indexOf(id) >= 0);
       if (!ids.length) throw new Error('اختر الموظف');
       const project = String(x.project || '');
-      if (project && !RAW.projects.some(p => p.id === project)) throw new Error('المشروع غير موجود');
+      if (!project) throw new Error('اختر المشروع');
+      if (!RAW.projects.some(p => p.id === project)) throw new Error('المشروع غير موجود');
       const items = (x.items || []).slice(0, 20);
       if (!items.length) throw new Error('اكتب المهمة');
       const rows = [];
@@ -672,6 +673,7 @@
       const amount = cleanAmount_(x.amount);
       const desc = String(x.desc || '').trim().slice(0, 200);
       if (!desc) throw new Error('اكتب وش اشتريت');
+      if (!String(x.project || '')) throw new Error('اختر المشروع');
       const paths = await empUpload(token, dataUrls, 3);
       if (!paths.length) throw new Error('صوّر الفاتورة');
       const w = Math.round(Number(x.warranty) || 0);
@@ -695,6 +697,7 @@
       const amount = cleanAmount_(x.amount);
       const desc = String(x.desc || '').trim().slice(0, 200);
       if (!desc) throw new Error('اكتب وش انشرى');
+      if (!String(x.project || '')) throw new Error('اختر المشروع');
       const list = (dataUrls || []).slice(0, 3), paths = [];
       for (const d of list) paths.push(await API.apiUploadImg(k, d));
       return adminDo(k, 'inv_add', { emp: x.emp || '', amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: x.project || '',

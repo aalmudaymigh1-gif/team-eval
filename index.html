@@ -654,9 +654,9 @@ body.kb .tabs,body.kb .fab{opacity:0!important;pointer-events:none!important;tra
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=49"></script>
+<script src="api.js?v=50"></script>
 <script>
-const APP_VER = '49';
+const APP_VER = '50';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -1555,7 +1555,7 @@ function loadTq() {
   try { const v = JSON.parse(lsGet('tq') || '{}'); if (typeof v.emp === 'string') S.tq.emp = v.emp; if (typeof v.proj === 'string') S.tq.proj = v.proj; S.tq.urg = !!v.urg; } catch (e) {}
   const d = S.data;
   if (S.tq.emp !== 'all' && !d.employees.some(e => e.id === S.tq.emp)) S.tq.emp = 'all';
-  if (S.tq.proj !== 'all' && S.tq.proj !== 'gen' && !(d.projects || []).some(p => p.id === S.tq.proj)) S.tq.proj = 'all';
+  if (S.tq.proj !== 'all' && !(d.projects || []).some(p => p.id === S.tq.proj)) S.tq.proj = 'all';
 }
 function saveTq() { lsSet('tq', JSON.stringify({emp: S.tq.emp, proj: S.tq.proj, urg: S.tq.urg})); }
 function tqActive() { const q = S.tq; return !!(q.f || q.emp !== 'all' || q.proj !== 'all' || q.urg || (q.q || '').trim()); }
@@ -1585,7 +1585,7 @@ function renderTasks() {
   loadTq();
   const d = S.data, q = S.tq;
   const empOpts = '<option value="all">كل الموظفين</option>' + d.employees.map(e => `<option value="${e.id}" ${q.emp === e.id ? 'selected' : ''}>${esc(e.name)}</option>`).join('');
-  const projOpts = `<option value="all">كل المشاريع</option><option value="gen" ${q.proj === 'gen' ? 'selected' : ''}>عام</option>` + (d.projects || []).map(p => `<option value="${p.id}" ${q.proj === p.id ? 'selected' : ''}>${esc(p.name)}${p.archived ? ' (مؤرشف)' : ''}</option>`).join('');
+  const projOpts = `<option value="all">كل المشاريع</option>` + (d.projects || []).map(p => `<option value="${p.id}" ${q.proj === p.id ? 'selected' : ''}>${esc(p.name)}${p.archived ? ' (مؤرشف)' : ''}</option>`).join('');
   $('#view').innerHTML = tvSeg(d) + `
     ${q.search ? `<input id="tqs" class="tqs" type="search" placeholder="ابحث بالعنوان أو الوصف أو المشروع" value="${esc(q.q)}" oninput="S.tq.q=this.value;drawTaskList()">` : ''}
     <div class="scards" id="tcards"></div>
@@ -1676,7 +1676,7 @@ function renderTaskDetail() {
     <div class="dhead"><input class="dtitle" value="${esc(t.title)}" aria-label="عنوان المهمة" onchange="updTask('${id}',{title:this.value})">${pillHtml(p)}</div>
     <div class="dprops">
       <label class="dp"><span>الموظف</span><select onchange="updTask('${id}',{emp:this.value})">${d.employees.map(e => `<option value="${e.id}" ${t.emp === e.id ? 'selected' : ''}>${esc(e.name)}</option>`).join('')}</select></label>
-      <label class="dp"><span>المشروع</span><select onchange="updTask('${id}',{project:this.value})"><option value="">عام</option>${ps.map(x => `<option value="${x.id}" ${t.project === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
+      <label class="dp"><span>المشروع</span><select onchange="updTask('${id}',{project:this.value})">${t.project ? '' : '<option value="" selected>اختر المشروع</option>'}${ps.map(x => `<option value="${x.id}" ${t.project === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
       <label class="dp"><span>الموعد</span><input type="date" class="${t.due && t.due < today && t.status !== 'done' ? 'lt' : ''}" value="${t.due || ''}" onchange="updTask('${id}',{due:this.value})"></label>
       <div class="dp"><span>عاجلة</span><button class="tg ${t.urgent ? 'on u' : ''}" aria-label="عاجلة" onclick="updTask('${id}',{urgent:${t.urgent ? 'false' : 'true'}})"></button></div>
       <label class="dp"><span>الإثبات</span><select onchange="updTask('${id}',{proof:this.value})" ${t.status === 'open' || t.status === 'returned' ? '' : 'disabled'}>${PROOFS.map(o => `<option value="${o[0]}" ${(t.proof || 'photo') === o[0] ? 'selected' : ''}>${o[1]}</option>`).join('')}</select></label>
@@ -1715,8 +1715,7 @@ function openSheet() {
   const ids = d.employees.map(e => e.id);
   tf.emps = tf.emps.filter(x => ids.includes(x));
   if (!tf.emps.length) { const last = lsGet('tf_emp'); tf.emps = [ids.includes(last) ? last : ids[0]]; }
-  if (tf.project === null) tf.project = lsGet('tf_proj') || '';
-  if (tf.project && !activeProjects().some(p => p.id === tf.project)) tf.project = '';
+  tf.project = pickProj(tf.project, activeProjects());
   S.sheet = true; S.sheetMore = false;
   drawSheet();
   setTimeout(() => { const i = $('#qtTitle'); if (i) i.focus(); }, 80);
@@ -1731,7 +1730,7 @@ function drawSheet() {
     <div class="qlab">${I('user', 14)}لمين</div>
     <div class="qch">${d.employees.map(e => chip(!all && tf.emps[0] === e.id, `qtEmp('${e.id}')`, esc(shortName(e.name)))).join('')}${d.employees.length > 1 ? chip(all, "qtEmp('all')", 'الكل') : ''}</div>
     <div class="qlab">${I('folder', 14)}المشروع</div>
-    <div class="qch">${ap.map(p => chip(tf.project === p.id, `qtProj('${p.id}')`, esc(p.name))).join('')}${chip(!tf.project, "qtProj('')", 'عام')}${chip(false, 'S.tf.newP=!S.tf.newP;drawSheet()', '+ جديد', 'nw')}</div>
+    <div class="qch">${ap.map(p => chip(tf.project === p.id, `qtProj('${p.id}')`, esc(p.name))).join('')}${chip(false, 'S.tf.newP=!S.tf.newP;drawSheet()', '+ جديد', 'nw')}</div>
     ${tf.newP ? `<div class="grid2" style="grid-template-columns:1fr auto"><input id="np_tf" placeholder="اسم المشروع الجديد" onkeydown="if(event.key==='Enter')addProject('tf')"><button class="btn2 cu" onclick="addProject('tf')">أضف</button></div><div class="err" id="nperr"></div>` : ''}
     <div class="qlab">${I('calendar', 14)}الموعد</div>
     <div class="qch">${[['none', 'بدون'], ['today', 'اليوم'], ['tom', 'بكرة'], ['other', 'تاريخ…']].map(x => chip((it.dueMode || 'none') === x[0], `qtDue('${x[0]}')`, x[1])).join('')}</div>
@@ -1844,6 +1843,7 @@ async function addTask() {
   const tf = S.tf, it = tf.items[0], err = $('#tferr');
   if (err) err.textContent = '';
   if (!tf.emps.length) { if (err) err.textContent = 'اختر الموظف'; return; }
+  if (!tf.project) { if (err) err.textContent = 'اختر المشروع، أو أضف مشروع جديد'; return; }
   if (!it.title.trim()) { if (err) err.textContent = 'اكتب المهمة'; const i = $('#qtTitle'); if (i) i.focus(); return; }
   if (S.rec) { if (err) err.textContent = 'وقّف التسجيل أول'; return; }
   if (S.upN) { if (err) err.textContent = 'انتظر لين يخلص رفع المرفقات'; return; }
@@ -2085,8 +2085,9 @@ function finCtx() {
   const name = id => { const e = d.employees.find(x => x.id === id); return e ? e.name : ''; };
   return {d: d, mk: d.today.slice(0, 7), parts: iv.parts || {}, items: (iv.items || []).map(x => Object.assign({}, x, {ename: name(x.emp)}))};
 }
+function pickProj(cur, list) { const ok = id => id && list.some(p => p.id === id); return ok(cur) ? cur : ok(lsGet('tf_proj')) ? lsGet('tf_proj') : ((list[0] || {}).id || ''); }
 function shortName(n) { const w = String(n || '').trim().split(/\s+/); return /^(ابو|أبو|ام|أم|بن)$/.test(w[0]) && w[1] ? w[0] + ' ' + w[1] : w[0]; }
-function projName(k) { if (!k) return 'عام'; const p = (S.data.projects || []).find(x => x.id === k); return p ? p.name : 'مشروع محذوف'; }
+function projName(k) { if (!k) return 'بدون مشروع'; const p = (S.data.projects || []).find(x => x.id === k); return p ? p.name : 'مشروع محذوف'; }
 function openSt(id) { Object.assign(S.fx, {emp: id, proj: null, rv: false, all: false}); S.view = 'fin'; S.armed = null; S.form = null; renderAdmin(); toTop(); }
 function openFinProj(k) { Object.assign(S.fx, {proj: k, emp: '', rv: false, all: false}); S.armed = null; renderFin(); toTop(); }
 function openFinRv() { Object.assign(S.fx, {rv: true, emp: '', proj: null}); S.armed = null; renderFin(); toTop(); }
@@ -2134,7 +2135,7 @@ function renderFin() {
       const arch = (d.projects || []).filter(p => p.archived && used.has(p.id));
       if (act.length > 1) h += `<div class="fxt"><span></span><button onclick="S.fx.ord=true;renderFin()">${I('list-checks', 16)}رتّب</button></div>`;
       h += act.map(p => `<button class="fxn" onclick="openFinProj('${p.id}')">${esc(p.name)}<span class="cv">${I('chevron-left', 16)}</span></button>`).join('')
-        + `<button class="fxn" onclick="openFinProj('')">عام<span class="cv">${I('chevron-left', 16)}</span></button>`
+        + (used.has('') ? `<button class="fxn ar" onclick="openFinProj('')">بدون مشروع<span class="cv">${I('chevron-left', 16)}</span></button>` : '')
         + arch.map(p => `<button class="fxn ar" onclick="openFinProj('${p.id}')">${esc(p.name)} · مؤرشف<span class="cv">${I('chevron-left', 16)}</span></button>`).join('');
     }
   }
@@ -2177,7 +2178,7 @@ function finLedger(c, e) {
 function renderFinEmp(c, id) {
   const d = c.d, e = d.employees.find(x => x.id === id), p = c.parts[id] || {c: 0, o: 0, g: 0, rt: 0, cash: 0};
   const mine = c.items.filter(x => x.emp === id);
-  const rv = mine.filter(x => x.kind === 'inv' && x.status === 'review'), ret = mine.filter(x => x.kind === 'inv' && x.status === 'returned');
+  const rv = mine.filter(x => x.kind === 'inv' && x.status === 'review');
   const f = S.form && S.form.emp === id ? S.form : null;
   let h = finBackBtn() + `<div class="fxh"><h2>${esc(e.name)}</h2><span>${esc(d.month)}</span></div>`;
   if (rv.length) h += `<div class="sech a" style="margin-top:4px">تنتظر اعتمادك<span>${rv.length}</span></div>` + rv.map(x => invRowHtml(x, false)).join('') + '<div style="height:12px"></div>';
@@ -2197,7 +2198,6 @@ function renderFinEmp(c, id) {
   h += `<div class="sech">كل حركاته<span>${L.length}</span></div>`;
   h += L.length ? `<div class="card fxl" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${show.map(x => x.h).join('')}
       ${L.length > 12 ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كلها (' + L.length + ')'}</button>` : ''}</div>` : emptyHtml('wallet', 'ما فيه حركات للحين');
-  if (ret.length) h += `<button class="dtog" onclick="S.iv.f=S.iv.f?'':'o';renderFin()">${S.iv.f ? 'إخفاء' : 'فواتير رجّعتها له (' + ret.length + ')'}</button>` + (S.iv.f ? ret.map(x => invRowHtml(x, false)).join('') : '');
   $('#view').innerHTML = h;
 }
 
@@ -2305,12 +2305,13 @@ async function doRet(empId) {
 }
 function askInvAdd() {
   const d = S.data, ps = (d.projects || []).filter(p => !p.archived);
-  if (!S.ai) S.ai = {amount: '', vendor: '', desc: '', project: S.view === 'fin' && S.fx.proj !== null ? S.fx.proj : (lsGet('tf_proj') || ''), emp: S.view === 'fin' ? (S.fx.emp || '') : '', shots: []};
+  if (!S.ai) S.ai = {amount: '', vendor: '', desc: '', project: S.view === 'fin' && S.fx.proj ? S.fx.proj : '', emp: S.view === 'fin' ? (S.fx.emp || '') : '', shots: []};
   const f = S.ai;
+  f.project = pickProj(f.project, ps);
   ovOpen(`<label class="shh">فاتورة جديدة</label>
     <div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.ai.amount=this.value"><input placeholder="المحل" value="${esc(f.vendor)}" oninput="S.ai.vendor=this.value"></div>
     <input placeholder="وش انشرى؟" value="${esc(f.desc)}" oninput="S.ai.desc=this.value">
-    <select aria-label="المشروع" onchange="S.ai.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}<option value="" ${f.project === '' ? 'selected' : ''}>عام</option></select>
+    <select aria-label="المشروع" onchange="S.ai.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
     <div class="sub" style="margin:6px 0 4px">مين دفع؟</div>
     <div class="segc">${[['', 'أنا']].concat(d.employees.map(e => [e.id, 'عهدة ' + shortName(e.name)])).map(o => `<button class="${f.emp === o[0] ? 'on' : ''}" onclick="S.ai.emp='${o[0]}';askInvAdd()">${esc(o[1])}</button>`).join('')}</div>
     <div class="shots">${f.shots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة الفاتورة"><button class="x" onclick="S.ai.shots.splice(${i},1);askInvAdd()" aria-label="حذف الصورة">×</button></div>`).join('')}
@@ -2326,6 +2327,7 @@ async function pickAi(input) {
 }
 async function doInvAdd() {
   const f = S.ai, b = $('#aibtn');
+  if (!f.project) { $('#aierr').textContent = 'اختر المشروع'; return; }
   if (b && b.disabled) return;
   if (b) { b.disabled = true; b.textContent = 'جاري الحفظ…'; }
   try {
@@ -2907,6 +2909,7 @@ function empInvHtml(d, isPreview) {
 
 function invFormHtml(d) {
   const f = S.inv, ps = d.projects || [];
+  f.project = pickProj(f.project, ps);
   return `<div class="pform" style="margin-top:12px">
     <b>فاتورة جديدة</b>
     <div class="shots">${S.ishots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة الفاتورة"><button class="x" onclick="S.ishots.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}
@@ -2915,7 +2918,7 @@ function invFormHtml(d) {
     <input class="qtt" inputmode="decimal" placeholder="المبلغ بالريال" value="${esc(f.amount)}" oninput="S.inv.amount=this.value">
     <input placeholder="وش اشتريت؟ مثلاً: أفياش وأسلاك" value="${esc(f.desc)}" oninput="S.inv.desc=this.value">
     <input placeholder="المحل (اختياري)" value="${esc(f.vendor || '')}" oninput="S.inv.vendor=this.value">
-    <select aria-label="المشروع" onchange="S.inv.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}<option value="" ${f.project === '' ? 'selected' : ''}>عام</option></select>
+    <select aria-label="المشروع" onchange="S.inv.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
     <div class="sub" style="margin:4px 0 -2px">دفعت من؟</div>
     <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'المدير']].map(o => `<button class="${(f.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="S.inv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>
     <div class="sub" style="margin-top:-4px">${f.paidBy === 'card' ? 'ما تنخصم من عهدتك' : f.paidBy === 'own' ? 'ترجع لك بعد ما يعتمدها المدير' : 'تنخصم من العهدة اللي معك'}</div>
