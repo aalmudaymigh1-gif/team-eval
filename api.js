@@ -571,6 +571,8 @@
         const note = String(it.note || '').trim().slice(0, 1000);
         const media = (it.media || []).filter(m => m && m.id && (m.t === 'i' || m.t === 'v')).slice(0, MAX_MEDIA)
           .map(m => ({ id: String(m.id), t: m.t }));
+        const voice = (it.media || []).find(m => m && m.id && m.t === 'a');
+        if (voice) media.push({ id: String(voice.id), t: 'a', d: Math.max(0, Math.round(Number(voice.d) || 0)) });
         const proof = ['invoice', 'note'].indexOf(it.proof) >= 0 ? it.proof : 'photo';
         ids.forEach(id => rows.push({ emp: id, title: title, due: due, note: note, project: project, media: media, urgent: !!it.urgent, proof: proof }));
       });
@@ -599,6 +601,7 @@
       }
       if (x.urgent !== undefined) a.urgent = !!x.urgent;
       if (x.proof !== undefined) a.proof = String(x.proof);
+      if (x.voice !== undefined) { a.voice = String(x.voice || ''); a.vd = Math.max(0, Math.round(Number(x.vd) || 0)); }
       return adminDo(k, 'task_update', a);
     },
 
@@ -634,6 +637,25 @@
       if (['video/mp4', 'video/quicktime', 'video/webm', 'video/3gpp'].indexOf(type) < 0) type = known[ext] || 'video/mp4';
       const r = await aexec(k, 'ticket', { kind: 'vid', ext: ext === 'm4v' ? 'mp4' : ext });
       return put(r.path, file, type);
+    },
+
+    async apiUploadAud(k, blob) {
+      if (!blob || !blob.size) throw new Error('ما وصل التسجيل، جرّب مرة ثانية');
+      if (blob.size > 20 * 1024 * 1024) throw new Error('التسجيل كبير، سجّل أقصر');
+      let type = String(blob.type || '').split(';')[0];
+      const ext = { 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a', 'audio/aac': 'aac', 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mpeg': 'mp3', 'audio/wav': 'wav' }[type];
+      if (!ext) type = 'audio/mp4';
+      const r = await aexec(k, 'ticket', { kind: 'aud', ext: ext || 'm4a' });
+      return put(r.path, blob, type);
+    },
+
+    async apiFileUrls(ids) {
+      const ps = Array.from(new Set((ids || []).filter(Boolean))).slice(0, 50);
+      if (!ps.length) return {};
+      await signMany(ps);
+      const out = {};
+      ps.forEach(p => { if (UC[p] && UC[p].u) out[p] = UC[p].u; });
+      return out;
     },
 
     async apiMediaDiscard() { return true; },

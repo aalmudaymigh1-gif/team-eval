@@ -568,6 +568,21 @@ span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 .pgrp.ep .pgh2 .n{font-size:12px;font-weight:500;background:rgba(255,255,255,.2);color:#fff}
 .ecard .tt,.trow2 .tt{font-size:15px!important;font-weight:300!important}
 .kpi .v small.gstar,.kpi .k .gstar{color:var(--amber)!important}.kpi .k .gstar{display:inline-flex}
+.vrec{margin-top:10px;display:flex;align-items:center;gap:10px;border:1.5px dashed var(--line2);border-radius:14px;padding:12px 14px;color:var(--acc-dk);font:inherit;font-size:14px;font-weight:500;background:none;width:100%;cursor:pointer;text-align:start}
+.vrec.on{border:1px solid var(--red);color:var(--red);background:var(--red-soft);cursor:default}
+.vrec .dot{width:10px;height:10px;border-radius:50%;background:var(--red);animation:vpulse 1s infinite}
+@keyframes vpulse{50%{opacity:.3}}
+.vrec .tm{margin-inline-start:auto;font-variant-numeric:tabular-nums;color:var(--text)}.vrec .tm.h{color:var(--faint);font-size:12px}
+.vrec .stp{background:var(--red);color:#fff;border:0;border-radius:999px;padding:6px 16px;font:inherit;font-size:13px;cursor:pointer}
+.vpl{margin-top:10px;display:flex;align-items:center;gap:10px;background:var(--acc-soft);border-radius:14px;padding:10px 12px}
+.vpl .pb{width:36px;height:36px;border-radius:50%;background:var(--acc);color:#fff;border:0;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;padding:0}
+.vpl .pb .pa,.vpl.pl .pb .py{display:none}.vpl.pl .pb .pa{display:block}
+.vpl .wv{flex:1;display:flex;align-items:center;gap:2px;height:26px;min-width:0}
+.vpl .wv i{flex:1;background:var(--acc);opacity:.4;border-radius:2px;min-width:2px}.vpl .wv i.on{opacity:1;background:var(--acc-dk)}
+.vpl .d{font-size:13px;color:var(--acc-dk);font-variant-numeric:tabular-nums}
+.vpl .rm{color:var(--muted);background:none;border:0;padding:4px;cursor:pointer;font:inherit;font-size:12.5px;display:flex}.vpl .rm.arm{color:var(--red);font-weight:600}
+.vpl .vup{font-size:12px;color:var(--muted)}
+.vcap{font-size:12px;color:var(--muted);margin-top:6px}
 </style>
 </head>
 <body>
@@ -577,14 +592,14 @@ span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=38"></script>
+<script src="api.js?v=45"></script>
 <script>
-const APP_VER = '44';
+const APP_VER = '45';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
   if (!force && Date.now() - verAt < 20000) return false;
-  if (S.upN || S.gr || CAM.stream || CAM.shot || S.doing || S.invForm || S.form || S.gform || S.ret || S.sheet || tfFilled().length || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) return false;
+  if (S.upN || S.rec || S.vup || !AU.paused || S.gr || CAM.stream || CAM.shot || S.doing || S.invForm || S.form || S.gform || S.ret || S.sheet || tfFilled().length || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) return false;
   verAt = Date.now();
   try {
     const t = await fetch(location.href.split('#')[0], {cache: 'reload'}).then(r => r.ok ? r.text() : '');
@@ -602,7 +617,7 @@ const BOOT = (function () {
   document.title = page === 'emp' ? 'تقييمي' : 'تقييم الفريق';
   return {page: page, key: k, token: page === 'emp' ? e : '', url: location.origin + location.pathname, firstRun: false};
 })();
-const S = {view:'rec', data:null, emp:null, type:null, crits:[], misses:[], star:false, starNote:'', date:null, dateMode:'today', note:'', busy:false, armed:null, lastId:null, form:null, preview:null, tf:{emps:[], project:null, newP:false, items:[newItem()]}, photos:{}, pf:'all', mopen:{}, mc:{}, upN:0, ret:null, doing:null, upload:null, empData:null, empPreview:false, tq:{f:'', emp:'all', proj:'all', urg:false, q:'', search:false, showDone:false}, tqLoaded:false, eopen:{}, iv:{f:''}, iopen:{}, ic:{}, invForm:false, ishots:[], ishotLoading:false, inv:{amount:'', desc:'', project:''}, td:null, sheet:false, sheetMore:false, pc:{}, popen:{}, etab:'tasks', eShowDone:false, shots:[], cm:'', shotLoading:false};
+const S = {view:'rec', data:null, emp:null, type:null, crits:[], misses:[], star:false, starNote:'', date:null, dateMode:'today', note:'', busy:false, armed:null, lastId:null, form:null, preview:null, tf:{emps:[], project:null, newP:false, items:[newItem()]}, photos:{}, pf:'all', mopen:{}, mc:{}, upN:0, ret:null, doing:null, upload:null, empData:null, empPreview:false, tq:{f:'', emp:'all', proj:'all', urg:false, q:'', search:false, showDone:false}, tqLoaded:false, eopen:{}, iv:{f:''}, iopen:{}, ic:{}, invForm:false, ishots:[], ishotLoading:false, inv:{amount:'', desc:'', project:''}, td:null, sheet:false, sheetMore:false, pc:{}, popen:{}, etab:'tasks', eShowDone:false, shots:[], cm:'', shotLoading:false, rec:null, vu:{}, vreq:{}, vup:null};
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num = n => Math.round(Number(n) || 0).toLocaleString('en-US');
@@ -614,7 +629,7 @@ const dmy = s => s ? s.slice(8,10) + '/' + s.slice(5,7) + '/' + s.slice(0,4) : '
 const signed = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n);
 const nqt = n => n === 1 ? 'نقطة' : n === 2 ? 'نقطتين' : n <= 10 ? 'نقاط' : 'نقطة';
 const TRUST = 'الأمانة والمصداقية';
-const ICONS = {"clipboard-check":"<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\"/> <path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/> <path d=\"m9 14 2 2 4-4\"/>","users":"<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/> <path d=\"M16 3.128a4 4 0 0 1 0 7.744\"/> <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\"/> <circle cx=\"9\" cy=\"7\" r=\"4\"/>","list-checks":"<path d=\"M13 5h8\"/> <path d=\"M13 12h8\"/> <path d=\"M13 19h8\"/> <path d=\"m3 17 2 2 4-4\"/> <path d=\"m3 7 2 2 4-4\"/>","wallet":"<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\"/> <path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\"/>","settings":"<path d=\"M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915\"/> <circle cx=\"12\" cy=\"12\" r=\"3\"/>","check":"<path d=\"M20 6 9 17l-5-5\"/>","x":"<path d=\"M18 6 6 18\"/> <path d=\"m6 6 12 12\"/>","star":"<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\"/>","refresh-cw":"<path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\"/> <path d=\"M21 3v5h-5\"/> <path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\"/> <path d=\"M8 16H3v5\"/>","calendar":"<path d=\"M8 2v3\"/> <path d=\"M16 2v3\"/> <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/> <path d=\"M3 9h18\"/>","user":"<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/> <circle cx=\"12\" cy=\"7\" r=\"4\"/>","clock":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M12 6v6l4 2\"/>","hammer":"<path d=\"m15 12-9.373 9.373a1 1 0 0 1-3.001-3L12 9\"/> <path d=\"m18 15 4-4\"/> <path d=\"m21.5 11.5-1.914-1.914A2 2 0 0 1 19 8.172v-.344a2 2 0 0 0-.586-1.414l-1.657-1.657A6 6 0 0 0 12.516 3H9l1.243 1.243A6 6 0 0 1 12 8.485V10l2 2h1.172a2 2 0 0 1 1.414.586L18.5 14.5\"/>","wrench":"<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z\"/>","shield-check":"<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/> <path d=\"m9 12 2 2 4-4\"/>","handshake":"<path d=\"m11 17 2 2a1 1 0 1 0 3-3\"/> <path d=\"m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4\"/> <path d=\"m21 3 1 11h-2\"/> <path d=\"M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3\"/> <path d=\"M3 4h8\"/>","clipboard-list":"<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\"/> <path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/> <path d=\"M12 11h4\"/> <path d=\"M12 16h4\"/> <path d=\"M8 11h.01\"/> <path d=\"M8 16h.01\"/>","sparkles":"<path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\"/> <path d=\"M20 2v4\"/> <path d=\"M22 4h-4\"/> <circle cx=\"4\" cy=\"20\" r=\"2\"/>","shirt":"<path d=\"M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z\"/>","circle-check":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"m16 9-5.5 5.5L8 12\"/>","circle-x":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"m15 9-6 6\"/> <path d=\"m9 9 6 6\"/>","message-circle":"<path d=\"M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719\"/>","copy":"<rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\"/> <path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\"/>","eye":"<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\"/> <circle cx=\"12\" cy=\"12\" r=\"3\"/>","plus":"<path d=\"M5 12h14\"/> <path d=\"M12 5v14\"/>","trash-2":"<path d=\"M10 11v6\"/> <path d=\"M14 11v6\"/> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\"/> <path d=\"M3 6h18\"/> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/>","rotate-ccw":"<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/> <path d=\"M3 3v5h5\"/>","image":"<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\"/> <circle cx=\"9\" cy=\"9\" r=\"2\"/> <path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\"/>","camera":"<path d=\"M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z\"/> <circle cx=\"12\" cy=\"13\" r=\"3\"/>","paperclip":"<path d=\"m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551\"/>","folder":"<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\"/>","archive":"<rect width=\"20\" height=\"5\" x=\"2\" y=\"3\" rx=\"1\"/> <path d=\"M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8\"/> <path d=\"M10 12h4\"/>","banknote":"<rect width=\"20\" height=\"12\" x=\"2\" y=\"6\" rx=\"2\"/> <circle cx=\"12\" cy=\"12\" r=\"2\"/> <path d=\"M6 12h.01M18 12h.01\"/>","hand-coins":"<path d=\"M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17\"/> <path d=\"m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9\"/> <path d=\"m2 16 6 6\"/> <circle cx=\"16\" cy=\"9\" r=\"2.9\"/> <circle cx=\"6\" cy=\"5\" r=\"3\"/>","arrow-right":"<path d=\"M5 12h14\"/> <path d=\"m12 5 7 7-7 7\"/>","inbox":"<polyline points=\"22 12 16 12 14 15 10 15 8 12 2 12\"/> <path d=\"M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\"/>","link":"<path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\"/> <path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\"/>","info":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M12 16v-4\"/> <path d=\"M12 8h.01\"/>","send":"<path d=\"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z\"/> <path d=\"m21.854 2.147-10.94 10.939\"/>","check-check":"<path d=\"M18 6 7 17l-5-5\"/> <path d=\"m22 10-7.5 7.5L13 16\"/>","undo-2":"<path d=\"M9 14 4 9l5-5\"/> <path d=\"M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11\"/>","receipt":"<path d=\"M12 17V7\"/> <path d=\"M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8\"/> <path d=\"M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z\"/>","history":"<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/> <path d=\"M3 3v5h5\"/> <path d=\"M12 7v5l4 2\"/>","file-text":"<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/> <path d=\"M10 9H8\"/> <path d=\"M16 13H8\"/> <path d=\"M16 17H8\"/>","pencil":"<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\"/> <path d=\"m15 5 4 4\"/>","triangle-alert":"<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/> <path d=\"M12 9v4\"/> <path d=\"M12 17h.01\"/>","folder-plus":"<path d=\"M12 10v6\"/> <path d=\"M9 13h6\"/> <path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\"/>","circle-dollar-sign":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8\"/> <path d=\"M12 18V6\"/>","play":"<path d=\"M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z\"/>","user-round":"<circle cx=\"12\" cy=\"8\" r=\"5\"/> <path d=\"M20 21a8 8 0 0 0-16 0\"/>","lock":"<rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\"/> <path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/>"};
+const ICONS = {"clipboard-check":"<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\"/> <path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/> <path d=\"m9 14 2 2 4-4\"/>","users":"<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/> <path d=\"M16 3.128a4 4 0 0 1 0 7.744\"/> <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\"/> <circle cx=\"9\" cy=\"7\" r=\"4\"/>","list-checks":"<path d=\"M13 5h8\"/> <path d=\"M13 12h8\"/> <path d=\"M13 19h8\"/> <path d=\"m3 17 2 2 4-4\"/> <path d=\"m3 7 2 2 4-4\"/>","wallet":"<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\"/> <path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\"/>","settings":"<path d=\"M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915\"/> <circle cx=\"12\" cy=\"12\" r=\"3\"/>","check":"<path d=\"M20 6 9 17l-5-5\"/>","x":"<path d=\"M18 6 6 18\"/> <path d=\"m6 6 12 12\"/>","star":"<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\"/>","refresh-cw":"<path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\"/> <path d=\"M21 3v5h-5\"/> <path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\"/> <path d=\"M8 16H3v5\"/>","calendar":"<path d=\"M8 2v3\"/> <path d=\"M16 2v3\"/> <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/> <path d=\"M3 9h18\"/>","user":"<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/> <circle cx=\"12\" cy=\"7\" r=\"4\"/>","clock":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M12 6v6l4 2\"/>","hammer":"<path d=\"m15 12-9.373 9.373a1 1 0 0 1-3.001-3L12 9\"/> <path d=\"m18 15 4-4\"/> <path d=\"m21.5 11.5-1.914-1.914A2 2 0 0 1 19 8.172v-.344a2 2 0 0 0-.586-1.414l-1.657-1.657A6 6 0 0 0 12.516 3H9l1.243 1.243A6 6 0 0 1 12 8.485V10l2 2h1.172a2 2 0 0 1 1.414.586L18.5 14.5\"/>","wrench":"<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z\"/>","shield-check":"<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/> <path d=\"m9 12 2 2 4-4\"/>","handshake":"<path d=\"m11 17 2 2a1 1 0 1 0 3-3\"/> <path d=\"m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4\"/> <path d=\"m21 3 1 11h-2\"/> <path d=\"M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3\"/> <path d=\"M3 4h8\"/>","clipboard-list":"<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\"/> <path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/> <path d=\"M12 11h4\"/> <path d=\"M12 16h4\"/> <path d=\"M8 11h.01\"/> <path d=\"M8 16h.01\"/>","sparkles":"<path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\"/> <path d=\"M20 2v4\"/> <path d=\"M22 4h-4\"/> <circle cx=\"4\" cy=\"20\" r=\"2\"/>","shirt":"<path d=\"M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z\"/>","circle-check":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"m16 9-5.5 5.5L8 12\"/>","circle-x":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"m15 9-6 6\"/> <path d=\"m9 9 6 6\"/>","message-circle":"<path d=\"M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719\"/>","copy":"<rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\"/> <path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\"/>","eye":"<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\"/> <circle cx=\"12\" cy=\"12\" r=\"3\"/>","plus":"<path d=\"M5 12h14\"/> <path d=\"M12 5v14\"/>","trash-2":"<path d=\"M10 11v6\"/> <path d=\"M14 11v6\"/> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\"/> <path d=\"M3 6h18\"/> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/>","rotate-ccw":"<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/> <path d=\"M3 3v5h5\"/>","image":"<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\"/> <circle cx=\"9\" cy=\"9\" r=\"2\"/> <path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\"/>","camera":"<path d=\"M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z\"/> <circle cx=\"12\" cy=\"13\" r=\"3\"/>","paperclip":"<path d=\"m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551\"/>","folder":"<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\"/>","archive":"<rect width=\"20\" height=\"5\" x=\"2\" y=\"3\" rx=\"1\"/> <path d=\"M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8\"/> <path d=\"M10 12h4\"/>","banknote":"<rect width=\"20\" height=\"12\" x=\"2\" y=\"6\" rx=\"2\"/> <circle cx=\"12\" cy=\"12\" r=\"2\"/> <path d=\"M6 12h.01M18 12h.01\"/>","hand-coins":"<path d=\"M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17\"/> <path d=\"m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9\"/> <path d=\"m2 16 6 6\"/> <circle cx=\"16\" cy=\"9\" r=\"2.9\"/> <circle cx=\"6\" cy=\"5\" r=\"3\"/>","arrow-right":"<path d=\"M5 12h14\"/> <path d=\"m12 5 7 7-7 7\"/>","inbox":"<polyline points=\"22 12 16 12 14 15 10 15 8 12 2 12\"/> <path d=\"M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\"/>","link":"<path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\"/> <path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\"/>","info":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M12 16v-4\"/> <path d=\"M12 8h.01\"/>","send":"<path d=\"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z\"/> <path d=\"m21.854 2.147-10.94 10.939\"/>","check-check":"<path d=\"M18 6 7 17l-5-5\"/> <path d=\"m22 10-7.5 7.5L13 16\"/>","undo-2":"<path d=\"M9 14 4 9l5-5\"/> <path d=\"M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11\"/>","receipt":"<path d=\"M12 17V7\"/> <path d=\"M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8\"/> <path d=\"M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z\"/>","history":"<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/> <path d=\"M3 3v5h5\"/> <path d=\"M12 7v5l4 2\"/>","file-text":"<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/> <path d=\"M10 9H8\"/> <path d=\"M16 13H8\"/> <path d=\"M16 17H8\"/>","pencil":"<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\"/> <path d=\"m15 5 4 4\"/>","triangle-alert":"<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/> <path d=\"M12 9v4\"/> <path d=\"M12 17h.01\"/>","folder-plus":"<path d=\"M12 10v6\"/> <path d=\"M9 13h6\"/> <path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\"/>","circle-dollar-sign":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8\"/> <path d=\"M12 18V6\"/>","play":"<path d=\"M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z\"/>","user-round":"<circle cx=\"12\" cy=\"8\" r=\"5\"/> <path d=\"M20 21a8 8 0 0 0-16 0\"/>","mic":"<path d=\"M12 19v3\"/> <path d=\"M19 10v2a7 7 0 0 1-14 0v-2\"/> <rect x=\"9\" y=\"2\" width=\"6\" height=\"13\" rx=\"3\"/>","lock":"<rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\"/> <path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/>"};
 ICONS.search = '<circle cx="11" cy="11" r="8"/> <path d="m21 21-4.3-4.3"/>';
 ICONS.bell = '<path d="M10.268 21a2 2 0 0 0 3.464 0"/> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>';
 function I(n, s, sw) { return '<svg class="i" width="' + (s || 18) + '" height="' + (s || 18) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 2) + '" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[n] || '') + '</svg>'; }
@@ -987,6 +1002,151 @@ async function projLocSave(id, lat, lng) {
   catch (e) { const el = $('#plerr'); if (el) el.textContent = e; }
 }
 
+const AU = new Audio(), VMAX = 180;
+AU.preload = 'auto';
+const PLAY_SVG = '<svg class="py" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"/></svg><svg class="pa" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg>';
+function vOf(t) { return (t.media || []).find(x => x.t === 'a') || null; }
+function mOf(t) { return (t.media || []).filter(x => x.t !== 'a'); }
+function fmtS(n) { n = Math.max(0, Math.round(n || 0)); return Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0'); }
+function vWave(key) {
+  let h = 7, o = '';
+  for (const c of String(key)) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  for (let i = 0; i < 30; i++) { h = (h * 1103515245 + 12345) >>> 0; o += '<i style="height:' + (25 + (h >>> 16) % 75) + '%"></i>'; }
+  return o;
+}
+function vPlayerHtml(key, d, extra) {
+  const on = AU.dataset.k === key, dur = on && isFinite(AU.duration) && AU.duration > 0 ? AU.duration : d;
+  const n = on && dur ? Math.round(Math.min(1, AU.currentTime / dur) * 30) : 0;
+  const w = vWave(key).split('</i>').map((x, i) => i < n ? x.replace('<i ', '<i class="on" ') : x).join('</i>');
+  return `<div class="vpl ${on && !AU.paused ? 'pl' : ''}" data-k="${esc(key)}" data-d="${d || 0}" dir="ltr"><button class="pb" onclick="vToggle('${esc(key)}')" aria-label="تشغيل الشرح الصوتي">${PLAY_SVG}</button><span class="wv">${w}</span><span class="d">${fmtS(on && AU.currentTime > 0 ? AU.currentTime : d)}</span>${extra || ''}</div>`;
+}
+function vUi() {
+  document.querySelectorAll('.vpl[data-k]').forEach(el => {
+    const on = AU.dataset.k === el.dataset.k, d = Number(el.dataset.d) || 0;
+    const dur = on && isFinite(AU.duration) && AU.duration > 0 ? AU.duration : d;
+    const n = on && dur ? Math.round(Math.min(1, AU.currentTime / dur) * 30) : 0;
+    el.classList.toggle('pl', on && !AU.paused);
+    el.querySelectorAll('.wv i').forEach((b, i) => b.classList.toggle('on', i < n));
+    const t = el.querySelector('.d'); if (t) t.textContent = fmtS(on && AU.currentTime > 0 ? AU.currentTime : d);
+  });
+}
+['play', 'pause', 'timeupdate'].forEach(ev => AU.addEventListener(ev, vUi));
+AU.addEventListener('ended', () => { try { AU.currentTime = 0; } catch (e) {} AU.pause(); vUi(); });
+function vSrc(key) { return key === 'tf' ? ((S.tf.items[0].voice || {}).url || '') : (S.vu[key] || ''); }
+function vToggle(key) {
+  if (AU.dataset.k === key && !AU.paused) { AU.pause(); return; }
+  const url = vSrc(key);
+  if (!url) { vFetch([key], true); return; }
+  if (AU.dataset.k !== key || AU.src !== url) { AU.src = url; AU.dataset.k = key; }
+  const p = AU.play();
+  if (p && p.catch) p.catch(() => toastErr('ما اشتغل المقطع، اضغط مرة ثانية'));
+  vUi();
+}
+async function vFetch(ids, play) {
+  const need = ids.filter(id => id && id !== 'tf' && !S.vu[id] && !S.vreq[id]);
+  if (!need.length) return;
+  need.forEach(id => { S.vreq[id] = 1; });
+  try { Object.assign(S.vu, await API.apiFileUrls(need)); } catch (e) { if (play) toastErr(e); }
+  need.forEach(id => { delete S.vreq[id]; });
+  if (play && S.vu[need[0]]) {
+    AU.src = S.vu[need[0]]; AU.dataset.k = need[0];
+    try { await AU.play(); } catch (e) { toast('المقطع جاهز، اضغط تشغيل'); }
+    vUi();
+  }
+}
+function vStopIf(key) { if (AU.dataset.k === key) { AU.pause(); AU.removeAttribute('src'); AU.dataset.k = ''; } }
+
+function recBarHtml(r) { return `<div class="vrec on"><span class="dot"></span>يسجّل…<span class="tm" id="vrt">${fmtS(r.sec)}</span><button class="stp" onclick="recStop()">وقّف</button></div>`; }
+async function recStart(where) {
+  if (S.rec) return;
+  if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder)) return toastErr('جوالك ما يدعم التسجيل من التطبيق، حدّث النظام');
+  if (!AU.paused) AU.pause();
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true}}); }
+  catch (e) { return toastErr('ما قدرت أفتح المايكروفون، اسمح للتطبيق يستخدمه من الإعدادات'); }
+  const mt = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'].find(x => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(x)) || '';
+  let mr;
+  try { mr = new MediaRecorder(stream, mt ? {mimeType: mt, audioBitsPerSecond: 64000} : undefined); }
+  catch (e) { stream.getTracks().forEach(t => t.stop()); return toastErr('ما قدرت أبدأ التسجيل'); }
+  const r = S.rec = {where, mr, stream, chunks: [], t0: Date.now(), sec: 0};
+  mr.ondataavailable = e => { if (e.data && e.data.size) r.chunks.push(e.data); };
+  mr.onstop = () => recDone(r);
+  mr.start(1000);
+  r.iv = setInterval(() => {
+    r.sec = Math.floor((Date.now() - r.t0) / 1000);
+    if (r.sec >= VMAX) recStop(); else { const el = $('#vrt'); if (el) el.textContent = fmtS(r.sec); }
+  }, 300);
+  drawVoice(where);
+}
+function recStop(cancel) {
+  const r = S.rec;
+  if (!r || r.stopping) return;
+  r.stopping = true; r.cancel = !!cancel; clearInterval(r.iv);
+  r.sec = Math.min(VMAX, Math.max(1, Math.round((Date.now() - r.t0) / 1000)));
+  try { if (r.mr.state !== 'inactive') r.mr.stop(); else recDone(r); } catch (e) { recDone(r); }
+  r.stream.getTracks().forEach(t => t.stop());
+}
+async function recDone(r) {
+  if (r.done) return;
+  r.done = true;
+  if (S.rec === r) S.rec = null;
+  if (r.cancel) return drawVoice(r.where);
+  const type = String(r.mr.mimeType || (r.chunks[0] && r.chunks[0].type) || 'audio/mp4').split(';')[0];
+  const blob = new Blob(r.chunks, {type});
+  if (blob.size < 500) { toastErr('التسجيل قصير، سجّل مرة ثانية'); return drawVoice(r.where); }
+  const tf = r.where === 'tf', it = S.tf.items[0], v = {st: 'up', d: r.sec, url: URL.createObjectURL(blob)};
+  if (tf) it.voice = v; else S.vup = r.where;
+  drawVoice(r.where);
+  S.upN++;
+  try {
+    v.id = await callT(300000, 'apiUploadAud', BOOT.key, blob);
+    v.st = 'ok'; S.vu[v.id] = v.url;
+    if (!tf) { S.data = await call('apiTaskUpdate', BOOT.key, r.where, {voice: v.id, vd: v.d}); toast('انحفظ الشرح الصوتي'); }
+  } catch (e) {
+    if (tf && it.voice === v) it.voice = null;
+    toastErr('ما ارتفع التسجيل، ' + e);
+  }
+  S.upN--;
+  if (tf) drawVoice('tf');
+  else { S.vup = null; if (S.td === r.where) renderAdmin(); }
+}
+function drawVoice(where) {
+  if (where === 'tf') { const el = $('#tfVoice'); if (el) el.innerHTML = tfVoiceHtml(); return; }
+  const el = $('#dVoice'), t = S.td === where && allTasks().find(x => x.id === where);
+  if (el && t) el.innerHTML = dVoiceHtml(t);
+}
+function tfVoiceHtml() {
+  const r = S.rec, v = S.tf.items[0].voice;
+  if (r && r.where === 'tf') return recBarHtml(r);
+  if (v) return vPlayerHtml('tf', v.d, v.st === 'up' ? '<span class="vup">يرفع…</span>' : `<button class="rm" onclick="rmVoice()" aria-label="حذف التسجيل">${I('trash-2', 17)}</button>`)
+    + `<div class="vcap">${v.st === 'up' ? 'جاري رفع التسجيل… خلك بالصفحة لين يخلص' : 'شرح صوتي · اسمعه قبل ما تضيف، أو احذفه وسجّل من جديد'}</div>`;
+  return `<button class="vrec" onclick="recStart('tf')">${I('mic', 18)}سجّل شرح صوتي<span class="tm h">لين 3 دقايق</span></button>`;
+}
+function rmVoice() {
+  const it = S.tf.items[0];
+  if (!it.voice || it.voice.st === 'up') return;
+  vStopIf('tf'); it.voice = null; drawVoice('tf');
+}
+function dVoiceHtml(t) {
+  const id = t.id, r = S.rec, v = vOf(t), edit = t.status !== 'done';
+  if (r && r.where === id) return recBarHtml(r);
+  if (S.vup === id) return '<div class="sub" style="margin-top:8px">جاري رفع التسجيل… خلك بالصفحة لين يخلص</div>';
+  if (v) {
+    const arm = S.armed === 'vdel_' + id;
+    return vPlayerHtml(v.id, v.d, edit ? `<button class="rm ${arm ? 'arm' : ''}" onclick="delVoice('${id}')" aria-label="حذف الشرح الصوتي">${arm ? 'احذفه؟' : I('trash-2', 17)}</button>` : '')
+      + (edit ? `<button class="lnk" onclick="recStart('${id}')">سجّل بداله</button>` : '');
+  }
+  return edit ? `<button class="vrec" onclick="recStart('${id}')">${I('mic', 18)}سجّل شرح صوتي<span class="tm h">لين 3 دقايق</span></button>` : '';
+}
+async function delVoice(id) {
+  if (S.armed !== 'vdel_' + id) { S.armed = 'vdel_' + id; return drawVoice(id); }
+  S.armed = null;
+  const t = allTasks().find(x => x.id === id), v = t && vOf(t);
+  if (v) vStopIf(v.id);
+  try { S.data = await call('apiTaskUpdate', BOOT.key, id, {voice: ''}); renderAdmin(); toast('انحذف الشرح الصوتي'); }
+  catch (e) { toastErr(e); renderAdmin(); }
+}
+
 function newItem(dueMode) { return {title: '', note: '', dueMode: dueMode || 'none', due: '', media: [], urgent: false, proof: lsGet('tf_proof') || 'photo'}; }
 const PROOFS = [['photo', 'صورة'], ['invoice', 'فاتورة'], ['note', 'ملاحظة']];
 const PROOF_HINT = {photo: 'يصوّر الشغل بعد ما يخلص', invoice: 'يصوّر الفاتورة ويكتب المبلغ والمحل، وتنحسب على مشروع المهمة', note: 'يكتب وش سوّى، بدون صورة'};
@@ -1133,7 +1293,7 @@ function renderAdmin() {
 const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 const MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 function dayLabel(s) { if (!s) return ''; const d = new Date(s + 'T12:00:00'); return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_AR[d.getMonth()] + ' ' + d.getFullYear(); }
-function go(v) { S.view = v; S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); window.scrollTo(0,0); }
+function go(v) { if (S.rec) recStop(true); S.view = v; S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); window.scrollTo(0,0); }
 function rerender() { renderAdmin(); }
 
 /* ---------- تسجيل ---------- */
@@ -1397,8 +1557,8 @@ function drawTaskList() {
 function taskRowHtml(t, showProj) {
   const today = S.data.today, p = pillOf(t, t.b, false);
   const ring = t.status === 'done' ? 'g' : t.status === 'review' ? 'a' : t.status === 'returned' ? 'r' : '';
-  const nm = (t.media || []).length, np = (t.proofs || []).length;
-  const mini = (t.urgent && t.status !== 'done' ? '<span class="mb u">عاجلة</span>' : '') + (t.proof === 'invoice' ? `<span class="mb">فاتورة${t.inv ? ' ' + M(t.inv.amount, '', 't') : ''}</span>` : t.proof === 'note' ? '<span class="mb">ملاحظة</span>' : '') + (nm ? `<span class="mb">شرح ${nm}</span>` : '') + (np ? `<span class="mb">إثبات ${np}</span>` : '');
+  const nm = mOf(t).length, np = (t.proofs || []).length;
+  const mini = (t.urgent && t.status !== 'done' ? '<span class="mb u">عاجلة</span>' : '') + (t.proof === 'invoice' ? `<span class="mb">فاتورة${t.inv ? ' ' + M(t.inv.amount, '', 't') : ''}</span>` : t.proof === 'note' ? '<span class="mb">ملاحظة</span>' : '') + (nm ? `<span class="mb">شرح ${nm}</span>` : '') + (vOf(t) ? '<span class="mb">صوت</span>' : '') + (np ? `<span class="mb">إثبات ${np}</span>` : '');
   const when = t.status === 'done' ? 'خلصت ' + dmy(t.doneAt) : t.status === 'review' ? 'انرسلت ' + dmy(t.doneAt) : dueHtml(t, today);
   const meta = [esc(t.ename), showProj ? esc(t.pname || 'عام') : '', when].filter(Boolean).join(' · ');
   return `<div class="tli"><button class="trow2" onclick="openTask('${t.id}')"><span class="ring ${ring}"></span>
@@ -1408,7 +1568,7 @@ function taskRowHtml(t, showProj) {
 }
 
 function openTask(id) { S.td = id; S.armed = null; renderAdmin(); window.scrollTo(0, 0); }
-function closeTask() { S.td = null; S.armed = null; renderAdmin(); window.scrollTo(0, 0); }
+function closeTask() { if (S.rec) recStop(true); S.td = null; S.armed = null; renderAdmin(); window.scrollTo(0, 0); }
 async function approveTask(id) {
   try { S.data = await call('apiTaskApprove', BOOT.key, id); renderAdmin(); toast('اعتمدتها'); }
   catch (e) { toastErr(e); }
@@ -1456,11 +1616,13 @@ function renderTaskDetail() {
     ${t.status === 'returned' && t.reason ? `<div class="note bad">${I('rotate-ccw', 16)}<div><b>رجّعتها:</b> ${esc(t.reason)}</div></div>` : ''}
     <div class="lbl">الوصف</div>
     <textarea class="dnote" placeholder="تعليمات أو تفاصيل للموظف…" onchange="updTask('${id}',{note:this.value})">${esc(t.note)}</textarea>
-    ${(t.media || []).length ? `<div class="lbl">الشرح</div>${mediaHtml(t)}` : ''}
+    ${vOf(t) || t.status !== 'done' ? `<div class="lbl">الشرح الصوتي</div><div id="dVoice">${dVoiceHtml(t)}</div>` : ''}
+    ${mOf(t).length ? `<div class="lbl">الشرح</div>${mediaHtml(t)}` : ''}
     ${np ? `<div class="lbl">إثبات الإنجاز${t.doneAt ? ' · ' + dmy(t.doneAt) : ''}</div>${proofHtml(t)}` : ''}
     ${t.comment && t.status !== 'open' ? `<div class="note good">${I('message-circle', 16)}<div><b>${esc(t.ename)}:</b> ${esc(t.comment)}</div></div>` : ''}
     <div class="abar">${detailActions(t)}</div>
     <button class="del ${armDel ? 'arm' : ''}" style="margin:16px auto 0;display:flex" onclick="delTask('${id}')">${I('trash-2', 15)}${armDel ? 'تأكيد حذف المهمة' : 'حذف المهمة'}</button>`;
+  if (vOf(t)) vFetch([vOf(t).id]);
 }
 function detailActions(t) {
   const id = t.id;
@@ -1475,7 +1637,7 @@ function ovOpen(html) {
   o.innerHTML = `<div class="ovl ${again ? 'na' : ''}" onclick="if(event.target===this)ovClose()"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div></div>`;
   o.classList.add('on');
 }
-function ovClose() { if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); S.sheet = false; }
+function ovClose() { if (S.rec && S.rec.where === 'tf') recStop(true); vStopIf('tf'); if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); S.sheet = false; }
 function openSheet() {
   const d = S.data, tf = S.tf;
   if (!d.employees.length) return toast('أضف موظف من الإعدادات أول', null, 'in');
@@ -1504,6 +1666,7 @@ function drawSheet() {
     <div class="segc">${PROOFS.map(o => `<button class="${(it.proof || 'photo') === o[0] ? 'on' : ''}" onclick="S.tf.items[0].proof='${o[0]}';lsSet('tf_proof','${o[0]}');drawSheet()">${o[1]}</button>`).join('')}</div>
     <div class="sub" style="margin:-4px 0 8px">${PROOF_HINT[it.proof || 'photo']}</div>
     <div id="tfMedia_0">${tfMediaHtml(0)}</div>
+    <div id="tfVoice">${tfVoiceHtml()}</div>
     ${S.sheetMore ? `<label class="lbl" for="qtNote" style="margin:4px 0 0">الوصف</label><textarea id="qtNote" placeholder="المقاسات عند الحارس…" oninput="S.tf.items[0].note=this.value">${esc(it.note)}</textarea>
       <div class="trow" style="padding:0"><div class="n"><b>عاجلة</b><small>تطلع أول مجموعتها وعليها علامة</small></div><button class="tg ${it.urgent ? 'on u' : ''}" aria-label="عاجلة" onclick="S.tf.items[0].urgent=!S.tf.items[0].urgent;drawSheet()"></button></div>`
       : '<button class="lnk" onclick="S.sheetMore=true;drawSheet()">+ تفاصيل أكثر (الوصف، عاجلة)</button>'}
@@ -1529,7 +1692,7 @@ async function addProject(from) {
 
 /* ---------- مرفقات المهمة الجديدة ---------- */
 
-function tfFilled() { return S.tf.items.filter(it => it.title.trim() || it.note.trim() || it.media.length); }
+function tfFilled() { return S.tf.items.filter(it => it.title.trim() || it.note.trim() || it.media.length || it.voice); }
 function tfBtnLabel() { return 'إضافة'; }
 
 function tfMediaHtml(k) {
@@ -1608,13 +1771,15 @@ async function addTask() {
   if (err) err.textContent = '';
   if (!tf.emps.length) { if (err) err.textContent = 'اختر الموظف'; return; }
   if (!it.title.trim()) { if (err) err.textContent = 'اكتب المهمة'; const i = $('#qtTitle'); if (i) i.focus(); return; }
+  if (S.rec) { if (err) err.textContent = 'وقّف التسجيل أول'; return; }
   if (S.upN) { if (err) err.textContent = 'انتظر لين يخلص رفع المرفقات'; return; }
   if (S.busy) return;
   S.busy = true;
   const b = $('#tfBtn'); if (b) { b.disabled = true; b.textContent = 'جاري الإضافة…'; }
   try {
-    const items = [{title: it.title, due: itemDue(it), note: it.note, urgent: !!it.urgent, proof: it.proof || 'photo', media: it.media.filter(x => x.id).map(x => ({id: x.id, t: x.t}))}];
+    const items = [{title: it.title, due: itemDue(it), note: it.note, urgent: !!it.urgent, proof: it.proof || 'photo', media: it.media.filter(x => x.id).map(x => ({id: x.id, t: x.t})).concat(it.voice && it.voice.id ? [{id: it.voice.id, t: 'a', d: it.voice.d}] : [])}];
     S.data = await call('apiTasksAdd', BOOT.key, {emps: tf.emps, project: tf.project || '', items});
+    vStopIf('tf');
     const keep = newItem(it.dueMode); if (it.dueMode === 'other') keep.due = it.due;
     S.tf = {emps: tf.emps, project: tf.project, newP: false, items: [keep]};
     S.busy = false;
@@ -1631,7 +1796,7 @@ async function addTask() {
 function redrawTasks(admin) { admin ? renderTasks() : rerenderEmp(); }
 
 function mediaHtml(t) {
-  const m = t.media || [];
+  const m = mOf(t);
   if (!m.length) return '';
   const ni = m.filter(x => x.t === 'i').length, nv = m.length - ni;
   const what = [ni ? (ni === 1 ? 'صورة' : ni === 2 ? 'صورتين' : ni + ' صور') : '', nv ? (nv === 1 ? 'فيديو' : nv + ' فيديو') : ''].filter(Boolean).join(' و');
@@ -1646,7 +1811,7 @@ function mediaHtml(t) {
 async function openMedia(id, admin) {
   S.mopen[id] = true;
   const t = findTask(id);
-  const need = t ? (t.media || []).filter(x => !S.mc[x.id]) : [];
+  const need = t ? mOf(t).filter(x => !S.mc[x.id]) : [];
   need.forEach(x => { S.mc[x.id] = 'loading'; });
   redrawTasks(admin);
   await Promise.all(need.map(async x => {
@@ -2429,6 +2594,7 @@ function renderEmp(d, isPreview) {
     <div class="segc etabs"><button class="${S.etab === 'tasks' ? 'on' : ''}" onclick="S.etab='tasks';rerenderEmp()">مهامي${nOpen ? ' (' + nOpen + ')' : ''}</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">حافزي</button></div>
     ${S.etab === 'inv' ? empInvHtml(d, isPreview) : tasksTab ? empTasksHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
   if (!isPreview) prefetchImgs();
+  if (tasksTab) vFetch((d.tasks || []).filter(t => t.status === 'open' || t.status === 'returned').map(t => (vOf(t) || {}).id));
 }
 
 function empPayHtml(d) {
@@ -2507,6 +2673,7 @@ function empCardHtml(t, mode, inGroup) {
     ${open && t.proof === 'invoice' ? '<span class="mb" style="display:inline-block;margin-top:6px">إثباتها فاتورة</span>' : open && t.proof === 'note' ? '<span class="mb" style="display:inline-block;margin-top:6px">إثباتها ملاحظة</span>' : ''}
     ${t.status === 'returned' && t.reason ? `<div class="note bad"><div><b>المدير يقول:</b> ${esc(t.reason)}</div></div>` : ''}
     ${t.note && open ? `<div class="enote">${esc(t.note)}</div>` : ''}
+    ${open && vOf(t) ? vPlayerHtml(vOf(t).id, vOf(t).d) + '<div class="vcap">شرح صوتي من المدير</div>' : ''}
     ${open ? mediaHtml(t) : ''}
     ${act}</div>`;
 }
@@ -2700,6 +2867,7 @@ async function refresh(silent) {
     y0 = null; pulled = 0; ind.style.height = '0';
   }, {passive: true});
   document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && S.rec) recStop();
     if (document.visibilityState === 'visible') { if (Date.now() - lastLoad > 60000) refresh(true); else checkUpdate(); }
   });
   window.addEventListener('error', () => toastErr('صار خطأ، اسحب الصفحة لتحت عشان تحدّث'));
