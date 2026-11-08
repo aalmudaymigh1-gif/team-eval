@@ -583,23 +583,25 @@ span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 .vpl .rm{color:var(--muted);background:none;border:0;padding:4px;cursor:pointer;font:inherit;font-size:12.5px;display:flex}.vpl .rm.arm{color:var(--red);font-weight:600}
 .vpl .vup{font-size:12px;color:var(--muted)}
 .vcap{font-size:12px;color:var(--muted);margin-top:6px}
-#app{min-height:100vh}
-html.lock,html.lock body{overflow:hidden}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{padding:0!important}
+#scr{position:fixed;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding:env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 190px)}
+html.lock #scr{overflow:hidden}
 .sheet{overscroll-behavior:contain}
 .tabs,.fab{transition:opacity .18s,transform .18s}
 body.kb .tabs,body.kb .fab{opacity:0!important;pointer-events:none!important;transform:translateY(24px)!important}
 </style>
 </head>
 <body>
-<div id="busy"></div><div id="ptr"></div>
-<div class="wrap" id="app"><div class="load">جاري التحميل…</div></div>
+<div id="busy"></div>
+<div id="scr"><div id="ptr"></div><div class="wrap" id="app"><div class="load">جاري التحميل…</div></div></div>
 <div id="ov"></div><button id="fab" class="fab hide" onclick="S.tview === 'g' ? openGForm() : openSheet()" aria-label="إضافة"></button>
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=45"></script>
 <script>
-const APP_VER = '46';
+const APP_VER = '47';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -922,7 +924,7 @@ function teamTrackRow(d, e) {
     ${teamRecent(e, true)}
   </div>`;
 }
-function openAttLog(id) { S.attLog = id; S.armed = null; renderTeam(); window.scrollTo(0, 0); }
+function openAttLog(id) { S.attLog = id; S.armed = null; renderTeam(); toTop(); }
 function renderAttLog(empId) {
   const d = S.data, e = d.employees.find(x => x.id === empId);
   if (!e) { S.attLog = null; return renderTeam(); }
@@ -1007,6 +1009,7 @@ async function projLocSave(id, lat, lng) {
   catch (e) { const el = $('#plerr'); if (el) el.textContent = e; }
 }
 
+function toTop() { const sc = document.getElementById('scr'); if (sc) sc.scrollTop = 0; }
 const AU = new Audio(), VMAX = 180;
 AU.preload = 'auto';
 const PLAY_SVG = '<svg class="py" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"/></svg><svg class="pa" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg>';
@@ -1271,7 +1274,7 @@ async function loadAdmin() {
     if (!S.emp && S.data.employees.length) S.emp = S.data.employees[0].id;
     S.date = S.data.today;
     renderAdmin();
-  } catch (e) { $('#app').innerHTML = '<div class="load"><div class="ei">' + I('triangle-alert', 28) + '</div>' + esc(e) + '<br><button class="btn2" style="margin:16px auto 0" onclick="location.reload()">' + I('refresh-cw', 16) + 'حاول مرة ثانية</button></div>'; }
+  } catch (e) { const td = document.getElementById('tabsDock'); if (td) td.remove(); $('#app').innerHTML = '<div class="load"><div class="ei">' + I('triangle-alert', 28) + '</div>' + esc(e) + '<br><button class="btn2" style="margin:16px auto 0" onclick="location.reload()">' + I('refresh-cw', 16) + 'حاول مرة ثانية</button></div>'; }
 }
 
 function renderAdmin() {
@@ -1291,6 +1294,7 @@ function renderAdmin() {
     <div class="tabs">${tab('rec','clipboard-check','تقييم')}${tab('team','users','الفريق')}${tab('task','list-checks','المهام')}${tab('inv','receipt','الفواتير')}${tab('fin','wallet','المالية')}${tab('set','settings','الإعدادات')}</div>` + h + `
     <div id="view"></div>`;
   $('#app').innerHTML = h;
+  mountTabs();
   prefetchImgs();
   ({rec:renderRec, team:renderTeam, task:renderTasks, inv:renderInv, fin:renderFin, set:renderSet})[S.view]();
 }
@@ -1298,7 +1302,12 @@ function renderAdmin() {
 const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 const MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
 function dayLabel(s) { if (!s) return ''; const d = new Date(s + 'T12:00:00'); return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_AR[d.getMonth()] + ' ' + d.getFullYear(); }
-function go(v) { if (S.rec) recStop(true); S.view = v; S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); window.scrollTo(0,0); }
+function mountTabs() {
+  const old = document.getElementById('tabsDock'), t = $('#app .tabs');
+  if (old) old.remove();
+  if (t) { t.id = 'tabsDock'; document.body.appendChild(t); }
+}
+function go(v) { if (S.rec) recStop(true); S.view = v; S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
 function rerender() { renderAdmin(); }
 
 /* ---------- تسجيل ---------- */
@@ -1427,10 +1436,10 @@ async function armLog(id) {
 }
 
 async function preview(id) {
-  try { S.preview = await call('apiPreview', BOOT.key, id); renderAdmin(); window.scrollTo(0,0); }
+  try { S.preview = await call('apiPreview', BOOT.key, id); renderAdmin(); toTop(); }
   catch (e) { toastErr(e); }
 }
-function closePreview() { S.preview = null; renderAdmin(); window.scrollTo(0,0); }
+function closePreview() { S.preview = null; renderAdmin(); toTop(); }
 
 /* ---------- المهام (المدير) ---------- */
 
@@ -1572,8 +1581,8 @@ function taskRowHtml(t, showProj) {
     ${t.status === 'review' ? `<div class="racts">${t.comment ? `<div class="note good" style="margin:0 0 8px">${esc(t.comment)}</div>` : ''}<div class="grid2"><button class="btn2 cu" onclick="approveTask('${t.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askReturn('${t.id}')">رجّعها</button></div></div>` : ''}</div>`;
 }
 
-function openTask(id) { S.td = id; S.armed = null; renderAdmin(); window.scrollTo(0, 0); }
-function closeTask() { if (S.rec) recStop(true); S.td = null; S.armed = null; renderAdmin(); window.scrollTo(0, 0); }
+function openTask(id) { S.td = id; S.armed = null; renderAdmin(); toTop(); }
+function closeTask() { if (S.rec) recStop(true); S.td = null; S.armed = null; renderAdmin(); toTop(); }
 async function approveTask(id) {
   try { S.data = await call('apiTaskApprove', BOOT.key, id); renderAdmin(); toast('اعتمدتها'); }
   catch (e) { toastErr(e); }
@@ -2054,7 +2063,7 @@ async function delInvD(id) {
   try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; ovClose(); renderAdmin(); toast('انحذفت'); }
   catch (e) { S.armed = null; toastErr(e); }
 }
-function openSt(id) { S.iv.st = id; S.armed = null; renderInv(); window.scrollTo(0, 0); }
+function openSt(id) { S.iv.st = id; S.armed = null; renderInv(); toTop(); }
 function renderInvSt(empId) {
   const d = S.data, e = d.employees.find(x => x.id === empId);
   const items = ((d.inv || {}).items || []).filter(x => x.emp === empId).map(x => Object.assign({}, x, {ename: e.name}));
@@ -2411,9 +2420,9 @@ function openGuide(id) {
   if (!g) return;
   S.gr = {id: id, i: 0, stage: 'points', t0: Date.now(), review: !!g.done};
   if (!g.done && !S.empPreview) API.apiGuideOpen(BOOT.token, id).catch(() => {});
-  renderGuide(); window.scrollTo(0, 0);
+  renderGuide(); toTop();
 }
-function closeGuide() { clearInterval(S.grT); S.gr = null; rerenderEmp(); window.scrollTo(0, 0); }
+function closeGuide() { clearInterval(S.grT); S.gr = null; rerenderEmp(); toTop(); }
 function renderGuide() {
   clearInterval(S.grT);
   const r = S.gr, g = (S.empData.guides || []).find(x => x.id === r.id);
@@ -2459,8 +2468,8 @@ async function finishGuide(ans) {
   try {
     const res = await call('apiGuideDone', BOOT.token, r.id, secs, ans);
     S.empData = res.data;
-    if (res.ok) { S.gr = null; rerenderEmp(); window.scrollTo(0, 0); toast('تم، يعطيك العافية'); }
-    else { r.i = 0; r.stage = 'points'; r.t0 = Date.now(); renderGuide(); window.scrollTo(0, 0); toastErr('الجواب غلط، اقرا النقاط مرة ثانية'); }
+    if (res.ok) { S.gr = null; rerenderEmp(); toTop(); toast('تم، يعطيك العافية'); }
+    else { r.i = 0; r.stage = 'points'; r.t0 = Date.now(); renderGuide(); toTop(); toastErr('الجواب غلط، اقرا النقاط مرة ثانية'); }
   } catch (e) { toastErr(e); }
 }
 
@@ -2861,7 +2870,7 @@ async function refresh(silent) {
   const ind = document.getElementById('ptr');
   const ptrOk = e => !(document.documentElement.classList.contains('lock') || document.body.classList.contains('kb') || S.rec || S.gr || S.sheet || CAM.stream
     || (e.target && e.target.closest && e.target.closest('#ov')));
-  window.addEventListener('touchstart', e => { y0 = window.scrollY <= 0 && ptrOk(e) ? e.touches[0].clientY : null; pulled = 0; }, {passive: true});
+  window.addEventListener('touchstart', e => { y0 = document.getElementById('scr').scrollTop <= 0 && ptrOk(e) ? e.touches[0].clientY : null; pulled = 0; }, {passive: true});
   window.addEventListener('touchmove', e => {
     if (y0 === null) return;
     pulled = e.touches[0].clientY - y0;
@@ -2883,11 +2892,11 @@ async function refresh(silent) {
     const vv = window.visualViewport;
     const off = SA ? (maxH - window.innerHeight > 4 || (vv && (vv.offsetTop > 1 || window.innerHeight - vv.height > 4))) : !!(vv && vv.offsetTop > 1);
     if (!off || kbOn() || isField(document.activeElement)) return;
-    const y = window.scrollY, app = document.getElementById('app');
+    const sc = document.getElementById('scr'), y = sc.scrollTop, app = sc;
     app.style.display = 'none';
     void app.offsetHeight;
     app.style.display = '';
-    window.scrollTo(0, y);
+    sc.scrollTop = y;
   }
   const healSoon = ms => { clearTimeout(healT); healT = setTimeout(heal, ms); };
   window.addEventListener('resize', () => { if (SA && !kbOn()) { maxH = Math.max(maxH, window.innerHeight); healSoon(200); } });
