@@ -596,19 +596,67 @@ html.lock #scr{overflow:hidden}
 .dock,.save{bottom:calc(max(4px,calc(env(safe-area-inset-bottom) - 10px)) + 50px)!important;padding-bottom:10px!important}
 .fab{bottom:calc(max(4px,calc(env(safe-area-inset-bottom) - 10px)) + 70px)!important}
 .sheet.drag{transition:none!important;animation:none!important}
+.tabs{z-index:15!important}
+html.lock #fab{display:none!important}
+#zv{position:fixed;inset:0;z-index:70;background:#000;display:flex;align-items:center;justify-content:center;touch-action:none;overscroll-behavior:none}
+#zv img{max-width:100%;max-height:100%;object-fit:contain;transform-origin:center center;will-change:transform;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#zv .zx{position:absolute;top:calc(14px + env(safe-area-inset-top));left:14px;width:42px;height:42px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+#zv .zh{position:absolute;bottom:calc(18px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:rgba(255,255,255,.6);font-size:12.5px;pointer-events:none}
+html.zlock #scr{overflow:hidden}
+img.ph{cursor:zoom-in}
+.qlab{font-size:12.5px;color:var(--muted);margin:4px 2px -2px;display:flex;align-items:center;gap:6px}
+.qch{display:flex;flex-wrap:wrap;gap:7px}
+.qch button{border:1px solid var(--line2);background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;color:var(--text);cursor:pointer}
+.qch button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.qch button.nw{color:var(--acc-dk);border-style:dashed}
+.qtools{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
+.qtools>div{min-width:0}
+.qtools>#tfMedia_0:has(.mi),.qtools>#tfVoice:has(.vpl),.qtools>#tfVoice:has(.vrec.on){grid-column:1/-1}
+.qtools .vrec{margin-top:0;justify-content:center;padding:12px 8px}.qtools .vrec .tm.h{display:none}
+.qtools .vrec.on{justify-content:flex-start}
+.qadd{margin-top:0!important;justify-content:center;cursor:pointer}
+.qbig{width:100%;padding:14px!important;font-size:16px!important}
+.fxh{display:flex;align-items:baseline;justify-content:space-between;margin:14px 2px 12px}
+.fxh h2{font-size:20px;font-weight:600;margin:0}.fxh span{color:var(--muted);font-size:13px}
+.fxs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.fxs div{background:var(--surface);border:1px solid var(--line2);border-radius:18px;padding:11px 10px;min-width:0}
+.fxs b{display:block;font-size:11.5px;color:var(--muted);font-weight:400;margin-bottom:6px}
+.fxs small{display:block;font-size:11px;color:var(--faint);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fxa{background:var(--amber-soft,#F8F1E4);border:1px solid #EFE2C8;border-radius:18px;margin-bottom:14px;overflow:hidden}
+.fxa .r{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;font:inherit;font-size:14px;color:var(--text);background:none;border:0;text-align:start;cursor:pointer}
+.fxa .r+.r{border-top:1px solid #EFE2C8}.fxa .dt{width:8px;height:8px;border-radius:50%;background:var(--amber);flex:none}
+.fxa .r em{margin-inline-start:auto;font-style:normal;color:var(--muted);display:flex;align-items:center;gap:6px}
+.fxn{display:flex;align-items:center;justify-content:space-between;width:100%;background:var(--acc);color:#fff;border:0;border-radius:16px;padding:14px 16px;font:inherit;font-size:15px;font-weight:500;margin-top:8px;cursor:pointer;text-align:start}
+.fxn .cv{display:flex;opacity:.85}.fxn.ar{opacity:.6}
+.fxn .ord{display:flex;gap:6px}
+.fxn .ord button{width:34px;height:34px;border-radius:10px;border:0;background:rgba(255,255,255,.22);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.fxn .ord button[disabled]{opacity:.3}
+.fxt{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:2px 2px 0;font-size:12.5px;color:var(--muted)}
+.fxt button{background:none;border:0;font:inherit;font-size:13.5px;color:var(--acc-dk);display:flex;align-items:center;gap:6px;cursor:pointer;flex:none}
+.fxt button.dn{background:var(--acc);color:#fff;border-radius:999px;padding:6px 18px}
+.card>.hair:first-child{display:none}
+.fxb{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fxb>div{border-radius:14px;padding:11px 12px;background:#fff;border:1px solid var(--line2);min-width:0}
+.fxb b{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-bottom:5px}
+.fxb small{display:block;font-size:11px;color:var(--faint);margin-top:5px}
+.fxb .lnk{padding:6px 0 0;font-size:13px}
+.fxbt{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
+.fxbt button{background:#fff;border:1px solid var(--line2);border-radius:14px;padding:9px 2px;font:inherit;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--text);cursor:pointer;line-height:1.25}
+.fxbt button.rd{color:var(--red)}
+.fxl .str .tm{font-size:12px}
 body.kb .tabs,body.kb .fab{opacity:0!important;pointer-events:none!important;transform:translateY(24px)!important}
 </style>
 </head>
 <body>
 <div id="busy"></div>
 <div id="scr"><div id="ptr"></div><div class="wrap" id="app"><div class="load">جاري التحميل…</div></div></div>
-<div id="ov"></div><button id="fab" class="fab hide" onclick="S.tview === 'g' ? openGForm() : openSheet()" aria-label="إضافة"></button>
+<div id="ov"></div><button id="fab" class="fab hide" onclick="fabTap()" aria-label="إضافة"></button>
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=45"></script>
+<script src="api.js?v=49"></script>
 <script>
-const APP_VER = '48';
+const APP_VER = '49';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -631,7 +679,7 @@ const BOOT = (function () {
   document.title = page === 'emp' ? 'تقييمي' : 'تقييم الفريق';
   return {page: page, key: k, token: page === 'emp' ? e : '', url: location.origin + location.pathname, firstRun: false};
 })();
-const S = {view:'rec', data:null, emp:null, type:null, crits:[], misses:[], star:false, starNote:'', date:null, dateMode:'today', note:'', busy:false, armed:null, lastId:null, form:null, preview:null, tf:{emps:[], project:null, newP:false, items:[newItem()]}, photos:{}, pf:'all', mopen:{}, mc:{}, upN:0, ret:null, doing:null, upload:null, empData:null, empPreview:false, tq:{f:'', emp:'all', proj:'all', urg:false, q:'', search:false, showDone:false}, tqLoaded:false, eopen:{}, iv:{f:''}, iopen:{}, ic:{}, invForm:false, ishots:[], ishotLoading:false, inv:{amount:'', desc:'', project:''}, td:null, sheet:false, sheetMore:false, pc:{}, popen:{}, etab:'tasks', eShowDone:false, shots:[], cm:'', shotLoading:false, rec:null, vu:{}, vreq:{}, vup:null};
+const S = {view:'rec', data:null, emp:null, type:null, crits:[], misses:[], star:false, starNote:'', date:null, dateMode:'today', note:'', busy:false, armed:null, lastId:null, form:null, preview:null, tf:{emps:[], project:null, newP:false, items:[newItem()]}, photos:{}, pf:'all', mopen:{}, mc:{}, upN:0, ret:null, doing:null, upload:null, empData:null, empPreview:false, tq:{f:'', emp:'all', proj:'all', urg:false, q:'', search:false, showDone:false}, tqLoaded:false, eopen:{}, iv:{f:''}, fx:{seg:'e', emp:'', proj:null, rv:false, ord:false, all:false}, iopen:{}, ic:{}, invForm:false, ishots:[], ishotLoading:false, inv:{amount:'', desc:'', project:''}, td:null, sheet:false, sheetMore:false, pc:{}, popen:{}, etab:'tasks', eShowDone:false, shots:[], cm:'', shotLoading:false, rec:null, vu:{}, vreq:{}, vup:null};
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num = n => Math.round(Number(n) || 0).toLocaleString('en-US');
@@ -647,7 +695,7 @@ const ICONS = {"clipboard-check":"<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\"
 ICONS.search = '<circle cx="11" cy="11" r="8"/> <path d="m21 21-4.3-4.3"/>';
 ICONS.bell = '<path d="M10.268 21a2 2 0 0 0 3.464 0"/> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>';
 function I(n, s, sw) { return '<svg class="i" width="' + (s || 18) + '" height="' + (s || 18) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 2) + '" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[n] || '') + '</svg>'; }
-const CRIT_IC = {'الحضور والمواعيد':'clock','جودة الشغل':'hammer','إدارة العمال':'users','حل المشاكل':'wrench','الأمانة والمصداقية':'shield-check','الاحترام وحسن التعامل':'handshake','الالتزام بالتعليمات':'clipboard-list','النظافة':'sparkles','الانضباط والمظهر':'shirt'};
+const CRIT_IC = {'الحضور والمواعيد':'clock','جودة الشغل':'hammer','إدارة العمال':'users','حل المشاكل':'wrench','متابعة الأعمال الموكلة':'clipboard-list','التركيز والانتباه':'eye','الأمانة والمصداقية':'shield-check','الاحترام وحسن التعامل':'handshake','الالتزام بالتعليمات':'clipboard-list','النظافة':'sparkles','الانضباط والمظهر':'shirt'};
 function emptyHtml(icon, text) { return '<div class="empty"><div class="ei">' + I(icon, 24) + '</div>' + text + '</div>'; }
 function ctitle(icon, text, extra) { return '<div class="ctitle"><span class="ci">' + I(icon, 17) + '</span>' + text + (extra ? '<span class="sp">' + extra + '</span>' : '') + '</div>'; }
 function segc(items, cur, fn) { return '<div class="segc">' + items.map(x => '<button class="' + (cur === x[0] ? 'on' : '') + '" onclick="' + fn + '(\'' + x[0] + '\')">' + x[1] + '</button>').join('') + '</div>'; }
@@ -1298,7 +1346,7 @@ function renderAdmin() {
   }
   const tab = (v, ic, t) => `<button class="${S.view===v?'on':''}" onclick="go('${v}')">${I(ic, 16)}${t}</button>`;
   h = `<div class="top"><div><h1>إدارة الشغل</h1><div class="sub">${esc(dayLabel(d.today))}</div></div><button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>${pushHtml()}
-    <div class="tabs">${tab('rec','clipboard-check','تقييم')}${tab('team','users','الفريق')}${tab('task','list-checks','المهام')}${tab('inv','receipt','الفواتير')}${tab('fin','wallet','المالية')}${tab('set','settings','الإعدادات')}</div>` + h + `
+    <div class="tabs">${tab('rec','clipboard-check','تقييم')}${tab('team','users','الفريق')}${tab('task','list-checks','المهام')}${tab('fin','wallet','المالية')}${tab('set','settings','الإعدادات')}</div>` + h + `
     <div id="view"></div>`;
   $('#app').innerHTML = h;
   mountTabs();
@@ -1314,7 +1362,7 @@ function mountTabs() {
   if (old) old.remove();
   if (t) { t.id = 'tabsDock'; document.body.appendChild(t); }
 }
-function go(v) { if (S.rec) recStop(true); S.view = v; S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
+function go(v) { if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false}); S.view = v; S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
 function rerender() { renderAdmin(); }
 
 /* ---------- تسجيل ---------- */
@@ -1654,10 +1702,11 @@ function detailActions(t) {
 }
 
 function ovOpen(html) {
-  const o = $('#ov'), again = o.classList.contains('on');
+  const o = $('#ov'), again = o.classList.contains('on'), old = again && o.querySelector('.sheet'), top = old ? old.scrollTop : 0;
   o.innerHTML = `<div class="ovl ${again ? 'na' : ''}" onclick="if(event.target===this)ovClose()"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div></div>`;
   o.classList.add('on');
   document.documentElement.classList.add('lock');
+  if (top) { const sh = o.querySelector('.sheet'); if (sh) sh.scrollTop = top; }
 }
 function ovClose() { if (S.rec && S.rec.where === 'tf') recStop(true); vStopIf('tf'); if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); document.documentElement.classList.remove('lock'); S.sheet = false; }
 function openSheet() {
@@ -1675,29 +1724,31 @@ function openSheet() {
 function drawSheet() {
   if (!S.sheet) return;
   const d = S.data, tf = S.tf, it = tf.items[0], all = d.employees.length > 1 && tf.emps.length === d.employees.length;
-  const ap = activeProjects(), sel = (v, cur) => v === cur ? 'selected' : '';
+  const ap = activeProjects(), pf = it.proof || 'photo';
+  const chip = (on, click, label, cls) => `<button class="${on ? 'on' : ''} ${cls || ''}" onclick="${click}">${label}</button>`;
   ovOpen(`<label class="shh" for="qtTitle">مهمة جديدة</label>
     <input id="qtTitle" class="qtt" placeholder="وش المهمة؟ مثلاً: تركيب باب الشقة 4" value="${esc(it.title)}" oninput="S.tf.items[0].title=this.value" onkeydown="if(event.key==='Enter')addTask()">
-    <div class="qrow">
-      <label class="qsel">${I('user', 15)}<select aria-label="الموظف" onchange="qtEmp(this.value)">${d.employees.map(e => `<option value="${e.id}" ${!all && tf.emps[0] === e.id ? 'selected' : ''}>${esc(e.name)}</option>`).join('')}${d.employees.length > 1 ? `<option value="all" ${all ? 'selected' : ''}>الكل</option>` : ''}</select></label>
-      <label class="qsel">${I('folder', 15)}<select aria-label="المشروع" onchange="qtProj(this.value)">${ap.map(p => `<option value="${p.id}" ${sel(p.id, tf.project)}>${esc(p.name)}</option>`).join('')}<option value="" ${sel('', tf.project)}>عام</option></select></label>
-      <label class="qsel">${I('calendar', 15)}<select aria-label="الموعد" onchange="qtDue(this.value)">${[['none', 'بدون موعد'], ['today', 'اليوم'], ['tom', 'بكرة'], ['other', 'تاريخ…']].map(x => `<option value="${x[0]}" ${sel(x[0], it.dueMode)}>${x[1]}</option>`).join('')}</select></label>
-    </div>
+    <div class="qlab">${I('user', 14)}لمين</div>
+    <div class="qch">${d.employees.map(e => chip(!all && tf.emps[0] === e.id, `qtEmp('${e.id}')`, esc(shortName(e.name)))).join('')}${d.employees.length > 1 ? chip(all, "qtEmp('all')", 'الكل') : ''}</div>
+    <div class="qlab">${I('folder', 14)}المشروع</div>
+    <div class="qch">${ap.map(p => chip(tf.project === p.id, `qtProj('${p.id}')`, esc(p.name))).join('')}${chip(!tf.project, "qtProj('')", 'عام')}${chip(false, 'S.tf.newP=!S.tf.newP;drawSheet()', '+ جديد', 'nw')}</div>
+    ${tf.newP ? `<div class="grid2" style="grid-template-columns:1fr auto"><input id="np_tf" placeholder="اسم المشروع الجديد" onkeydown="if(event.key==='Enter')addProject('tf')"><button class="btn2 cu" onclick="addProject('tf')">أضف</button></div><div class="err" id="nperr"></div>` : ''}
+    <div class="qlab">${I('calendar', 14)}الموعد</div>
+    <div class="qch">${[['none', 'بدون'], ['today', 'اليوم'], ['tom', 'بكرة'], ['other', 'تاريخ…']].map(x => chip((it.dueMode || 'none') === x[0], `qtDue('${x[0]}')`, x[1])).join('')}</div>
     ${it.dueMode === 'other' ? `<input type="date" value="${it.due || d.today}" min="${d.today}" onchange="S.tf.items[0].due=this.value">` : ''}
-    <div class="sub" style="margin:2px 0 4px">الإثبات</div>
-    <div class="segc">${PROOFS.map(o => `<button class="${(it.proof || 'photo') === o[0] ? 'on' : ''}" onclick="S.tf.items[0].proof='${o[0]}';lsSet('tf_proof','${o[0]}');drawSheet()">${o[1]}</button>`).join('')}</div>
-    <div class="sub" style="margin:-4px 0 8px">${PROOF_HINT[it.proof || 'photo']}</div>
-    <div id="tfMedia_0">${tfMediaHtml(0)}</div>
-    <div id="tfVoice">${tfVoiceHtml()}</div>
-    ${S.sheetMore ? `<label class="lbl" for="qtNote" style="margin:4px 0 0">الوصف</label><textarea id="qtNote" placeholder="المقاسات عند الحارس…" oninput="S.tf.items[0].note=this.value">${esc(it.note)}</textarea>
+    <div class="qtools"><div id="tfMedia_0">${tfMediaHtml(0)}</div><div id="tfVoice">${tfVoiceHtml()}</div></div>
+    ${S.sheetMore ? `<div class="sub" style="margin:4px 0 0">الإثبات</div>
+      <div class="segc">${PROOFS.map(o => `<button class="${pf === o[0] ? 'on' : ''}" onclick="S.tf.items[0].proof='${o[0]}';lsSet('tf_proof','${o[0]}');drawSheet()">${o[1]}</button>`).join('')}</div>
+      <div class="sub" style="margin:-4px 0 4px">${PROOF_HINT[pf]}</div>
+      <label class="lbl" for="qtNote" style="margin:4px 0 0">الوصف</label><textarea id="qtNote" placeholder="المقاسات عند الحارس…" oninput="S.tf.items[0].note=this.value">${esc(it.note)}</textarea>
       <div class="trow" style="padding:0"><div class="n"><b>عاجلة</b><small>تطلع أول مجموعتها وعليها علامة</small></div><button class="tg ${it.urgent ? 'on u' : ''}" aria-label="عاجلة" onclick="S.tf.items[0].urgent=!S.tf.items[0].urgent;drawSheet()"></button></div>`
-      : '<button class="lnk" onclick="S.sheetMore=true;drawSheet()">+ تفاصيل أكثر (الوصف، عاجلة)</button>'}
+      : `<button class="lnk" onclick="S.sheetMore=true;drawSheet()">+ تفاصيل أكثر (الإثبات، الوصف، عاجلة)${pf !== 'photo' ? ' · الإثبات: ' + (PROOFS.find(o => o[0] === pf) || ['', ''])[1] : ''}${it.urgent ? ' · عاجلة' : ''}</button>`}
     <div class="err" id="tferr"></div>
-    <div class="g21"><button class="btn2 cu" id="tfBtn" onclick="addTask()">إضافة</button><button class="btn2" onclick="ovClose()">إغلاق</button></div>
-    <div class="sub" style="text-align:center">بعد «إضافة» تبقى النافذة مفتوحة للمهمة اللي بعدها</div>`);
+    <button class="btn2 cu qbig" id="tfBtn" onclick="addTask()">إضافة</button>
+    <div class="sub" style="text-align:center">بعد «إضافة» تبقى النافذة مفتوحة للمهمة اللي بعدها، واسحبها لتحت عشان تسكّرها</div>`);
 }
-function qtEmp(v) { S.tf.emps = v === 'all' ? S.data.employees.map(e => e.id) : [v]; if (v !== 'all') lsSet('tf_emp', v); }
-function qtProj(v) { S.tf.project = v; lsSet('tf_proj', v); }
+function qtEmp(v) { S.tf.emps = v === 'all' ? S.data.employees.map(e => e.id) : [v]; if (v !== 'all') lsSet('tf_emp', v); drawSheet(); }
+function qtProj(v) { S.tf.project = v; S.tf.newP = false; lsSet('tf_proj', v); drawSheet(); }
 function qtDue(v) { const it = S.tf.items[0]; it.dueMode = v; it.due = v === 'other' ? (it.due || S.data.today) : ''; drawSheet(); }
 
 async function addProject(from) {
@@ -1708,7 +1759,7 @@ async function addProject(from) {
     const r = await call('apiProjectAdd', BOOT.key, name);
     S.data = r.data;
     if (from === 'tf') { S.tf.newP = false; S.tf.project = r.id; lsSet('tf_proj', r.id); }
-    renderAdmin(); toast('انضاف المشروع');
+    renderAdmin(); if (from === 'tf') drawSheet(); toast('انضاف المشروع');
   } catch (e) { err.textContent = e; }
 }
 
@@ -1720,6 +1771,7 @@ function tfBtnLabel() { return 'إضافة'; }
 function tfMediaHtml(k) {
   const it = S.tf.items[k], m = it.media;
   const up = m.some(x => x.st === 'up');
+  if (!m.length) return `<label class="vrec qadd">${I('camera', 18)}صورة أو فيديو<input type="file" accept="${ACC_MEDIA}" multiple style="display:none" onchange="pickMedia(this, ${k})"></label><div class="err">${esc(it.merr || '')}</div>`;
   return `<div class="mst">
     ${m.map((x, i) => `<div class="mi ${x.st === 'up' ? 'up' : ''}">
       ${x.t === 'i' && x.prev ? `<img src="${x.prev}" alt="">` : x.t === 'v' ? `<span>▶<br>فيديو${x.mb ? '<br>' + x.mb + ' م.ب' : ''}</span>` : ''}
@@ -1825,7 +1877,7 @@ function mediaHtml(t) {
   const admin = S.view === 'task' && !S.preview && BOOT.page === 'admin';
   if (!S.mopen[t.id]) return `<button class="mbtn" onclick="openMedia('${t.id}', ${admin})">${I('paperclip', 15)}شوف الشرح (${what})</button>`;
   return `<div>${m.map(x => x.t === 'i'
-      ? (S.mc[x.id] && S.mc[x.id] !== 'loading' ? `<img src="${S.mc[x.id]}" class="ph" alt="">` : '<div class="sub" style="margin-top:8px">جاري تحميل الصورة…</div>')
+      ? (S.mc[x.id] && S.mc[x.id] !== 'loading' ? `<img src="${S.mc[x.id]}" class="ph" alt="صورة الشرح" onclick="zoomOpen(this.src,'صورة الشرح')">` : '<div class="sub" style="margin-top:8px">جاري تحميل الصورة…</div>')
       : (S.mc[x.id] && S.mc[x.id] !== 'loading' ? `<video class="vid" src="${esc(S.mc[x.id])}" controls playsinline preload="metadata"></video>` : '<div class="sub" style="margin-top:8px">جاري تحميل الفيديو…</div>')).join('')}
     <button class="mbtn" onclick="S.mopen['${t.id}']=false;redrawTasks(${admin})">${I('x', 15)}إخفاء الشرح</button></div>`;
 }
@@ -1931,13 +1983,65 @@ function viewInvImg(f) {
   showFull(S.ic[f], f, 'صورة الفاتورة');
 }
 function showFull(thumb, f, alt) {
-  ovOpen(`<img class="full" id="fullimg" src="${thumb}" alt="${alt}"><button class="btn2" onclick="ovClose()">إغلاق</button>`);
+  zoomOpen(thumb, alt);
+  if (!f) return;
   fileUrl(f).then(u => {
-    if (u === thumb) return;
+    if (!u || u === thumb) return;
     const big = new Image();
-    big.onload = () => { const el = $('#fullimg'); if (el) el.src = u; };
+    big.onload = () => { const el = $('#zvimg'); if (el) el.src = u; };
     big.src = u;
   }).catch(() => {});
+}
+function zoomOpen(src, alt) {
+  zoomClose();
+  const z = document.createElement('div');
+  z.id = 'zv';
+  z.innerHTML = `<img id="zvimg" src="${src}" alt="${esc(alt || '')}" draggable="false"><button class="zx" aria-label="إغلاق" onclick="zoomClose()">${I('x', 22, 2.2)}</button><div class="zh">كبّر بإصبعين</div>`;
+  document.body.appendChild(z);
+  document.documentElement.classList.add('zlock');
+  zoomBind(z);
+}
+function zoomClose() { const z = $('#zv'); if (z) z.remove(); document.documentElement.classList.remove('zlock'); }
+function zoomBind(z) {
+  const img = z.querySelector('img');
+  let s = 1, tx = 0, ty = 0, st = null;
+  const apply = () => { img.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')'; };
+  const fit = () => {
+    if (s <= 1.02) { s = 1; tx = 0; ty = 0; return; }
+    const mx = Math.max(0, (img.offsetWidth * s - z.clientWidth) / 2), my = Math.max(0, (img.offsetHeight * s - z.clientHeight) / 2);
+    tx = Math.max(-mx, Math.min(mx, tx)); ty = Math.max(-my, Math.min(my, ty));
+  };
+  const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  const mid = t => ({x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2});
+  const begin = t => {
+    if (t.length === 2) st = {k: 'p', d: dist(t) || 1, s: s, tx: tx, ty: ty, m: mid(t)};
+    else if (t.length === 1 && s > 1) st = {k: 'm', x: t[0].clientX, y: t[0].clientY, tx: tx, ty: ty};
+    else st = null;
+  };
+  z.addEventListener('touchstart', e => { img.style.transition = 'none'; const h = z.querySelector('.zh'); if (h) h.remove(); begin(e.touches); }, {passive: true});
+  z.addEventListener('touchmove', e => {
+    if (!st) return;
+    e.preventDefault();
+    const t = e.touches;
+    if (st.k === 'p' && t.length === 2) {
+      const r = z.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, m = mid(t);
+      const qx = (st.m.x - cx - st.tx) / st.s, qy = (st.m.y - cy - st.ty) / st.s;
+      s = Math.min(6, Math.max(1, st.s * dist(t) / st.d));
+      tx = m.x - cx - s * qx; ty = m.y - cy - s * qy;
+      apply();
+    } else if (st.k === 'm' && t.length === 1) {
+      tx = st.tx + t[0].clientX - st.x; ty = st.ty + t[0].clientY - st.y;
+      apply();
+    }
+  }, {passive: false});
+  const end = e => {
+    if (e.touches.length) return begin(e.touches);
+    st = null; img.style.transition = 'transform .2s ease-out'; fit(); apply();
+  };
+  z.addEventListener('touchend', end);
+  z.addEventListener('touchcancel', end);
+  z.addEventListener('gesturestart', e => e.preventDefault());
+  z.addEventListener('click', e => { if (e.target === z && s === 1) zoomClose(); });
 }
 let pfT;
 function prefetchImgs() {
@@ -1972,47 +2076,145 @@ function invRowHtml(x, showEmp) {
   </div>`;
 }
 
-function renderInv() {
-  if (S.iv.st && S.data.employees.some(e => e.id === S.iv.st)) return renderInvSt(S.iv.st);
-  S.iv.st = '';
-  const d = S.data, iv = d.inv || {items: [], bal: {}}, mk = d.today.slice(0, 7);
+function renderInv() { return renderFin(); }
+function fabTap() { if (S.view === 'fin') return askInvAdd(true); if (S.tview === 'g') return openGForm(); openSheet(); }
+const SV_UP = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>';
+const SV_DN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+function finCtx() {
+  const d = S.data, iv = d.inv || {items: [], bal: {}, parts: {}};
   const name = id => { const e = d.employees.find(x => x.id === id); return e ? e.name : ''; };
-  const items = iv.items.map(x => Object.assign({}, x, {ename: name(x.emp)}));
-  const rv = items.filter(x => x.kind === 'inv' && x.status === 'review');
-  const okM = items.filter(x => x.kind === 'inv' && x.status === 'ok' && x.ts.slice(0, 7) === mk);
-  const tot = okM.reduce((s, x) => s + x.amount, 0);
-  let h = '<div class="ecs">' + d.employees.map(e => {
-    const p = (iv.parts || {})[e.id] || {c: iv.bal[e.id] || 0, o: 0}, n = rv.filter(x => x.emp === e.id).length;
-    return `<button class="ec" onclick="openSt('${e.id}')">${n ? `<span class="pend">${n} تنتظر</span>` : ''}
-      <b>${esc(e.name)}</b><span class="l">رصيد العهدة</span><span class="v">${M(Math.abs(p.c), p.c < 0 ? '−' : '', 'big')}</span>
-      <span class="o ${p.o > 0 ? 'r' : ''}">${p.o > 0 ? 'له عندك من جيبه ' + M(p.o, '', 't') : p.c < 0 ? 'صرف أكثر من عهدته' : 'ما له شي عندك'}</span></button>`;
-  }).join('') + '</div>' + `<button class="btn2 cu" style="width:100%;margin-top:10px" onclick="askInvAdd()">${I('plus', 16, 2.5)}أضف فاتورة</button>`;
-  const okList = items.filter(x => x.kind === 'inv' && x.status === 'ok');
-  if (okList.length) {
-    const showAll = !!S.iopen.allinv, list = showAll ? okList : okList.slice(0, 8);
-    h += `<div class="sech">آخر الفواتير<span>${okList.length}</span></div><div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${list.map(x => invMiniRow(x, true)).join('')}
-      ${okList.length > 8 ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.iopen.allinv=!S.iopen.allinv;renderInv()">${showAll ? 'أقل' : 'كل الفواتير (' + okList.length + ')'}</button>` : ''}</div>`;
+  return {d: d, mk: d.today.slice(0, 7), parts: iv.parts || {}, items: (iv.items || []).map(x => Object.assign({}, x, {ename: name(x.emp)}))};
+}
+function shortName(n) { const w = String(n || '').trim().split(/\s+/); return /^(ابو|أبو|ام|أم|بن)$/.test(w[0]) && w[1] ? w[0] + ' ' + w[1] : w[0]; }
+function projName(k) { if (!k) return 'عام'; const p = (S.data.projects || []).find(x => x.id === k); return p ? p.name : 'مشروع محذوف'; }
+function openSt(id) { Object.assign(S.fx, {emp: id, proj: null, rv: false, all: false}); S.view = 'fin'; S.armed = null; S.form = null; renderAdmin(); toTop(); }
+function openFinProj(k) { Object.assign(S.fx, {proj: k, emp: '', rv: false, all: false}); S.armed = null; renderFin(); toTop(); }
+function openFinRv() { Object.assign(S.fx, {rv: true, emp: '', proj: null}); S.armed = null; renderFin(); toTop(); }
+function finBack() { Object.assign(S.fx, {emp: '', proj: null, rv: false, all: false}); S.form = null; S.armed = null; renderFin(); toTop(); }
+function finBackBtn() { return `<button class="back" onclick="finBack()">${I('arrow-right', 17)}المالية</button>`; }
+
+function renderFin() {
+  const c = finCtx(), d = c.d;
+  const fb = $('#fab'); fb.innerHTML = I('plus', 26, 2.5); fb.classList.remove('hide'); fb.setAttribute('aria-label', 'أضف فاتورة');
+  fb.classList.toggle('hide', !!(S.fx.rv || S.fx.emp || (S.fx.proj !== null && S.fx.proj !== undefined)));
+  if (S.fx.rv) return renderFinRv(c);
+  if (S.fx.emp && d.employees.some(e => e.id === S.fx.emp)) return renderFinEmp(c, S.fx.emp);
+  if (S.fx.proj !== null && S.fx.proj !== undefined) return renderFinProj(c, S.fx.proj);
+  S.fx.emp = '';
+  const unpaid = d.employees.reduce((a, e) => a + e.unpaid.reduce((b, u) => b + Math.max(0, u.net), 0), 0);
+  const nUn = d.employees.filter(e => e.unpaid.length).length;
+  const withC = d.employees.filter(e => ((c.parts[e.id] || {}).c || 0) > 0);
+  const cust = withC.reduce((a, e) => a + c.parts[e.id].c, 0);
+  const okM = c.items.filter(x => x.kind === 'inv' && x.status === 'ok' && x.ts.slice(0, 7) === c.mk);
+  const exp = okM.reduce((a, x) => a + x.amount, 0);
+  const rv = c.items.filter(x => x.kind === 'inv' && x.status === 'review');
+  const owe = d.employees.filter(e => ((c.parts[e.id] || {}).o || 0) > 0);
+  const cnt = (n, one, two, many) => n === 1 ? one : n === 2 ? two : n + ' ' + many;
+  let h = `<div class="fxh"><h2>المالية</h2><span>${esc(d.month)}</span></div>
+    <div class="fxs">
+      <div><b>رواتب ما انصرفت</b>${M(unpaid)}<small>${nUn ? nUn + ' من ' + d.employees.length + ' موظفين' : 'كلها انصرفت'}</small></div>
+      <div><b>عهد عند الموظفين</b>${M(cust)}<small>${withC.length ? esc(withC.map(e => shortName(e.name)).join('، ')) : 'ما عند أحد عهدة'}</small></div>
+      <div><b>مصاريف الشهر</b>${M(exp)}<small>${okM.length ? cnt(okM.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير') : 'ما فيه فواتير'}</small></div>
+    </div>`;
+  const acts = [];
+  if (rv.length) acts.push(`<button class="r" onclick="openFinRv()"><span class="dt"></span>${cnt(rv.length, 'فاتورة تنتظر', 'فاتورتين تنتظر', 'فواتير تنتظر')} اعتمادك<em>${M(rv.reduce((a, x) => a + x.amount, 0), '', 't')}${I('chevron-left', 15)}</em></button>`);
+  owe.forEach(e => acts.push(`<button class="r" onclick="openSt('${e.id}')"><span class="dt"></span>${esc(shortName(e.name))} له عندك من جيبه<em>${M(c.parts[e.id].o, '', 't')}${I('chevron-left', 15)}</em></button>`));
+  if (acts.length) h += `<div class="fxa">${acts.join('')}</div>`;
+  const seg = S.fx.seg === 'p' ? 'p' : 'e';
+  h += `<div class="segc" style="margin:4px 0 6px"><button class="${seg === 'e' ? 'on' : ''}" onclick="S.fx.seg='e';S.fx.ord=false;renderFin()">الموظفين</button><button class="${seg === 'p' ? 'on' : ''}" onclick="S.fx.seg='p';renderFin()">المشاريع</button></div>`;
+  if (seg === 'e') {
+    h += d.employees.length ? d.employees.map(e => `<button class="fxn" onclick="openSt('${e.id}')">${esc(e.name)}<span class="cv">${I('chevron-left', 16)}</span></button>`).join('') : emptyHtml('users', 'ما فيه موظفين. أضفهم من الإعدادات');
+  } else {
+    const act = (d.projects || []).filter(p => !p.archived);
+    if (S.fx.ord && act.length > 1) {
+      h += `<div class="fxt"><span>رتّبها مثل ما تبي، والترتيب يمشي على المهام بعد</span><button class="dn" onclick="S.fx.ord=false;renderFin()">تم</button></div>`
+        + act.map((p, i) => `<div class="fxn"><span>${esc(p.name)}</span><span class="ord"><button ${i === 0 ? 'disabled' : ''} onclick="projMove('${p.id}',-1)" aria-label="فوق">${SV_UP}</button><button ${i === act.length - 1 ? 'disabled' : ''} onclick="projMove('${p.id}',1)" aria-label="تحت">${SV_DN}</button></span></div>`).join('');
+    } else {
+      const used = new Set(c.items.filter(x => x.kind === 'inv').map(x => x.project || ''));
+      const arch = (d.projects || []).filter(p => p.archived && used.has(p.id));
+      if (act.length > 1) h += `<div class="fxt"><span></span><button onclick="S.fx.ord=true;renderFin()">${I('list-checks', 16)}رتّب</button></div>`;
+      h += act.map(p => `<button class="fxn" onclick="openFinProj('${p.id}')">${esc(p.name)}<span class="cv">${I('chevron-left', 16)}</span></button>`).join('')
+        + `<button class="fxn" onclick="openFinProj('')">عام<span class="cv">${I('chevron-left', 16)}</span></button>`
+        + arch.map(p => `<button class="fxn ar" onclick="openFinProj('${p.id}')">${esc(p.name)} · مؤرشف<span class="cv">${I('chevron-left', 16)}</span></button>`).join('');
+    }
   }
-  const ws = items.filter(x => x.kind === 'inv' && x.status !== 'returned' && x.warrantyUntil).sort((a, b) => a.warrantyUntil < b.warrantyUntil ? -1 : 1);
+  $('#view').innerHTML = h;
+}
+
+async function projMove(id, dir) {
+  const ps = (S.data.projects || []).slice(), act = ps.filter(p => !p.archived), i = act.findIndex(p => p.id === id), j = i + dir;
+  if (i < 0 || j < 0 || j >= act.length) return;
+  const t = act[i]; act[i] = act[j]; act[j] = t;
+  const order = act.concat(ps.filter(p => p.archived));
+  S.data.projects = order;
+  renderFin();
+  try { S.data = await call('apiProjOrder', BOOT.key, order.map(p => p.id)); renderFin(); }
+  catch (e) { toastErr(e); refresh(true); }
+}
+
+function renderFinRv(c) {
+  const rv = c.items.filter(x => x.kind === 'inv' && x.status === 'review');
+  $('#view').innerHTML = finBackBtn() + `<div class="fxh"><h2>تنتظر اعتمادك</h2><span>${rv.length || ''}</span></div>`
+    + (rv.length ? rv.map(x => invRowHtml(x, true)).join('') : emptyHtml('check-check', 'ما فيه فواتير تنتظرك'));
+}
+
+function finLedger(c, e) {
+  const L = [], mine = c.items.filter(x => x.emp === e.id);
+  mine.filter(x => x.kind === 'give').forEach(x => L.push({ts: x.ts, h: `<div class="str"><span><b style="font-weight:600">${x.paidBy === 'own' ? 'سدّدت له' : x.paidBy === 'ret' ? 'رجّع من العهدة' : 'عطيته عهدة'}</b>${x.desc && !['عهدة', 'سداد', 'رجّع الباقي'].includes(x.desc) ? ' · ' + esc(x.desc) : ''}<div class="tm">${dmy(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}</div></span>
+      <span style="display:flex;align-items:center;gap:4px"><b class="iva ${x.paidBy === 'ret' ? 'r' : 'g'}">${M(x.amount, x.paidBy === 'ret' ? '−' : '+', x.paidBy === 'ret' ? 'neg' : 'pos')}</b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`}));
+  mine.filter(x => x.kind === 'inv' && x.status === 'ok').forEach(x => {
+    const fromC = (x.paidBy || 'cash') === 'cash';
+    L.push({ts: x.ts, h: `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">فاتورة · ${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmy(x.ts)} · ${esc(x.pname || 'عام')}${fromC ? ' · من العهدة' : ''}</div></span><b class="iva">${M(x.amount, fromC ? '−' : '', fromC ? 'neg' : '')} ‹</b></div></button>`});
+  });
+  (e.tx || []).forEach(t => {
+    const armed = S.armed === 'tx_' + t.id;
+    L.push({ts: t.date, h: `<div class="str"><span><b style="font-weight:600">${esc(txText(t))}</b>${t.note ? ' · ' + esc(t.note) : ''}<div class="tm">${dmy(t.date)}</div></span>
+      <span style="display:flex;align-items:center;gap:4px"><b class="iva">${M(t.amount, t.kind === 'ded' ? '−' : '', t.kind === 'ded' ? 'neg' : '')}</b><button class="ed ${armed ? 'arm' : ''}" style="${armed ? 'color:var(--red);font-size:12.5px' : ''}" onclick="armTx('${t.id}')" aria-label="حذف">${armed ? 'احذف؟' : I('trash-2', 15)}</button></span></div>`});
+  });
+  return L.sort((a, b) => a.ts < b.ts ? 1 : a.ts > b.ts ? -1 : 0);
+}
+
+function renderFinEmp(c, id) {
+  const d = c.d, e = d.employees.find(x => x.id === id), p = c.parts[id] || {c: 0, o: 0, g: 0, rt: 0, cash: 0};
+  const mine = c.items.filter(x => x.emp === id);
+  const rv = mine.filter(x => x.kind === 'inv' && x.status === 'review'), ret = mine.filter(x => x.kind === 'inv' && x.status === 'returned');
+  const f = S.form && S.form.emp === id ? S.form : null;
+  let h = finBackBtn() + `<div class="fxh"><h2>${esc(e.name)}</h2><span>${esc(d.month)}</span></div>`;
+  if (rv.length) h += `<div class="sech a" style="margin-top:4px">تنتظر اعتمادك<span>${rv.length}</span></div>` + rv.map(x => invRowHtml(x, false)).join('') + '<div style="height:12px"></div>';
+  h += `<div class="card">${e.unpaid.length ? e.unpaid.map(u => payHtml(e, u)).join('') : `<div class="row"><b>الراتب</b><span class="badge">${I('check', 12, 3)} كل الرواتب منصرفة</span></div>`}
+    ${e.loans.length ? `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('hand-coins', 14)}السلف</div>
+      ${e.loans.map(l => `<div class="row"><span>سلفة ${sar(l.amount)} <span class="sub">· ${dmy(l.date)}</span></span><span class="sub">باقي ${sar(l.remaining)}</span></div>`).join('')}` : ''}</div>`;
+  h += `<div class="card"><div class="fxb">
+      <div><b>${p.c < 0 ? 'صرف أكثر من عهدته' : 'معه عهدة'}</b>${M(Math.abs(p.c), p.c < 0 ? '−' : '', p.c < 0 ? 'neg' : '')}<small>عطيته ${M(p.g || 0, '', 't')}${p.rt ? ' · رجّع ' + M(p.rt, '', 't') : ''} · صرف ${M(p.cash || 0, '', 't')}</small></div>
+      <div><b>له عندك من جيبه</b>${M(p.o || 0, '', p.o > 0 ? 'neg' : '')}${p.o > 0 ? `<button class="lnk" onclick="askSdad('${id}', ${p.o})">${I('check', 14, 2.5)} سدّدته</button>` : ''}</div></div>
+    ${f ? '<div class="hair"></div>' + formHtml(e, f) : `<div class="fxbt">
+      <button onclick="askGive('${id}')">${I('hand-coins', 18)}عطيته</button>
+      <button onclick="askRet('${id}', ${Math.max(0, p.c)})">${I('rotate-ccw', 18)}رجّع لي</button>
+      <button onclick="openForm('${id}','loan')">${I('banknote', 18)}سلفة</button>
+      <button onclick="openForm('${id}','adv')">${I('wallet', 18)}راتب مقدم</button>
+      <button class="rd" onclick="openForm('${id}','ded')">${I('circle-dollar-sign', 18)}خصم</button></div>`}</div>`;
+  const L = finLedger(c, e), show = S.fx.all ? L : L.slice(0, 12);
+  h += `<div class="sech">كل حركاته<span>${L.length}</span></div>`;
+  h += L.length ? `<div class="card fxl" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${show.map(x => x.h).join('')}
+      ${L.length > 12 ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كلها (' + L.length + ')'}</button>` : ''}</div>` : emptyHtml('wallet', 'ما فيه حركات للحين');
+  if (ret.length) h += `<button class="dtog" onclick="S.iv.f=S.iv.f?'':'o';renderFin()">${S.iv.f ? 'إخفاء' : 'فواتير رجّعتها له (' + ret.length + ')'}</button>` + (S.iv.f ? ret.map(x => invRowHtml(x, false)).join('') : '');
+  $('#view').innerHTML = h;
+}
+
+function renderFinProj(c, k) {
+  const d = c.d, list = c.items.filter(x => x.kind === 'inv' && x.status === 'ok' && (x.project || '') === k);
+  const m = list.filter(x => x.ts.slice(0, 7) === c.mk).reduce((a, x) => a + x.amount, 0), all = list.reduce((a, x) => a + x.amount, 0);
+  let h = finBackBtn() + `<div class="fxh"><h2>${esc(projName(k))}</h2><span>${esc(d.month)}</span></div>
+    <div class="fxs"><div><b>هالشهر</b>${M(m)}</div><div><b>الإجمالي</b>${M(all)}</div><div><b>الفواتير</b><span class="mn">${list.length}</span></div></div>`;
+  if (!list.length) return $('#view').innerHTML = h + emptyHtml('receipt', 'ما فيه فواتير على هالمشروع للحين');
+  const show = S.fx.all ? list : list.slice(0, 15);
+  h += `<div class="sech">الفواتير<span>${list.length}</span></div><div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${show.map(x => invMiniRow(x, true)).join('')}
+    ${list.length > 15 ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كل الفواتير (' + list.length + ')'}</button>` : ''}</div>`;
+  const ws = list.filter(x => x.warrantyUntil).sort((a, b) => a.warrantyUntil < b.warrantyUntil ? -1 : 1);
   if (ws.length) {
-    const live = ws.filter(x => x.warrantyUntil >= d.today), old = ws.filter(x => x.warrantyUntil < d.today);
-    const wrow = x => { const w = wLeft(x.warrantyUntil, d.today); return `<div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b><div class="tm">${esc(x.pname || 'عام')} · ${esc(x.ename)} · ${dmy(x.ts)}</div>${invPhotosHtml(x, true)}</span><span class="wl ${w[0]}">${w[1]}</span></div>`; };
-    h += `<div class="sech">الضمانات<span>${live.length}</span></div><div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${live.map(wrow).join('') || '<div class="sub" style="padding:12px 0">ما فيه ضمان شغال</div>'}
-      ${old.length ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.iopen.wold=!S.iopen.wold;renderInv()">${S.iopen.wold ? 'إخفاء المنتهية' : 'المنتهية (' + old.length + ')'}</button>${S.iopen.wold ? old.map(wrow).join('') : ''}` : ''}</div>`;
+    const wrow = x => { const w = wLeft(x.warrantyUntil, d.today); return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b><div class="tm">${esc(x.ename || 'أنت')} · ${dmy(x.ts)} · لين ${dmy(x.warrantyUntil)}</div></span><span class="wl ${w[0]}">${w[1]}</span></div></button>`; };
+    h += `<div class="sech">الضمانات<span>${ws.filter(x => x.warrantyUntil >= d.today).length}</span></div><div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${ws.map(wrow).join('')}</div>`;
   }
-  const okAll = items.filter(x => x.kind === 'inv' && x.status === 'ok');
-  const groups = {}, keys = [], order = (d.projects || []).map(p => p.id);
-  okAll.forEach(x => { const k = x.project || ''; if (!groups[k]) { groups[k] = {name: x.pname || 'عام', all: 0, m: 0, list: []}; keys.push(k); } const g = groups[k]; g.all += x.amount; if (x.ts.slice(0, 7) === mk) { g.m += x.amount; g.list.push(x); } });
-  keys.sort((a, b) => (a === '' ? 1e6 : order.indexOf(a)) - (b === '' ? 1e6 : order.indexOf(b)));
-  if (keys.length) h += `<div class="sech">مصاريف المشاريع<span>${M(tot, '', 't')} ${esc(d.month)}</span></div>` + keys.map(k => {
-    const g = groups[k], on = !!S.iopen['p_' + k];
-    return `<div class="pgrp"><button class="pgh2" onclick="S.iopen['p_${k}']=${on ? 'false' : 'true'};renderInv()"><span>${esc(g.name)}</span><span class="n">${M(g.m, '', 't')} هالشهر<span class="chev ${on ? 'up' : ''}">${I('arrow-right', 15, 2.5)}</span></span></button>
-      <div class="ivtot">الإجمالي من البداية: <b>${M(g.all, '', 't')}</b></div>
-      ${on ? (g.list.length ? g.list.map(x => invRowHtml(x, true)).join('') : '<div class="ivtot">ما فيه فواتير هالشهر</div>') : ''}</div>`;
-  }).join('');
-  const other = items.filter(x => x.kind === 'inv' && x.status === 'returned').slice(0, 20);
-  if (other.length) h += `<button class="dtog" onclick="S.iv.f=S.iv.f?'':'o';renderInv()">${S.iv.f ? 'إخفاء' : 'الفواتير المرجّعة (' + other.length + ')'}</button>` + (S.iv.f ? other.map(x => invRowHtml(x, true)).join('') : '');
-  if (!items.length) h += emptyHtml('receipt', 'ما فيه فواتير للحين. الموظف يرسلها من صفحته');
   $('#view').innerHTML = h;
 }
 
@@ -2070,33 +2272,6 @@ async function delInvD(id) {
   try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; ovClose(); renderAdmin(); toast('انحذفت'); }
   catch (e) { S.armed = null; toastErr(e); }
 }
-function openSt(id) { S.iv.st = id; S.armed = null; renderInv(); toTop(); }
-function renderInvSt(empId) {
-  const d = S.data, e = d.employees.find(x => x.id === empId);
-  const items = ((d.inv || {}).items || []).filter(x => x.emp === empId).map(x => Object.assign({}, x, {ename: e.name}));
-  const gives = items.filter(x => x.kind === 'give'), oks = items.filter(x => x.kind === 'inv' && x.status === 'ok' && x.paidBy !== 'card');
-  const rv = items.filter(x => x.kind === 'inv' && x.status === 'review');
-  const p = ((d.inv || {}).parts || {})[empId] || {c: 0, o: 0, t: 0, g: 0, rt: 0, cash: 0, own: 0};
-  const rows = gives.concat(oks).sort((a, b2) => a.ts < b2.ts ? 1 : a.ts > b2.ts ? -1 : 0);
-  let h = `<button class="back" onclick="S.iv.st='';renderInv()">${I('arrow-right', 17)}رجوع للفواتير</button>
-    <h2 style="margin:10px 0 0;font-size:20px">${esc(e.name)}</h2>
-    ${rv.length ? `<div class="sech a">تنتظر اعتمادك<span>${rv.length}</span></div>` + rv.map(x => invRowHtml(x, false)).join('') : ''}
-    <div class="stc ${p.c < 0 ? 'red' : ''}"><div class="l">رصيد العهدة</div><div class="v">${M(Math.abs(p.c), p.c < 0 ? '−' : '', 'big')}</div>
-    <div class="r"><span>عطيته ${M(p.g, '', 't')}${p.rt ? ' · رجّع ' + M(p.rt, '', 't') : ''}</span><span>صرف ${M(p.cash, '', 't')}</span></div>
-    ${p.c < 0 ? '<div class="r" style="margin-top:4px"><span>صرف أكثر من اللي معه</span></div>' : ''}</div>
-    <div class="grid2"><button class="bigdo" style="justify-content:center;border:0;font-family:inherit;cursor:pointer" onclick="askGive('${empId}')">${I('plus', 15, 2.5)}أعطيته</button>
-    <button class="btn2" style="border-radius:999px" onclick="askRet('${empId}', ${Math.max(0, p.c)})">رجّع لي</button></div>
-    ${p.o > 0 ? `<div class="stc red"><div class="l">له عندك من جيبه</div><div class="v">${M(p.o, '', 'big')}</div>
-      <button class="bigdo" onclick="askSdad('${empId}', ${p.o})">${I('check', 15, 2.5)}سدّدته</button></div>` : ''}`;
-
-  h += `<div class="sech">كشف ${esc(e.name)}</div>`;
-  if (!rows.length) return $('#view').innerHTML = h + emptyHtml('wallet', 'ما فيه حركات للحين');
-  h += '<div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">' + rows.map(x => x.kind === 'give'
-    ? `<div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${x.paidBy === 'own' ? '<span class="ob">سداد</span>' : x.paidBy === 'ret' ? '<span class="ob">رجّع</span>' : ''}<div class="tm">${dmy(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}</div></span>
-        <span style="display:flex;align-items:center;gap:4px"><b class="iva ${x.paidBy === 'ret' ? 'r' : 'g'}">${M(x.amount, x.paidBy === 'ret' ? '−' : '+')}</b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`
-    : `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmy(x.ts)} · ${esc(x.pname || 'عام')}</div></span><b class="iva r">${M(x.amount, '−')} ‹</b></div></button>`).join('') + '</div>';
-  $('#view').innerHTML = h;
-}
 function giveForm(title, x) {
   S.gm = (x && x.method) || S.gm || 'تحويل';
   return `<label class="shh" for="ga">${title}</label>
@@ -2130,14 +2305,14 @@ async function doRet(empId) {
 }
 function askInvAdd() {
   const d = S.data, ps = (d.projects || []).filter(p => !p.archived);
-  S.ai = S.ai || {amount: '', vendor: '', desc: '', project: lsGet('tf_proj') || '', emp: '', shots: []};
+  if (!S.ai) S.ai = {amount: '', vendor: '', desc: '', project: S.view === 'fin' && S.fx.proj !== null ? S.fx.proj : (lsGet('tf_proj') || ''), emp: S.view === 'fin' ? (S.fx.emp || '') : '', shots: []};
   const f = S.ai;
   ovOpen(`<label class="shh">فاتورة جديدة</label>
     <div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.ai.amount=this.value"><input placeholder="المحل" value="${esc(f.vendor)}" oninput="S.ai.vendor=this.value"></div>
     <input placeholder="وش انشرى؟" value="${esc(f.desc)}" oninput="S.ai.desc=this.value">
     <select aria-label="المشروع" onchange="S.ai.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}<option value="" ${f.project === '' ? 'selected' : ''}>عام</option></select>
     <div class="sub" style="margin:6px 0 4px">مين دفع؟</div>
-    <div class="segc">${[['', 'أنا']].concat(d.employees.map(e => [e.id, 'عهدة ' + e.name.split(' ')[0]])).map(o => `<button class="${f.emp === o[0] ? 'on' : ''}" onclick="S.ai.emp='${o[0]}';askInvAdd()">${esc(o[1])}</button>`).join('')}</div>
+    <div class="segc">${[['', 'أنا']].concat(d.employees.map(e => [e.id, 'عهدة ' + shortName(e.name)])).map(o => `<button class="${f.emp === o[0] ? 'on' : ''}" onclick="S.ai.emp='${o[0]}';askInvAdd()">${esc(o[1])}</button>`).join('')}</div>
     <div class="shots">${f.shots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة الفاتورة"><button class="x" onclick="S.ai.shots.splice(${i},1);askInvAdd()" aria-label="حذف الصورة">×</button></div>`).join('')}
     ${f.shots.length < 3 ? `<label class="madd">${I('camera', 20)}صورة (اختياري)<input type="file" accept="${ACC_IMG}" multiple style="display:none" onchange="pickAi(this)"></label>` : ''}</div>
     <div class="sub">تنحفظ معتمدة على طول${f.emp ? '، وتنخصم من عهدته' : ''}.</div>
@@ -2218,26 +2393,6 @@ async function doWarranty(id, clear) {
 }
 
 /* ---------- المالية ---------- */
-
-function renderFin() {
-  const d = S.data;
-  if (!d.employees.length) { $('#view').innerHTML = '<div class="card" style="margin-top:16px">' + emptyHtml('wallet', 'ما فيه موظفين') + '</div>'; return; }
-  $('#view').innerHTML = '<div style="height:12px"></div>' + d.employees.map(e => {
-    const f = S.form && S.form.emp === e.id ? S.form : null;
-    return `<div class="card">
-      ${ctitle('user-round', esc(e.name), e.unpaid.length ? '' : '<span class="badge">' + I('check', 12, 3) + ' كل الرواتب منصرفة</span>')}
-      ${e.unpaid.map(u => payHtml(e, u)).join('')}
-      ${e.loans.length ? `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('hand-coins', 14)}السلف</div>
-        ${e.loans.map(l => `<div class="row"><span>سلفة ${sar(l.amount)} <span class="sub">· ${dmy(l.date)}</span></span><span class="sub">باقي ${sar(l.remaining)}</span></div>`).join('')}` : ''}
-      <div class="hair"></div>
-      ${f ? formHtml(e, f) : `<div class="grid3">
-        <button class="btn2" onclick="openForm('${e.id}','loan')">${I('hand-coins', 16)}سلفة</button>
-        <button class="btn2" onclick="openForm('${e.id}','adv')">${I('banknote', 16)}راتب مقدم</button>
-        <button class="btn2 dedb" onclick="openForm('${e.id}','ded')">${I('receipt', 16)}خصم</button></div>`}
-      ${e.tx.length ? `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('receipt', 14)}آخر الحركات</div>${e.tx.map(t => txHtml(t, true)).join('')}` : ''}
-    </div>`;
-  }).join('');
-}
 
 function payHtml(e, u) {
   const armed = S.armed === 'pay_' + e.id + u.month;
@@ -2595,7 +2750,7 @@ function rulesHtml(st) {
     <div>• كل موقف مميز فوق الواجب يزيد ${M(st.star, '', 't')}، لين ${M(st.starCap, '', 't')} بالشهر.</div>
     <div>• إذا خلص الشهر بدون ولا تقصير، مكافأة ${M(st.clean, '', 't')}.</div>
     <div>• الحافز ينصرف مع راتب نفس الشهر، والسلف والراتب المقدم ينخصمون من الراتب.</div>
-    <div class="sub" style="margin-top:8px">الأداء: الحضور والمواعيد، جودة الشغل، إدارة العمال، حل المشاكل.<br>السلوك: الأمانة والمصداقية، الاحترام وحسن التعامل، الالتزام بالتعليمات، النظافة، الانضباط والمظهر.</div></div>`;
+    <div class="sub" style="margin-top:8px">الأداء: الحضور والمواعيد، جودة الشغل، إدارة العمال، حل المشاكل، متابعة الأعمال الموكلة، التركيز والانتباه.<br>السلوك: الأمانة والمصداقية، الاحترام وحسن التعامل، الالتزام بالتعليمات، النظافة، الانضباط والمظهر.</div></div>`;
 }
 
 /* ================= صفحة الموظف ================= */
@@ -2875,7 +3030,7 @@ async function refresh(silent) {
 (function () {
   let y0 = null, pulled = 0;
   const ind = document.getElementById('ptr');
-  const ptrOk = e => !(document.documentElement.classList.contains('lock') || document.body.classList.contains('kb') || S.rec || S.gr || S.sheet || CAM.stream
+  const ptrOk = e => !(document.documentElement.classList.contains('lock') || document.documentElement.classList.contains('zlock') || document.body.classList.contains('kb') || S.rec || S.gr || S.sheet || CAM.stream
     || (e.target && e.target.closest && e.target.closest('#ov')));
   window.addEventListener('touchstart', e => { y0 = document.getElementById('scr').scrollTop <= 0 && ptrOk(e) ? e.touches[0].clientY : null; pulled = 0; }, {passive: true});
   window.addEventListener('touchmove', e => {
@@ -2894,7 +3049,7 @@ async function refresh(silent) {
   document.addEventListener('touchstart', e => {
     sh = null;
     const s = e.target && e.target.closest && e.target.closest('#ov .sheet');
-    if (!s || S.rec || document.body.classList.contains('kb') || s.scrollTop > 0) return;
+    if (!s || S.rec || document.body.classList.contains('kb') || s.scrollTop > 0 || $('#zv')) return;
     if (e.target.closest('input,textarea,select,video,audio,[contenteditable]')) return;
     sh = s; sy = e.touches[0].clientY; dy = 0; t0 = Date.now(); drag = false;
   }, {passive: true});

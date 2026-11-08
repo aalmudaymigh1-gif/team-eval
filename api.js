@@ -5,7 +5,7 @@
   const sb = supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
   const BUCKET = 'files';
   const FN_URL = SB_URL + '/functions/v1/push';
-  const NOTIFY = ['tasks_add', 'task_return', 'inv_approve', 'inv_return'];
+  const NOTIFY = ['tasks_add', 'task_return', 'task_update', 'inv_approve', 'inv_return'];
   function flush() {
     fetch(FN_URL, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: '{"op":"flush"}', keepalive: true }).catch(() => {});
   }
@@ -19,6 +19,8 @@
     { n: 'جودة الشغل', s: 'الأداء', short: 'جودة الشغل', bad: 'راجع الشغل قبل التسليم عشان ما نحتاج نعيده.' },
     { n: 'إدارة العمال', s: 'الأداء', short: 'إدارة العمال', bad: 'تابع العمال أكثر وتأكد إن كل واحد عارف شغله.' },
     { n: 'حل المشاكل', s: 'الأداء', short: 'حل المشاكل', bad: 'حاول تحل المشاكل البسيطة بنفسك وترجع لي بالكبيرة بس.' },
+    { n: 'متابعة الأعمال الموكلة', s: 'الأداء', short: 'المتابعة', bad: 'اللي أوكّله لك سجّله وتابعه لين يخلص، لا يضيع منك.' },
+    { n: 'التركيز والانتباه', s: 'الأداء', short: 'التركيز', bad: 'وقت الدوام للشغل، خلّ الجوال والسوالف بعدين.' },
     { n: 'الأمانة والمصداقية', s: 'السلوك', short: 'الأمانة', bad: 'الأمانة والوضوح في المصاريف والمعلومات خط أحمر، انتبه لها.' },
     { n: 'الاحترام وحسن التعامل', s: 'السلوك', short: 'الاحترام', bad: 'انتبه لأسلوبك في التعامل مع العمال والعملاء.' },
     { n: 'الالتزام بالتعليمات', s: 'السلوك', short: 'التعليمات', bad: 'نفّذ التعليمات مثل ما هي، وإذا عندك رأي قوله قبل التنفيذ.' },
@@ -540,6 +542,11 @@
       const r = await aexec(k, 'proj_add', { name: n });
       await loadAdmin(k);
       return { id: r.id, data: adminPayload_() };
+    },
+
+    async apiProjOrder(k, ids) {
+      if (!Array.isArray(ids) || !ids.length) throw new Error('ما فيه ترتيب');
+      return adminDo(k, 'proj_order', { ids: ids.map(String) });
     },
 
     async apiProjectSave(k, x) {
