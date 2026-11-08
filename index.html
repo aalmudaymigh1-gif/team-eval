@@ -578,7 +578,7 @@ span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=38"></script>
 <script>
-const APP_VER = '42';
+const APP_VER = '43';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -1385,7 +1385,7 @@ function drawTaskList() {
   const rv = list.filter(t => t.b === 'review').sort(byUrgent);
   if (rv.length && q.f !== 'open') h += `<div class="sech a">تنتظر مراجعتك<span>${rv.length}</span></div>` + rv.map(t => taskRowHtml(t, true)).join('');
   if (q.f !== 'review') projGroups(list.filter(t => t.b === 'open')).forEach(g => {
-    h += `<div class="pgrp"><div class="pgh2"><span>${esc(g.name)}</span><span class="n">${g.items.length === 1 ? 'مهمة وحدة' : g.items.length === 2 ? 'مهمتين' : g.items.length + ' مهام'}</span></div>${g.items.map(t => taskRowHtml(t, false)).join('')}</div>`;
+    h += `<div class="pgrp ep"><div class="pgh2"><span>${esc(g.name)}</span><span class="n">${g.items.length === 1 ? 'مهمة وحدة' : g.items.length === 2 ? 'مهمتين' : g.items.length + ' مهام'}</span></div>${g.items.map(t => taskRowHtml(t, false)).join('')}</div>`;
   });
   const done = list.filter(t => t.b === 'done');
   if (!h && !(done.length && !q.f)) h = emptyHtml('check-check', tqActive() ? 'ما فيه مهام بهالفلاتر' : 'ما فيه مهام مفتوحة. اضغط + وأضف أول مهمة');
