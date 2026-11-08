@@ -627,7 +627,7 @@ img.ph{cursor:zoom-in}
 .fxa .r+.r{border-top:1px solid #EFE2C8}.fxa .dt{width:8px;height:8px;border-radius:50%;background:var(--amber);flex:none}
 .fxa .r em{margin-inline-start:auto;font-style:normal;color:var(--muted);display:flex;align-items:center;gap:6px}
 .fxn{display:flex;align-items:center;justify-content:space-between;width:100%;background:var(--acc);color:#fff;border:0;border-radius:16px;padding:14px 16px;font:inherit;font-size:15px;font-weight:500;margin-top:8px;cursor:pointer;text-align:start}
-.fxn .cv{display:flex;opacity:.85}.fxn.ar{opacity:.6}
+.fxn .cv{display:flex;opacity:.85}.fxn .am{display:flex;align-items:center;gap:8px;font-size:14px}.fxn .am span.mn.mn{color:#fff!important}.fxn.ar{opacity:.6}
 .fxn .ord{display:flex;gap:6px}
 .fxn .ord button{width:34px;height:34px;border-radius:10px;border:0;background:rgba(255,255,255,.22);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .fxn .ord button[disabled]{opacity:.3}
@@ -656,7 +656,7 @@ body.kb .tabs,body.kb .fab{opacity:0!important;pointer-events:none!important;tra
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=50"></script>
 <script>
-const APP_VER = '50';
+const APP_VER = '51';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -2132,11 +2132,13 @@ function renderFin() {
         + act.map((p, i) => `<div class="fxn"><span>${esc(p.name)}</span><span class="ord"><button ${i === 0 ? 'disabled' : ''} onclick="projMove('${p.id}',-1)" aria-label="فوق">${SV_UP}</button><button ${i === act.length - 1 ? 'disabled' : ''} onclick="projMove('${p.id}',1)" aria-label="تحت">${SV_DN}</button></span></div>`).join('');
     } else {
       const used = new Set(c.items.filter(x => x.kind === 'inv').map(x => x.project || ''));
+      const spent = {}; c.items.forEach(x => { if (x.kind === 'inv' && x.status === 'ok') { const k = x.project || ''; spent[k] = (spent[k] || 0) + x.amount; } });
+      const tail = k => `<span class="am">${M(spent[k] || 0, '', 't')}<span class="cv">${I('chevron-left', 16)}</span></span>`;
       const arch = (d.projects || []).filter(p => p.archived && used.has(p.id));
       if (act.length > 1) h += `<div class="fxt"><span></span><button onclick="S.fx.ord=true;renderFin()">${I('list-checks', 16)}رتّب</button></div>`;
-      h += act.map(p => `<button class="fxn" onclick="openFinProj('${p.id}')">${esc(p.name)}<span class="cv">${I('chevron-left', 16)}</span></button>`).join('')
-        + (used.has('') ? `<button class="fxn ar" onclick="openFinProj('')">بدون مشروع<span class="cv">${I('chevron-left', 16)}</span></button>` : '')
-        + arch.map(p => `<button class="fxn ar" onclick="openFinProj('${p.id}')">${esc(p.name)} · مؤرشف<span class="cv">${I('chevron-left', 16)}</span></button>`).join('');
+      h += act.map(p => `<button class="fxn" onclick="openFinProj('${p.id}')">${esc(p.name)}${tail(p.id)}</button>`).join('')
+        + (used.has('') ? `<button class="fxn ar" onclick="openFinProj('')">بدون مشروع${tail('')}</button>` : '')
+        + arch.map(p => `<button class="fxn ar" onclick="openFinProj('${p.id}')">${esc(p.name)} · مؤرشف${tail(p.id)}</button>`).join('');
     }
   }
   $('#view').innerHTML = h;
