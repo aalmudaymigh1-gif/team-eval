@@ -925,6 +925,19 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .tdoc .pn{font-size:13px;color:#4B5563;margin-top:4px;white-space:pre-line}
 .rpi.dn li small{display:block;font-size:12px;color:var(--muted)}
 .rpi li.decx{display:flex;align-items:center;gap:8px}
+.rpcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r2);padding:12px 14px 10px;margin-top:14px}
+.rpcard .rch{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;margin-bottom:2px}
+.rpcard .rch .ci{width:28px;height:28px;border-radius:9px;background:var(--fill);display:flex;align-items:center;justify-content:center;color:var(--acc-dk)}
+.rpcard .rch .cn{margin-inline-start:auto;font-size:12px;font-weight:500;color:var(--muted);background:var(--fill);border-radius:999px;padding:2px 9px}
+.rpcard.lt .rch .ci{color:#85642B;background:#F8F1E4}
+.rpcard .rhint{margin:6px 0 0}
+.rpcard .rpe{padding:6px 0 2px}
+.rphr{margin-top:12px}
+.rpi.dn li.hx{display:flex;align-items:flex-start;gap:8px}
+.rpi.dn li.hx>.tx{flex:1;min-width:0}
+.rpi.dn li .unb svg{position:static;color:inherit}
+.unb{flex:none;display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line2);background:#fff;border-radius:999px;padding:4px 10px;font:inherit;font-size:12px;color:var(--muted);cursor:pointer;margin-top:2px}
+.unb.arm{background:var(--red);border-color:var(--red);color:#fff}
 .rpi li.decx>span{flex:1;min-width:0}
 .dx{min-width:30px;height:30px;border-radius:999px;border:0;background:rgba(0,0,0,.06);color:#85642B;display:flex;align-items:center;justify-content:center;padding:0 8px;font:inherit;font-size:12px;cursor:pointer;flex:none}
 .dx.arm{background:var(--red);color:#fff}
@@ -937,9 +950,9 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=76"></script>
+<script src="api.js?v=77"></script>
 <script>
-const APP_VER = '76';
+const APP_VER = '77';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -3801,7 +3814,7 @@ function rpCardHtml(r) {
 }
 function rpOpen(id) { RP.open = id; RP.hist = null; RP.draft = ''; rpRerender(); toTop(); }
 function rpClose() { RP.open = null; RP.draft = ''; rpRerender(); toTop(); }
-function rpOpenHist(p) { RP.hist = p; rpRerender(); toTop(); }
+function rpOpenHist(p) { RP.hist = p; RP.unArm = null; rpRerender(); toTop(); }
 function rpCloseHist() { RP.hist = null; rpRerender(); toTop(); }
 
 function rpItems(arr, tags, cls) {
@@ -3824,11 +3837,11 @@ function rpTickDoc(k) {
 }
 function rpTickWhen(ms) { const d = nfDay(ms), t = rpToday(); return (d === t ? 'اليوم' : rpDay(d)) + ' ' + nfTime(ms); }
 function rpHistOf(p) {
-  const gs = [], add = (date, by, it) => { let g = gs.find(x => x.date === date && x.by === by); if (!g) { g = {date: date, by: by, items: []}; gs.push(g); } g.items.push(it); };
+  const gs = [], add = (date, by, it, rid) => { let g = gs.find(x => x.date === date && x.by === by); if (!g) { g = {date: date, by: by, items: [], rids: []}; gs.push(g); } g.items.push(it); g.rids.push(rid); };
   rpOf(p).forEach(r => {
     const tk = rpArr(r.ticks), tt = tk.map(x => x.t);
-    rpArr(r.done).filter(x => !tt.includes(x)).forEach(x => add(r.date, rpBy(r), x));
-    tk.forEach(x => { if (rpArr(r.done).includes(x.t)) add(nfDay(x.at), x.by === 'admin' ? 'المدير العام' : shortName(x.name || ''), x.t); });
+    rpArr(r.done).filter(x => !tt.includes(x)).forEach(x => add(r.date, rpBy(r), x, r.id));
+    tk.forEach(x => { if (rpArr(r.done).includes(x.t)) add(nfDay(x.at), x.by === 'admin' ? 'المدير العام' : shortName(x.name || ''), x.t, r.id); });
   });
   return gs.sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
 }
@@ -3837,8 +3850,27 @@ function rpHistHtml(isAdmin) {
   let h = `<button class="back" onclick="rpCloseHist()">${I('arrow-right', 17)}${RP.open ? 'التقرير' : isAdmin ? 'التقارير' : 'تقاريري'}</button><h2>سجل الإنجاز</h2>
     <div class="rpmeta">${I('check-check', 15)}${esc(rpPName(p))} · ${rpNDone(n)}</div>`;
   const atk = rpOf(p).flatMap(r => rpArr(r.ticks));
-  h += gs.length ? gs.map(g => `<div class="hday"><div class="hdh">${esc(dayLabel(g.date))}<span>${esc(g.by)}</span></div>${rpDoneHtml(g.items, atk, true)}</div>`).join('') : emptyHtml('check-check', 'لا توجد أعمال منجزة بعد');
+  if (isAdmin && gs.length) h += `<div class="rhint" style="margin:8px 0 0">${I('info', 13)}اضغط «إرجاع» لإعادة العمل إلى الأعمال الحالية في آخر تقرير</div>`;
+  h += gs.length ? gs.map(g => `<div class="hday"><div class="hdh">${esc(dayLabel(g.date))}<span>${esc(g.by)}</span></div>${isAdmin ? rpHistAdmin(g, atk) : rpDoneHtml(g.items, atk, true)}</div>`).join('') : emptyHtml('check-check', 'لا توجد أعمال منجزة بعد');
   return h;
+}
+/* الإصدار 77: إرجاع أي عمل منجز إلى الأعمال الحالية في آخر تقرير، للمدير العام بس، بضغطتين */
+function rpHistAdmin(g, atk) {
+  return '<ul class="rpi dn">' + g.items.map((x, i) => {
+    const k = g.rids[i] + '|' + x, arm = RP.unArm === k, tk = atk.filter(y => y.t === x).pop();
+    return `<li class="hx">${I('check', 13, 3)}<span class="tx">${esc(x)}${tk ? rpTickDoc(tk) : ''}</span><button class="unb ${arm ? 'arm' : ''}" data-r="${esc(g.rids[i])}" data-t="${esc(x)}" onclick="rpUndone(this)">${arm ? 'تأكيد الإرجاع' : I('rotate-ccw', 13) + 'إرجاع'}</button></li>`;
+  }).join('') + '</ul>';
+}
+async function rpUndone(btn) {
+  const id = btn.dataset.r, item = btn.dataset.t, k = id + '|' + item;
+  if (RP.busy) return;
+  if (RP.unArm !== k) { RP.unArm = k; return rpRerender(); }
+  RP.busy = true; btn.disabled = true; btn.textContent = 'جاري الإرجاع…';
+  try {
+    await call('apiRepUndone', id, item);
+    await rpTickReload();
+    RP.busy = false; RP.unArm = null; rpRerender(); toast('رجع إلى الأعمال الحالية');
+  } catch (e) { RP.busy = false; RP.unArm = null; rpRerender(); toastErr(e); }
 }
 function rpFilesHtml(fs) {
   const img = fs.filter(f => f.t === 'i'), vid = fs.filter(f => f.t === 'v'), doc = fs.filter(f => f.t === 'f');
@@ -3886,9 +3918,11 @@ function rpDetailHtml(isAdmin) {
     else h += '<div class="rprep">بانتظار رد المدير العام</div>';
     h += '</div>';
   }
-  h += `<div class="lbl">الأعمال الحالية</div>${rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags) : rpItems(cur, tags, 'cur')}`;
-  h += `<div class="lbl">الأعمال اللاحقة</div>${rpCanTick(r, isAdmin) && rpArr(r.later).length ? rpNowList(r, rpArr(r.later)) : rpLaterHtml(rpArr(r.later))}`;
-  h += `<div class="lbl">أُنجز في هذا التقرير</div>${rpDoneHtml(rpArr(r.done), r.ticks)}`;
+  /* الإصدار 77: الحالية واللاحقة في بطاقتين، و«أُنجز في هذا التقرير» انشال لأنه في سجل الإنجاز */
+  const lat = rpArr(r.later), nh = rpHistOf(r.proj).reduce((a, g) => a + g.items.length, 0), nd = rpArr(r.done).length;
+  h += `<div class="rpcard now"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span></div>${rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags) : rpItems(cur, tags, 'cur')}</div>`;
+  h += `<div class="rpcard lt"><div class="rch"><span class="ci">${I('history', 16)}</span>الأعمال اللاحقة<span class="cn">${lat.length}</span></div>${rpCanTick(r, isAdmin) && lat.length ? rpNowList(r, lat) : rpLaterHtml(lat)}</div>`;
+  h += `<div class="tbl2 rphr">${tbRow('check-check', 'سجل الإنجاز', nh + ' منجزة' + (nd ? ' · ' + nd + ' في هذا التقرير' : ''), `rpOpenHist('${r.proj}')`)}</div>`;
   if (rpArr(r.removed).length) h += `<div class="rpgone rm">${I('x', 14, 2.5)}<div><b>حُذفت دون إنجاز:</b> ${esc(r.removed.join('، '))}</div></div>`;
   if (rpArr(r.files).length) h += `<div class="lbl">المرفقات</div>${rpFilesHtml(r.files)}`;
   if (isAdmin) {
@@ -3897,8 +3931,6 @@ function rpDetailHtml(isAdmin) {
   } else if (own) {
     h += `<div class="lbl">ملاحظات المدير العام</div>` + (notes.length ? notes.map(n => `<div class="note good">${I('message-circle', 16)}<div><b>المدير العام:</b> ${esc(n.text)}</div></div>`).join('') : '<div class="rpe">لا توجد ملاحظات</div>');
   }
-  const nh = rpHistOf(r.proj).reduce((a, g) => a + g.items.length, 0);
-  h += `<div class="lbl">السجل</div><div class="tbl2">${tbRow('check-check', 'سجل الإنجاز', rpNDone(nh), `rpOpenHist('${r.proj}')`)}</div>`;
   if (all.length > 1) h += `<div class="lbl">التقارير السابقة</div><div class="tbl2">${all.map(x => x.id === r.id ? `<div class="tbr cur"><span class="ic">${I('file-text', 16)}</span><span class="k">${esc(rpDay(x.date))}</span><span class="v">التقرير المعروض</span></div>` : tbRow('file-text', esc(rpDay(x.date)), esc(rpBy(x)) + (rpArr(x.decide).length ? ' · يتضمن قراراً' : ''), `rpOpen('${x.id}')`)).join('')}</div>`;
   return h;
 }
