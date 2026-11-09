@@ -50,9 +50,24 @@
     if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'ما فيه اتصال، تأكد من النت وجرّب مرة ثانية';
     return m || 'صار خطأ، جرّب مرة ثانية';
   }
-  const aexec = (k, op, a) => rpc('admin_exec', { k: k, op: op, a: a || {} });
-  const eexec = (t, op, a) => rpc('emp_exec', { t: t, op: op, a: a || {} });
-  const gadmin = (k, op, a) => rpc('guide_admin', { k: k, op: op, a: a || {} });
+  /* الإصدار 74: كل عملية تطلع برقم طلب (rid). لو وصلت السيرفر مرتين ينحفظ أول وحدة بس، والإعادة بعد فشل الاتصال تستخدم نفس الرقم */
+  const RID = {};
+  const NO_RID = ['ticket', 'push_sub', 'proj_add', 'admin_newkey'];
+  const RID_SKIP = ['grp', 'lat', 'lng', 'acc', 'rid'];
+  const ridKey = (op, a) => op + '|' + JSON.stringify(a, (k, v) => RID_SKIP.indexOf(k) >= 0 ? undefined : v);
+  const newRid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)).replace(/[^a-z0-9-]/gi, '');
+  async function withRid(fn, op, a) {
+    if (NO_RID.indexOf(op) >= 0) return fn(a);
+    const key = ridKey(op, a), now = Date.now();
+    Object.keys(RID).forEach(x => { if (RID[x].exp && RID[x].exp < now) delete RID[x]; });
+    if (!RID[key]) RID[key] = { id: newRid(), exp: 0 };
+    const r = await fn(Object.assign({}, a, { rid: RID[key].id }));
+    RID[key].exp = Date.now() + 20000;
+    return r;
+  }
+  const aexec = (k, op, a) => withRid(x => rpc('admin_exec', { k: k, op: op, a: x }), op, a || {});
+  const eexec = (t, op, a) => withRid(x => rpc('emp_exec', { t: t, op: op, a: x }), op, a || {});
+  const gadmin = (k, op, a) => op === 'add' ? withRid(x => rpc('guide_admin', { k: k, op: op, a: x }), 'guide_' + op, a || {}) : rpc('guide_admin', { k: k, op: op, a: a || {} });
   const gemp = (t, op, a) => rpc('guide_emp', { t: t, op: op, a: a || {} });
 
   let RAW = null;
@@ -408,7 +423,7 @@
     const parts = {};
     emps.forEach(e => { parts[e.id] = invParts_(RAW.invoices, e.id); bal[e.id] = parts[e.id].c; });
     return {
-      inv: { bal: bal, parts: parts, items: RAW.invoices.slice().reverse().slice(0, 400).map(x => invOut_(x, pmap)) },
+      inv: { bal: bal, parts: parts, items: RAW.invoices.slice().reverse().map(x => invOut_(x, pmap)) },
       attendance: RAW.attendance,
       attCfg: attCfg_(),
       guides: RAW.guides.map(g => ({ id: g.id, ts: g.ts, title: g.title, points: g.points, q: g.q,
@@ -436,21 +451,35 @@
     };
   }
 
+  /* الإصدار 74: لو انحفظت العملية وفشل التحديث بعدها، ترجع البيانات القديمة مع علامة __stale بدل ما يطلع خطأ */
+  async function reloadAdmin(k, r) {
+    let out;
+    try { await loadAdmin(k); out = adminPayload_(); }
+    catch (e) { out = adminPayload_(); out.__stale = true; }
+    if (r && r.dup) out.__dup = true;
+    return out;
+  }
+  async function reloadEmp(t, r) {
+    let out;
+    try { out = await API.apiEmp(t); }
+    catch (e) { const emp = RAW && empById(RAW.me); if (!emp) throw e; out = empPayload_(emp); out.__stale = true; }
+    if (r && r.dup) out.__dup = true;
+    return out;
+  }
   async function adminDo(k, op, a) {
-    await aexec(k, op, a);
+    const r = await aexec(k, op, a);
     if (NOTIFY.indexOf(op) >= 0) flush();
-    await loadAdmin(k);
-    return adminPayload_();
+    return reloadAdmin(k, r);
   }
   const empById = id => RAW.employees.filter(e => e.id === id)[0];
 
   async function attDo(token, op, dataUrl, pos, project) {
     const paths = await empUpload(token, [dataUrl], 1);
     const p = pos || {};
-    await eexec(token, op, { photo: paths[0], lat: p.lat == null ? '' : String(p.lat), lng: p.lng == null ? '' : String(p.lng),
+    const r = await eexec(token, op, { photo: paths[0], lat: p.lat == null ? '' : String(p.lat), lng: p.lng == null ? '' : String(p.lng),
       acc: p.acc == null ? '' : String(Math.round(p.acc)), project: project || '' });
     flush();
-    return API.apiEmp(token);
+    return reloadEmp(token, r);
   }
   async function empUpload(token, dataUrls, max) {
     const list = (Array.isArray(dataUrls) ? dataUrls : [dataUrls]).filter(Boolean).slice(0, max);
@@ -597,8 +626,7 @@
       const n = String(name || '').trim().replace(/\s+/g, ' ').slice(0, 60);
       if (!n) throw new Error('اكتب اسم المشروع');
       const r = await aexec(k, 'proj_add', { name: n });
-      await loadAdmin(k);
-      return { id: r.id, data: adminPayload_() };
+      return { id: r.id, data: await reloadAdmin(k) };
     },
 
     async apiTaskRemind(k, id) {
@@ -609,8 +637,7 @@
     async apiEmpOrder(k, ids) {
       if (!Array.isArray(ids) || !ids.length) throw new Error('ما فيه ترتيب');
       await rpc('emp_order', { k: k, ids: ids.map(String) });
-      await loadAdmin(k);
-      return adminPayload_();
+      return reloadAdmin(k);
     },
     async apiProjOrder(k, ids) {
       if (!Array.isArray(ids) || !ids.length) throw new Error('ما فيه ترتيب');
@@ -668,8 +695,7 @@
     async apiTasksDelete(k, ids) {
       if (!Array.isArray(ids) || !ids.length) throw new Error('ما حددت مهام');
       await rpc('tasks_del', { k: k, ids: ids.map(String) });
-      await loadAdmin(k);
-      return adminPayload_();
+      return reloadAdmin(k);
     },
 
     async apiTaskReturn(k, id, reason) {
@@ -700,9 +726,9 @@
       const paths = await empUpload(token, dataUrls || [], 5);
       const x = extra || {}, a = { id: id, comment: String(comment || ''), proofs: paths };
       if (x.amount !== undefined) { a.amount = cleanAmount_(x.amount); a.vendor = String(x.vendor || '').trim(); a.paidBy = x.paidBy || 'cash'; }
-      await eexec(token, 'task_done', a);
+      const r = await eexec(token, 'task_done', a);
       flush();
-      return API.apiEmp(token);
+      return reloadEmp(token, r);
     },
 
     async apiProofAdmin(k, id, fid) { return imgUrl(fid); },
@@ -763,9 +789,23 @@
       const paths = await empUpload(token, dataUrls, 3);
       if (!paths.length) throw new Error('صوّر الفاتورة');
       const w = Math.round(Number(x.warranty) || 0);
-      await eexec(token, 'inv_add', { cid: String(x.cid || ''), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
+      const r = await eexec(token, 'inv_add', { cid: String(x.cid || ''), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
       flush();
-      return API.apiEmp(token);
+      return reloadEmp(token, r);
+    },
+    /* الإصدار 74: تصحيح فاتورة رجّعها المدير العام وإعادة إرسالها بنفس السجل */
+    async apiInvResend(token, id, x, dataUrls, keep) {
+      x = x || {};
+      const amount = cleanAmount_(x.amount);
+      const desc = String(x.desc || '').trim().slice(0, 200);
+      if (!desc) throw new Error('اكتب وش اشتريت');
+      if (!String(x.project || '')) throw new Error('اختر المشروع');
+      const old = (keep || []).filter(Boolean).slice(0, 3);
+      const paths = old.concat(await empUpload(token, dataUrls || [], Math.max(0, 3 - old.length)));
+      if (!paths.length) throw new Error('صوّر الفاتورة');
+      const r = await eexec(token, 'inv_resend', { id: String(id), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: String(x.project || ''), photos: paths, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
+      flush();
+      return reloadEmp(token, r);
     },
 
     async apiInvApprove(k, id) { return adminDo(k, 'inv_approve', { id: id }); },
@@ -831,17 +871,16 @@
       }
       const emps = (x.emps || []).filter(Boolean);
       if (!emps.length) throw new Error('اختر الموظف');
-      await gadmin(k, 'add', { title: title, points: points, q: q, emps: emps });
+      const r = await gadmin(k, 'add', { title: title, points: points, q: q, emps: emps });
       flush();
-      await loadAdmin(k);
-      return adminPayload_();
+      return reloadAdmin(k, r);
     },
-    async apiGuideDel(k, id) { await gadmin(k, 'del', { id: id }); await loadAdmin(k); return adminPayload_(); },
-    async apiGuideToggle(k, empId, on) { await gadmin(k, 'emp_guide', { emp: empId, on: !!on }); await loadAdmin(k); return adminPayload_(); },
+    async apiGuideDel(k, id) { await gadmin(k, 'del', { id: id }); return reloadAdmin(k); },
+    async apiGuideToggle(k, empId, on) { await gadmin(k, 'emp_guide', { emp: empId, on: !!on }); return reloadAdmin(k); },
     async apiGuideOpen(token, id) { await gemp(token, 'open', { id: id }); return true; },
     async apiGuideDone(token, id, secs, ans) {
       const r = await gemp(token, 'done', { id: id, secs: Math.round(Number(secs) || 0), ans: ans == null ? '' : String(ans) });
-      return { ok: !!(r && r.ok), data: await API.apiEmp(token) };
+      return { ok: !!(r && r.ok), data: await reloadEmp(token) };
     },
     async apiAttToggle(k, empId, on) { return adminDo(k, 'att_toggle', { emp: empId, on: !!on }); },
     async apiProjLoc(k, id, lat, lng) { return adminDo(k, 'proj_loc', { id: id, lat: lat == null ? '' : String(lat), lng: lng == null ? '' : String(lng) }); },
@@ -884,19 +923,16 @@
     async apiTaskApprove2(k, id, txt) {
       await rpc('task_approve2', { k: k, id: String(id || ''), txt: String(txt || '') });
       flush();
-      await loadAdmin(k);
-      return adminPayload_();
+      return reloadAdmin(k);
     },
     async apiTaskMedia(k, id, media) {
       await rpc('task_media_set', { k: k, id: String(id || ''), media: (media || []).map(x => ({ t: x.t, id: x.id })) });
       flush();
-      await loadAdmin(k);
-      return adminPayload_();
+      return reloadAdmin(k);
     },
     async apiTaskComment(k, id, txt) {
       await rpc('task_comment_edit', { k: k, id: String(id || ''), txt: String(txt || '') });
-      await loadAdmin(k);
-      return adminPayload_();
+      return reloadAdmin(k);
     },
     async apiRepUpload(x, onProgress) {
       const key = x.t === 'i' ? x.d : x.file;

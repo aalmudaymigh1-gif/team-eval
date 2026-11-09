@@ -921,9 +921,9 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=69"></script>
+<script src="api.js?v=74"></script>
 <script>
-const APP_VER = '73';
+const APP_VER = '74';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -1440,16 +1440,44 @@ const PROOFS = [['photo', 'صورة'], ['invoice', 'فاتورة'], ['note', 'م
 const PROOF_HINT = {photo: 'يصوّر الشغل بعد ما يخلص', invoice: 'يصوّر الفاتورة ويكتب المبلغ والمحل، وتنحسب على مشروع المهمة', note: 'يكتب وش سوّى، بدون صورة'};
 
 function call(fn, ...args) { return callT(30000, fn, ...args); }
+/* الإصدار 74: عمليات الحفظ ما تعطي «فشل» بعد 30 ثانية، تنتظر الرد. والضغطة الثانية على نفس العملية وهي ماشية ما تسوي شي */
+const READ_FN = ['apiAdmin', 'apiEmp', 'apiPreview', 'apiTasksOld', 'apiProofAdmin', 'apiProofEmp', 'apiMediaAdmin', 'apiMediaEmp', 'apiInvImgAdmin', 'apiInvImgEmp', 'apiFileUrls', 'apiRepList', 'apiNotifs', 'attPhoto', 'apiCleanup', 'pushKey',
+  'apiUploadImg', 'apiUploadVid', 'apiUploadAud', 'apiRepUpload', 'apiMediaDiscard', 'apiAdminLogin'];
+const INFL = {};
 function callT(ms, fn, ...args) {
+  const write = READ_FN.indexOf(fn) < 0;
+  let key = '';
+  if (write) {
+    try { key = fn + '|' + JSON.stringify(args); } catch (e) { key = ''; }
+    if (key && INFL[key]) return new Promise(() => {});
+    if (key) INFL[key] = 1;
+  }
   setBusy(1);
   const ld = LD_MSG[fn] ? toastLoad(LD_MSG[fn]) : null;
   return new Promise((res, rej) => {
-    let done = false;
-    const t = setTimeout(() => { if (done) return; done = true; setBusy(-1); toastDone(ld); rej('الاتصال تأخر، اسحب الصفحة لتحت أو اضغط ↻'); }, ms);
+    let done = false, slow = null, t2 = null;
+    const fin = () => { done = true; clearTimeout(t); clearTimeout(t2); if (key) delete INFL[key]; setBusy(-1); toastDone(ld); toastDone(slow); };
+    const t = setTimeout(() => {
+      if (done) return;
+      if (write) { slow = toastLoad('الاتصال بطيء، ما زلت أنتظر الرد…'); return; }
+      fin(); rej('الاتصال تأخر، اسحب الصفحة لتحت أو اضغط ↻');
+    }, ms);
+    if (write) t2 = setTimeout(() => { if (done) return; fin(); rej('لم يصل الرد بعد. أعد المحاولة، ولن يتكرر الحفظ'); }, Math.max(ms, 120000));
     Promise.resolve().then(() => API[fn](...args))
-      .then(v => { if (done) return; done = true; clearTimeout(t); setBusy(-1); toastDone(ld); res(v); })
-      .catch(e => { if (done) return; done = true; clearTimeout(t); setBusy(-1); toastDone(ld); rej(e && e.message ? e.message : String(e)); });
+      .then(v => {
+        if (done) return; fin(); res(v);
+        if (v && v.__dup) setTimeout(() => toast('وصل من المحاولة الأولى، ولم يتكرر', null, 'in'), 900);
+        if (v && v.__stale) setTimeout(() => toastErr('تم الحفظ، وتعذّر تحديث الصفحة. اسحب الصفحة للأسفل للتحديث'), 900);
+      })
+      .catch(e => { if (done) return; fin(); rej(e && e.message ? e.message : String(e)); });
   });
+}
+/* يقفل الزر اللي انضغط لين تخلص العملية */
+function lockBtn(txt) {
+  const ev = window.event, b = ev && ev.target && ev.target.closest ? ev.target.closest('button') : null;
+  if (!b) return () => {};
+  const h = b.innerHTML; b.disabled = true; b.innerHTML = txt || 'جاري الحفظ…';
+  return () => { if (b.isConnected) { b.disabled = false; b.innerHTML = h; } };
 }
 
 let busyN = 0;
@@ -2018,11 +2046,13 @@ function askReturn(id) {
 async function doReturn(id) {
   const r = $('#rr').value.trim();
   if (!r) { $('#rrerr').textContent = 'اكتب السبب عشان يعرف وش ناقص'; return; }
+  const un = lockBtn();
   try { S.data = await call('apiTaskReturn', BOOT.key, id, r); ovClose(); renderAdmin(); toast('رجعت له'); }
-  catch (e) { $('#rrerr').textContent = e; }
+  catch (e) { un(); $('#rrerr').textContent = e; }
 }
 async function closeByAdmin(id) {
   if (S.armed !== 'close_' + id) { S.armed = 'close_' + id; renderAdmin(); return; }
+  lockBtn('جاري الحفظ…');
   try { S.data = await call('apiTaskClose', BOOT.key, id); S.armed = null; renderAdmin(); toast('تسجلت إنها خلصت'); }
   catch (e) { S.armed = null; renderAdmin(); toastErr(e); }
 }
@@ -2064,7 +2094,8 @@ function detailActions(t) {
   if (t.status === 'review') return `<div class="grid2"><button class="btn2 cu" onclick="askApprove('${id}')">${I('check', 17, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askReturn('${id}')">رجّعها</button></div>`;
   if (t.status === 'done') return `<button class="btn2 rd" onclick="askReturn('${id}')">${I('rotate-ccw', 16)}ما خلصت، رجّعها له</button>`;
   const arm = S.armed === 'close_' + id;
-  const cb = `<button class="btn2 ${arm ? 'arm' : ''}" onclick="closeByAdmin('${id}')">${I('check-check', 17)}${arm ? 'تأكيد: خلصت بدون صورة إثبات' : 'خلّصتها أنا'}</button>`;
+  const invR = t.inv && t.inv.status === 'returned';
+  const cb = `<button class="btn2 ${arm ? 'arm' : ''}" onclick="closeByAdmin('${id}')">${I('check-check', 17)}${arm ? (invR ? 'فاتورتها مرجّعة، الإغلاق يعتمدها معها. اضغط مرة ثانية' : 'تأكيد: خلصت بدون صورة إثبات') : 'خلّصتها أنا'}</button>`;
   if (arm) return cb;
   return `<div class="grid2"><button class="btn2 cu" id="pingb" onclick="pingTask('${id}')">${I('bell-ring', 17)}ذكّره</button>${cb}</div>`;
 }
@@ -2625,8 +2656,9 @@ function askInvReturn(id) {
 async function doInvReturn(id) {
   const r = $('#ir').value.trim();
   if (!r) { $('#irerr').textContent = 'اكتب السبب'; return; }
+  const un = lockBtn();
   try { S.data = await call('apiInvReturn', BOOT.key, id, r); ovClose(); renderAdmin(); toast('رجعت له'); }
-  catch (e) { $('#irerr').textContent = e; }
+  catch (e) { un(); $('#irerr').textContent = e; }
 }
 async function invDel(id) {
   if (S.armed !== 'inv_' + id) { S.armed = 'inv_' + id; renderInv(); return; }
@@ -2645,7 +2677,8 @@ function openInvD(id) {
   ovOpen(`<div class="ivd"><h3>${esc(x.desc)}</h3><div class="amt">${M(x.amount, '', 'big')}</div>
     <div class="sub">${esc(e ? e.name : 'أنت')} · ${esc(x.pname || 'عام')}${x.vendor ? ' · ' + esc(x.vendor) : ''} · ${dmyt(x.ts)}</div>
     ${x.warrantyUntil ? `<div class="sub" style="margin-top:4px">ضمان لين ${dmy(x.warrantyUntil)} · ${wLeft(x.warrantyUntil, d.today)[1]}</div>` : ''}
-    ${x.taskDeleted ? `<div class="note info" style="margin-top:8px">${I('info', 16)}<div>كانت فاتورة مهمة «${esc(x.desc)}»، والمهمة انحذفت. الفاتورة وسجلها باقيين، وتقدر تعتمدها أو ترجّعها أو تحذفها من هنا.</div></div>` : ''}
+    ${x.taskDeleted ? `<div class="note info" style="margin-top:8px">${I('info', 16)}<div>كانت فاتورة مهمة «${esc(x.desc)}»، والمهمة حُذفت. الفاتورة وسجلّها باقيان.</div></div>` : ''}
+    ${x.status === 'review' && x.kind === 'inv' ? `<div class="grid2" style="margin-top:10px"><button class="btn2 cu" onclick="ovClose();invApprove('${id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="ovClose();askInvReturn('${id}')">رجّعها</button></div>` : ''}
     <div class="pgrid" id="ivdph">${x.photos.map(f => `<div class="pph" data-f="${esc(f)}">جاري التحميل…</div>`).join('')}</div>
     ${x.emp ? `<div class="sub" style="margin:6px 0 4px">دفعها من</div><div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبه'], ['card', 'أنا']].map(o => `<button class="${(x.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="${(x.paidBy || 'cash') === o[0] ? '' : `setPaidBy('${id}','${o[0]}',true)`}">${o[1]}</button>`).join('')}</div>` : '<div class="sub" style="margin:6px 0">دفعتها أنت</div>'}
     <button class="btn2" onclick="askWarranty('${id}')">${x.warrantyUntil ? 'عدّل الضمان' : 'أضف ضمان'}</button>
@@ -2680,8 +2713,9 @@ function askGive(empId) {
   setTimeout(() => { const i = $('#ga'); if (i) i.focus(); }, 80);
 }
 async function doGive(empId) {
+  const un = lockBtn();
   try { S.data = await call('apiInvGive', BOOT.key, empId, $('#ga').value, $('#gn').value, S.gm); ovClose(); renderAdmin(); toast('انحفظ'); }
-  catch (e) { $('#gerr').textContent = e; }
+  catch (e) { un(); $('#gerr').textContent = e; }
 }
 function askRet(empId, amt) {
   const e = S.data.employees.find(x => x.id === empId);
@@ -2694,8 +2728,9 @@ function askRet(empId, amt) {
     <div class="g21"><button class="btn2 cu" onclick="doRet('${empId}')">سجّل</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
 }
 async function doRet(empId) {
+  const un = lockBtn();
   try { S.data = await call('apiInvGive', BOOT.key, empId, $('#ga').value, $('#gn').value, S.gm, false, true); ovClose(); renderAdmin(); toast('تسجّل اللي رجّعه'); }
-  catch (e) { $('#gerr').textContent = e; }
+  catch (e) { un(); $('#gerr').textContent = e; }
 }
 function askInvAdd() {
   const d = S.data, ps = (d.projects || []).filter(p => !p.archived);
@@ -2740,8 +2775,9 @@ function askSdad(empId, amt) {
     <div class="g21"><button class="btn2 cu" onclick="doSdad('${empId}')">سجّل السداد</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
 }
 async function doSdad(empId) {
+  const un = lockBtn();
   try { S.data = await call('apiInvGive', BOOT.key, empId, $('#ga').value, $('#gn').value, S.gm, true); ovClose(); renderAdmin(); toast('تسجّل السداد'); }
-  catch (e) { $('#gerr').textContent = e; }
+  catch (e) { un(); $('#gerr').textContent = e; }
 }
 function askGiveEdit(id) {
   const x = ((S.data.inv || {}).items || []).find(v => v.id === id);
@@ -2853,14 +2889,16 @@ async function saveFin() {
   if (S.form.kind === 'ded' && !x.note.trim()) return $('#ferr').textContent = 'اكتب سبب الخصم';
   if (S.form.kind === 'loan') x.months = $('#f_months').value;
   if (!(Number(x.amount) > 0)) return $('#ferr').textContent = 'اكتب المبلغ';
+  const un = lockBtn();
   try { S.data = await call('apiFinAdd', BOOT.key, x); S.form = null; renderAdmin(); toast('انحفظ'); }
-  catch (e) { $('#ferr').textContent = e; }
+  catch (e) { un(); $('#ferr').textContent = e; }
 }
 
 async function pay(emp, month) {
   const k = 'pay_' + emp + month;
   if (S.armed !== k) { S.armed = k; renderFin(); return; }
   const v = $('#pay_' + emp + month).value;
+  lockBtn('جاري تسجيل الصرف…');
   try { S.data = await call('apiPay', BOOT.key, {emp, month, amount: v}); S.armed = null; renderAdmin(); toast('تسجل الصرف'); }
   catch (e) { S.armed = null; renderFin(); toastErr(e); }
 }
@@ -2946,8 +2984,9 @@ async function sendGuide() {
   if (!f.title.trim()) return $('#gerr').textContent = 'اكتب عنوان التوجيه';
   if (!f.points.some(p => p.trim())) return $('#gerr').textContent = 'اكتب نقطة وحدة على الأقل';
   if (f.q && f.ok < 0) return $('#gerr').textContent = 'اضغط الدائرة جنب الجواب الصح';
+  const un = lockBtn('جاري الإرسال…');
   try { S.data = await call('apiGuideAdd', BOOT.key, x); S.gform = null; renderAdmin(); toast('انرسل التوجيه'); }
-  catch (e) { $('#gerr').textContent = e; }
+  catch (e) { un(); $('#gerr').textContent = e; }
 }
 async function delGuide(id) {
   if (S.armed !== 'gd_' + id) { S.armed = 'gd_' + id; renderTasks(); return; }
@@ -3217,6 +3256,7 @@ async function loadEmp() {
 function renderEmp(d, isPreview) {
   S.empData = d; S.empPreview = isPreview;
   const nOpen = (d.tasks || []).filter(t => t.status === 'open' || t.status === 'returned').length;
+  const nRetInv = ((d.inv || {}).items || []).filter(x => x.kind === 'inv' && x.status === 'returned' && !x.task).length;
   if (!['tasks', 'rep', 'inv', 'pay'].includes(S.etab)) S.etab = 'tasks';
   const tasksTab = S.etab === 'tasks';
   $('#app').classList.add('empv');
@@ -3227,7 +3267,7 @@ function renderEmp(d, isPreview) {
   $('#app').innerHTML = `
     ${isPreview ? `<button class="back" onclick="closePreview()">${I('arrow-right', 17)}رجوع للفريق</button><div class="note info">${I('eye', 16)}هذي معاينة، والموظف يشوف نفس الصفحة.</div>` : ''}
     <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>`}</div>${isPreview ? '' : pushHtml()}${tasksTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) : ''}
-    <div class="segc etabs e4"><button class="${S.etab === 'tasks' ? 'on' : ''}" onclick="S.etab='tasks';rerenderEmp()">مهامي${nOpen ? ' (' + nOpen + ')' : ''}</button><button class="${S.etab === 'rep' ? 'on' : ''}" onclick="S.etab='rep';RP.sent=null;RP.open=null;RP.hist=null;rerenderEmp()">تقاريري</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">حافزي</button></div>
+    <div class="segc etabs e4"><button class="${S.etab === 'tasks' ? 'on' : ''}" onclick="S.etab='tasks';rerenderEmp()">مهامي${nOpen ? ' (' + nOpen + ')' : ''}</button><button class="${S.etab === 'rep' ? 'on' : ''}" onclick="S.etab='rep';RP.sent=null;RP.open=null;RP.hist=null;rerenderEmp()">تقاريري</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري${nRetInv ? ' (' + nRetInv + ')' : ''}</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">حافزي</button></div>
     ${S.etab === 'inv' ? empInvHtml(d, isPreview) : S.etab === 'rep' ? rpEmpHtml(d, isPreview) : tasksTab ? empTasksHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
   if (!isPreview) prefetchImgs();
   if (tasksTab) vFetch((d.tasks || []).filter(t => t.status === 'open' || t.status === 'returned').map(t => (vOf(t) || {}).id));
@@ -3350,7 +3390,7 @@ async function startDone(id, input) {
 function empInvHtml(d, isPreview) {
   const iv = d.inv || {balance: 0, o: 0, items: []}, c = iv.c != null ? iv.c : (iv.balance || 0), t = iv.o || 0;
   let h = `<div class="tbl2 ivb"><div class="tbr ${c < 0 ? 'neg' : ''}"><span class="ic">${I('wallet', 16)}</span><span class="k">${c < 0 ? 'صرفت أكثر من عهدتك' : 'العهدة اللي معك'}</span><span class="v">${M(Math.abs(c), c < 0 ? '−' : '', 'big')}</span></div>${t > 0 ? `<div class="tbr neg"><span class="ic">${I('hand-coins', 16)}</span><span class="k">لك عند المدير العام (من جيبك)</span><span class="v">${M(t, '', 'big')}</span></div>` : ''}</div>`;
-  if (!isPreview) h += S.invForm ? invFormHtml(d) : `<button class="btn2 cu ivsend" onclick="S.invForm=true;S.ishots=[];rerenderEmp()">${I('receipt', 17)}أرسل فاتورة</button>`;
+  if (!isPreview) h += S.invForm ? invFormHtml(d) : `<button class="btn2 cu ivsend" onclick="S.invForm=true;S.ishots=[];if(S.inv.edit)S.inv={amount:'',desc:'',project:''};rerenderEmp()">${I('receipt', 17)}أرسل فاتورة</button>`;
   const items = iv.items || [];
   if (!items.length) return h + emptyHtml('receipt', 'ما أرسلت فواتير للحين');
   return h + '<div class="card" style="margin-top:14px;padding-top:4px;padding-bottom:4px">' + items.map(x => {
@@ -3358,18 +3398,35 @@ function empInvHtml(d, isPreview) {
     return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? (x.paidBy === 'ret' ? 'r' : 'g') : ''}">${M(x.amount, give ? (x.paidBy === 'ret' ? '−' : '+') : '')}</b></div>
       <div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · '}${dmyt(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>
       ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px"><div><b>المدير العام يقول:</b> ${esc(x.reason)}</div></div>` : ''}
+      ${!isPreview && x.kind === 'inv' && x.status === 'returned' && !x.task && !(S.invForm && S.inv.edit === x.id) ? `<button class="bigdo" style="border:0;font-family:inherit;cursor:pointer" onclick="invEdit('${x.id}')">${I('pencil', 15, 2.2)}صحّح وأعد الإرسال</button>` : ''}
       ${invPhotosHtml(x, BOOT.page === 'admin')}</div>`;
   }).join('') + '</div>';
 }
 
+/* الإصدار 74: تصحيح الفاتورة المرجّعة. نفس النموذج، بنفس بيانات الفاتورة وصورها */
+function invEdit(id) {
+  const x = ((S.empData.inv || {}).items || []).find(v => v.id === id);
+  if (!x) return toastErr('الفاتورة غير موجودة، حدّث الصفحة');
+  S.inv = {edit: id, amount: String(x.amount), desc: x.desc || '', vendor: x.vendor || '', project: x.project || '', paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash', keep: (x.photos || []).slice(0, 3)};
+  S.ishots = []; S.invForm = true;
+  S.inv.keep.forEach(async f => {
+    if (S.ic[f]) return;
+    S.ic[f] = 'loading';
+    try { S.ic[f] = await call('apiInvImgEmp', BOOT.token, id, f); } catch (e) { delete S.ic[f]; }
+    if (S.invForm && S.inv.edit === id) rerenderEmp();
+  });
+  rerenderEmp();
+  setTimeout(() => { const el = document.querySelector('.ivform'); if (el) el.scrollIntoView({block: 'start', behavior: 'smooth'}); }, 60);
+}
 function invFormHtml(d) {
-  const f = S.inv, ps = d.projects || [];
+  const f = S.inv, ps = d.projects || [], ed = !!f.edit, keep = ed ? (f.keep || []) : [], room = 3 - keep.length - S.ishots.length;
   if (!f.cid) f.cid = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random()).replace(/[^a-z0-9-]/gi, '');
   f.project = pickProj(f.project, ps);
-  return `<div class="pform" style="margin-top:12px">
-    <b>فاتورة جديدة</b>
-    <div class="shots">${S.ishots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة الفاتورة"><button class="x" onclick="S.ishots.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}
-    ${S.ishots.length < 3 ? `<label class="madd">${I('camera', 20)}صوّر الفاتورة<input type="file" accept="${ACC_IMG}" multiple style="display:none" onchange="pickInv(this)"></label>` : ''}</div>
+  return `<div class="pform ivform" style="margin-top:12px">
+    <b>${ed ? 'تصحيح الفاتورة' : 'فاتورة جديدة'}</b>
+    ${ed ? '<div class="sub">عدّل ما طلبه المدير العام. تُرسل بنفس الفاتورة وتعود «تنتظر الاعتماد».</div>' : ''}
+    <div class="shots">${keep.map((p, i) => `<div class="shot">${S.ic[p] && S.ic[p] !== 'loading' ? `<img src="${S.ic[p]}" alt="صورة الفاتورة">` : '<div class="pph" style="width:100%;height:100%;font-size:11px">جاري التحميل…</div>'}<button class="x" onclick="S.inv.keep.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}${S.ishots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة الفاتورة"><button class="x" onclick="S.ishots.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}
+    ${room > 0 ? `<label class="madd">${I('camera', 20)}صوّر الفاتورة<input type="file" accept="${ACC_IMG}" multiple style="display:none" onchange="pickInv(this)"></label>` : ''}</div>
     ${S.ishotLoading ? '<div class="sub">جاري تجهيز الصورة…</div>' : ''}
     <input class="qtt" inputmode="decimal" placeholder="المبلغ بالريال" value="${esc(f.amount)}" oninput="S.inv.amount=this.value">
     <input placeholder="وش اشتريت؟ مثلاً: أفياش وأسلاك" value="${esc(f.desc)}" oninput="S.inv.desc=this.value">
@@ -3378,11 +3435,11 @@ function invFormHtml(d) {
     <div class="sub" style="margin:4px 0 -2px">دفعت من؟</div>
     <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'المدير العام']].map(o => `<button class="${(f.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="S.inv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>
     <div class="sub" style="margin-top:-4px">${f.paidBy === 'card' ? 'ما تنخصم من عهدتك' : f.paidBy === 'own' ? 'ترجع لك بعد ما يعتمدها المدير العام' : 'تنخصم من العهدة اللي معك'}</div>
-    <label class="tgl"><span>عليها ضمان؟</span><input type="checkbox" ${f.wOn ? 'checked' : ''} onchange="S.inv.wOn=this.checked;if(this.checked&&!S.inv.w)S.inv.w=12;rerenderEmp()"></label>
-    ${f.wOn ? `<div class="wchips">${[[6, '6 أشهر'], [12, 'سنة'], [24, 'سنتين']].map(c => `<button class="${!f.wc && f.w === c[0] ? 'on' : ''}" onclick="S.inv.w=${c[0]};S.inv.wc=false;rerenderEmp()">${c[1]}</button>`).join('')}<button class="${f.wc ? 'on' : ''}" onclick="S.inv.wc=true;rerenderEmp()">غيره</button></div>
+    ${ed ? '' : `<label class="tgl"><span>عليها ضمان؟</span><input type="checkbox" ${f.wOn ? 'checked' : ''} onchange="S.inv.wOn=this.checked;if(this.checked&&!S.inv.w)S.inv.w=12;rerenderEmp()"></label>`}
+    ${!ed && f.wOn ? `<div class="wchips">${[[6, '6 أشهر'], [12, 'سنة'], [24, 'سنتين']].map(c => `<button class="${!f.wc && f.w === c[0] ? 'on' : ''}" onclick="S.inv.w=${c[0]};S.inv.wc=false;rerenderEmp()">${c[1]}</button>`).join('')}<button class="${f.wc ? 'on' : ''}" onclick="S.inv.wc=true;rerenderEmp()">غيره</button></div>
       ${f.wc ? `<input inputmode="numeric" placeholder="كم شهر؟" value="${f.w || ''}" oninput="S.inv.w=Number(String(this.value).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)))||0">` : ''}` : ''}
-    <button class="btn" ${S.busy || S.ishotLoading ? 'disabled' : ''} onclick="sendInv()">${S.busy ? 'جاري الإرسال…' : I('send', 17) + 'إرسال'}</button>
-    <button class="btn2" style="width:100%;border:0" onclick="S.invForm=false;S.ishots=[];rerenderEmp()">إلغاء</button>
+    <button class="btn" ${S.busy || S.ishotLoading ? 'disabled' : ''} onclick="sendInv()">${S.busy ? 'جاري الإرسال…' : I('send', 17) + (ed ? 'إعادة الإرسال' : 'إرسال')}</button>
+    <button class="btn2" style="width:100%;border:0" onclick="S.invForm=false;S.ishots=[];if(S.inv.edit)S.inv={amount:'',desc:'',project:S.inv.project};rerenderEmp()">إلغاء</button>
     <div class="err" id="ierr"></div></div>`;
 }
 
@@ -3391,7 +3448,7 @@ async function pickInv(input) {
   input.value = '';
   if (!files.length) return;
   S.ishotLoading = true; rerenderEmp();
-  for (const f of files.slice(0, Math.max(0, 3 - S.ishots.length))) {
+  for (const f of files.slice(0, Math.max(0, 3 - S.ishots.length - (S.inv.edit ? (S.inv.keep || []).length : 0)))) {
     try { S.ishots.push(await resizeImg(f, 1600, 0.8)); } catch (e) { toastErr(e); }
   }
   S.ishotLoading = false; rerenderEmp();
@@ -3399,12 +3456,22 @@ async function pickInv(input) {
 
 async function sendInv() {
   const f = S.inv, err = () => $('#ierr');
-  if (!S.ishots.length) { err().textContent = 'صوّر الفاتورة'; return; }
+  if (!S.ishots.length && !(f.edit && (f.keep || []).length)) { err().textContent = 'صوّر الفاتورة'; return; }
   if (!(Number(String(f.amount).replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/[^\d.]/g, '')) > 0)) { err().textContent = 'اكتب المبلغ'; return; }
   if (!f.desc.trim()) { err().textContent = 'اكتب وش اشتريت'; return; }
-  if (f.wOn && !(f.w >= 1 && f.w <= 120)) { err().textContent = 'اكتب مدة الضمان بالأشهر'; return; }
+  if (!f.edit && f.wOn && !(f.w >= 1 && f.w <= 120)) { err().textContent = 'اكتب مدة الضمان بالأشهر'; return; }
   if (S.busy) return;
   S.busy = true; rerenderEmp();
+  if (f.edit) {
+    try {
+      const d = await callT(120000, 'apiInvResend', BOOT.token, f.edit, {amount: f.amount, desc: f.desc, project: f.project, vendor: f.vendor || '', paidBy: f.paidBy || 'cash'}, S.ishots, f.keep || []);
+      S.busy = false; S.invForm = false; S.ishots = []; S.inv = {amount: '', desc: '', project: f.project};
+      renderEmp(d, false); toast('أُعيد إرسال الفاتورة');
+    } catch (e) {
+      S.busy = false; rerenderEmp(); const el = $('#ierr'); if (el) el.textContent = e;
+    }
+    return;
+  }
   try {
     const d = await callT(120000, 'apiInvAdd', BOOT.token, {cid: f.cid || '', amount: f.amount, desc: f.desc, project: f.project, vendor: f.vendor || '', warranty: f.wOn ? f.w : 0, paidBy: f.paidBy || 'cash'}, S.ishots);
     S.busy = false; S.invForm = false; S.ishots = []; S.inv = {amount: '', desc: '', project: f.project};
@@ -3474,7 +3541,9 @@ async function refresh(silent) {
       renderAdmin();
     } else if (BOOT.page === 'emp') {
       const d = await call('apiEmp', BOOT.token);
-      S.doing = null; S.upload = null; S.shots = [];
+      /* الإصدار 74: التحديث ما يمسح نموذج الإثبات وصوره إذا المهمة لسه مفتوحة */
+      if (!(S.doing && (d.tasks || []).some(t => t.id === S.doing && (t.status === 'open' || t.status === 'returned')))) { S.doing = null; S.shots = []; }
+      S.upload = null;
       renderEmp(d, false);
     }
     lastLoad = Date.now();
