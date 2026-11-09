@@ -19,8 +19,6 @@
     '<meta name="apple-mobile-web-app-title" content="' + (emp ? 'تقييمي' : 'الفريق') + '">');
 })();
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#FFFFFF;--surface:#FFFFFF;--fill:#F3F4F6;--fill2:#EBEDF0;--line:#EDEFF2;--line2:#E3E6EA;--text:#0F1419;--muted:#6B7280;--faint:#9CA3AF;
 --acc:#1F3A5F;--acc-2:#2C5282;--acc-ink:#FFFFFF;--acc-soft:#EEF3F9;--acc-ring:#DCE6F2;
@@ -498,7 +496,7 @@ video.vid{height:auto;max-height:70vh;background:#000}
 --acc:#7FA3C0;--acc-2:#6A8FAE;--acc-ink:#FFFFFF;--acc-soft:#EDF3F8;--acc-ring:#D3E1EC;--acc-dk:#4F7493;
 --green:#4F8463;--green-soft:#EDF4EF;--red:#B05A52;--red-soft:#F9EEEC;--red-line:#EDCFCB;
 --r:16px;--r2:24px;--sh:none;--sh2:0 12px 40px rgba(42,42,40,.10)}
-html,body,button,input,select,textarea{font-family:'Readex Pro','IBM Plex Sans Arabic',system-ui,sans-serif!important;letter-spacing:.01em}
+html,body,button,input,select,textarea{font-family:-apple-system,BlinkMacSystemFont,'SF Arabic','SF Pro Text','Segoe UI',Roboto,'Noto Sans Arabic',system-ui,sans-serif!important;letter-spacing:0}
 body{font-weight:300;padding-bottom:calc(env(safe-area-inset-bottom) + 190px)}
 b,strong{font-weight:500}
 h1{font-size:17px;font-weight:600;letter-spacing:0}
@@ -735,6 +733,113 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .lnkb{width:40px;height:40px;border-radius:999px;border:1px solid var(--line2);background:#fff;color:var(--acc-dk);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;margin-inline-start:auto}
 .tbh .lnkb+.rate{margin-inline-start:8px}.tbr .v .lv{color:var(--muted);font-weight:400}
 .tbh2{font-size:13px;color:var(--muted);margin:18px 2px 8px}
+/* الإصدار 62: تقارير تقدم الأعمال، وخط النظام (نفس خط الآيفون وواتساب) */
+.etabs.e4{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;overflow:visible}
+.etabs.e4 button{min-width:0;padding-inline:2px;white-space:nowrap;font-size:14px}
+.rpl{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.rpc{display:block;width:100%;text-align:start;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px 16px;font:inherit;color:var(--text);cursor:pointer}
+.rpc:active{background:var(--fill)}
+.rph{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.rph b{font-size:15px;font-weight:600;min-width:0;overflow-wrap:anywhere}
+.rpm{font-size:12px;color:var(--muted);flex:none}
+.rpd{display:flex;gap:7px;align-items:flex-start;margin-top:10px;padding:9px 11px;border-radius:14px;background:var(--amber-soft);color:#85642B;font-size:14px;line-height:1.55;overflow-wrap:anywhere}
+.rpd svg{flex:none;margin-top:3px}
+.rpd b{font-weight:600}
+.rpd.ok{background:none;padding:2px 0 0;color:var(--muted);font-size:13px}
+.rpd.ok svg{color:var(--green)}
+.rpd.ok b{color:var(--text);font-weight:500}
+.rpr{margin-top:8px;font-size:13px;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.rpr b{color:var(--text);font-weight:500}
+.rpr.nt{display:flex;align-items:center;gap:5px;margin-top:6px}
+.rph2{font-size:13px;color:var(--muted);margin:22px 2px 8px}
+.tbr .v .lv{color:var(--acc-dk)}
+.rpmeta{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin:2px 0 12px}
+.rpdec{background:var(--amber-soft);border-radius:18px;padding:12px 14px;margin-bottom:6px;color:#6E5323}
+.rpdec.done{background:var(--surface);border:1px solid var(--line);color:var(--text)}
+.rplab{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;margin-bottom:4px}
+.rpdec.done .rplab{color:var(--green)}
+.rpdec .rpi li{color:inherit}
+.rpdec .grid2{margin-top:10px}
+.rprep{margin-top:8px;font-size:13px;color:var(--muted)}
+.rprep .lnk{font-size:13px;padding:0 4px}
+.rpi{list-style:none;margin:0;padding:0}
+.rpi li{position:relative;padding:5px 14px 5px 0;font-size:15px;line-height:1.6;overflow-wrap:anywhere}
+.rpi li:before{content:"";position:absolute;right:2px;top:15px;width:5px;height:5px;border-radius:50%;background:var(--faint)}
+.tg2{display:inline-block;margin-inline-start:6px;font-size:11px;color:var(--acc-dk);background:var(--acc-soft);border-radius:999px;padding:1px 8px;vertical-align:2px}
+.rpgone{display:flex;gap:7px;align-items:flex-start;margin-top:6px;font-size:13px;color:var(--muted);line-height:1.6}
+.rpgone svg{color:var(--green);flex:none;margin-top:3px}
+.rpgone b{font-weight:500;color:var(--text)}
+.rpe{font-size:14px;color:var(--faint);padding:4px 0}
+.rpf{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rpf img,.rvid{width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;background:var(--fill);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;color:var(--muted)}
+.rdoc{display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.rdoc svg{color:var(--acc-dk);flex:none}
+.rdoc b{display:block;font-size:14px;font-weight:500;overflow-wrap:anywhere}
+.rdoc small{font-size:12px;color:var(--muted)}
+.tbr.cur{cursor:default}
+.tbr.cur .v{color:var(--faint)}
+.rta,#rnote{border:1.5px solid var(--line2)!important;line-height:1.6;overflow:hidden}
+.rta{min-height:92px}
+.rta.sm{min-height:64px}
+.rhint{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--acc-dk);margin:-2px 0 6px}
+.rfl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rfl .mi{position:relative;width:64px;height:64px;border-radius:12px;overflow:hidden;background:var(--fill);display:flex;align-items:center;justify-content:center;text-align:center;font-size:10px;color:var(--muted);line-height:1.3}
+.rfl .mi img{width:100%;height:100%;object-fit:cover}
+.rfl .mx{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;display:flex;align-items:center;justify-content:center;padding:0}
+.rfl .qadd{flex:1;min-width:150px}
+.rsent{margin-bottom:4px}
+.rok{text-align:center;padding:18px 0 8px}
+.rok .rokc{width:64px;height:64px;border-radius:50%;background:var(--green-soft);color:var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.rok b{display:block;font-size:17px;font-weight:600;margin-bottom:6px}
+.rok>div{font-size:15px}
+.rpr.up{display:flex;align-items:flex-start;gap:5px;color:var(--green);-webkit-line-clamp:unset}
+.rpr.up svg{flex:none;margin-top:4px}
+.rpr.up b{color:var(--green)}
+.rpr.lt{display:flex;align-items:center;gap:5px;margin-top:6px;font-size:12px}
+.tg2.g{color:var(--green);background:var(--green-soft)}
+.rpi.lat li{color:#6E6E69}
+.rpi.lat li:before{background:transparent;border:1.5px solid var(--faint);width:6px;height:6px;top:14px}
+.rpi.lat small{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.lbox{border:1.5px solid var(--line2);border-radius:16px;padding:4px 12px 10px;background:#fff}
+.lrow{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)}
+.lrow .lt{flex:1;min-width:0}
+.lrow .lt b{display:block;font-weight:400;font-size:15px;line-height:1.5;overflow-wrap:anywhere}
+.lrow .lt small{display:flex;align-items:flex-start;gap:4px;font-size:12px;color:var(--muted);line-height:1.5;margin-top:1px}
+.lrow.mv .lt small{color:var(--green)}
+.lrow.mv .lt small svg{flex:none;margin-top:3px}
+.lmv{font:inherit;font-size:12px;border:1px solid var(--line2);background:#fff;color:var(--acc-dk);border-radius:999px;padding:6px 10px;flex:none;min-height:34px}
+.mx2{width:34px;height:34px;border-radius:50%;border:0;background:var(--fill);color:var(--muted);display:flex;align-items:center;justify-content:center;flex:none;padding:0}
+.ladd{display:grid;gap:8px;margin-top:10px}
+.ladd input,.ladd select{border:1.5px solid var(--line2)!important;padding:10px 12px;font-size:16px;width:100%;color:var(--text);-webkit-appearance:none;appearance:none}
+.ladd select{color:var(--muted)}
+.ladd .btn2{width:100%}
+.rokm{display:flex;align-items:flex-start;justify-content:center;gap:6px;margin-top:12px;font-size:13px;color:var(--green);line-height:1.6}
+.rokm svg{flex:none;margin-top:4px}
+.crow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.ck{width:28px;height:28px;border-radius:50%;border:1.8px solid var(--line2);background:#fff;flex:none;display:flex;align-items:center;justify-content:center;padding:0;color:#fff;position:relative}
+.ck:before{content:"";position:absolute;inset:-8px}
+.crow.dn .ck{background:var(--green);border-color:var(--green)}
+.ct{flex:1;min-width:0;font-size:15px;line-height:1.5;overflow-wrap:anywhere}
+.ct small{display:block;font-size:12px;color:var(--green)}
+.crow.dn .ct{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--faint)}
+.crow.dn .ct small{text-decoration:none}
+.ladd.one{grid-template-columns:1fr auto}
+.ladd.one .btn2{width:auto;padding-inline:14px}
+.lnk.xtra{display:block;margin:8px 2px 0;font-size:13px;color:var(--acc-dk);background:none;border:0;padding:4px 0;font-family:inherit}
+.rhint.ok{color:var(--green);margin:8px 0 0}
+.rpi.dn li{padding-right:22px}
+.rpi.dn li:before{display:none}
+.rpi.dn li svg{position:absolute;right:0;top:9px;color:var(--green)}
+.rpgone.rm svg{color:var(--red)}
+.rpr.lt{gap:14px}
+.rpr.lt span{display:inline-flex;align-items:center;gap:5px}
+.rpr.lt .okc{color:var(--green)}
+.hday{margin-top:14px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.hdh{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.hdh span{font-weight:400;color:var(--muted)}
+#ov .sheet:has(#f_cur)>*{flex-shrink:0}
+a.rdoc{text-decoration:none;color:var(--text)}
+.rpf img{cursor:zoom-in}
 </style>
 </head>
 <body>
@@ -744,9 +849,9 @@ b,strong,th,h2,h3,h4{font-weight:600}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=60"></script>
+<script src="api.js?v=62"></script>
 <script>
-const APP_VER = '61';
+const APP_VER = '62';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -1431,7 +1536,7 @@ function mountTabs() {
   if (old) old.remove();
   if (t) { t.id = 'tabsDock'; document.body.appendChild(t); }
 }
-function go(v) { S.tsub = null; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false}); S.view = v; S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
+function go(v) { RP.open = null; RP.hist = null; S.tsub = null; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false}); S.view = v; S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
 function rerender() { renderAdmin(); }
 
 /* ---------- تسجيل ---------- */
@@ -1699,11 +1804,13 @@ function tqMatch(t) {
 }
 
 function tvSeg(d) {
-  const n = (d.guides || []).filter(g => g.reads.some(r => !r.done)).length;
-  return `<div class="segc tvseg"><button class="${S.tview !== 'g' ? 'on' : ''}" onclick="S.tview='t';S.gform=null;renderTasks()">المهام</button><button class="${S.tview === 'g' ? 'on' : ''}" onclick="S.tview='g';renderTasks()">التوجيهات${n ? ' (' + n + ')' : ''}</button></div>`;
+  const n = (d.guides || []).filter(g => g.reads.some(r => !r.done)).length, nr = RP.reps ? rpNPend() : 0;
+  return `<div class="segc tvseg"><button class="${S.tview !== 'g' && S.tview !== 'r' ? 'on' : ''}" onclick="S.tview='t';S.gform=null;renderTasks()">المهام</button><button data-r="1" class="${S.tview === 'r' ? 'on' : ''}" onclick="S.tview='r';S.gform=null;RP.open=null;RP.hist=null;renderTasks();toTop()">التقارير${nr ? ' (' + nr + ')' : ''}</button><button class="${S.tview === 'g' ? 'on' : ''}" onclick="S.tview='g';renderTasks()">التوجيهات${n ? ' (' + n + ')' : ''}</button></div>`;
 }
 function renderTasks() {
   if (S.td) return renderTaskDetail();
+  rpEnsure();
+  if (S.tview === 'r') return rpAdminView();
   if (S.tview === 'g') {
     $('#view').innerHTML = tvSeg(S.data) + guidesHtml(S.data);
     const fb = $('#fab'); fb.innerHTML = I('plus', 26, 2.5); fb.classList.toggle('hide', !!S.gform || !S.data.employees.some(e => e.guide));
@@ -1892,7 +1999,7 @@ function ovOpen(html) {
   document.documentElement.classList.add('lock');
   if (top) { const sh = o.querySelector('.sheet'); if (sh) sh.scrollTop = top; }
 }
-function ovClose() { if (S.rec && S.rec.where === 'tf') recStop(true); vStopIf('tf'); if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); document.documentElement.classList.remove('lock'); S.sheet = false; }
+function ovClose() { if (S.rec && S.rec.where === 'tf') recStop(true); vStopIf('tf'); if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); document.documentElement.classList.remove('lock'); S.sheet = false; RP.form = null; }
 function openSheet() {
   const d = S.data, tf = S.tf;
   if (!d.employees.length) return toast('أضف موظف من الإعدادات أول', null, 'in');
@@ -2267,7 +2374,7 @@ function invRowHtml(x, showEmp) {
 }
 
 function renderInv() { return renderFin(); }
-function fabTap() { if (S.view === 'fin') return askInvAdd(true); if (S.tview === 'g') return openGForm(); openSheet(); }
+function fabTap() { if (S.view === 'fin') return askInvAdd(true); if (S.view === 'task' && S.tview === 'r') return rpOpenForm(null, true); if (S.tview === 'g') return openGForm(); openSheet(); }
 const SV_UP = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>';
 const SV_DN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
 function finCtx() {
@@ -3023,14 +3130,16 @@ async function loadEmp() {
 function renderEmp(d, isPreview) {
   S.empData = d; S.empPreview = isPreview;
   const nOpen = (d.tasks || []).filter(t => t.status === 'open' || t.status === 'returned').length;
-  if (!['tasks', 'inv', 'pay'].includes(S.etab)) S.etab = 'tasks';
+  if (!['tasks', 'rep', 'inv', 'pay'].includes(S.etab)) S.etab = 'tasks';
   const tasksTab = S.etab === 'tasks';
   $('#app').classList.add('empv');
+  const rsub = S.etab === 'rep' ? rpEmpSub(d) : '';
+  if (rsub) { $('#app').innerHTML = `<div class="top"><div><h1></h1></div></div><div id="view">${rsub}</div>`; rpHead(); rpAfterDetail(); return; }
   $('#app').innerHTML = `
     ${isPreview ? `<button class="back" onclick="closePreview()">${I('arrow-right', 17)}رجوع للفريق</button><div class="note info">${I('eye', 16)}هذي معاينة، والموظف يشوف نفس الصفحة.</div>` : ''}
     <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button>`}</div>${isPreview ? '' : pushHtml()}${tasksTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) : ''}
-    <div class="segc etabs"><button class="${S.etab === 'tasks' ? 'on' : ''}" onclick="S.etab='tasks';rerenderEmp()">مهامي${nOpen ? ' (' + nOpen + ')' : ''}</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">حافزي</button></div>
-    ${S.etab === 'inv' ? empInvHtml(d, isPreview) : tasksTab ? empTasksHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
+    <div class="segc etabs e4"><button class="${S.etab === 'tasks' ? 'on' : ''}" onclick="S.etab='tasks';rerenderEmp()">مهامي${nOpen ? ' (' + nOpen + ')' : ''}</button><button class="${S.etab === 'rep' ? 'on' : ''}" onclick="S.etab='rep';RP.sent=null;RP.open=null;RP.hist=null;rerenderEmp()">تقاريري</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">حافزي</button></div>
+    ${S.etab === 'inv' ? empInvHtml(d, isPreview) : S.etab === 'rep' ? rpEmpHtml(d, isPreview) : tasksTab ? empTasksHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
   if (!isPreview) prefetchImgs();
   if (tasksTab) vFetch((d.tasks || []).filter(t => t.status === 'open' || t.status === 'returned').map(t => (vOf(t) || {}).id));
 }
@@ -3268,6 +3377,7 @@ async function refresh(silent) {
   refreshing = true;
   document.querySelectorAll('.rf').forEach(b => b.classList.add('spin'));
   try {
+    RP.need = true;
     if (BOOT.page === 'admin') {
       S.data = await call('apiAdmin', BOOT.key);
       S.armed = null; S.preview = null;
@@ -3382,6 +3492,388 @@ async function refresh(silent) {
   });
   window.addEventListener('error', () => toastErr('صار خطأ، اسحب الصفحة لتحت عشان تحدّث'));
 })();
+
+/* الإصدار 62: تقارير تقدم الأعمال */
+const RP = {reps: null, projs: [], need: false, loading: false, failed: false, open: null, hist: null, form: null, sent: null, eProj: '', draft: '', uc: {}};
+const RP_ACC = 'image/' + '*,video/' + '*,.pdf,.xlsx,.xls,.doc,.docx';
+const RP_DOC = ['pdf', 'xlsx', 'xls', 'doc', 'docx'];
+
+function rpAdmin() { return BOOT.page === 'admin' && !S.preview; }
+function rpData() { return BOOT.page === 'admin' && !S.preview ? S.data : S.empData; }
+function rpToday() { return (rpData() || {}).today || ''; }
+function rpArr(a) { return Array.isArray(a) ? a : []; }
+function rpLines(s) { return String(s || '').split('\n').map(x => x.trim()).filter(Boolean); }
+function rpProjs() {
+  if (BOOT.page === 'admin') return (S.data.projects || []).filter(p => !p.archived).map(p => ({id: p.id, name: p.name, mine: true}));
+  return RP.projs || [];
+}
+function rpPName(id) {
+  const p = rpProjs().find(x => x.id === id) || (BOOT.page === 'admin' ? (S.data.projects || []).find(x => x.id === id) : null);
+  return p ? p.name : 'مشروع';
+}
+function rpOf(p) { return (RP.reps || []).filter(r => r.proj === p).sort((a, b) => (b.ts || 0) - (a.ts || 0)); }
+function rpLast(p) { return rpOf(p)[0] || null; }
+function rpPend(r) { return !!(r && rpArr(r.decide).length && !r.reply); }
+function rpNPend() { return rpProjs().filter(p => rpPend(rpLast(p.id))).length; }
+function rpBy(r) { return r.by === 'admin' ? 'المدير' : shortName(r.byName || ''); }
+function rpDay(s) { const d = new Date(s + 'T12:00:00'); return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_AR[d.getMonth()]; }
+function rpRel(s) {
+  const t = rpToday();
+  if (s === t) return 'اليوم';
+  const y = new Date(t + 'T12:00:00Z'); y.setUTCDate(y.getUTCDate() - 1);
+  return s === y.toISOString().slice(0, 10) ? 'أمس' : rpDay(s);
+}
+function rpNDone(n) { return n === 1 ? 'عمل منجز واحد' : n === 2 ? 'عملان منجزان' : n <= 10 ? n + ' أعمال منجزة' : n + ' عملاً منجزاً'; }
+function rpNLater(n) { return n === 1 ? 'عمل لاحق واحد' : n === 2 ? 'عملان لاحقان' : n <= 10 ? n + ' أعمال لاحقة' : n + ' عملاً لاحقاً'; }
+function rpReplyT(v) { return v === 'ok' ? 'اعتُمد' : v === 'no' ? 'لم يُعتمد' : 'تم الرد'; }
+
+function rpEnsure() { if ((RP.reps === null && !RP.failed) || RP.need) rpLoad(); }
+async function rpLoad(manual) {
+  if (RP.loading) return;
+  RP.loading = true; RP.need = false;
+  if (manual) { RP.failed = false; rpRerender(); }
+  try {
+    const d = await API.apiRepList();
+    RP.reps = rpArr(d && d.reps); if (d && d.projs) RP.projs = d.projs;
+    RP.failed = false;
+  } catch (e) {
+    if (RP.reps === null) RP.failed = true;
+    if (manual) toastErr(e);
+  }
+  RP.loading = false;
+  if ($('#ov').classList.contains('on')) return rpSegCount();
+  rpRerender();
+}
+function rpRerender() {
+  if (BOOT.page === 'admin' && !S.preview) {
+    if (S.view === 'task' && !S.td && S.tview === 'r') renderTasks(); else rpSegCount();
+  } else if (S.empData && S.etab === 'rep') rerenderEmp();
+}
+function rpSegCount() {
+  const b = document.querySelector('.tvseg button[data-r]');
+  if (!b || RP.reps === null) return;
+  const n = rpNPend();
+  b.textContent = 'التقارير' + (n ? ' (' + n + ')' : '');
+}
+function rpLoadingHtml() {
+  if (RP.failed) return `<div class="empty"><div class="ei">${I('info', 24)}</div>تعذّر تحميل التقارير<br><button class="btn2" style="margin-top:12px" onclick="rpLoad(true)">${I('refresh-cw', 16)}إعادة المحاولة</button></div>`;
+  return emptyHtml('file-text', 'جاري تحميل التقارير…');
+}
+
+function rpAdminView() {
+  const fb = $('#fab');
+  fb.classList.add('hide');
+  if (RP.reps === null) { $('#view').innerHTML = tvSeg(S.data) + rpLoadingHtml(); return; }
+  if (RP.hist) { $('#view').innerHTML = rpHistHtml(true); return; }
+  if (RP.open) {
+    const h = rpDetailHtml(true);
+    if (h) { $('#view').innerHTML = h; rpAfterDetail(); return; }
+    RP.open = null;
+  }
+  $('#view').innerHTML = tvSeg(S.data) + rpSummaryHtml();
+  fb.innerHTML = I('plus', 26, 2.5); fb.setAttribute('aria-label', 'إضافة تقرير'); fb.classList.remove('hide');
+}
+function rpSummaryHtml() {
+  const ps = rpProjs(), withR = ps.filter(p => rpLast(p.id)), none = ps.filter(p => !rpLast(p.id));
+  withR.sort((a, b) => { const ra = rpLast(a.id), rb = rpLast(b.id); return (rpPend(rb) ? 1 : 0) - (rpPend(ra) ? 1 : 0) || (rb.ts || 0) - (ra.ts || 0); });
+  let h = withR.length ? '<div class="rpl">' + withR.map(p => rpCardHtml(rpLast(p.id))).join('') + '</div>' : emptyHtml('file-text', 'لا توجد تقارير بعد. التقارير التي يرسلها الموظفون تظهر هنا');
+  if (none.length && withR.length) h += `<div class="rph2">مشاريع بلا تقارير</div><div class="tbl2">${none.map(p => tbRow('folder', esc(p.name), '<span class="lv">إضافة تقرير</span>', `rpOpenForm('${p.id}',true)`)).join('')}</div>`;
+  return h;
+}
+function rpCardHtml(r) {
+  const dec = rpArr(r.decide), up = rpArr(r.up), rest = rpArr(r.cur).filter(x => !up.includes(x)), nd = rpArr(r.done).length, nl = rpArr(r.later).length;
+  const decH = dec.length ? (r.reply
+    ? `<div class="rpd ok">${I('circle-check', 15)}<div><b>${rpReplyT(r.reply)}:</b> ${esc(dec.join('، '))}</div></div>`
+    : `<div class="rpd">${I('triangle-alert', 15)}<div><b>بانتظار قرارك:</b> ${esc(dec.join('، '))}</div></div>`) : '';
+  return `<button class="rpc" onclick="rpOpen('${r.id}')">
+    <div class="rph"><b>${esc(rpPName(r.proj))}</b><span class="rpm">${esc(rpBy(r))} · ${esc(rpRel(r.date))}</span></div>
+    ${decH}
+    ${up.length ? `<div class="rpr up">${I('clock', 13)}<span><b>حان وقته:</b> ${esc(up.join('، '))}</span></div>` : ''}
+    ${rest.length ? `<div class="rpr"><b>المتبقي:</b> ${esc(rest.join('، '))}</div>` : (up.length ? '' : '<div class="rpr">لا توجد أعمال متبقية</div>')}
+    ${nd || nl ? `<div class="rpr lt">${nd ? `<span class="okc">${I('check-check', 13)}أُنجز ${nd}</span>` : ''}${nl ? `<span>${I('history', 13)}${rpNLater(nl)}</span>` : ''}</div>` : ''}
+  </button>`;
+}
+function rpOpen(id) { RP.open = id; RP.hist = null; RP.draft = ''; rpRerender(); toTop(); }
+function rpClose() { RP.open = null; RP.draft = ''; rpRerender(); toTop(); }
+function rpOpenHist(p) { RP.hist = p; rpRerender(); toTop(); }
+function rpCloseHist() { RP.hist = null; rpRerender(); toTop(); }
+
+function rpItems(arr, tags) {
+  if (!arr.length) return '<div class="rpe">لا يوجد</div>';
+  return '<ul class="rpi">' + arr.map((x, i) => `<li>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>` : ''}</li>`).join('') + '</ul>';
+}
+function rpLaterHtml(arr) {
+  if (!arr.length) return '<div class="rpe">لا يوجد</div>';
+  return '<ul class="rpi lat">' + arr.map(x => `<li>${esc(x.t)}<small>${x.after ? 'تبدأ بعد: ' + esc(x.after) : 'غير مرتبطة بعمل'}</small></li>`).join('') + '</ul>';
+}
+function rpDoneHtml(arr) {
+  if (!arr.length) return '<div class="rpe">لا يوجد</div>';
+  return '<ul class="rpi dn">' + arr.map(x => `<li>${I('check', 13, 3)}${esc(x)}</li>`).join('') + '</ul>';
+}
+function rpHistOf(p) { return rpOf(p).filter(r => rpArr(r.done).length).map(r => ({date: r.date, by: rpBy(r), items: rpArr(r.done)})); }
+function rpHistHtml(isAdmin) {
+  const p = RP.hist, gs = rpHistOf(p), n = gs.reduce((a, g) => a + g.items.length, 0);
+  let h = `<button class="back" onclick="rpCloseHist()">${I('arrow-right', 17)}${RP.open ? 'التقرير' : isAdmin ? 'التقارير' : 'تقاريري'}</button><h2>سجل الإنجاز</h2>
+    <div class="rpmeta">${I('check-check', 15)}${esc(rpPName(p))} · ${rpNDone(n)}</div>`;
+  h += gs.length ? gs.map(g => `<div class="hday"><div class="hdh">${esc(dayLabel(g.date))}<span>${esc(g.by)}</span></div>${rpDoneHtml(g.items)}</div>`).join('') : emptyHtml('check-check', 'لا توجد أعمال منجزة بعد');
+  return h;
+}
+function rpFilesHtml(fs) {
+  const img = fs.filter(f => f.t === 'i'), vid = fs.filter(f => f.t === 'v'), doc = fs.filter(f => f.t === 'f');
+  return `${img.length ? `<div class="rpf">${img.map(f => `<img alt="" data-rp="${esc(f.p)}" ${RP.uc[f.p] ? `src="${esc(RP.uc[f.p])}"` : ''} onclick="rpZoom(this)">`).join('')}</div>` : ''}
+    ${vid.map(f => `<video class="vid" data-rpv="${esc(f.p)}" controls playsinline preload="metadata"></video>`).join('')}
+    ${doc.map(f => `<a class="rdoc" data-rpd="${esc(f.p)}" href="#" target="_blank" rel="noopener" onclick="return rpDocTap(this)">${I('file-text', 18)}<div><b>${esc(f.n || 'ملف')}</b><small>فتح الملف</small></div></a>`).join('')}`;
+}
+async function rpAfterDetail() {
+  const imgs = Array.from(document.querySelectorAll('img[data-rp]')).filter(x => !x.getAttribute('src')).map(x => x.dataset.rp);
+  const others = Array.from(document.querySelectorAll('[data-rpv],[data-rpd]')).map(x => x.dataset.rpv || x.dataset.rpd);
+  try {
+    if (imgs.length) {
+      const m = await API.prefetch(imgs);
+      imgs.forEach(p => { if (m[p]) RP.uc[p] = m[p]; });
+      document.querySelectorAll('img[data-rp]').forEach(x => { const u = RP.uc[x.dataset.rp]; if (u && !x.getAttribute('src')) x.src = u; });
+    }
+    if (others.length) {
+      const m = await API.apiFileUrls(others);
+      document.querySelectorAll('[data-rpv]').forEach(x => { const u = m[x.dataset.rpv]; if (u && !x.getAttribute('src')) x.src = u; });
+      document.querySelectorAll('[data-rpd]').forEach(x => { const u = m[x.dataset.rpd]; if (u) { x.href = u; x.dataset.u = '1'; } });
+    }
+  } catch (e) {}
+}
+function rpZoom(el) { if (el.getAttribute('src')) showFull(el.src, el.dataset.rp, 'مرفق التقرير'); }
+function rpDocTap(a) {
+  if (a.dataset.u) return true;
+  const w = window.open('', '_blank');
+  fileUrl(a.dataset.rpd).then(u => { a.href = u; a.dataset.u = '1'; if (w) w.location.href = u; else location.href = u; }).catch(e => { if (w) w.close(); toastErr(e); });
+  return false;
+}
+
+function rpDetailHtml(isAdmin) {
+  const r = (RP.reps || []).find(x => x.id === RP.open);
+  if (!r) return '';
+  const all = rpOf(r.proj), i = all.findIndex(x => x.id === r.id), prev = all[i + 1] || null;
+  const dec = rpArr(r.decide), cur = rpArr(r.cur), up = rpArr(r.up), pCur = prev ? rpArr(prev.cur) : [];
+  const tags = cur.map(x => up.includes(x) ? ['حان وقته', 'g'] : prev && !pCur.includes(x) ? ['جديد'] : null);
+  const me = rpData() || {}, own = !isAdmin && r.by === me.id, notes = rpArr(r.notes);
+  let h = `<button class="back" onclick="rpClose()">${I('arrow-right', 17)}${isAdmin ? 'التقارير' : 'تقاريري'}</button><h2>${esc(rpPName(r.proj))}</h2>
+    <div class="rpmeta">${I('file-text', 15)}تقرير ${esc(rpBy(r))} · ${esc(dayLabel(r.date))}${all.length > 1 ? ` · ${all.length - i} من ${all.length}` : ''}</div>`;
+  if (dec.length) {
+    h += `<div class="rpdec ${r.reply ? 'done' : ''}"><div class="rplab">${I(r.reply ? 'circle-check' : 'triangle-alert', 15)}القرارات والاعتمادات المطلوبة</div>${rpItems(dec)}`;
+    if (r.reply) h += `<div class="rprep">${r.reply === 'ok' ? 'تم الاعتماد' : r.reply === 'no' ? 'لم يُعتمد' : 'تم الرد بملاحظة'}${isAdmin ? ` <button class="lnk" onclick="rpReply('${r.id}','')">تعديل</button>` : ''}</div>`;
+    else if (isAdmin) h += `<div class="grid2"><button class="btn2 cu" onclick="rpReply('${r.id}','ok')">${I('check', 17, 2.5)}اعتماد</button><button class="btn2 rd" onclick="rpReply('${r.id}','no')">رفض</button></div><div class="rhint" style="margin:8px 0 0">يُرسل نص الملاحظة أدناه مع الاعتماد أو الرفض</div>`;
+    else h += '<div class="rprep">بانتظار رد المدير</div>';
+    h += '</div>';
+  }
+  h += `<div class="lbl">الأعمال الحالية</div>${rpItems(cur, tags)}`;
+  h += `<div class="lbl">أُنجز في هذا التقرير</div>${rpDoneHtml(rpArr(r.done))}`;
+  if (rpArr(r.removed).length) h += `<div class="rpgone rm">${I('x', 14, 2.5)}<div><b>حُذفت دون إنجاز:</b> ${esc(r.removed.join('، '))}</div></div>`;
+  h += `<div class="lbl">الأعمال اللاحقة</div>${rpLaterHtml(rpArr(r.later))}`;
+  if (rpArr(r.files).length) h += `<div class="lbl">المرفقات</div>${rpFilesHtml(r.files)}`;
+  if (isAdmin) {
+    h += `<div class="lbl">ملاحظاتك</div>` + notes.map(n => `<div class="note good">${I('message-circle', 16)}<div><b>المدير:</b> ${esc(n.text)}</div></div>`).join('');
+    h += `<textarea id="rnote" class="dnote" placeholder="${r.by === 'admin' ? 'اكتب ملاحظة على التقرير' : 'اكتب ملاحظتك للموظف'}" oninput="RP.draft=this.value;rpGrow(this)">${esc(RP.draft || '')}</textarea><button class="btn2 cu" style="margin-top:8px;width:100%" onclick="rpReply('${r.id}','note')">${I('send', 16)}إرسال الملاحظة</button>`;
+  } else if (own) {
+    h += `<div class="lbl">ملاحظات المدير</div>` + (notes.length ? notes.map(n => `<div class="note good">${I('message-circle', 16)}<div><b>المدير:</b> ${esc(n.text)}</div></div>`).join('') : '<div class="rpe">لا توجد ملاحظات</div>');
+  }
+  const nh = rpHistOf(r.proj).reduce((a, g) => a + g.items.length, 0);
+  h += `<div class="lbl">السجل</div><div class="tbl2">${tbRow('check-check', 'سجل الإنجاز', rpNDone(nh), `rpOpenHist('${r.proj}')`)}</div>`;
+  if (all.length > 1) h += `<div class="lbl">التقارير السابقة</div><div class="tbl2">${all.map(x => x.id === r.id ? `<div class="tbr cur"><span class="ic">${I('file-text', 16)}</span><span class="k">${esc(rpDay(x.date))}</span><span class="v">التقرير المعروض</span></div>` : tbRow('file-text', esc(rpDay(x.date)), esc(rpBy(x)) + (rpArr(x.decide).length ? ' · يتضمن قراراً' : ''), `rpOpen('${x.id}')`)).join('')}</div>`;
+  return h;
+}
+async function rpReply(id, v) {
+  if (RP.busy) return;
+  const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
+  const t = (RP.draft || '').trim();
+  if (v === 'note' && !t) return toast('اكتب الملاحظة أولاً', null, 'er');
+  RP.busy = true;
+  try {
+    await call('apiRepReply', id, v, v ? t : '');
+    if (v) RP.draft = '';
+    const d = await API.apiRepList(); RP.reps = rpArr(d.reps);
+    RP.busy = false;
+    rpRerender();
+    const tell = r.by === 'admin' ? '' : ' وإشعار الموظف';
+    if (v === 'ok') toast('تم الاعتماد' + tell); else if (v === 'no') toast('تم الرفض' + tell); else if (v === 'note') toast(r.by === 'admin' ? 'أُضيفت الملاحظة' : 'أُرسلت الملاحظة للموظف');
+  } catch (e) { RP.busy = false; toastErr(e); }
+}
+
+function rpEmpHtml(d, isPreview) {
+  rpEnsure();
+  if (RP.reps === null) return rpLoadingHtml();
+  const ps = rpProjs().slice().sort((a, b) => (b.mine ? 1 : 0) - (a.mine ? 1 : 0));
+  if (!ps.length) return emptyHtml('folder', 'لا توجد مشاريع نشطة');
+  if (!ps.some(p => p.id === RP.eProj)) { const s = lsGet('rp_proj'); RP.eProj = ps.some(p => p.id === s) ? s : ps[0].id; }
+  let h = `<div class="qlab" style="margin-top:16px">${I('folder', 14)}المشروع</div><div class="qch">${ps.map(p => `<button class="${RP.eProj === p.id ? 'on' : ''}" onclick="rpPickProj('${p.id}')">${esc(p.name)}</button>`).join('')}</div>`;
+  if (RP.sent && RP.sent.proj === RP.eProj) h += `<div class="note good rsent">${I('circle-check', 16)}<div><b>تم إرسال تقرير ${esc(rpPName(RP.sent.proj))}</b><br>${esc(dayLabel(RP.sent.date))}</div></div>`;
+  if (!isPreview) h += `<button class="btn2 cu qbig" onclick="rpOpenForm('${RP.eProj}',false)">${I('file-text', 17)}إعداد تقرير</button>`;
+  const mine = rpOf(RP.eProj);
+  h += `<div class="rph2">تقارير ${esc(rpPName(RP.eProj))}</div>`;
+  h += mine.length ? '<div class="rpl">' + mine.map(r => rpEmpRowHtml(r, d)).join('') + '</div>' : emptyHtml('file-text', 'لا توجد تقارير لهذا المشروع بعد');
+  return h;
+}
+function rpPickProj(id) { RP.eProj = id; RP.sent = null; lsSet('rp_proj', id); rerenderEmp(); }
+function rpEmpRowHtml(r, d) {
+  const dec = rpArr(r.decide), notes = rpArr(r.notes), last = notes[notes.length - 1], nl = rpArr(r.later).length;
+  return `<button class="rpc" onclick="rpOpen('${r.id}')">
+    <div class="rph"><b>${esc(dayLabel(r.date))}</b><span class="rpm">${esc(rpBy(r))}</span></div>
+    <div class="rpr">المنجزة: ${rpArr(r.done).length} · الحالية: ${rpArr(r.cur).length}${nl ? ` · اللاحقة: ${nl}` : ''}${dec.length ? ` · القرار: ${r.reply ? rpReplyT(r.reply) : 'بانتظار المدير'}` : ''}</div>
+    ${last && r.by === (d || {}).id ? `<div class="rpd ok">${I('message-circle', 15)}<div><b>ملاحظة المدير:</b> ${esc(last.text)}</div></div>` : ''}
+  </button>`;
+}
+function rpEmpSub(d) {
+  if (RP.reps === null || !(RP.open || RP.hist)) return '';
+  const body = RP.hist ? rpHistHtml(false) : rpDetailHtml(false);
+  if (!body) { RP.open = null; return ''; }
+  return body;
+}
+function rpHead() {
+  const v = $('#view'), top = document.querySelector('#app .top');
+  if (!v || !top) return;
+  const h1 = top.querySelector('h1'), back = v.querySelector(':scope > .back'), h2 = v.querySelector(':scope > h2');
+  if (h2) { h1.textContent = h2.textContent; h2.remove(); }
+  top.classList.add('subp');
+  if (back) h1.parentNode.insertBefore(back, h1);
+}
+
+function rpOpenForm(p, isAdmin) {
+  const ps = rpProjs();
+  if (!ps.length) return toast('لا توجد مشاريع نشطة', null, 'in');
+  const pid = p || (ps.find(x => !rpLast(x.id)) || ps[0]).id;
+  RP.form = {proj: pid, admin: isAdmin, decide: '', files: [], err: '', sent: false, pick: !p, nl: '', na: '', nc: '', extra: false, cid: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()).replace(/[^a-z0-9]/gi, '').slice(0, 24)};
+  rpFill();
+  S.sheet = true;
+  rpDraw();
+}
+function rpFill() {
+  const f = RP.form, l = rpLast(f.proj);
+  f.items = l ? rpArr(l.cur).map(t => ({t: t, done: false})) : [];
+  f.later = l ? rpArr(l.later).map(x => ({t: x.t, after: x.after || ''})) : [];
+  f.from = l ? l.date : '';
+  f.nc = ''; f.extra = false; f.na = '';
+}
+function rpWillMove(x) { return !!x.after && RP.form.items.some(i => i.t === x.after && i.done); }
+function rpCurHtml() {
+  const f = RP.form;
+  const rows = f.items.map((x, i) => `<div class="crow ${x.done ? 'dn' : ''}"><button class="ck" onclick="rpTog(${i})" aria-label="${x.done ? 'إلغاء الإنجاز' : 'تم الإنجاز'}">${x.done ? I('check', 15, 3) : ''}</button><span class="ct">${esc(x.t)}${x.x ? '<small>عمل منجز لم يكن مسجلاً</small>' : ''}</span>${x.done && !x.x ? '' : `<button class="mx2" onclick="rpRmCur(${i})" aria-label="حذف">${I('x', 14, 2.5)}</button>`}</div>`).join('');
+  const nd = f.items.filter(x => x.done).length;
+  return `<div class="lbox">${rows || '<div class="rpe" style="padding:8px 2px">لا توجد أعمال حالية</div>'}
+    <div class="ladd one"><input id="f_nc" placeholder="${f.extra ? 'عمل أُنجز ولم يكن مسجلاً' : 'عمل حالي جديد'}" value="${esc(f.nc)}" oninput="RP.form.nc=this.value" onkeydown="if(event.key==='Enter')rpAddCur()"><button class="btn2" onclick="rpAddCur()">${I('plus', 16)}إضافة</button></div>
+    <button class="lnk xtra" onclick="RP.form.extra=!RP.form.extra;rpRefCur()">${f.extra ? 'إضافة عمل حالي بدلاً من ذلك' : '+ عمل منجز لم يكن مسجلاً'}</button></div>
+    ${nd ? `<div class="rhint ok">${I('check-check', 13)}${nd === 1 ? 'عمل واحد سيُنقل' : nd === 2 ? 'عملان سيُنقلان' : nd + ' أعمال ستُنقل'} إلى سجل الإنجاز عند الإرسال</div>` : ''}`;
+}
+function rpRefCur() { const b = document.getElementById('f_cur'); if (b) b.innerHTML = rpCurHtml(); rpRefLater(); }
+function rpTog(i) { const x = RP.form.items[i]; x.done = !x.done; rpRefCur(); }
+function rpRmCur(i) { RP.form.items.splice(i, 1); rpRefCur(); }
+function rpAddCur() {
+  const f = RP.form, t = (f.nc || '').trim();
+  if (!t) return toast('اكتب العمل أولاً', null, 'er');
+  if (f.items.some(x => x.t === t)) return toast('هذا العمل مضاف من قبل', null, 'er');
+  f.items.push(f.extra ? {t: t, done: true, x: true} : {t: t, done: false}); f.nc = ''; f.extra = false;
+  rpRefCur();
+}
+function rpLaterFormHtml() {
+  const f = RP.form, cur = f.items.filter(x => !x.done).map(x => x.t);
+  const rows = f.later.map((x, i) => `<div class="lrow ${rpWillMove(x) ? 'mv' : ''}"><div class="lt"><b>${esc(x.t)}</b><small>${x.after ? (rpWillMove(x) ? I('check', 12, 3) + 'أُنجز «' + esc(x.after) + '»، وستنتقل إلى الأعمال الحالية عند الإرسال' : 'تبدأ بعد: ' + esc(x.after)) : 'غير مرتبطة بعمل'}</small></div>
+    ${!x.after ? `<button class="lmv" onclick="rpMoveNow(${i})">نقل إلى الحالية</button>` : ''}<button class="mx2" onclick="rpRmLater(${i})" aria-label="حذف">${I('x', 14, 2.5)}</button></div>`).join('');
+  return `<div class="lbox">${rows || '<div class="rpe" style="padding:8px 2px">لا توجد أعمال لاحقة</div>'}
+    <div class="ladd"><input id="f_nl" placeholder="عمل لاحق جديد" value="${esc(f.nl)}" oninput="RP.form.nl=this.value">
+      <select id="f_na" aria-label="تبدأ بعد" onchange="RP.form.na=this.value"><option value="">تبدأ بعد: غير مرتبطة</option>${cur.map((c, i) => `<option value="${i}" ${f.na === String(i) ? 'selected' : ''}>تبدأ بعد: ${esc(c.length > 34 ? c.slice(0, 34) + '…' : c)}</option>`).join('')}</select>
+      <button class="btn2" onclick="rpAddLater()">${I('plus', 16)}إضافة</button></div></div>`;
+}
+function rpRefLater() { const b = document.getElementById('f_later'); if (b) b.innerHTML = rpLaterFormHtml(); }
+function rpAddLater() {
+  const f = RP.form, t = (f.nl || '').trim(), cur = f.items.filter(x => !x.done).map(x => x.t);
+  if (!t) return toast('اكتب العمل اللاحق أولاً', null, 'er');
+  f.later.push({t: t, after: f.na !== '' && cur[+f.na] ? cur[+f.na] : ''}); f.nl = ''; f.na = '';
+  rpRefLater();
+}
+function rpRmLater(i) { RP.form.later.splice(i, 1); rpRefLater(); }
+function rpMoveNow(i) { const f = RP.form, x = f.later.splice(i, 1)[0]; if (!f.items.some(y => y.t === x.t)) f.items.push({t: x.t, done: false}); rpRefCur(); }
+function rpDraw() {
+  const f = RP.form;
+  if (!f) return;
+  if (f.sent) {
+    ovOpen(`<div class="rok"><div class="rokc">${I('check', 30, 2.5)}</div><b>تم إرسال التقرير</b><div>${esc(rpPName(f.proj))}</div><div class="sub">${esc(dayLabel(rpToday()))}</div>${f.nDone ? `<div class="rokm">${I('check-check', 14)}${f.nDone <= 2 || f.nDone > 10 ? 'نُقل ' : 'نُقلت '}${rpNDone(f.nDone)} إلى سجل الإنجاز</div>` : ''}${f.moved.length ? `<div class="rokm">${I('clock', 14)}انتقل إلى الأعمال الحالية: ${esc(f.moved.join('، '))}</div>` : ''}</div>
+      <button class="btn2 cu qbig" onclick="ovClose()">حسناً</button>`);
+    return;
+  }
+  const ap = rpProjs();
+  ovOpen(`<label class="shh">تقرير ${esc(rpPName(f.proj))}</label>
+    <div class="sub" style="margin:-6px 0 6px">${esc(dayLabel(rpToday()))}${f.admin ? ' · من المدير' : ''}</div>
+    ${f.pick ? `<div class="qlab">${I('folder', 14)}المشروع</div><div class="qch">${ap.map(x => `<button class="${f.proj === x.id ? 'on' : ''}" onclick="RP.form.proj='${x.id}';rpFill();rpDraw()">${esc(x.name)}</button>`).join('')}</div>` : ''}
+    <div class="qlab">${I('list-checks', 14)}الأعمال الحالية</div>
+    ${f.from ? `<div class="rhint">${I('history', 13)}منقولة من تقرير ${esc(rpDay(f.from))}. ضع علامة ✓ على ما أُنجز</div>` : ''}
+    <div id="f_cur">${rpCurHtml()}</div>
+    <div class="qlab">${I('history', 14)}الأعمال اللاحقة</div>
+    <div class="rhint">أعمال لم يحن وقتها. اربطها بالعمل الذي تبدأ بعده لتنتقل تلقائياً عند إنجازه</div>
+    <div id="f_later">${rpLaterFormHtml()}</div>
+    <label class="qlab" for="f_dec">${I('triangle-alert', 14)}القرارات والاعتمادات المطلوبة</label>
+    <textarea id="f_dec" class="rta sm" placeholder="مثال: اعتماد عرض سعر، أو اختيار لون" oninput="RP.form.decide=this.value;rpGrow(this)">${esc(f.decide)}</textarea>
+    <div class="qlab">${I('paperclip', 14)}المرفقات</div>
+    <div class="rfl">${f.files.map((x, i) => x.t === 'i' ? `<div class="mi"><img src="${x.d}" alt=""><button class="mx" onclick="rpRmFile(${i})" aria-label="حذف">${I('x', 12, 3)}</button></div>` : `<div class="mi doc"><span>${I(x.t === 'v' ? 'play' : 'file-text', 18)}<br>${esc(x.n.slice(0, 14))}</span><button class="mx" onclick="rpRmFile(${i})" aria-label="حذف">${I('x', 12, 3)}</button></div>`).join('')}
+      ${f.files.length < 10 ? `<label class="vrec qadd">${I('camera', 18)}صورة أو فيديو أو ملف<input type="file" multiple accept="${RP_ACC}" style="display:none" onchange="rpPick(this)"></label>` : ''}</div>
+    <div class="err" id="f_err">${esc(f.err)}</div>
+    <button class="btn2 cu qbig" id="f_send" ${f.busy ? 'disabled' : ''} onclick="rpSend()">${f.busy ? esc(f.prog || 'جاري الإرسال…') : I('send', 17) + 'إرسال التقرير'}</button>`);
+  rpGrowAll();
+}
+function rpGrow(el) { el.style.height = 'auto'; el.style.height = (el.scrollHeight + 3) + 'px'; }
+function rpGrowAll() { const g = () => document.querySelectorAll('.rta,#rnote').forEach(rpGrow); g(); requestAnimationFrame(g); setTimeout(g, 350); }
+async function rpPick(inp) {
+  const f = RP.form, fs = Array.from(inp.files || []);
+  inp.value = '';
+  if (!f) return;
+  for (const file of fs) {
+    if (f.files.length >= 10) { toast('الحد الأقصى ١٠ مرفقات', null, 'er'); break; }
+    const ty = String(file.type || ''), ext = ((String(file.name || '').match(/\.(\w{2,5})$/) || [])[1] || '').toLowerCase();
+    try {
+      if (ty.indexOf('image') === 0 || /^(jpe?g|png|heic|heif|webp)$/.test(ext)) f.files.push({t: 'i', d: await resizeImg(file, 1600, 0.78), n: file.name || 'صورة'});
+      else if (ty.indexOf('video') === 0 || /^(mp4|mov|m4v|webm|3gp)$/.test(ext)) {
+        if (file.size > 45 * 1024 * 1024) { toast('الفيديو أكبر من ٤٥ ميغابايت، صوّر مقطعاً أقصر', null, 'er'); continue; }
+        f.files.push({t: 'v', file: file, n: file.name || 'فيديو'});
+      } else if (RP_DOC.includes(ext)) {
+        if (file.size > 20 * 1024 * 1024) { toast('حجم الملف أكبر من ٢٠ ميغابايت', null, 'er'); continue; }
+        f.files.push({t: 'f', file: file, n: file.name || 'ملف'});
+      } else toast('نوع الملف غير مدعوم', null, 'er', 'الصيغ المدعومة: PDF أو Excel أو Word');
+    } catch (e) { toastErr(e); }
+  }
+  if (RP.form === f) rpDraw();
+}
+function rpRmFile(i) { RP.form.files.splice(i, 1); rpDraw(); }
+function rpProg(f) { const b = document.getElementById('f_send'); if (b && RP.form === f) b.textContent = f.prog; }
+async function rpSend() {
+  const f = RP.form;
+  if (!f || f.busy) return;
+  const dec = rpLines(f.decide);
+  if (!f.items.length && !dec.length && !f.later.length) { f.err = 'أدخل عملاً واحداً على الأقل'; return rpDraw(); }
+  const moved = f.later.filter(rpWillMove), keep = f.later.filter(x => !rpWillMove(x));
+  const cur = f.items.filter(x => !x.done).map(x => x.t).concat(moved.map(x => x.t).filter(t => !f.items.some(x => x.t === t)));
+  const done = f.items.filter(x => x.done).map(x => x.t);
+  const l = rpLast(f.proj), gone = l ? rpArr(l.cur).filter(t => !f.items.some(x => x.t === t)) : [];
+  f.busy = true; f.err = ''; f.prog = 'جاري الإرسال…'; rpDraw();
+  S.upN++;
+  try {
+    const files = [];
+    for (let i = 0; i < f.files.length; i++) {
+      const x = f.files[i];
+      f.prog = 'جاري رفع المرفقات ' + (i + 1) + ' من ' + f.files.length; rpProg(f);
+      const p = await callT(180000, 'apiRepUpload', x, pr => { f.prog = 'جاري رفع المرفقات ' + (i + 1) + ' من ' + f.files.length + ' · ' + Math.round(pr * 100) + '٪'; rpProg(f); });
+      files.push({p: p, t: x.t, n: x.n});
+    }
+    f.prog = 'جاري الإرسال…'; rpProg(f);
+    await call('apiRepAdd', {proj: f.proj, cid: f.cid, cur: cur, done: done, later: keep, up: moved.map(x => x.t), removed: gone, decide: dec, files: files});
+  } catch (e) {
+    S.upN = Math.max(0, S.upN - 1);
+    f.busy = false; f.err = String(e);
+    if (RP.form === f) rpDraw(); else toastErr(e);
+    return;
+  }
+  S.upN = Math.max(0, S.upN - 1);
+  f.busy = false; f.sent = true; f.moved = moved.map(x => x.t); f.nDone = done.length;
+  if (!f.admin) { RP.sent = {proj: f.proj, date: rpToday()}; RP.eProj = f.proj; lsSet('rp_proj', f.proj); }
+  try { const d = await API.apiRepList(); RP.reps = rpArr(d.reps); if (d.projs) RP.projs = d.projs; } catch (e) { RP.need = true; }
+  if (RP.form === f) rpDraw(); else toast('تم إرسال التقرير');
+  rpRerender();
+}
 
 /* الإصدار 53: الصفحة الفرعية عنوانها الكبير اسمها، والرجوع رابط صغير فوقه */
 function subHead() {

@@ -361,6 +361,7 @@
     const mine = logs.filter(l => l.emp === emp.id);
     const inv = RAW.invoices.filter(x => x.emp === emp.id);
     return {
+      id: emp.id,
       name: emp.name,
       today: todayS,
       tasks: tasksFor_(emp.id, RAW.tasks, todayS, pmap),
@@ -845,6 +846,51 @@
       return adminDo(k, 'settings_save', { WORK_START: st, GRACE_MIN: String(g), ATT_AUTO: x.auto ? '1' : '0' });
     },
     attPhoto: imgUrl,
+
+    /* الإصدار 62: تقارير تقدم الأعمال */
+    async apiRepList() { return rpc('rep_list', { k: CRED.k || '', t: CRED.t || '' }); },
+    async apiRepAdd(a) {
+      const r = await rpc('rep_add', { k: CRED.k || '', t: CRED.t || '', a: a || {} });
+      flush();
+      return r;
+    },
+    async apiRepReply(id, v, txt) {
+      const r = await rpc('rep_reply', { k: CRED.k || '', id: String(id || ''), v: String(v || ''), txt: String(txt || '') });
+      if (v) flush();
+      return r;
+    },
+    async apiRepUpload(x, onProgress) {
+      const key = x.t === 'i' ? x.d : x.file;
+      if (UPD.has(key)) return UPD.get(key);
+      const ticket = (kind, ext) => rpc('rep_ticket', { k: CRED.k || '', t: CRED.t || '', kind: kind, ext: ext });
+      let p;
+      if (x.t === 'i') {
+        const blob = dataUrlBlob(x.d);
+        const r = await ticket('img', 'jpg');
+        p = await putImg(r.path, blob);
+      } else if (x.t === 'v') {
+        const file = x.file;
+        if (file.size > MAX_VID) throw new Error('الفيديو أكبر من الحد المسموح، صوّر مقطعاً أقصر');
+        const ext = ((String(file.name || '').match(/\.(\w{2,4})$/) || [])[1] || 'mp4').toLowerCase();
+        const known = { mov: 'video/quicktime', mp4: 'video/mp4', m4v: 'video/mp4', webm: 'video/webm', '3gp': 'video/3gpp' };
+        let type = String(file.type || '');
+        if (['video/mp4', 'video/quicktime', 'video/webm', 'video/3gpp'].indexOf(type) < 0) type = known[ext] || 'video/mp4';
+        const e2 = ext === 'm4v' || !known[ext] ? 'mp4' : ext;
+        const r = await ticket('vid', e2);
+        p = await put(r.path, file, type, onProgress);
+      } else {
+        const file = x.file;
+        const ext = ((String(file.name || '').match(/\.(\w{2,5})$/) || [])[1] || '').toLowerCase();
+        const types = { pdf: 'application/pdf', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', xls: 'application/vnd.ms-excel',
+          docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', doc: 'application/msword' };
+        if (!types[ext]) throw new Error('نوع الملف غير مدعوم');
+        if (file.size > 20 * 1024 * 1024) throw new Error('حجم الملف أكبر من ٢٠ ميغابايت');
+        const r = await ticket('doc', ext);
+        p = await put(r.path, file, types[ext], onProgress);
+      }
+      UPD.set(key, p);
+      return p;
+    },
 
     async apiEmp(token) {
       await loadEmp(token);
