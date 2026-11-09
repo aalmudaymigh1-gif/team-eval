@@ -32,8 +32,16 @@
   const MONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
 
   /* ---------- اتصال ---------- */
+  /* الإصدار 63: أي رقم عربي ينحفظ إنجليزي */
+  const toEn = s => s.replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x660)).replace(/[\u06F0-\u06F9]/g, d => String(d.charCodeAt(0) - 0x6F0));
+  function enDeep(v) {
+    if (typeof v === 'string') return toEn(v);
+    if (Array.isArray(v)) return v.map(enDeep);
+    if (v && typeof v === 'object') { const o = {}; Object.keys(v).forEach(k => { o[k] = enDeep(v[k]); }); return o; }
+    return v;
+  }
   async function rpc(fn, args) {
-    const { data, error } = await sb.rpc(fn, args);
+    const { data, error } = await sb.rpc(fn, enDeep(args));
     if (error) throw new Error(friendly(error));
     return data;
   }
@@ -884,7 +892,7 @@
         const types = { pdf: 'application/pdf', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', xls: 'application/vnd.ms-excel',
           docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', doc: 'application/msword' };
         if (!types[ext]) throw new Error('نوع الملف غير مدعوم');
-        if (file.size > 20 * 1024 * 1024) throw new Error('حجم الملف أكبر من ٢٠ ميغابايت');
+        if (file.size > 20 * 1024 * 1024) throw new Error('حجم الملف أكبر من 20 ميغابايت');
         const r = await ticket('doc', ext);
         p = await put(r.path, file, types[ext], onProgress);
       }
