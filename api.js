@@ -48,8 +48,19 @@
   const gemp = (t, op, a) => rpc('guide_emp', { t: t, op: op, a: a || {} });
 
   let RAW = null;
-  async function loadAdmin(k) { CRED = { k: k }; RAW = norm(await rpc('admin_raw', { k: k })); return RAW; }
-  async function loadEmp(t) { CRED = { t: t }; RAW = norm(await rpc('emp_raw', { t: t })); return RAW; }
+  /* الإصدار 60: التحميل الخفيف (المهام المنتهية من أكثر من 90 يوم تنجاب عند الطلب)، ولو الدالة الجديدة مو موجودة يرجع للقديمة */
+  let LITE = true;
+  const noFn = e => /Could not find the function|schema cache|PGRST202/i.test(String(e && e.message || e));
+  async function loadAdmin(k) {
+    CRED = { k: k };
+    if (LITE) { try { RAW = norm(await rpc('admin_raw2', { k: k, days: 90 })); return RAW; } catch (e) { if (!noFn(e)) throw e; LITE = false; } }
+    RAW = norm(await rpc('admin_raw', { k: k })); return RAW;
+  }
+  async function loadEmp(t) {
+    CRED = { t: t };
+    if (LITE) { try { RAW = norm(await rpc('emp_raw2', { t: t, days: 90 })); return RAW; } catch (e) { if (!noFn(e)) throw e; LITE = false; } }
+    RAW = norm(await rpc('emp_raw', { t: t })); return RAW;
+  }
 
   function norm(r) {
     r.employees = (r.employees || []).map(e => ({ id: e.id, name: e.name, salary: Number(e.salary) || 0, max: Number(e.max) || 0,
@@ -635,6 +646,14 @@
       return adminDo(k, 'tasks_add', { rows: rows });
     },
 
+    oldCount() { return (RAW && RAW.tasksOld) || 0; },
+    async apiTasksOld(k, q) {
+      const old = await rpc('admin_tasks_old', { k: k, q: String(q || ''), lim: 200 });
+      const n = norm({ tasks: old || [] }).tasks, have = new Set(RAW.tasks.map(t => t.id));
+      RAW.tasks = RAW.tasks.concat(n.filter(t => !have.has(t.id)));
+      if (!String(q || '').trim()) RAW.tasksOld = Math.max(0, (RAW.tasksOld || 0) - n.length);
+      return adminPayload_();
+    },
     async apiTaskDelete(k, id) { return adminDo(k, 'task_del', { id: id }); },
     async apiTasksDelete(k, ids) {
       if (!Array.isArray(ids) || !ids.length) throw new Error('ما حددت مهام');

@@ -1748,9 +1748,16 @@ function drawTaskList() {
   if (!h && !(done.length && !q.f)) h = emptyHtml('check-check', tqActive() ? 'ما فيه مهام بهالفلاتر' : 'ما فيه مهام مفتوحة. اضغط + وأضف أول مهمة');
   if (done.length && !q.f) h += `<button class="dtog" onclick="S.tq.showDone=!S.tq.showDone;drawTaskList()">${q.showDone ? 'إخفاء اللي خلصت' : 'خلصت مؤخرًا (' + done.length + ')'}</button>` + (q.showDone ? done.map(t => taskRowHtml(t, true)).join('') : '');
   el.innerHTML = h;
+  const oc = API.oldCount ? API.oldCount() : 0;
+  if (oc && !q.f && (q.showDone || (q.q || '').trim())) el.insertAdjacentHTML('beforeend', `<button class="dtog" id="oldb" onclick="loadOldTasks()">${I('history', 15)}${(q.q || '').trim() ? 'دوّر في السجل الأقدم' : 'السجل الأقدم (' + oc + ')'}</button>`);
   drawSel(list);
 }
 
+async function loadOldTasks() {
+  const b = $('#oldb'); if (b) { b.disabled = true; b.textContent = 'جاري الجلب…'; }
+  try { S.data = await call('apiTasksOld', BOOT.key, (S.tq.q || '').trim()); S.tq.showDone = true; drawTaskList(); }
+  catch (e) { toastErr(e); if (b) b.disabled = false; }
+}
 /* الإصدار 58: تحديد أكثر من مهمة وحذفها */
 function togSel() { S.tsel = S.tsel ? null : []; S.armed = null; renderTasks(); }
 function selTask(id) { const i = S.tsel.indexOf(id); if (i >= 0) S.tsel.splice(i, 1); else S.tsel.push(id); S.armed = null; drawTaskList(); }
