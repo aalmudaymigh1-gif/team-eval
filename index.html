@@ -731,6 +731,10 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .del{min-height:40px}
 .tg:before{content:'';position:absolute;inset:-6px -4px}
 .empv .ecard .badge{background:none!important;padding:0;font-weight:500}
+/* الإصدار 61: الفريق 3 أسطر، والمواقف داخل الحافز، والرابط زر جنب «قيّمه» */
+.lnkb{width:40px;height:40px;border-radius:999px;border:1px solid var(--line2);background:#fff;color:var(--acc-dk);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;margin-inline-start:auto}
+.tbh .lnkb+.rate{margin-inline-start:8px}.tbr .v .lv{color:var(--muted);font-weight:400}
+.tbh2{font-size:13px;color:var(--muted);margin:18px 2px 8px}
 </style>
 </head>
 <body>
@@ -742,7 +746,7 @@ b,strong,th,h2,h3,h4{font-weight:600}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=60"></script>
 <script>
-const APP_VER = '60';
+const APP_VER = '61';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -1564,8 +1568,9 @@ function teamEmp(d, e) {
   const rv = ts.filter(t => t.status === 'review').length, op = ts.filter(t => t.status === 'open' || t.status === 'returned').length, lt = ts.filter(t => t.late).length;
   const tv = [rv ? rv + ' تنتظرك' : '', op ? op + ' مفتوحة' : '', lt ? `<span class="lt">${lt} متأخرة</span>` : ''].filter(Boolean).join(' · ');
   const lv = [m.misses ? m.misses + ' تقصير' : '', m.stars ? m.stars + ' مميز' : ''].filter(Boolean).join(' · ');
-  return `<div class="tfr"><div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span></div><button class="rate" onclick="rateEmp('${e.id}')">${I('clipboard-check', 14)}قيّمه</button></div>
-    <div class="tbl2">${m.track ? '' : tbRow('sparkles', 'الحافز', M(m.bonus, '', 'pos'), `tsub('${e.id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${e.id}')`) : ''}${tbRow('list-checks', 'المهام', tv || 'ما عنده', `tsub('${e.id}','tasks')`)}${tbRow('history', 'المواقف', lv || 'ما فيه', `tsub('${e.id}','log')`)}${tbRow('link', 'رابط صفحته', '', `tsub('${e.id}','link')`)}</div></div>`;
+  return `<div class="tfr"><div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span></div>
+      <button class="lnkb" onclick="tsub('${e.id}','link')" aria-label="رابط صفحته">${I('link', 16)}</button><button class="rate" onclick="rateEmp('${e.id}')">${I('clipboard-check', 14)}قيّمه</button></div>
+    <div class="tbl2">${m.track ? tbRow('history', 'المواقف', lv || 'ما فيه', `tsub('${e.id}','log')`) : tbRow('sparkles', 'الحافز', M(m.bonus, '', 'pos') + (lv ? ` <span class="lv">· ${lv}</span>` : ''), `tsub('${e.id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${e.id}')`) : ''}${tbRow('list-checks', 'المهام', tv || 'ما عنده', `tsub('${e.id}','tasks')`)}</div></div>`;
 }
 function teamTasksHtml(d, e) {
   const list = allTasks().filter(t => t.emp === e.id);
@@ -1583,7 +1588,7 @@ function teamTasksHtml(d, e) {
 function teamSub(d, e, k) {
   const m = e.month, nm = esc(shortName(e.name));
   let h = `<button class="back" onclick="tsub(null)">${I('arrow-right', 17)}الفريق</button>`;
-  if (k === 'bonus') return h + `<h2>حافز ${nm}</h2><div class="tsb">${teamBreak(m)}${impHtml(m)}</div>`;
+  if (k === 'bonus') return h + `<h2>حافز ومواقف ${nm}</h2><div class="tsb">${teamBreak(m)}${impHtml(m)}<div class="tbh2">المواقف</div>${e.recent.length ? '<div class="tents">' + e.recent.map(x => entryHtml(x, true, m.track)).join('') + '</div>' : emptyHtml('history', 'ما فيه مواقف مسجلة')}</div>`;
   if (k === 'tasks') return h + `<h2>مهام ${nm}</h2>` + teamTasksHtml(d, e);
   if (k === 'log') return h + `<h2>مواقف ${nm}</h2><div class="tsb">${impHtml(m)}${e.recent.length ? '<div class="tents">' + e.recent.map(x => entryHtml(x, true, m.track)).join('') + '</div>' : emptyHtml('history', 'ما فيه مواقف مسجلة')}</div>`;
   return h + `<h2>رابط ${nm}</h2><div class="tsb"><div class="tbl2">${tbRow('send', 'أرسله واتساب', '', `waEmp('${e.id}')`)}${tbRow('copy', 'انسخ الرابط', '', `copyEmp('${e.id}')`)}${tbRow('eye', 'شوف صفحته', '', `preview('${e.id}')`)}</div></div>`;
