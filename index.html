@@ -852,6 +852,29 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .erow.dn input{color:var(--muted)}
 .ehint{font-size:12px;color:var(--muted);margin:2px 0 4px}
 #ov .sheet:has(#e_dec)>*,#ov .sheet:has(#cmt_e)>*{flex-shrink:0}
+/* الإصدار 65 */
+.topr{display:flex;gap:8px;align-items:center}
+.bellb{position:relative;width:40px;height:40px;border-radius:50%;border:0;background:var(--fill);color:var(--text);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer;flex:none}
+.bellb i{position:absolute;top:4px;right:4px;min-width:17px;height:17px;border-radius:9px;background:var(--red);color:#fff;font-size:12px;font-style:normal;line-height:17px;text-align:center;padding:0 4px}
+.nfr{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-bottom:1px solid var(--line)}
+.nfr:last-child{border-bottom:0}
+.nfr .ic{width:34px;height:34px;border-radius:50%;background:var(--fill);display:flex;align-items:center;justify-content:center;flex:none;color:var(--acc-dk)}
+.nfr .tx{flex:1;min-width:0}
+.nfr .tx b{display:block;font-size:15px;font-weight:500;overflow-wrap:anywhere}
+.nfr .tx small{display:block;font-size:13px;color:var(--muted);line-height:1.5;overflow-wrap:anywhere}
+.nfr .tm{font-size:12px;color:var(--faint);flex:none;padding-top:2px}
+.nfr.new .tx b:after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--acc);margin-inline-start:6px;vertical-align:2px}
+.cfm{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:300;padding:24px}
+.cfm>div{background:#fff;border-radius:22px;padding:22px 20px 16px;width:100%;max-width:340px;text-align:center}
+.cfm b{display:block;font-size:17px;font-weight:600;margin-bottom:6px}
+.cfm p{margin:0 0 16px;color:var(--muted);font-size:14px;line-height:1.6}
+.cfm .btn2{width:100%;margin-top:8px}
+.medit{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.mchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);border-radius:999px;padding:4px 6px 4px 12px;font-size:13px;color:var(--text);background:#fff}
+.mchip button{border:0;background:var(--fill);color:var(--muted);border-radius:999px;min-width:28px;height:28px;display:flex;align-items:center;justify-content:center;padding:0 8px;font:inherit;font-size:12px;cursor:pointer}
+.mchip.arm button{background:var(--red);color:#fff}
+.mchip.add{color:var(--acc-dk);border-style:dashed;padding:8px 14px;cursor:pointer}
+#ov .sheet:has(#apc)>*{flex-shrink:0}
 </style>
 </head>
 <body>
@@ -861,9 +884,9 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=64"></script>
+<script src="api.js?v=65"></script>
 <script>
-const APP_VER = '64';
+const APP_VER = '65';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -908,6 +931,8 @@ function M(n, sg, cls) { const v = (Math.round((Number(n) || 0) * 100) / 100).to
 const sar = n => M(n);
 const sarS = (n, sg) => M(n, sg);
 const dmy = s => s ? s.slice(8,10) + '/' + s.slice(5,7) + '/' + s.slice(0,4) : '';
+const hm12 = (h, m) => (h % 12 || 12) + ':' + m + ' ' + (h < 12 ? 'ص' : 'م');
+const dmyt = s => { const m = /[ T](\d\d):(\d\d)/.exec(s || ''); return dmy(s) + (m ? ' · ' + hm12(+m[1], m[2]) : ''); };
 const signed = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n);
 const nqt = n => n === 1 ? 'نقطة' : n === 2 ? 'نقطتين' : n <= 10 ? 'نقاط' : 'نقطة';
 const TRUST = 'الأمانة والمصداقية';
@@ -1503,7 +1528,7 @@ async function adminAuth() {
 function renderLogin(msg) {
   const td = document.getElementById('tabsDock'); if (td) td.remove();
   $('#fab').classList.add('hide');
-  $('#app').innerHTML = `<div class="login"><div class="ei">${I('lock', 28)}</div><h1>دخول المدير</h1>
+  $('#app').innerHTML = `<div class="login"><div class="ei">${I('lock', 28)}</div><h1>دخول المدير العام</h1>
     <div class="sub">اكتب رمز الدخول. تطلع رمز جديد من «الإعدادات ← الدخول والأجهزة ← ربط جهاز جديد» في جهاز داخل، أو استخدم رمز الاسترجاع.</div>
     ${msg ? `<div class="err">${esc(msg)}</div>` : ''}
     <input id="lgc" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="رمز الدخول" onkeydown="if(event.key==='Enter')doLogin()">
@@ -1541,12 +1566,14 @@ function renderAdmin() {
       <button class="btn2" onclick="copyAdmin()">نسخ الرابط</button></div></div>`;
   }
   const tab = (v, ic, t) => `<button class="${S.view===v?'on':''}" onclick="go('${v}')">${I(ic, 16)}${t}</button>`;
-  h = `<div class="top"><div><h1>${({rec:'التقييم',team:'الفريق',task:'المهام',fin:'المالية',set:'الإعدادات'})[S.view] || 'إدارة الشغل'}</h1><div class="sub">${esc(dayLabel(d.today))}</div></div><button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>${pushHtml()}
+  h = `<div class="top"><div><h1>${({rec:'التقييم',team:'الفريق',task:'المهام',fin:'المالية',set:'الإعدادات'})[S.view] || 'إدارة الشغل'}</h1><div class="sub">${esc(dayLabel(d.today))}</div></div><div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div></div>${pushHtml()}
     <div class="tabs">${tab('rec','clipboard-check','تقييم')}${tab('team','users','الفريق')}${tab('task','list-checks','المهام')}${tab('fin','wallet','المالية')}${tab('set','settings','الإعدادات')}</div>` + h + `
     <div id="view"></div>`;
   $('#app').innerHTML = h;
   mountTabs();
   prefetchImgs();
+  nfEnsure();
+  if (NF.open) { $('#fab').classList.add('hide'); return nfRender(); }
   ({rec:renderRec, team:renderTeam, task:renderTasks, inv:renderInv, fin:renderFin, set:renderSet})[S.view]();
 }
 
@@ -1558,7 +1585,7 @@ function mountTabs() {
   if (old) old.remove();
   if (t) { t.id = 'tabsDock'; document.body.appendChild(t); }
 }
-function go(v) { RP.open = null; RP.hist = null; S.tsub = null; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false}); S.view = v; S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
+function go(v) { NF.open = false; RP.open = null; RP.hist = null; S.tsub = null; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false}); S.view = v; S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
 function rerender() { renderAdmin(); }
 
 /* ---------- تسجيل ---------- */
@@ -1934,7 +1961,7 @@ function taskRowHtml(t, showProj) {
   return `<div class="tli"><button class="trow2" onclick="openTask('${t.id}')"><span class="ring ${ring}"></span>
     <span class="tb"><span class="th"><span class="tt ${t.status === 'done' ? 'd' : ''}">${esc(t.title)}</span>${pillHtml(p)}</span>
     <span class="tm">${meta}</span></span></button>
-    ${t.status === 'review' ? `<div class="racts">${t.comment ? `<div class="note good" style="margin:0 0 8px">${esc(t.comment)}</div>` : ''}<div class="grid2"><button class="btn2 cu" onclick="approveTask('${t.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askReturn('${t.id}')">رجّعها</button></div></div>` : ''}</div>`;
+    ${t.status === 'review' ? `<div class="racts">${t.comment ? `<div class="note good" style="margin:0 0 8px">${esc(t.comment)}</div>` : ''}<div class="grid2"><button class="btn2 cu" onclick="askApprove('${t.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askReturn('${t.id}')">رجّعها</button></div></div>` : ''}</div>`;
 }
 
 function openTask(id) { S.td = id; S.armed = null; renderAdmin(); toTop(); }
@@ -1987,16 +2014,17 @@ function renderTaskDetail() {
     <div class="lbl">الوصف</div>
     <textarea class="dnote" placeholder="تعليمات أو تفاصيل للموظف…" onchange="updTask('${id}',{note:this.value})">${esc(t.note)}</textarea>
     ${vOf(t) || t.status !== 'done' ? `<div class="lbl">الشرح الصوتي</div><div id="dVoice">${dVoiceHtml(t)}</div>` : ''}
-    ${mOf(t).length ? `<div class="lbl">الشرح</div>${mediaHtml(t)}` : ''}
+    ${mOf(t).length || t.status !== 'done' ? `<div class="lbl">الشرح</div>${mOf(t).length ? mediaHtml(t) : ''}${mEditHtml(t)}` : ''}
     ${np ? `<div class="lbl">إثبات الإنجاز${t.doneAt ? ' · ' + dmy(t.doneAt) : ''}</div>${proofHtml(t)}` : ''}
-    ${t.comment && t.status !== 'open' ? `<div class="note good">${I('message-circle', 16)}<div><b>${esc(t.ename)}:</b> ${esc(t.comment)}${t.cmtEdited ? ' <span class="edt">عدّله المدير</span>' : ''}</div></div><div class="ecm"><button class="edl" onclick="openCmtEdit('${id}')">${I('pencil', 15)}تعديل ملاحظة الموظف</button></div>` : ''}
+    ${t.comment && t.status !== 'open' ? `<div class="note good">${I('message-circle', 16)}<div><b>${esc(t.ename)}:</b> ${esc(t.comment)}${t.cmtEdited ? ' <span class="edt">عدّله المدير العام</span>' : ''}</div></div><div class="ecm"><button class="edl" onclick="openCmtEdit('${id}')">${I('pencil', 15)}تعديل ملاحظة الموظف</button></div>` : ''}
+    ${t.status === 'done' && t.apNote ? `<div class="note good">${I('check-check', 16)}<div><b>تعليقك عند الاعتماد:</b> ${esc(t.apNote)}</div></div>` : ''}
     <div class="abar">${detailActions(t)}</div>
     <button class="del ${armDel ? 'arm' : ''}" style="margin:16px auto 0;display:flex" onclick="delTask('${id}')">${I('trash-2', 15)}${armDel ? 'تأكيد حذف المهمة' : 'حذف المهمة'}</button>`;
   if (vOf(t)) vFetch([vOf(t).id]);
 }
 function detailActions(t) {
   const id = t.id;
-  if (t.status === 'review') return `<div class="grid2"><button class="btn2 cu" onclick="approveTask('${id}')">${I('check', 17, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askReturn('${id}')">رجّعها</button></div>`;
+  if (t.status === 'review') return `<div class="grid2"><button class="btn2 cu" onclick="askApprove('${id}')">${I('check', 17, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askReturn('${id}')">رجّعها</button></div>`;
   if (t.status === 'done') return `<button class="btn2 rd" onclick="askReturn('${id}')">${I('rotate-ccw', 16)}ما خلصت، رجّعها له</button>`;
   const arm = S.armed === 'close_' + id;
   const cb = `<button class="btn2 ${arm ? 'arm' : ''}" onclick="closeByAdmin('${id}')">${I('check-check', 17)}${arm ? 'تأكيد: خلصت بدون صورة إثبات' : 'خلّصتها أنا'}</button>`;
@@ -2016,7 +2044,7 @@ async function pingTask(id) {
 
 function ovOpen(html) {
   const o = $('#ov'), again = o.classList.contains('on'), old = again && o.querySelector('.sheet'), top = old ? old.scrollTop : 0;
-  o.innerHTML = `<div class="ovl ${again ? 'na' : ''}" onclick="if(event.target===this)ovClose()"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div></div>`;
+  o.innerHTML = `<div class="ovl ${again ? 'na' : ''}" onclick="if(event.target===this)ovTryClose()"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div></div>`;
   o.classList.add('on');
   document.documentElement.classList.add('lock');
   if (top) { const sh = o.querySelector('.sheet'); if (sh) sh.scrollTop = top; }
@@ -2267,7 +2295,7 @@ function wLeft(until, today) {
 function wBadge(x) {
   const me = BOOT.page === 'admin' && !S.preview;
   let b = '';
-  if (x.kind === 'inv' && x.paidBy === 'card') b = '<span class="cb">' + (me ? 'أنا' : 'المدير') + '</span>';
+  if (x.kind === 'inv' && x.paidBy === 'card') b = '<span class="cb">' + (me ? 'أنا' : 'المدير العام') + '</span>';
   else if (x.kind === 'inv' && x.paidBy === 'own') b = '<span class="ob">' + (me ? 'من جيبه' : 'من جيبي') + '</span>';
   return b + (x.warrantyUntil ? '<span class="wb">ضمان</span>' : '');
 }
@@ -2384,7 +2412,7 @@ function prefetchImgs() {
 
 function invRowHtml(x, showEmp) {
   const st = invSt(x, false), armDel = S.armed === 'inv_' + x.id, give = x.kind === 'give';
-  const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', give ? '' : esc(x.pname || 'عام'), x.vendor ? esc(x.vendor) : '', dmy(x.ts)].filter(Boolean).join(' · ');
+  const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', give ? '' : esc(x.pname || 'عام'), x.vendor ? esc(x.vendor) : '', dmyt(x.ts)].filter(Boolean).join(' · ');
   return `<div class="ivr ${x.status === 'review' ? 'rv' : ''}">
     <div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}">${M(x.amount, give ? '+' : '')}</b></div>
     <div class="tm">${meta}${x.status !== 'ok' || give ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}${x.taskDeleted ? ' · <span class="tdel">مهمتها انحذفت</span>' : ''}</div>
@@ -2489,11 +2517,11 @@ function renderFinRv(c) {
 
 function finLedger(c, e) {
   const L = [], mine = c.items.filter(x => x.emp === e.id);
-  mine.filter(x => x.kind === 'give').forEach(x => L.push({ts: x.ts, h: `<div class="str"><span><b style="font-weight:600">${x.paidBy === 'own' ? 'سدّدت له' : x.paidBy === 'ret' ? 'رجّع من العهدة' : 'عطيته عهدة'}</b>${x.desc && !['عهدة', 'سداد', 'رجّع الباقي'].includes(x.desc) ? ' · ' + esc(x.desc) : ''}<div class="tm">${dmy(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}</div></span>
+  mine.filter(x => x.kind === 'give').forEach(x => L.push({ts: x.ts, h: `<div class="str"><span><b style="font-weight:600">${x.paidBy === 'own' ? 'سدّدت له' : x.paidBy === 'ret' ? 'رجّع من العهدة' : 'عطيته عهدة'}</b>${x.desc && !['عهدة', 'سداد', 'رجّع الباقي'].includes(x.desc) ? ' · ' + esc(x.desc) : ''}<div class="tm">${dmyt(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}</div></span>
       <span style="display:flex;align-items:center;gap:4px"><b class="iva ${x.paidBy === 'ret' ? 'r' : 'g'}">${M(x.amount, x.paidBy === 'ret' ? '−' : '+', x.paidBy === 'ret' ? 'neg' : 'pos')}</b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`}));
   mine.filter(x => x.kind === 'inv' && x.status === 'ok').forEach(x => {
     const fromC = (x.paidBy || 'cash') === 'cash';
-    L.push({ts: x.ts, h: `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">فاتورة · ${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmy(x.ts)} · ${esc(x.pname || 'عام')}${fromC ? ' · من العهدة' : ''}</div></span><b class="iva">${M(x.amount, fromC ? '−' : '', fromC ? 'neg' : '')} ‹</b></div></button>`});
+    L.push({ts: x.ts, h: `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">فاتورة · ${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmyt(x.ts)} · ${esc(x.pname || 'عام')}${fromC ? ' · من العهدة' : ''}</div></span><b class="iva">${M(x.amount, fromC ? '−' : '', fromC ? 'neg' : '')} ‹</b></div></button>`});
   });
   (e.tx || []).forEach(t => {
     const armed = S.armed === 'tx_' + t.id;
@@ -2540,7 +2568,7 @@ function renderFinProj(c, k) {
     ${list.length > 15 ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كل الفواتير (' + list.length + ')'}</button>` : ''}</div>`;
   const ws = list.filter(x => x.warrantyUntil).sort((a, b) => a.warrantyUntil < b.warrantyUntil ? -1 : 1);
   if (ws.length) {
-    const wrow = x => { const w = wLeft(x.warrantyUntil, d.today); return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b><div class="tm">${esc(x.ename || 'أنت')} · ${dmy(x.ts)} · لين ${dmy(x.warrantyUntil)}</div></span><span class="wl ${w[0]}">${w[1]}</span></div></button>`; };
+    const wrow = x => { const w = wLeft(x.warrantyUntil, d.today); return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b><div class="tm">${esc(x.ename || 'أنت')} · ${dmyt(x.ts)} · لين ${dmy(x.warrantyUntil)}</div></span><span class="wl ${w[0]}">${w[1]}</span></div></button>`; };
     h += `<div class="sech">الضمانات<span>${ws.filter(x => x.warrantyUntil >= d.today).length}</span></div><div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${ws.map(wrow).join('')}</div>`;
   }
   $('#view').innerHTML = h;
@@ -2569,7 +2597,7 @@ async function invDel(id) {
   catch (e) { S.armed = null; renderInv(); toastErr(e); }
 }
 function invMiniRow(x, showEmp) {
-  const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', esc(x.pname || 'عام'), x.vendor ? esc(x.vendor) : '', dmy(x.ts)].filter(Boolean).join(' · ');
+  const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', esc(x.pname || 'عام'), x.vendor ? esc(x.vendor) : '', dmyt(x.ts)].filter(Boolean).join(' · ');
   return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${meta}</div></span><b class="iva">${M(x.amount)} ‹</b></div></button>`;
 }
 function openInvD(id) {
@@ -2578,7 +2606,7 @@ function openInvD(id) {
   const e = d.employees.find(v => v.id === x.emp);
   S.armed = null;
   ovOpen(`<div class="ivd"><h3>${esc(x.desc)}</h3><div class="amt">${M(x.amount, '', 'big')}</div>
-    <div class="sub">${esc(e ? e.name : 'أنت')} · ${esc(x.pname || 'عام')}${x.vendor ? ' · ' + esc(x.vendor) : ''} · ${dmy(x.ts)}</div>
+    <div class="sub">${esc(e ? e.name : 'أنت')} · ${esc(x.pname || 'عام')}${x.vendor ? ' · ' + esc(x.vendor) : ''} · ${dmyt(x.ts)}</div>
     ${x.warrantyUntil ? `<div class="sub" style="margin-top:4px">ضمان لين ${dmy(x.warrantyUntil)} · ${wLeft(x.warrantyUntil, d.today)[1]}</div>` : ''}
     ${x.taskDeleted ? `<div class="note info" style="margin-top:8px">${I('info', 16)}<div>كانت فاتورة مهمة «${esc(x.desc)}»، والمهمة انحذفت. الفاتورة وسجلها باقيين، وتقدر تعتمدها أو ترجّعها أو تحذفها من هنا.</div></div>` : ''}
     <div class="pgrid" id="ivdph">${x.photos.map(f => `<div class="pph" data-f="${esc(f)}">جاري التحميل…</div>`).join('')}</div>
@@ -2899,7 +2927,7 @@ async function toggleGuide(id) {
 function guideBannerHtml(d) {
   if (!d.guideOn) return '';
   return (d.guides || []).filter(g => !g.done).map(g => `<button class="gban" onclick="openGuide('${g.id}')">
-    <span class="gbi">${I('clipboard-list', 20)}</span><span class="gbt"><small>توجيه جديد من المدير</small><b>${esc(g.title)}</b></span>${I('chevron-left', 18)}</button>`).join('');
+    <span class="gbi">${I('clipboard-list', 20)}</span><span class="gbt"><small>توجيه جديد من المدير العام</small><b>${esc(g.title)}</b></span>${I('chevron-left', 18)}</button>`).join('');
 }
 function guideDoneHtml(d) {
   const done = (d.guides || []).filter(g => g.done);
@@ -2943,7 +2971,7 @@ function renderGuide() {
     }, 1000);
   }
   $('#app').innerHTML = `<button class="back" onclick="closeGuide()">${I('arrow-right', 17)}رجوع</button>
-    <div class="card gread"><div class="gtag">${I('clipboard-list', 14)}توجيه من المدير</div><h2>${esc(g.title)}</h2>${body}</div>`;
+    <div class="card gread"><div class="gtag">${I('clipboard-list', 14)}توجيه من المدير العام</div><h2>${esc(g.title)}</h2>${body}</div>`;
 }
 function nextPoint() {
   const r = S.gr, g = (S.empData.guides || []).find(x => x.id === r.id);
@@ -3155,11 +3183,13 @@ function renderEmp(d, isPreview) {
   if (!['tasks', 'rep', 'inv', 'pay'].includes(S.etab)) S.etab = 'tasks';
   const tasksTab = S.etab === 'tasks';
   $('#app').classList.add('empv');
+  if (NF.open && !isPreview) { $('#app').innerHTML = `<div class="top"><div><h1></h1></div><div class="topr">${nfBell()}</div></div><div id="view"></div>`; nfRender(); return; }
+  if (!isPreview) nfEnsure();
   const rsub = S.etab === 'rep' ? rpEmpSub(d) : '';
   if (rsub) { $('#app').innerHTML = `<div class="top"><div><h1></h1></div></div><div id="view">${rsub}</div>`; rpHead(); rpAfterDetail(); return; }
   $('#app').innerHTML = `
     ${isPreview ? `<button class="back" onclick="closePreview()">${I('arrow-right', 17)}رجوع للفريق</button><div class="note info">${I('eye', 16)}هذي معاينة، والموظف يشوف نفس الصفحة.</div>` : ''}
-    <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button>`}</div>${isPreview ? '' : pushHtml()}${tasksTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) : ''}
+    <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>`}</div>${isPreview ? '' : pushHtml()}${tasksTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) : ''}
     <div class="segc etabs e4"><button class="${S.etab === 'tasks' ? 'on' : ''}" onclick="S.etab='tasks';rerenderEmp()">مهامي${nOpen ? ' (' + nOpen + ')' : ''}</button><button class="${S.etab === 'rep' ? 'on' : ''}" onclick="S.etab='rep';RP.sent=null;RP.open=null;RP.hist=null;rerenderEmp()">تقاريري</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">حافزي</button></div>
     ${S.etab === 'inv' ? empInvHtml(d, isPreview) : S.etab === 'rep' ? rpEmpHtml(d, isPreview) : tasksTab ? empTasksHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
   if (!isPreview) prefetchImgs();
@@ -3222,7 +3252,7 @@ function empTasksHtml(d, isPreview) {
     h += `<div class="pgrp ep"><button class="pgh2" aria-expanded="${on}" onclick="S.eopen['${k}']=${on ? 'false' : 'true'};rerenderEmp()"><span>${esc(g.name)}</span><span class="n">${g.items.length === 1 ? 'مهمة وحدة' : g.items.length === 2 ? 'مهمتين' : g.items.length + ' مهام'}<span class="chev ${on ? 'up' : ''}">${I('arrow-right', 15, 2.5)}</span></span></button>${on ? g.items.map(t => empCardHtml(t, mode, true)).join('') : ''}</div>`;
   });
   const rv = ts.filter(t => t.status === 'review');
-  if (rv.length) h += `<div class="sech a">انرسلت، تنتظر المدير</div>` + rv.map(t => empCardHtml(t, mode, false)).join('');
+  if (rv.length) h += `<div class="sech a">انرسلت، تنتظر المدير العام</div>` + rv.map(t => empCardHtml(t, mode, false)).join('');
   const done = ts.filter(t => t.status === 'done').slice(0, 10);
   if (done.length) h += `<button class="dtog" onclick="S.eShowDone=!S.eShowDone;rerenderEmp()">${S.eShowDone ? 'إخفاء اللي خلصت' : 'خلصت (' + done.length + ')'}</button>` + (S.eShowDone ? done.map(t => `<div class="tli dn"><span class="tt d">${esc(t.title)}</span><span class="tm">${dmy(t.doneAt)}</span></div>`).join('') : '');
   return h;
@@ -3238,9 +3268,10 @@ function empCardHtml(t, mode, inGroup) {
   return `<div class="ecard ${inGroup ? 'in' : ''} ${t.status === 'returned' ? 'rt' : ''}">
     <div class="th"><span class="tt">${esc(t.title)}</span>${pillHtml(p)}</div>
     ${meta ? `<div class="tm">${meta}</div>` : ''}
-    ${t.status === 'returned' && t.reason ? `<div class="note bad"><div><b>المدير يقول:</b> ${esc(t.reason)}</div></div>` : ''}
+    ${t.status === 'returned' && t.reason ? `<div class="note bad"><div><b>المدير العام يقول:</b> ${esc(t.reason)}</div></div>` : ''}
+    ${t.status === 'done' && t.apNote ? `<div class="note good"><div><b>تعليق المدير العام:</b> ${esc(t.apNote)}</div></div>` : ''}
     ${t.note && open ? `<div class="enote">${esc(t.note)}</div>` : ''}
-    ${open && vOf(t) ? vPlayerHtml(vOf(t).id, vOf(t).d) + '<div class="vcap">شرح صوتي من المدير</div>' : ''}
+    ${open && vOf(t) ? vPlayerHtml(vOf(t).id, vOf(t).d) + '<div class="vcap">شرح صوتي من المدير العام</div>' : ''}
     ${open ? mediaHtml(t) : ''}
     ${act}</div>`;
 }
@@ -3260,7 +3291,7 @@ function proofFormHtml(t) {
     ${S.shotLoading ? '<div class="sub">جاري تجهيز الصورة…</div>' : ''}
     ${inv ? `<div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.dinv.amount=this.value"><input placeholder="المحل" value="${esc(f.vendor)}" oninput="S.dinv.vendor=this.value"></div>
       <div class="sub" style="margin:4px 0 -2px">دفعت من؟</div>
-      <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'المدير']].map(o => `<button class="${f.paidBy === o[0] ? 'on' : ''}" onclick="S.dinv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>` : ''}
+      <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'المدير العام']].map(o => `<button class="${f.paidBy === o[0] ? 'on' : ''}" onclick="S.dinv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>` : ''}
     <input placeholder="تعليق (اختياري)" value="${esc(S.cm || '')}" oninput="S.cm=this.value">
     <button class="btn" ${S.shots.length && !S.busy && !S.shotLoading ? '' : 'disabled'} onclick="sendDone('${t.id}')">${S.busy ? 'جاري الإرسال…' : I('send', 17) + 'إرسال'}</button>
     <button class="btn2" style="width:100%;border:0" onclick="S.doing=null;S.shots=[];S.dinv=null;rerenderEmp()">إلغاء</button>
@@ -3281,15 +3312,15 @@ async function startDone(id, input) {
 
 function empInvHtml(d, isPreview) {
   const iv = d.inv || {balance: 0, o: 0, items: []}, c = iv.c != null ? iv.c : (iv.balance || 0), t = iv.o || 0;
-  let h = `<div class="tbl2 ivb"><div class="tbr ${c < 0 ? 'neg' : ''}"><span class="ic">${I('wallet', 16)}</span><span class="k">${c < 0 ? 'صرفت أكثر من عهدتك' : 'العهدة اللي معك'}</span><span class="v">${M(Math.abs(c), c < 0 ? '−' : '', 'big')}</span></div>${t > 0 ? `<div class="tbr neg"><span class="ic">${I('hand-coins', 16)}</span><span class="k">لك عند المدير (من جيبك)</span><span class="v">${M(t, '', 'big')}</span></div>` : ''}</div>`;
+  let h = `<div class="tbl2 ivb"><div class="tbr ${c < 0 ? 'neg' : ''}"><span class="ic">${I('wallet', 16)}</span><span class="k">${c < 0 ? 'صرفت أكثر من عهدتك' : 'العهدة اللي معك'}</span><span class="v">${M(Math.abs(c), c < 0 ? '−' : '', 'big')}</span></div>${t > 0 ? `<div class="tbr neg"><span class="ic">${I('hand-coins', 16)}</span><span class="k">لك عند المدير العام (من جيبك)</span><span class="v">${M(t, '', 'big')}</span></div>` : ''}</div>`;
   if (!isPreview) h += S.invForm ? invFormHtml(d) : `<button class="btn2 cu ivsend" onclick="S.invForm=true;S.ishots=[];rerenderEmp()">${I('receipt', 17)}أرسل فاتورة</button>`;
   const items = iv.items || [];
   if (!items.length) return h + emptyHtml('receipt', 'ما أرسلت فواتير للحين');
   return h + '<div class="card" style="margin-top:14px;padding-top:4px;padding-bottom:4px">' + items.map(x => {
     const st = invSt(x, true), give = x.kind === 'give';
     return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? (x.paidBy === 'ret' ? 'r' : 'g') : ''}">${M(x.amount, give ? (x.paidBy === 'ret' ? '−' : '+') : '')}</b></div>
-      <div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · '}${dmy(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>
-      ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px"><div><b>المدير يقول:</b> ${esc(x.reason)}</div></div>` : ''}
+      <div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · '}${dmyt(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>
+      ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px"><div><b>المدير العام يقول:</b> ${esc(x.reason)}</div></div>` : ''}
       ${invPhotosHtml(x, BOOT.page === 'admin')}</div>`;
   }).join('') + '</div>';
 }
@@ -3308,8 +3339,8 @@ function invFormHtml(d) {
     <input placeholder="المحل (اختياري)" value="${esc(f.vendor || '')}" oninput="S.inv.vendor=this.value">
     <select aria-label="المشروع" onchange="S.inv.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
     <div class="sub" style="margin:4px 0 -2px">دفعت من؟</div>
-    <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'المدير']].map(o => `<button class="${(f.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="S.inv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>
-    <div class="sub" style="margin-top:-4px">${f.paidBy === 'card' ? 'ما تنخصم من عهدتك' : f.paidBy === 'own' ? 'ترجع لك بعد ما يعتمدها المدير' : 'تنخصم من العهدة اللي معك'}</div>
+    <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'المدير العام']].map(o => `<button class="${(f.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="S.inv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>
+    <div class="sub" style="margin-top:-4px">${f.paidBy === 'card' ? 'ما تنخصم من عهدتك' : f.paidBy === 'own' ? 'ترجع لك بعد ما يعتمدها المدير العام' : 'تنخصم من العهدة اللي معك'}</div>
     <label class="tgl"><span>عليها ضمان؟</span><input type="checkbox" ${f.wOn ? 'checked' : ''} onchange="S.inv.wOn=this.checked;if(this.checked&&!S.inv.w)S.inv.w=12;rerenderEmp()"></label>
     ${f.wOn ? `<div class="wchips">${[[6, '6 أشهر'], [12, 'سنة'], [24, 'سنتين']].map(c => `<button class="${!f.wc && f.w === c[0] ? 'on' : ''}" onclick="S.inv.w=${c[0]};S.inv.wc=false;rerenderEmp()">${c[1]}</button>`).join('')}<button class="${f.wc ? 'on' : ''}" onclick="S.inv.wc=true;rerenderEmp()">غيره</button></div>
       ${f.wc ? `<input inputmode="numeric" placeholder="كم شهر؟" value="${f.w || ''}" oninput="S.inv.w=Number(String(this.value).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)))||0">` : ''}` : ''}
@@ -3399,7 +3430,7 @@ async function refresh(silent) {
   refreshing = true;
   document.querySelectorAll('.rf').forEach(b => b.classList.add('spin'));
   try {
-    RP.need = true;
+    RP.need = true; NF.need = true;
     if (BOOT.page === 'admin') {
       S.data = await call('apiAdmin', BOOT.key);
       S.armed = null; S.preview = null;
@@ -3464,7 +3495,11 @@ async function refresh(silent) {
     if (!drag) return;
     drag = false; s.classList.remove('drag');
     const v = dy / Math.max(1, Date.now() - t0);
-    if (dy > Math.min(160, s.offsetHeight * 0.35) || (v > 0.6 && dy > 40)) {
+    if ((dy > Math.min(160, s.offsetHeight * 0.35) || (v > 0.6 && dy > 40)) && ovGuard()) {
+      s.style.transition = 'transform .22s cubic-bezier(.2,.9,.3,1.15)';
+      s.style.transform = '';
+      setTimeout(() => { s.style.transition = ''; }, 240);
+    } else if (dy > Math.min(160, s.offsetHeight * 0.35) || (v > 0.6 && dy > 40)) {
       s.style.transition = 'transform .2s ease-out';
       s.style.transform = 'translateY(' + (s.offsetHeight + 40) + 'px)';
       setTimeout(() => { if ($('#ov').contains(s)) ovClose(); }, 190);
@@ -3537,7 +3572,7 @@ function rpOf(p) { return (RP.reps || []).filter(r => r.proj === p).sort((a, b) 
 function rpLast(p) { return rpOf(p)[0] || null; }
 function rpPend(r) { return !!(r && rpArr(r.decide).length && !r.reply); }
 function rpNPend() { return rpProjs().filter(p => rpPend(rpLast(p.id))).length; }
-function rpBy(r) { return r.by === 'admin' ? 'المدير' : shortName(r.byName || ''); }
+function rpBy(r) { return r.by === 'admin' ? 'المدير العام' : shortName(r.byName || ''); }
 function rpDay(s) { const d = new Date(s + 'T12:00:00'); return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_AR[d.getMonth()]; }
 function rpRel(s) {
   const t = rpToday();
@@ -3678,12 +3713,12 @@ function rpDetailHtml(isAdmin) {
   const tags = cur.map(x => up.includes(x) ? ['حان وقته', 'g'] : prev && !pCur.includes(x) ? ['جديد'] : null);
   const me = rpData() || {}, own = !isAdmin && r.by === me.id, notes = rpArr(r.notes);
   let h = `<button class="back" onclick="rpClose()">${I('arrow-right', 17)}${isAdmin ? 'التقارير' : 'تقاريري'}</button><h2>${esc(rpPName(r.proj))}</h2>
-    <div class="rpmeta">${I('file-text', 15)}<span>تقرير ${esc(rpBy(r))} · ${esc(dayLabel(r.date))}${all.length > 1 ? ` · ${all.length - i} من ${all.length}` : ''}${r.edited ? ' · <span class="edt">عدّله المدير</span>' : ''}</span>${isAdmin ? `<button class="edl" onclick="rpOpenEdit('${r.id}')">${I('pencil', 15)}تعديل</button>` : ''}</div>`;
+    <div class="rpmeta">${I('file-text', 15)}<span>تقرير ${esc(rpBy(r))} · ${esc(dayLabel(r.date))}${all.length > 1 ? ` · ${all.length - i} من ${all.length}` : ''}${r.edited ? ' · <span class="edt">عدّله المدير العام</span>' : ''}</span>${isAdmin ? `<button class="edl" onclick="rpOpenEdit('${r.id}')">${I('pencil', 15)}تعديل</button>` : ''}</div>`;
   if (dec.length) {
     h += `<div class="rpdec ${r.reply ? 'done' : ''}"><div class="rplab">${I(r.reply ? 'circle-check' : 'triangle-alert', 15)}القرارات والاعتمادات المطلوبة</div>${rpItems(dec)}`;
     if (r.reply) h += `<div class="rprep">${r.reply === 'ok' ? 'تم الاعتماد' : r.reply === 'no' ? 'لم يُعتمد' : 'تم الرد بملاحظة'}${isAdmin ? ` <button class="lnk" onclick="rpReply('${r.id}','')">تعديل</button>` : ''}</div>`;
     else if (isAdmin) h += `<div class="grid2"><button class="btn2 cu" onclick="rpReply('${r.id}','ok')">${I('check', 17, 2.5)}اعتماد</button><button class="btn2 rd" onclick="rpReply('${r.id}','no')">رفض</button></div><div class="rhint" style="margin:8px 0 0">يُرسل نص الملاحظة أدناه مع الاعتماد أو الرفض</div>`;
-    else h += '<div class="rprep">بانتظار رد المدير</div>';
+    else h += '<div class="rprep">بانتظار رد المدير العام</div>';
     h += '</div>';
   }
   h += `<div class="lbl">الأعمال الحالية</div>${rpItems(cur, tags)}`;
@@ -3692,10 +3727,10 @@ function rpDetailHtml(isAdmin) {
   h += `<div class="lbl">الأعمال اللاحقة</div>${rpLaterHtml(rpArr(r.later))}`;
   if (rpArr(r.files).length) h += `<div class="lbl">المرفقات</div>${rpFilesHtml(r.files)}`;
   if (isAdmin) {
-    h += `<div class="lbl">ملاحظاتك</div>` + notes.map(n => `<div class="note good">${I('message-circle', 16)}<div><b>المدير:</b> ${esc(n.text)}</div></div>`).join('');
+    h += `<div class="lbl">ملاحظاتك</div>` + notes.map(n => `<div class="note good">${I('message-circle', 16)}<div><b>المدير العام:</b> ${esc(n.text)}</div></div>`).join('');
     h += `<textarea id="rnote" class="dnote" placeholder="${r.by === 'admin' ? 'اكتب ملاحظة على التقرير' : 'اكتب ملاحظتك للموظف'}" oninput="RP.draft=this.value;rpGrow(this)">${esc(RP.draft || '')}</textarea><button class="btn2 cu" style="margin-top:8px;width:100%" onclick="rpReply('${r.id}','note')">${I('send', 16)}إرسال الملاحظة</button>`;
   } else if (own) {
-    h += `<div class="lbl">ملاحظات المدير</div>` + (notes.length ? notes.map(n => `<div class="note good">${I('message-circle', 16)}<div><b>المدير:</b> ${esc(n.text)}</div></div>`).join('') : '<div class="rpe">لا توجد ملاحظات</div>');
+    h += `<div class="lbl">ملاحظات المدير العام</div>` + (notes.length ? notes.map(n => `<div class="note good">${I('message-circle', 16)}<div><b>المدير العام:</b> ${esc(n.text)}</div></div>`).join('') : '<div class="rpe">لا توجد ملاحظات</div>');
   }
   const nh = rpHistOf(r.proj).reduce((a, g) => a + g.items.length, 0);
   h += `<div class="lbl">السجل</div><div class="tbl2">${tbRow('check-check', 'سجل الإنجاز', rpNDone(nh), `rpOpenHist('${r.proj}')`)}</div>`;
@@ -3737,9 +3772,9 @@ function rpPickProj(id) { RP.eProj = id; RP.sent = null; lsSet('rp_proj', id); r
 function rpEmpRowHtml(r, d) {
   const dec = rpArr(r.decide), notes = rpArr(r.notes), last = notes[notes.length - 1], nl = rpArr(r.later).length;
   return `<button class="rpc" onclick="rpOpen('${r.id}')">
-    <div class="rph"><b>${esc(dayLabel(r.date))}</b><span class="rpm">${esc(rpBy(r))}${r.edited ? ' · عدّله المدير' : ''}</span></div>
-    <div class="rpr">المنجزة: ${rpArr(r.done).length} · الحالية: ${rpArr(r.cur).length}${nl ? ` · اللاحقة: ${nl}` : ''}${dec.length ? ` · القرار: ${r.reply ? rpReplyT(r.reply) : 'بانتظار المدير'}` : ''}</div>
-    ${last && r.by === (d || {}).id ? `<div class="rpd ok">${I('message-circle', 15)}<div><b>ملاحظة المدير:</b> ${esc(last.text)}</div></div>` : ''}
+    <div class="rph"><b>${esc(dayLabel(r.date))}</b><span class="rpm">${esc(rpBy(r))}${r.edited ? ' · عدّله المدير العام' : ''}</span></div>
+    <div class="rpr">المنجزة: ${rpArr(r.done).length} · الحالية: ${rpArr(r.cur).length}${nl ? ` · اللاحقة: ${nl}` : ''}${dec.length ? ` · القرار: ${r.reply ? rpReplyT(r.reply) : 'بانتظار المدير العام'}` : ''}</div>
+    ${last && r.by === (d || {}).id ? `<div class="rpd ok">${I('message-circle', 15)}<div><b>ملاحظة المدير العام:</b> ${esc(last.text)}</div></div>` : ''}
   </button>`;
 }
 function rpEmpSub(d) {
@@ -3772,6 +3807,8 @@ function rpFill() {
   f.later = l ? rpArr(l.later).map(x => ({t: x.t, after: x.after || ''})) : [];
   f.from = l ? l.date : '';
   f.nc = ''; f.extra = false; f.na = '';
+  f.sig0 = rpSig(f); f.draftAt = 0;
+  rpDraftLoad(f);
 }
 function rpWillMove(x) { return !!x.after && RP.form.items.some(i => i.t === x.after && i.done); }
 function rpCurHtml() {
@@ -3779,7 +3816,7 @@ function rpCurHtml() {
   const rows = f.items.map((x, i) => `<div class="crow ${x.done ? 'dn' : ''}"><button class="ck" onclick="rpTog(${i})" aria-label="${x.done ? 'إلغاء الإنجاز' : 'تم الإنجاز'}">${x.done ? I('check', 15, 3) : ''}</button><span class="ct">${esc(x.t)}${x.x ? '<small>عمل منجز لم يكن مسجلاً</small>' : ''}</span>${x.done && !x.x ? '' : `<button class="mx2" onclick="rpRmCur(${i})" aria-label="حذف">${I('x', 14, 2.5)}</button>`}</div>`).join('');
   const nd = f.items.filter(x => x.done).length;
   return `<div class="lbox">${rows || '<div class="rpe" style="padding:8px 2px">لا توجد أعمال حالية</div>'}
-    <div class="ladd one"><input id="f_nc" placeholder="${f.extra ? 'عمل أُنجز ولم يكن مسجلاً' : 'عمل حالي جديد'}" value="${esc(f.nc)}" oninput="RP.form.nc=this.value" onkeydown="if(event.key==='Enter')rpAddCur()"><button class="btn2" onclick="rpAddCur()">${I('plus', 16)}إضافة</button></div>
+    <div class="ladd one"><input id="f_nc" placeholder="${f.extra ? 'عمل أُنجز ولم يكن مسجلاً' : 'عمل حالي جديد'}" value="${esc(f.nc)}" oninput="RP.form.nc=this.value;rpDraftSave()" onkeydown="if(event.key==='Enter')rpAddCur()"><button class="btn2" onclick="rpAddCur()">${I('plus', 16)}إضافة</button></div>
     <button class="lnk xtra" onclick="RP.form.extra=!RP.form.extra;rpRefCur()">${f.extra ? 'إضافة عمل حالي بدلاً من ذلك' : '+ عمل منجز لم يكن مسجلاً'}</button></div>
     ${nd ? `<div class="rhint ok">${I('check-check', 13)}${nd === 1 ? 'عمل واحد سيُنقل' : nd === 2 ? 'عملان سيُنقلان' : nd + ' أعمال ستُنقل'} إلى سجل الإنجاز عند الإرسال</div>` : ''}`;
 }
@@ -3798,11 +3835,11 @@ function rpLaterFormHtml() {
   const rows = f.later.map((x, i) => `<div class="lrow ${rpWillMove(x) ? 'mv' : ''}"><div class="lt"><b>${esc(x.t)}</b><small>${x.after ? (rpWillMove(x) ? I('check', 12, 3) + 'أُنجز «' + esc(x.after) + '»، وستنتقل إلى الأعمال الحالية عند الإرسال' : 'تبدأ بعد: ' + esc(x.after)) : 'غير مرتبطة بعمل'}</small></div>
     ${!x.after ? `<button class="lmv" onclick="rpMoveNow(${i})">نقل إلى الحالية</button>` : ''}<button class="mx2" onclick="rpRmLater(${i})" aria-label="حذف">${I('x', 14, 2.5)}</button></div>`).join('');
   return `<div class="lbox">${rows || '<div class="rpe" style="padding:8px 2px">لا توجد أعمال لاحقة</div>'}
-    <div class="ladd"><input id="f_nl" placeholder="عمل لاحق جديد" value="${esc(f.nl)}" oninput="RP.form.nl=this.value">
+    <div class="ladd"><input id="f_nl" placeholder="عمل لاحق جديد" value="${esc(f.nl)}" oninput="RP.form.nl=this.value;rpDraftSave()">
       <select id="f_na" aria-label="تبدأ بعد" onchange="RP.form.na=this.value"><option value="">تبدأ بعد: غير مرتبطة</option>${cur.map((c, i) => `<option value="${i}" ${f.na === String(i) ? 'selected' : ''}>تبدأ بعد: ${esc(c.length > 34 ? c.slice(0, 34) + '…' : c)}</option>`).join('')}</select>
       <button class="btn2" onclick="rpAddLater()">${I('plus', 16)}إضافة</button></div></div>`;
 }
-function rpRefLater() { const b = document.getElementById('f_later'); if (b) b.innerHTML = rpLaterFormHtml(); }
+function rpRefLater() { const b = document.getElementById('f_later'); if (b) b.innerHTML = rpLaterFormHtml(); rpDraftSave(); }
 function rpAddLater() {
   const f = RP.form, t = (f.nl || '').trim(), cur = f.items.filter(x => !x.done).map(x => x.t);
   if (!t) return toast('اكتب العمل اللاحق أولاً', null, 'er');
@@ -3821,16 +3858,17 @@ function rpDraw() {
   }
   const ap = rpProjs();
   ovOpen(`<label class="shh">تقرير ${esc(rpPName(f.proj))}</label>
-    <div class="sub" style="margin:-6px 0 6px">${esc(dayLabel(rpToday()))}${f.admin ? ' · من المدير' : ''}</div>
+    <div class="sub" style="margin:-6px 0 6px">${esc(dayLabel(rpToday()))}${f.admin ? ' · من المدير العام' : ''}</div>
     ${f.pick ? `<div class="qlab">${I('folder', 14)}المشروع</div><div class="qch">${ap.map(x => `<button class="${f.proj === x.id ? 'on' : ''}" onclick="RP.form.proj='${x.id}';rpFill();rpDraw()">${esc(x.name)}</button>`).join('')}</div>` : ''}
     <div class="qlab">${I('list-checks', 14)}الأعمال الحالية</div>
+    ${f.draftAt ? `<div class="rhint ok">${I('history', 13)}استُعيدت المسودة المحفوظة ${esc(nfTime(f.draftAt))} <button class="lnk" style="font-size:12px;padding:0 4px" onclick="rpDraftDrop()">تجاهلها</button></div>` : ''}
     ${f.from ? `<div class="rhint">${I('history', 13)}منقولة من تقرير ${esc(rpDay(f.from))}. ضع علامة ✓ على ما أُنجز</div>` : ''}
     <div id="f_cur">${rpCurHtml()}</div>
     <div class="qlab">${I('history', 14)}الأعمال اللاحقة</div>
     <div class="rhint">أعمال لم يحن وقتها. اربطها بالعمل الذي تبدأ بعده لتنتقل تلقائياً عند إنجازه</div>
     <div id="f_later">${rpLaterFormHtml()}</div>
     <label class="qlab" for="f_dec">${I('triangle-alert', 14)}القرارات والاعتمادات المطلوبة</label>
-    <textarea id="f_dec" class="rta sm" placeholder="مثال: اعتماد عرض سعر، أو اختيار لون" oninput="RP.form.decide=this.value;rpGrow(this)">${esc(f.decide)}</textarea>
+    <textarea id="f_dec" class="rta sm" placeholder="مثال: اعتماد عرض سعر، أو اختيار لون" oninput="RP.form.decide=this.value;rpGrow(this);rpDraftSave()">${esc(f.decide)}</textarea>
     <div class="qlab">${I('paperclip', 14)}المرفقات</div>
     <div class="rfl">${f.files.map((x, i) => x.t === 'i' ? `<div class="mi"><img src="${x.d}" alt=""><button class="mx" onclick="rpRmFile(${i})" aria-label="حذف">${I('x', 12, 3)}</button></div>` : `<div class="mi doc"><span>${I(x.t === 'v' ? 'play' : 'file-text', 18)}<br>${esc(x.n.slice(0, 14))}</span><button class="mx" onclick="rpRmFile(${i})" aria-label="حذف">${I('x', 12, 3)}</button></div>`).join('')}
       ${f.files.length < 10 ? `<label class="vrec qadd">${I('camera', 18)}صورة أو فيديو أو ملف<input type="file" multiple accept="${RP_ACC}" style="display:none" onchange="rpPick(this)"></label>` : ''}</div>
@@ -3890,6 +3928,7 @@ async function rpSend() {
     return;
   }
   S.upN = Math.max(0, S.upN - 1);
+  rpDraftClear(f);
   f.busy = false; f.sent = true; f.moved = moved.map(x => x.t); f.nDone = done.length;
   if (!f.admin) { RP.sent = {proj: f.proj, date: rpToday()}; RP.eProj = f.proj; lsSet('rp_proj', f.proj); }
   try { const d = await API.apiRepList(); RP.reps = rpArr(d.reps); if (d.projs) RP.projs = d.projs; } catch (e) { RP.need = true; }
@@ -3903,6 +3942,7 @@ function rpOpenEdit(id) {
   if (!r) return;
   const cur = rpArr(r.cur).map(t => ({t: t, o: t}));
   RP.edit = {id: id, by: r.by, proj: r.proj, date: r.date, cur: cur, done: rpArr(r.done).slice(), later: rpArr(r.later).map(x => ({t: x.t, after: x.after || ''})), decide: rpArr(r.decide).join('\n'), nc: '', err: '', busy: false};
+  RP.edit.sig0 = rpEditSig(RP.edit);
   S.sheet = true;
   rpEditDraw();
 }
@@ -3916,7 +3956,7 @@ function rpEditDraw() {
   if (!f) return;
   const row = (k, i, v) => `<div class="erow ${k === 'done' ? 'dn' : ''}"><input value="${esc(v)}" aria-label="العمل" oninput="RP.edit.${k}[${i}]${k === 'cur' ? '.t' : k === 'later' ? '.t' : ''}=this.value"><button class="mx2" onclick="rpEditRm('${k}',${i})" aria-label="حذف">${I('x', 14, 2.5)}</button></div>`;
   ovOpen(`<label class="shh">تعديل تقرير ${esc(rpPName(f.proj))}</label>
-    <div class="sub" style="margin:-6px 0 6px">تقرير ${esc(f.by === 'admin' ? 'المدير' : rpBy({by: f.by, byName: ((RP.reps || []).find(x => x.id === f.id) || {}).byName}))} · ${esc(rpDay(f.date))}</div>
+    <div class="sub" style="margin:-6px 0 6px">تقرير ${esc(f.by === 'admin' ? 'المدير العام' : rpBy({by: f.by, byName: ((RP.reps || []).find(x => x.id === f.id) || {}).byName}))} · ${esc(rpDay(f.date))}</div>
     <div class="qlab">${I('list-checks', 14)}الأعمال الحالية</div>
     <div class="lbox">${f.cur.map((x, i) => row('cur', i, x.t)).join('') || '<div class="rpe" style="padding:8px 2px">لا توجد أعمال حالية</div>'}
       <div class="ladd one"><input id="e_nc" placeholder="عمل حالي جديد" value="${esc(f.nc)}" oninput="RP.edit.nc=this.value" onkeydown="if(event.key==='Enter')rpEditAdd()"><button class="btn2" onclick="rpEditAdd()">${I('plus', 16)}إضافة</button></div></div>
@@ -3926,7 +3966,7 @@ function rpEditDraw() {
     <div class="lbox">${f.later.map((x, i) => row('later', i, x.t) + `<div class="ehint">${esc(rpEditAfter(x.after))}</div>`).join('') || '<div class="rpe" style="padding:8px 2px">لا يوجد</div>'}</div>
     <label class="qlab" for="e_dec">${I('triangle-alert', 14)}القرارات والاعتمادات المطلوبة</label>
     <textarea id="e_dec" class="rta sm" placeholder="لا توجد قرارات" oninput="RP.edit.decide=this.value;rpGrow(this)">${esc(f.decide)}</textarea>
-    ${f.by !== 'admin' ? `<div class="rhint">${I('info', 13)}يرى الموظف علامة «عدّله المدير» على التقرير</div>` : ''}
+    ${f.by !== 'admin' ? `<div class="rhint">${I('info', 13)}يرى الموظف علامة «عدّله المدير العام» على التقرير</div>` : ''}
     <div class="err">${esc(f.err)}</div>
     <button class="btn2 cu qbig" ${f.busy ? 'disabled' : ''} onclick="rpEditSave()">${f.busy ? 'جاري الحفظ…' : I('check', 17, 2.5) + 'حفظ التعديل'}</button>`);
   rpGrowAll();
@@ -3969,7 +4009,7 @@ function openCmtEdit(id) {
   ovOpen(`<label class="shh">تعديل ملاحظة الموظف</label>
     <div class="sub" style="margin:-6px 0 6px">${esc(t.title)}</div>
     <textarea id="cmt_e" class="rta" oninput="rpGrow(this)">${esc(t.comment || '')}</textarea>
-    <div class="rhint">${I('info', 13)}تظهر عليها علامة «عدّله المدير»</div>
+    <div class="rhint">${I('info', 13)}تظهر عليها علامة «عدّله المدير العام»</div>
     <div class="err" id="cmt_err"></div>
     <button class="btn2 cu qbig" id="cmt_b" onclick="saveCmtEdit('${id}')">${I('check', 17, 2.5)}حفظ التعديل</button>`);
   rpGrowAll();
@@ -3985,6 +4025,150 @@ async function saveCmtEdit(id) {
     b.disabled = false; b.innerHTML = I('check', 17, 2.5) + 'حفظ التعديل';
     const er = $('#cmt_err'); if (er) er.textContent = e;
   }
+}
+
+/* الإصدار 65: الإشعارات، ومسودة التقرير، وتعليق الاعتماد، وتعديل الشرح */
+const NF = {items: null, need: false, loading: false, open: false, seen: +(lsGet('nf_seen') || 0), prev: 0, more: false};
+function nfNew() { return (NF.items || []).filter(x => x.at > NF.seen).length; }
+function nfBell() { const n = nfNew(); return `<button class="bellb" onclick="nfOpen()" aria-label="الإشعارات">${I('bell', 19)}${n ? '<i>' + (n > 9 ? '9+' : n) + '</i>' : ''}</button>`; }
+function nfPaint() { document.querySelectorAll('.bellb').forEach(b => { b.outerHTML = nfBell(); }); }
+function nfEnsure() { if ((NF.items === null || NF.need) && !NF.loading) nfLoad(); }
+async function nfLoad() {
+  NF.loading = true; NF.need = false;
+  try { const d = await API.apiNotifs(); NF.items = rpArr(d && d.items); } catch (e) { if (NF.items === null) NF.items = []; }
+  NF.loading = false;
+  if (NF.open) nfRender(); else nfPaint();
+}
+function nfOpen() {
+  if (S.sheet) return;
+  NF.prev = NF.seen; NF.seen = Date.now(); lsSet('nf_seen', String(NF.seen)); NF.open = true; NF.more = false; NF.need = true;
+  if (BOOT.page === 'admin' && !S.preview) renderAdmin(); else rerenderEmp();
+  toTop();
+}
+function nfClose() { NF.open = false; if (BOOT.page === 'admin' && !S.preview) renderAdmin(); else rerenderEmp(); toTop(); }
+function nfDay(ms) { return new Intl.DateTimeFormat('en-CA', {timeZone: 'Asia/Riyadh', year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date(ms)); }
+function nfTime(ms) { const p = new Intl.DateTimeFormat('en-GB', {timeZone: 'Asia/Riyadh', hour: '2-digit', minute: '2-digit', hour12: false}).format(new Date(ms)).split(':'); return hm12(+p[0], p[1]); }
+function nfIcon(t) {
+  return /تقرير/.test(t) ? 'file-text' : /إثبات/.test(t) ? 'check-check' : /فاتور/.test(t) ? 'receipt' : /وصل|طلع|البيت|الدوام/.test(t) ? 'map-pin'
+    : /اعتمد|انعتمد/.test(t) ? 'circle-check' : /توجيه/.test(t) ? 'clipboard-list' : /مهم|شرح/.test(t) ? 'list-checks' : /رد/.test(t) ? 'message-circle' : 'bell';
+}
+function nfRow(x) {
+  return `<div class="nfr ${x.at > NF.prev ? 'new' : ''}"><span class="ic">${I(nfIcon(x.t || ''), 16)}</span><div class="tx"><b>${esc(x.t || '')}</b>${x.b ? `<small>${esc(x.b)}</small>` : ''}</div><span class="tm">${esc(nfTime(x.at))}</span></div>`;
+}
+function nfRender() {
+  const v = $('#view'); if (!v) return;
+  const today = (rpData() || {}).today || nfDay(Date.now());
+  const y = new Date(today + 'T12:00:00Z'); y.setUTCDate(y.getUTCDate() - 1); const yd = y.toISOString().slice(0, 10);
+  const all = NF.items || [], a = all.filter(x => nfDay(x.at) === today), b = all.filter(x => nfDay(x.at) === yd), c = all.filter(x => nfDay(x.at) < yd);
+  const back = BOOT.page === 'admin' ? (({rec:'التقييم', team:'الفريق', task:'المهام', fin:'المالية', set:'الإعدادات'})[S.view] || 'رجوع') : 'رجوع';
+  let h = `<button class="back" onclick="nfClose()">${I('arrow-right', 17)}${back}</button><h2>الإشعارات</h2>`;
+  if (NF.items === null) h += emptyHtml('bell', 'جاري التحميل…');
+  else if (!all.length) h += emptyHtml('bell', 'لا توجد إشعارات خلال الأيام السبعة الماضية');
+  else {
+    h += `<div class="sech">اليوم<span>${a.length}</span></div>` + (a.length ? `<div class="tbl2">${a.map(nfRow).join('')}</div>` : '<div class="rpe">لا توجد إشعارات اليوم</div>');
+    if (b.length) h += `<div class="sech">أمس<span>${b.length}</span></div><div class="tbl2">${b.map(nfRow).join('')}</div>`;
+    if (c.length) h += NF.more ? `<div class="sech">الأقدم<span>${c.length}</span></div><div class="tbl2">${c.map(nfRow).join('')}</div>` : `<button class="dtog" onclick="NF.more=true;nfRender()">الأقدم، آخر 7 أيام (${c.length})</button>`;
+  }
+  v.innerHTML = h;
+  rpHead();
+  nfPaint();
+}
+
+function rpSig(f) { return JSON.stringify([f.items, f.later, String(f.decide || '').trim(), String(f.nc || '').trim(), String(f.nl || '').trim(), (f.files || []).length]); }
+function rpEditSig(f) { return JSON.stringify([f.cur.map(x => x.t), f.done, f.later, String(f.decide || ''), String(f.nc || '').trim()]); }
+function rpDraftKey(f) { return 'rp_draft:' + f.proj + ':' + (f.admin ? 'a' : 'e'); }
+let rpDT;
+function rpDraftSave() {
+  clearTimeout(rpDT);
+  rpDT = setTimeout(() => {
+    const f = RP.form;
+    if (!f || f.sent) return;
+    if (rpSig(f) === f.sig0) { try { localStorage.removeItem(rpDraftKey(f)); } catch (e) {} return; }
+    const l = rpLast(f.proj);
+    lsSet(rpDraftKey(f), JSON.stringify({base: l ? l.id : '', at: Date.now(), items: f.items, later: f.later, decide: f.decide || '', nc: f.nc || '', nl: f.nl || ''}));
+  }, 250);
+}
+function rpDraftLoad(f) {
+  let d = null; try { d = JSON.parse(lsGet(rpDraftKey(f)) || 'null'); } catch (e) {}
+  const l = rpLast(f.proj);
+  if (!d || d.base !== (l ? l.id : '') || Date.now() - (d.at || 0) > 14 * 864e5) return;
+  f.items = rpArr(d.items); f.later = rpArr(d.later); f.decide = d.decide || ''; f.nc = d.nc || ''; f.nl = d.nl || ''; f.draftAt = d.at;
+}
+function rpDraftClear(f) { clearTimeout(rpDT); try { localStorage.removeItem(rpDraftKey(f)); } catch (e) {} }
+function rpDraftDrop() { const f = RP.form; if (!f) return; rpDraftClear(f); f.draftAt = 0; rpFill(); rpDraftClear(f); f.draftAt = 0; rpDraw(); }
+function ovGuard() {
+  const f = RP.form, e = RP.edit;
+  if (f && !f.sent && !f.busy && rpSig(f) !== f.sig0) { rpDraftSave(); rpLeaveAsk('التقرير لم يُرسل بعد. يُحفظ ما كتبته مسودةً وتجده عند فتح التقرير مرة أخرى، عدا المرفقات.'); return true; }
+  if (e && !e.busy && rpEditSig(e) !== e.sig0) { rpLeaveAsk('لم تُحفظ التعديلات على التقرير، وستضيع عند الخروج.'); return true; }
+  return false;
+}
+function ovTryClose() { if (ovGuard()) return; ovClose(); }
+function rpLeaveAsk(msg) {
+  if ($('#cfm')) return;
+  document.body.insertAdjacentHTML('beforeend', `<div id="cfm" class="cfm" onclick="if(event.target===this)this.remove()"><div><b>تريد الخروج؟</b><p>${esc(msg)}</p><button class="btn2 cu" onclick="$('#cfm').remove()">متابعة الكتابة</button><button class="btn2" onclick="rpLeaveGo()">خروج</button></div></div>`);
+}
+function rpLeaveGo() { const c = $('#cfm'); if (c) c.remove(); if (RP.form) { clearTimeout(rpDT); const f = RP.form; if (rpSig(f) !== f.sig0) { const l = rpLast(f.proj); lsSet(rpDraftKey(f), JSON.stringify({base: l ? l.id : '', at: Date.now(), items: f.items, later: f.later, decide: f.decide || '', nc: f.nc || '', nl: f.nl || ''})); } } ovClose(); }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && RP.form) rpDraftSave(); });
+
+function askApprove(id) {
+  const t = allTasks().find(x => x.id === id);
+  if (!t) return;
+  ovOpen(`<label class="shh">اعتماد المهمة</label>
+    <div class="sub" style="margin:-6px 0 8px">${esc(t.title)} · ${esc(shortName(t.ename || ''))}</div>
+    <label class="qlab" for="apc">${I('message-circle', 14)}تعليق للموظف (اختياري)</label>
+    <textarea id="apc" class="rta sm" placeholder="مثال: شغل ممتاز، انتبه للنظافة بعد التركيب" oninput="rpGrow(this)"></textarea>
+    <div class="rhint">${I('info', 13)}يصل التعليق إلى الموظف مع إشعار الاعتماد</div>
+    <div class="err" id="aperr"></div>
+    <button class="btn2 cu qbig" id="apb" onclick="doApprove('${id}')">${I('check', 17, 2.5)}اعتمدها</button>`);
+  rpGrowAll();
+}
+async function doApprove(id) {
+  const b = $('#apb'); if (!b || b.disabled) return;
+  b.disabled = true; b.textContent = 'جاري الاعتماد…';
+  try {
+    S.data = await call('apiTaskApprove2', BOOT.key, id, ($('#apc') || {}).value || '');
+    ovClose(); renderAdmin(); toast('اعتمدتها');
+  } catch (e) {
+    b.disabled = false; b.innerHTML = I('check', 17, 2.5) + 'اعتمدها';
+    const er = $('#aperr'); if (er) er.textContent = e;
+  }
+}
+
+function mEditHtml(t) {
+  const m = mOf(t), id = t.id;
+  return `<div class="medit">${m.map((x, i) => { const arm = S.armed === 'md_' + id + '_' + i; return `<span class="mchip ${arm ? 'arm' : ''}">${I(x.t === 'v' ? 'play' : 'image', 14)}${x.t === 'v' ? 'فيديو' : 'صورة'} ${i + 1}<button onclick="delMedia('${id}',${i})" aria-label="حذف">${arm ? 'تأكيد الحذف' : I('x', 13, 2.5)}</button></span>`; }).join('')}
+    ${m.length < 5 && t.status !== 'done' ? `<label class="mchip add">${I('plus', 14)}إضافة صورة أو فيديو<input type="file" multiple accept="${ACC_MEDIA}" style="display:none" onchange="addMedia('${id}',this)"></label>` : ''}</div>`;
+}
+async function delMedia(id, i) {
+  const k = 'md_' + id + '_' + i;
+  if (S.armed !== k) { S.armed = k; renderAdmin(); return; }
+  S.armed = null;
+  const t = allTasks().find(x => x.id === id); if (!t) return;
+  const m = mOf(t).filter((x, j) => j !== i);
+  try { S.data = await call('apiTaskMedia', BOOT.key, id, m); renderAdmin(); toast('انحذف من الشرح'); }
+  catch (e) { toastErr(e); renderAdmin(); }
+}
+async function addMedia(id, inp) {
+  const fs = Array.from(inp.files || []); inp.value = '';
+  const t = allTasks().find(x => x.id === id); if (!t || !fs.length) return;
+  const m = mOf(t).slice();
+  if (m.length + fs.length > 5) return toast('الحد 5 مرفقات للمهمة', null, 'er');
+  const ld = toastLoad('جاري رفع الشرح…');
+  S.upN++;
+  try {
+    for (const f of fs) {
+      if (String(f.type).indexOf('video') === 0) {
+        if (f.size > 45 * 1024 * 1024) throw 'الفيديو أكبر من 45 ميغابايت، صوّر مقطعاً أقصر';
+        m.push({t: 'v', id: await callT(600000, 'apiUploadVid', BOOT.key, f)});
+      } else {
+        const data = await resizeImg(f, 1600, 0.8);
+        const p = await callT(120000, 'apiUploadImg', BOOT.key, data);
+        S.mc[p] = data; m.push({t: 'i', id: p});
+      }
+    }
+    S.data = await call('apiTaskMedia', BOOT.key, id, m);
+    S.upN--; toastDone(ld); renderAdmin(); toast('انضاف للشرح');
+  } catch (e) { S.upN--; toastDone(ld); toastErr(e); }
 }
 
 /* الإصدار 53: الصفحة الفرعية عنوانها الكبير اسمها، والرجوع رابط صغير فوقه */

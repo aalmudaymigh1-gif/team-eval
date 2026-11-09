@@ -336,7 +336,7 @@
     const done = mine.filter(t => t.status === 'done').sort((a, b) => a.doneAt < b.doneAt ? 1 : -1).slice(0, 15);
     return open.concat(done).map(t => ({
       id: t.id, title: t.title, due: t.due, note: t.note, status: t.status, doneAt: t.doneAt.slice(0, 10),
-      comment: t.comment, cmtEdited: !!t.cmtEdited, hasPhoto: !!t.photo, reason: t.reason, urgent: t.urgent,
+      comment: t.comment, cmtEdited: !!t.cmtEdited, apNote: t.apNote || '', hasPhoto: !!t.photo, reason: t.reason, urgent: t.urgent,
       proofs: [t.photo].concat(t.extra || []).filter(Boolean),
       project: pmap[t.project] ? t.project : '', pname: pmap[t.project] || '', media: t.media, proof: t.proof || 'photo',
       inv: t.proof === 'invoice' ? taskInv_(t.id) : null,
@@ -867,7 +867,20 @@
       if (v) flush();
       return r;
     },
-    async apiRepEdit(id, a) { return rpc('rep_edit', { k: CRED.k || '', id: String(id || ''), a: a || {} }); },
+    async apiRepEdit(id, a) { const r = await rpc('rep_edit', { k: CRED.k || '', id: String(id || ''), a: a || {} }); flush(); return r; },
+    async apiNotifs() { return rpc('notif_list', { k: CRED.k || '', t: CRED.t || '' }); },
+    async apiTaskApprove2(k, id, txt) {
+      await rpc('task_approve2', { k: k, id: String(id || ''), txt: String(txt || '') });
+      flush();
+      await loadAdmin(k);
+      return adminPayload_();
+    },
+    async apiTaskMedia(k, id, media) {
+      await rpc('task_media_set', { k: k, id: String(id || ''), media: (media || []).map(x => ({ t: x.t, id: x.id })) });
+      flush();
+      await loadAdmin(k);
+      return adminPayload_();
+    },
     async apiTaskComment(k, id, txt) {
       await rpc('task_comment_edit', { k: k, id: String(id || ''), txt: String(txt || '') });
       await loadAdmin(k);
