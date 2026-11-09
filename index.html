@@ -3731,9 +3731,9 @@ function rpDetailHtml(isAdmin) {
     h += '</div>';
   }
   h += `<div class="lbl">الأعمال الحالية</div>${rpItems(cur, tags, 'cur')}`;
+  h += `<div class="lbl">الأعمال اللاحقة</div>${rpLaterHtml(rpArr(r.later))}`;
   h += `<div class="lbl">أُنجز في هذا التقرير</div>${rpDoneHtml(rpArr(r.done))}`;
   if (rpArr(r.removed).length) h += `<div class="rpgone rm">${I('x', 14, 2.5)}<div><b>حُذفت دون إنجاز:</b> ${esc(r.removed.join('، '))}</div></div>`;
-  h += `<div class="lbl">الأعمال اللاحقة</div>${rpLaterHtml(rpArr(r.later))}`;
   if (rpArr(r.files).length) h += `<div class="lbl">المرفقات</div>${rpFilesHtml(r.files)}`;
   if (isAdmin) {
     h += `<div class="lbl">ملاحظاتك</div>` + notes.map(n => `<div class="note good">${I('message-circle', 16)}<div><b>المدير العام:</b> ${esc(n.text)}</div></div>`).join('');
