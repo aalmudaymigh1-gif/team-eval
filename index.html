@@ -922,7 +922,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=69"></script>
 <script>
-const APP_VER = '71';
+const APP_VER = '72';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -3863,19 +3863,54 @@ function rpOpenForm(p, isAdmin) {
   const ps = rpProjs();
   if (!ps.length) return toast('لا توجد مشاريع نشطة', null, 'in');
   const pid = p || (isAdmin ? (ps.find(x => !rpLast(x.id)) || ps[0]).id : (ps.some(x => x.id === RP.eProj) ? RP.eProj : (ps.find(x => x.mine) || ps[0]).id));
-  RP.form = {proj: pid, admin: isAdmin, decide: '', files: [], err: '', sent: false, pick: !p, nl: '', na: '', nc: '', extra: false, cid: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()).replace(/[^a-z0-9]/gi, '').slice(0, 24)};
+  RP.form = {proj: pid, admin: isAdmin, decide: '', files: [], err: '', sent: false, pick: !p, nl: '', na: '', nc: '', extra: false, cid: rpNewCid(), mem: {}, rm: []};
   rpFill();
   S.sheet = true;
   rpDraw();
+  rpFresh(RP.form);
 }
+function rpNewCid() { return (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()).replace(/[^a-z0-9]/gi, '').slice(0, 24); }
 function rpFill() {
   const f = RP.form, l = rpLast(f.proj);
   f.items = l ? rpArr(l.cur).map(t => ({t: t, done: false})) : [];
   f.later = l ? rpArr(l.later).map(x => ({t: x.t, after: x.after || ''})) : [];
-  f.from = l ? l.date : '';
-  f.nc = ''; f.extra = false; f.na = '';
+  rpSetBase(f, l);
+  f.nc = ''; f.nl = ''; f.extra = false; f.na = ''; f.rm = [];
   f.sig0 = rpSig(f); f.draftAt = 0;
   rpDraftLoad(f);
+}
+/* الإصدار 72: أساس النموذج = آخر تقرير للمشروع وقت التعبئة، عشان لو تغيّر (صح أو نقل أو تقرير جديد) نحدّث النموذج بدون ما يضيع اللي كتبه */
+function rpSetBase(f, l) {
+  f.base = l ? l.id : ''; f.bc = l ? rpArr(l.cur).slice() : []; f.bl = l ? rpArr(l.later).map(x => x.t) : []; f.from = l ? l.date : '';
+}
+function rpBaseSig(l) { return JSON.stringify([l ? l.id : '', l ? rpArr(l.cur) : [], l ? rpArr(l.later).map(x => x.t) : []]); }
+function rpStale(f) { return rpBaseSig(rpLast(f.proj)) !== JSON.stringify([f.base || '', f.bc || [], f.bl || []]); }
+function rpRebase(f) {
+  const l = rpLast(f.proj), nc = l ? rpArr(l.cur) : [], nl = l ? rpArr(l.later) : [], nlT = nl.map(x => x.t);
+  const oc = f.bc || [], ol = f.bl || [], rm = f.rm || [];
+  const fromBase = t => oc.includes(t) || ol.includes(t);
+  f.items = f.items.filter(x => x.x || !fromBase(x.t) || nc.includes(x.t) || nlT.includes(x.t));
+  nc.forEach(t => { if (!rm.includes(t) && !f.items.some(x => x.t === t)) f.items.push({t: t, done: false}); });
+  f.later = f.later.filter(x => !ol.includes(x.t) || nlT.includes(x.t));
+  nl.forEach(x => { if (!rm.includes(x.t) && !f.later.some(y => y.t === x.t) && !f.items.some(y => y.t === x.t)) f.later.push({t: x.t, after: x.after || ''}); });
+  rpSetBase(f, l);
+}
+async function rpFresh(f) {
+  try { const d = await API.apiRepList(); RP.reps = rpArr(d.reps); if (d.projs) RP.projs = d.projs; if (d.shares) RP.shares = d.shares; } catch (e) { return false; }
+  if (RP.form !== f || f.sent || f.busy) return true;
+  if (rpStale(f)) { const dirty = rpSig(f) !== f.sig0; rpRebase(f); if (!dirty) f.sig0 = rpSig(f); else rpDraftSave(); rpDraw(); }
+  return true;
+}
+function rpSwitchProj(id) {
+  const f = RP.form;
+  if (!f || f.busy || f.proj === id) return;
+  rpDraftNow(f);
+  f.mem[f.proj] = {items: f.items, later: f.later, decide: f.decide, nc: f.nc, nl: f.nl, na: f.na, extra: f.extra, files: f.files, cid: f.cid, base: f.base, bc: f.bc, bl: f.bl, from: f.from, sig0: f.sig0, draftAt: f.draftAt, rm: f.rm, tried: f.tried, trySig: f.trySig};
+  f.proj = id; f.err = '';
+  const m = f.mem[id];
+  if (m) { Object.assign(f, m); if (rpStale(f)) rpRebase(f); }
+  else { f.decide = ''; f.files = []; f.cid = rpNewCid(); f.tried = false; f.trySig = ''; rpFill(); }
+  rpDraw();
 }
 function rpWillMove(x) { return !!x.after && RP.form.items.some(i => i.t === x.after && i.done); }
 function rpCurHtml() {
@@ -3890,7 +3925,7 @@ function rpCurHtml() {
 }
 function rpRefCur() { const b = document.getElementById('f_cur'); if (b) b.innerHTML = rpCurHtml(); rpRefLater(); }
 function rpTog(i) { const x = RP.form.items[i]; x.done = !x.done; rpRefCur(); }
-function rpRmCur(i) { if (!RP.form.admin) return; RP.form.items.splice(i, 1); rpRefCur(); }
+function rpRmCur(i) { const f = RP.form; if (!f.admin) return; const x = f.items.splice(i, 1)[0]; if (x) f.rm.push(x.t); rpRefCur(); }
 function rpAddCur() {
   const f = RP.form, t = (f.nc || '').trim();
   if (!t) return toast('اكتب العمل أولاً', null, 'er');
@@ -3914,20 +3949,20 @@ function rpAddLater() {
   f.later.push({t: t, after: f.na !== '' && cur[+f.na] ? cur[+f.na] : ''}); f.nl = ''; f.na = '';
   rpRefLater();
 }
-function rpRmLater(i) { if (!RP.form.admin) return; RP.form.later.splice(i, 1); rpRefLater(); }
+function rpRmLater(i) { const f = RP.form; if (!f.admin) return; const x = f.later.splice(i, 1)[0]; if (x) f.rm.push(x.t); rpRefLater(); }
 function rpMoveNow(i) { const f = RP.form, x = f.later.splice(i, 1)[0]; if (!f.items.some(y => y.t === x.t)) f.items.push({t: x.t, done: false}); rpRefCur(); }
 function rpDraw() {
   const f = RP.form;
   if (!f) return;
   if (f.sent) {
-    ovOpen(`<div class="rok"><div class="rokc">${I('check', 30, 2.5)}</div><b>تم إرسال التقرير</b><div>${esc(rpPName(f.proj))}</div><div class="sub">${esc(dayLabel(rpToday()))}</div>${f.nDone ? `<div class="rokm">${I('check-check', 14)}${f.nDone <= 2 || f.nDone > 10 ? 'نُقل ' : 'نُقلت '}${rpNDone(f.nDone)} إلى سجل الإنجاز</div>` : ''}${f.moved.length ? `<div class="rokm">${I('clock', 14)}انتقل إلى الأعمال الحالية: ${esc(f.moved.join('، '))}</div>` : ''}</div>
+    ovOpen(`<div class="rok"><div class="rokc">${I('check', 30, 2.5)}</div><b>تم إرسال التقرير</b><div>${esc(rpPName(f.proj))}</div><div class="sub">${esc(dayLabel(rpToday()))}</div>${f.nDone ? `<div class="rokm">${I('check-check', 14)}${f.nDone <= 2 || f.nDone > 10 ? 'نُقل ' : 'نُقلت '}${rpNDone(f.nDone)} إلى سجل الإنجاز</div>` : ''}${f.moved.length ? `<div class="rokm">${I('clock', 14)}انتقل إلى الأعمال الحالية: ${esc(f.moved.join('، '))}</div>` : ''}${f.dupNote ? `<div class="rokm">${I('info', 14)}وصل التقرير من المحاولة الأولى، ولم تُضَف التعديلات التي أجريتها بعدها</div>` : ''}</div>
       <button class="btn2 cu qbig" onclick="ovClose()">حسناً</button>`);
     return;
   }
   const ap = rpProjs().slice().sort((a, b) => (b.mine ? 1 : 0) - (a.mine ? 1 : 0));
   ovOpen(`<label class="shh">تقرير ${esc(rpPName(f.proj))}</label>
     <div class="sub" style="margin:-6px 0 6px">${esc(dayLabel(rpToday()))}${f.admin ? ' · من المدير العام' : ''}</div>
-    ${f.pick ? `<div class="qlab">${I('folder', 14)}المشروع</div><div class="qch">${ap.map(x => `<button class="${f.proj === x.id ? 'on' : ''}" onclick="RP.form.proj='${x.id}';rpFill();rpDraw()">${esc(x.name)}</button>`).join('')}</div>` : ''}
+    ${f.pick ? `<div class="qlab">${I('folder', 14)}المشروع</div><div class="qch">${ap.map(x => `<button class="${f.proj === x.id ? 'on' : ''}" onclick="rpSwitchProj('${x.id}')">${esc(x.name)}</button>`).join('')}</div>` : ''}
     <div class="qlab">${I('list-checks', 14)}الأعمال الحالية</div>
     ${f.draftAt ? `<div class="rhint ok">${I('history', 13)}استُعيدت المسودة المحفوظة ${esc(nfTime(f.draftAt))} <button class="lnk" style="font-size:12px;padding:0 4px" onclick="rpDraftDrop()">تجاهلها</button></div>` : ''}
     ${f.from ? `<div class="rhint">${I('history', 13)}منقولة من تقرير ${esc(rpDay(f.from))}. ضع علامة ✓ على ما أُنجز</div>` : ''}
@@ -3971,13 +4006,18 @@ function rpProg(f) { const b = document.getElementById('f_send'); if (b && RP.fo
 async function rpSend() {
   const f = RP.form;
   if (!f || f.busy) return;
+  if (!rpLines(f.decide).length && !f.items.length && !f.later.length) { f.err = 'أدخل عملاً واحداً على الأقل'; return rpDraw(); }
+  f.busy = true; f.err = ''; f.prog = 'جاري الإرسال…'; rpDraw();
+  if (!f.tried && await rpFresh(f) && rpStale(f)) {
+    rpRebase(f); rpDraftSave();
+    f.busy = false; f.err = 'حُدّث التقرير بآخر تغييرات المشروع، راجعه ثم اضغط «إرسال التقرير» مرة أخرى';
+    return RP.form === f ? rpDraw() : null;
+  }
   const dec = rpLines(f.decide);
-  if (!f.items.length && !dec.length && !f.later.length) { f.err = 'أدخل عملاً واحداً على الأقل'; return rpDraw(); }
   const moved = f.later.filter(rpWillMove), keep = f.later.filter(x => !rpWillMove(x));
   const cur = f.items.filter(x => !x.done).map(x => x.t).concat(moved.map(x => x.t).filter(t => !f.items.some(x => x.t === t)));
   const done = f.items.filter(x => x.done).map(x => x.t);
-  const l = rpLast(f.proj), gone = l ? rpArr(l.cur).filter(t => !f.items.some(x => x.t === t)) : [];
-  f.busy = true; f.err = ''; f.prog = 'جاري الإرسال…'; rpDraw();
+  const gone = f.admin ? rpArr(f.bc).filter(t => !f.items.some(x => x.t === t)) : [];
   S.upN++;
   try {
     const files = [];
@@ -3988,10 +4028,17 @@ async function rpSend() {
       files.push({p: p, t: x.t, n: x.n});
     }
     f.prog = 'جاري الإرسال…'; rpProg(f);
-    await call('apiRepAdd', {proj: f.proj, cid: f.cid, cur: cur, done: done, later: keep, up: moved.map(x => x.t), removed: gone, decide: dec, files: files});
+    if (!f.tried) { f.tried = true; f.trySig = rpSig(f); }
+    const res = await call('apiRepAdd', {proj: f.proj, cid: f.cid, cur: cur, done: done, later: keep, up: moved.map(x => x.t), removed: gone, decide: dec, files: files});
+    f.dupNote = !!(res && res.dup && f.trySig !== rpSig(f));
   } catch (e) {
     S.upN = Math.max(0, S.upN - 1);
-    f.busy = false; f.err = String(e);
+    f.busy = false; f.err = String(e).replace(/^Error: /, '');
+    if (/لا يمكن حذف/.test(f.err)) {
+      f.tried = false; f.cid = rpNewCid();
+      await rpFresh(f); rpRebase(f); rpDraftSave();
+      f.err = 'حُدّث التقرير بآخر تغييرات المشروع، راجعه ثم اضغط «إرسال التقرير» مرة أخرى';
+    }
     if (RP.form === f) rpDraw(); else toastErr(e);
     return;
   }
@@ -4152,15 +4199,23 @@ function rpDraftSave() {
     const f = RP.form;
     if (!f || f.sent) return;
     if (rpSig(f) === f.sig0) { try { localStorage.removeItem(rpDraftKey(f)); } catch (e) {} return; }
-    const l = rpLast(f.proj);
-    lsSet(rpDraftKey(f), JSON.stringify({base: l ? l.id : '', at: Date.now(), items: f.items, later: f.later, decide: f.decide || '', nc: f.nc || '', nl: f.nl || ''}));
+    rpDraftNow(f);
   }, 250);
+}
+function rpDraftNow(f) {
+  if (!f || f.sent) return;
+  clearTimeout(rpDT);
+  if (rpSig(f) === f.sig0) { try { localStorage.removeItem(rpDraftKey(f)); } catch (e) {} return; }
+  lsSet(rpDraftKey(f), JSON.stringify({base: f.base || '', bc: f.bc || [], bl: f.bl || [], rm: f.rm || [], at: Date.now(), items: f.items, later: f.later, decide: f.decide || '', nc: f.nc || '', nl: f.nl || ''}));
 }
 function rpDraftLoad(f) {
   let d = null; try { d = JSON.parse(lsGet(rpDraftKey(f)) || 'null'); } catch (e) {}
   const l = rpLast(f.proj);
-  if (!d || d.base !== (l ? l.id : '') || Date.now() - (d.at || 0) > 14 * 864e5) return;
-  f.items = rpArr(d.items); f.later = rpArr(d.later); f.decide = d.decide || ''; f.nc = d.nc || ''; f.nl = d.nl || ''; f.draftAt = d.at;
+  if (!d || Date.now() - (d.at || 0) > 14 * 864e5) return;
+  if (!Array.isArray(d.bc) && d.base !== (l ? l.id : '')) return;
+  f.items = rpArr(d.items); f.later = rpArr(d.later); f.decide = d.decide || ''; f.nc = d.nc || ''; f.nl = d.nl || ''; f.draftAt = d.at; f.rm = rpArr(d.rm);
+  if (Array.isArray(d.bc)) { f.base = d.base || ''; f.bc = d.bc; f.bl = rpArr(d.bl); }
+  if (rpStale(f)) rpRebase(f);
   if (!f.admin && l) {
     rpArr(l.cur).forEach(t => { if (!f.items.some(x => x.t === t)) f.items.push({t: t, done: false}); });
     rpArr(l.later).forEach(x => { if (!f.later.some(y => y.t === x.t) && !f.items.some(y => y.t === x.t)) f.later.push({t: x.t, after: x.after || ''}); });
@@ -4181,7 +4236,7 @@ function rpLeaveAsk(msg) {
   if ($('#cfm')) return;
   document.body.insertAdjacentHTML('beforeend', `<div id="cfm" class="cfm" onclick="if(event.target===this)this.remove()"><div><b>تريد الخروج؟</b><p>${esc(msg)}</p><button class="btn2 cu" onclick="$('#cfm').remove()">متابعة الكتابة</button><button class="btn2" onclick="rpLeaveGo()">خروج</button></div></div>`);
 }
-function rpLeaveGo() { const c = $('#cfm'); if (c) c.remove(); if (RP.form) { clearTimeout(rpDT); const f = RP.form; if (rpSig(f) !== f.sig0) { const l = rpLast(f.proj); lsSet(rpDraftKey(f), JSON.stringify({base: l ? l.id : '', at: Date.now(), items: f.items, later: f.later, decide: f.decide || '', nc: f.nc || '', nl: f.nl || ''})); } } ovClose(); }
+function rpLeaveGo() { const c = $('#cfm'); if (c) c.remove(); if (RP.form) rpDraftNow(RP.form); ovClose(); }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && RP.form) rpDraftSave(); });
 
 function askApprove(id) {
