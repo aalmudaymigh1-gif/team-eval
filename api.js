@@ -873,8 +873,8 @@
       flush();
       return r;
     },
-    async apiRepTick(id, item, undo) {
-      const r = await rpc('rep_tick', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), undo: !!undo });
+    async apiRepTick(id, item, undo, files, note) {
+      const r = await rpc('rep_tick', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), undo: !!undo, files: (files || []).map(f => ({ p: f.p, t: f.t })), note: String(note || '') });
       flush();
       return r;
     },

@@ -896,6 +896,16 @@ a.rdoc{text-decoration:none;color:var(--text)}
 @media (prefers-reduced-motion:reduce){.tkb i{animation:none}}
 .tkb.up{color:var(--acc-dk)}.tkb.up.on{background:var(--acc-soft);border-color:var(--acc)}
 .nwl small{display:block;font-size:12px;color:var(--muted);line-height:1.5}
+.tdx{display:flex;flex-direction:column;gap:12px}
+.tdx h3{margin:2px 0 0;font-size:17px;font-weight:600}
+.tdx .it{background:var(--fill);border-radius:12px;padding:10px 12px;font-size:15px;display:flex;gap:8px;align-items:center}
+.tdx .it i{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}
+.tdx .req{font-size:12px;color:var(--red);font-weight:500;margin-inline-start:6px}
+.tdx .err{margin:0;min-height:0}
+.tdoc .pf{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.tdoc .pf img{width:52px;height:52px;border-radius:10px;object-fit:cover;cursor:zoom-in;background:var(--fill)}
+.tdoc .tdv{height:auto;max-height:260px;background:#000;margin-top:6px}
+.tdoc .pn{font-size:13px;color:#4B5563;margin-top:4px;white-space:pre-line}
 .rpi.dn li small{display:block;font-size:12px;color:var(--muted)}
 .rpi li.decx{display:flex;align-items:center;gap:8px}
 .rpi li.decx>span{flex:1;min-width:0}
@@ -910,9 +920,9 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=68"></script>
+<script src="api.js?v=69"></script>
 <script>
-const APP_VER = '68';
+const APP_VER = '69';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -2075,7 +2085,7 @@ function ovOpen(html) {
   document.documentElement.classList.add('lock');
   if (top) { const sh = o.querySelector('.sheet'); if (sh) sh.scrollTop = top; }
 }
-function ovClose() { if (S.rec && S.rec.where === 'tf') recStop(true); vStopIf('tf'); if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); document.documentElement.classList.remove('lock'); S.sheet = false; RP.form = null; RP.edit = null; }
+function ovClose() { if (S.rec && S.rec.where === 'tf') recStop(true); vStopIf('tf'); if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); document.documentElement.classList.remove('lock'); S.sheet = false; RP.form = null; RP.edit = null; RP.td = null; }
 function openSheet() {
   const d = S.data, tf = S.tf;
   if (!d.employees.length) return toast('أضف موظف من الإعدادات أول', null, 'in');
@@ -3689,10 +3699,15 @@ function rpLaterHtml(arr) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
   return '<ul class="rpi lat">' + arr.map(x => `<li>${esc(x.t)}<small>${x.after ? 'تبدأ بعد: ' + esc(x.after) : 'غير مرتبطة بعمل'}</small></li>`).join('') + '</ul>';
 }
-function rpDoneHtml(arr, ticks) {
+function rpDoneHtml(arr, ticks, docOnly) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
   const tk = rpArr(ticks);
-  return '<ul class="rpi dn">' + arr.map(x => { const k = tk.filter(y => y.t === x).pop(); return `<li>${I('check', 13, 3)}${esc(x)}${k ? `<small>${esc(k.by === 'admin' ? 'المدير العام' : shortName(k.name || ''))} · ${esc(rpTickWhen(k.at))}</small>` : ''}</li>`; }).join('') + '</ul>';
+  return '<ul class="rpi dn">' + arr.map(x => { const k = tk.filter(y => y.t === x).pop(); return `<li>${I('check', 13, 3)}${esc(x)}${k && !docOnly ? `<small>${esc(k.by === 'admin' ? 'المدير العام' : shortName(k.name || ''))} · ${esc(rpTickWhen(k.at))}</small>` : ''}${k ? rpTickDoc(k) : ''}</li>`; }).join('') + '</ul>';
+}
+function rpTickDoc(k) {
+  const fs = rpArr(k.files), img = fs.filter(f => f.t !== 'v'), vid = fs.filter(f => f.t === 'v');
+  if (!fs.length && !k.note) return '';
+  return `<div class="tdoc">${img.length ? `<div class="pf">${img.map(f => `<img alt="" data-rp="${esc(f.p)}" ${RP.uc[f.p] ? `src="${esc(RP.uc[f.p])}"` : ''} onclick="rpZoom(this)">`).join('')}</div>` : ''}${vid.map(f => `<video class="vid tdv" data-rpv="${esc(f.p)}" controls playsinline preload="metadata"></video>`).join('')}${k.note ? `<div class="pn">${esc(k.note)}</div>` : ''}</div>`;
 }
 function rpTickWhen(ms) { const d = nfDay(ms), t = rpToday(); return (d === t ? 'اليوم' : rpDay(d)) + ' ' + nfTime(ms); }
 function rpHistOf(p) {
@@ -3708,7 +3723,8 @@ function rpHistHtml(isAdmin) {
   const p = RP.hist, gs = rpHistOf(p), n = gs.reduce((a, g) => a + g.items.length, 0);
   let h = `<button class="back" onclick="rpCloseHist()">${I('arrow-right', 17)}${RP.open ? 'التقرير' : isAdmin ? 'التقارير' : 'تقاريري'}</button><h2>سجل الإنجاز</h2>
     <div class="rpmeta">${I('check-check', 15)}${esc(rpPName(p))} · ${rpNDone(n)}</div>`;
-  h += gs.length ? gs.map(g => `<div class="hday"><div class="hdh">${esc(dayLabel(g.date))}<span>${esc(g.by)}</span></div>${rpDoneHtml(g.items)}</div>`).join('') : emptyHtml('check-check', 'لا توجد أعمال منجزة بعد');
+  const atk = rpOf(p).flatMap(r => rpArr(r.ticks));
+  h += gs.length ? gs.map(g => `<div class="hday"><div class="hdh">${esc(dayLabel(g.date))}<span>${esc(g.by)}</span></div>${rpDoneHtml(g.items, atk, true)}</div>`).join('') : emptyHtml('check-check', 'لا توجد أعمال منجزة بعد');
   return h;
 }
 function rpFilesHtml(fs) {
@@ -4151,6 +4167,8 @@ function ovGuard() {
   const f = RP.form, e = RP.edit;
   if (f && !f.sent && !f.busy && rpSig(f) !== f.sig0) { rpDraftSave(); rpLeaveAsk('التقرير لم يُرسل بعد. يُحفظ ما كتبته مسودةً وتجده عند فتح التقرير مرة أخرى، عدا المرفقات.'); return true; }
   if (e && !e.busy && rpEditSig(e) !== e.sig0) { rpLeaveAsk('لم تُحفظ التعديلات على التقرير، وستضيع عند الخروج.'); return true; }
+  const td = RP.td;
+  if (td && !td.busy && (td.files.length || String(td.note || '').trim())) { rpLeaveAsk('لم يُحفظ توثيق الإنجاز، وستضيع الصور والملاحظة عند الخروج.'); return true; }
   return false;
 }
 function ovTryClose() { if (ovGuard()) return; ovClose(); }
@@ -4279,6 +4297,7 @@ async function rpTick(id, i, btn) {
   if (RP.busy) return;
   const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
   const item = rpArr(r.cur)[i]; if (!item) return;
+  if (BOOT.page !== 'admin') return rpTdOpen(id, item);
   RP.busy = true;
   if (btn) { btn.classList.add('on'); btn.innerHTML = I('check', 15, 3); }
   try {
@@ -4293,6 +4312,69 @@ async function rpUntick(id, item) {
   RP.busy = true;
   try { await call('apiRepTick', id, item, true); await rpTickReload(); RP.busy = false; rpRerender(); toast('رجع إلى الأعمال الحالية'); }
   catch (e) { RP.busy = false; toastErr(e); }
+}
+const RP_TD_ACC = 'image/' + '*,video/' + '*';
+function rpTdOpen(id, item) { RP.td = {id: id, item: item, files: [], note: '', err: '', busy: false, prog: ''}; rpTdDraw(); }
+function rpTdDraw() {
+  const d = RP.td; if (!d) return;
+  const tiles = d.files.map((f, i) => `<div class="mi">${f.t === 'i' ? `<img alt="" src="${f.d}">` : 'فيديو'}${d.busy ? '' : `<button class="x" onclick="rpTdRm(${i})" aria-label="حذف">×</button>`}</div>`).join('');
+  ovOpen(`<div class="tdx">
+    <h3>توثيق الإنجاز</h3>
+    <div class="it"><i></i>${esc(d.item)}</div>
+    <div><div class="shh">صورة أو فيديو للإنجاز<span class="req">مطلوب</span></div>
+    <div class="mst">${tiles}${d.files.length < 5 && !d.busy ? `<label class="madd">${I('camera', 20)}إضافة<input type="file" multiple accept="${RP_TD_ACC}" style="display:none" onchange="rpTdPick(this)"></label>` : ''}</div></div>
+    <div><div class="shh" style="margin-bottom:6px">ملاحظة (اختياري)</div><textarea id="td_note" placeholder="اكتب ملاحظة عن الإنجاز" oninput="RP.td.note=this.value" ${d.busy ? 'disabled' : ''}>${esc(d.note)}</textarea></div>
+    <div class="err">${esc(d.err)}</div>
+    <button class="btn" id="td_go" ${d.busy ? 'disabled' : ''} onclick="rpTdSave()">${d.busy ? esc(d.prog || 'جاري الحفظ…') : I('check', 17, 2.5) + 'تم الإنجاز'}</button></div>`);
+}
+async function rpTdPick(inp) {
+  const d = RP.td, fs = Array.from(inp.files || []);
+  inp.value = '';
+  if (!d) return;
+  for (const file of fs) {
+    if (d.files.length >= 5) { toast('الحد الأقصى 5 مرفقات', null, 'er'); break; }
+    const ty = String(file.type || ''), ext = ((String(file.name || '').match(/\.(\w{2,5})$/) || [])[1] || '').toLowerCase();
+    try {
+      if (ty.indexOf('image') === 0 || /^(jpe?g|png|heic|heif|webp)$/.test(ext)) d.files.push({t: 'i', d: await resizeImg(file, 1600, 0.78), n: file.name || 'صورة'});
+      else if (ty.indexOf('video') === 0 || /^(mp4|mov|m4v|webm|3gp)$/.test(ext)) {
+        if (file.size > 45 * 1024 * 1024) { toast('الفيديو أكبر من 45 ميغابايت، صوّر مقطعاً أقصر', null, 'er'); continue; }
+        d.files.push({t: 'v', file: file, n: file.name || 'فيديو'});
+      } else toast('أرفق صورة أو فيديو فقط', null, 'er');
+    } catch (e) { toastErr(e); }
+  }
+  d.err = '';
+  if (RP.td === d) rpTdDraw();
+}
+function rpTdRm(i) { const d = RP.td; if (!d || d.busy) return; d.files.splice(i, 1); rpTdDraw(); }
+async function rpTdSave() {
+  const d = RP.td;
+  if (!d || d.busy) return;
+  if (!d.files.length) { d.err = 'أرفق صورة أو فيديو يوثّق الإنجاز'; return rpTdDraw(); }
+  d.busy = true; d.err = ''; d.prog = 'جاري الحفظ…'; rpTdDraw();
+  const pg = () => { const b = document.getElementById('td_go'); if (b && RP.td === d) b.textContent = d.prog; };
+  S.upN++;
+  try {
+    const files = [];
+    for (let i = 0; i < d.files.length; i++) {
+      const x = d.files[i];
+      d.prog = 'جاري رفع المرفقات ' + (i + 1) + ' من ' + d.files.length; pg();
+      const p = await callT(180000, 'apiRepUpload', x, pr => { d.prog = 'جاري رفع المرفقات ' + (i + 1) + ' من ' + d.files.length + ' · ' + Math.round(pr * 100) + '%'; pg(); });
+      files.push({p: p, t: x.t});
+    }
+    d.prog = 'جاري الحفظ…'; pg();
+    await call('apiRepTick', d.id, d.item, false, files, String(d.note || '').trim());
+  } catch (e) {
+    S.upN = Math.max(0, S.upN - 1);
+    d.busy = false; d.err = String(e);
+    if (RP.td === d) rpTdDraw(); else toastErr(e);
+    return;
+  }
+  S.upN = Math.max(0, S.upN - 1);
+  if (RP.td === d) ovClose();
+  try { await rpTickReload(); } catch (e) { RP.need = true; }
+  rpRerender();
+  const id = d.id, item = d.item;
+  toast('انتقل إلى سجل الإنجاز', () => rpUntick(id, item));
 }
 function rpNowList(r, arr) {
   return '<ul class="tkl nwl">' + arr.map((x, i) => `<li><button class="tkb up" onclick="rpNow('${r.id}',${i},this)" aria-label="نقل إلى الأعمال الحالية">${I('arrow-up', 15, 2.5)}</button><span>${esc(x.t)}<small>${x.after ? 'تبدأ بعد: ' + esc(x.after) : 'غير مرتبطة بعمل'}</small></span></li>`).join('') + `</ul><div class="rhint" style="margin-top:6px">${I('info', 13)}اضغط السهم لنقل العمل إلى الأعمال الحالية</div>`;
