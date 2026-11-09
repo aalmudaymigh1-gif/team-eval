@@ -702,6 +702,22 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .selbar .btn2{width:100%;box-shadow:0 8px 24px rgba(42,42,40,.12)}
 .selbar .btn2.rd{background:#fff}
 #tlist:has(+ #selbar .selbar){padding-bottom:70px}
+/* الإصدار 59: صفحة الموظف بنفس تصميم صفحاتي */
+.empv .attc,.empv .attc.done{background:var(--surface);border-color:var(--line);color:var(--text)}
+.empv .attc .r1{color:var(--muted)}
+.empv .kpi,.empv .kpi.hero{background:var(--surface)!important;border-color:var(--line)!important}
+.empv .note.good,.empv .note.info{background:none;padding:2px 0;color:var(--muted);font-size:13px}
+.empv .note.good svg{color:var(--green);flex:none;margin-top:2px}
+.empv .note.good b{color:var(--text);font-weight:500}
+.empv .note.bad{font-size:13px}
+.empv .ivr .badge{background:none;padding:0;font-weight:500}
+.empv .ivr .badge:not(.a):not(.late){color:var(--muted)}
+.empv .cb{background:none;color:var(--muted);font-weight:400;padding:0}
+.empv .ivb{margin-top:14px}.empv .ivb .tbr{cursor:default}.empv .ivb .tbr:active{background:none}
+.empv .ivb .tbr.neg .v span.mn.mn,.empv .ivb .tbr.neg .k{color:var(--red)!important}
+.empv .ivsend{width:100%;margin-top:10px}
+.empv .stx{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:4px}.empv .stx.g{color:var(--green)}
+.empv .ecard .tm .tu{color:var(--red);font-weight:600}
 </style>
 </head>
 <body>
@@ -713,7 +729,7 @@ b,strong,th,h2,h3,h4{font-weight:600}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=58"></script>
 <script>
-const APP_VER = '58';
+const APP_VER = '59';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -2905,6 +2921,7 @@ function renderEmp(d, isPreview) {
   const nOpen = (d.tasks || []).filter(t => t.status === 'open' || t.status === 'returned').length;
   if (!['tasks', 'inv', 'pay'].includes(S.etab)) S.etab = 'tasks';
   const tasksTab = S.etab === 'tasks';
+  $('#app').classList.add('empv');
   $('#app').innerHTML = `
     ${isPreview ? `<button class="back" onclick="closePreview()">${I('arrow-right', 17)}رجوع للفريق</button><div class="note info">${I('eye', 16)}هذي معاينة، والموظف يشوف نفس الصفحة.</div>` : ''}
     <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button>`}</div>${isPreview ? '' : pushHtml()}${tasksTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) : ''}
@@ -2934,7 +2951,7 @@ function empPayHtml(d) {
       ${next}
     </div>
     <div class="card">
-      ${ctitle('banknote', 'راتب ' + esc(f.label), f.paid ? `<span class="badge">${I('check', 12, 3)} انصرف ${dmy(f.paidDate)}</span>` : `<span class="badge a">ما انصرف</span>`)}<div style="height:6px"></div>
+      ${ctitle('banknote', 'راتب ' + esc(f.label), f.paid ? `<span class="stx g">${I('check', 13, 3)}انصرف ${dmy(f.paidDate)}</span>` : `<span class="stx">ما انصرف للحين</span>`)}<div style="height:6px"></div>
       ${salaryTable(f)}
       ${f.paid && f.paidAmount !== f.net ? `<div class="sub" style="margin-top:6px">المبلغ المصروف: ${sar(f.paidAmount)}</div>` : ''}
     </div>
@@ -2963,7 +2980,7 @@ function empTasksHtml(d, isPreview) {
   const ts = (d.tasks || []).map(t => Object.assign({}, t, {b: tBucket(t, today)}));
   const open = ts.filter(t => t.status === 'open' || t.status === 'returned'), ret = ts.filter(t => t.status === 'returned').sort(byUrgent);
   const cnt = open.length === 1 ? 'عندك مهمة وحدة' : open.length === 2 ? 'عندك مهمتين' : 'عندك ' + open.length + ' مهام';
-  let h = `<div class="note info" style="margin-top:14px">${open.length ? cnt + (ret.length ? ' · ' + (ret.length === 1 ? 'وحدة رجعت لك' : ret.length + ' رجعت لك') : '') : 'ما عليك مهام الحين، يعطيك العافية'}</div>`;
+  let h = open.length ? '' : emptyHtml('check-check', 'ما عليك مهام الحين، يعطيك العافية');
   if (ret.length) h += `<div class="sech r">رجعت لك</div>` + ret.map(t => empCardHtml(t, mode, false)).join('');
   projGroups(ts.filter(t => t.status === 'open')).forEach((g, i) => {
     const k = g.key || 'gen', on = S.eopen[k] !== undefined ? S.eopen[k] : i === 0;
@@ -2982,12 +2999,10 @@ function empCardHtml(t, mode, inGroup) {
   if (open && mode === 'emp') act = S.doing === t.id ? proofFormHtml(t)
     : t.proof === 'note' ? `<button class="bigdo" style="border:0;font-family:inherit;cursor:pointer" onclick="S.doing='${t.id}';S.shots=[];S.cm='';rerenderEmp()">${I('pencil', 15, 2.2)}أنجزتها</button>`
     : `<label class="bigdo">${I('camera', 15, 2.2)}${t.proof === 'invoice' ? 'أنجزتها · صوّر الفاتورة' : 'أنجزتها'}<input type="file" accept="${ACC_IMG}" capture="environment" style="display:none" onchange="startDone('${t.id}', this)"></label>`;
-  const meta = [inGroup ? '' : (t.pname ? esc(t.pname) : ''), t.status === 'review' ? 'انرسلت ' + dmy(t.doneAt) : dueHtml(t, today)].filter(Boolean).join(' · ');
+  const meta = [t.urgent && open ? '<b class="tu">عاجلة</b>' : '', inGroup ? '' : (t.pname ? esc(t.pname) : ''), t.status === 'review' ? 'انرسلت ' + dmy(t.doneAt) : dueHtml(t, today), open && t.proof === 'invoice' ? 'الإثبات: فاتورة' : open && t.proof === 'note' ? 'الإثبات: ملاحظة' : ''].filter(Boolean).join(' · ');
   return `<div class="ecard ${inGroup ? 'in' : ''} ${t.status === 'returned' ? 'rt' : ''}">
     <div class="th"><span class="tt">${esc(t.title)}</span>${pillHtml(p)}</div>
     ${meta ? `<div class="tm">${meta}</div>` : ''}
-    ${t.urgent && open ? '<span class="mb u" style="display:inline-block;margin-top:6px">عاجلة</span>' : ''}
-    ${open && t.proof === 'invoice' ? '<span class="mb" style="display:inline-block;margin-top:6px">إثباتها فاتورة</span>' : open && t.proof === 'note' ? '<span class="mb" style="display:inline-block;margin-top:6px">إثباتها ملاحظة</span>' : ''}
     ${t.status === 'returned' && t.reason ? `<div class="note bad"><div><b>المدير يقول:</b> ${esc(t.reason)}</div></div>` : ''}
     ${t.note && open ? `<div class="enote">${esc(t.note)}</div>` : ''}
     ${open && vOf(t) ? vPlayerHtml(vOf(t).id, vOf(t).d) + '<div class="vcap">شرح صوتي من المدير</div>' : ''}
@@ -3031,9 +3046,8 @@ async function startDone(id, input) {
 
 function empInvHtml(d, isPreview) {
   const iv = d.inv || {balance: 0, o: 0, items: []}, c = iv.c != null ? iv.c : (iv.balance || 0), t = iv.o || 0;
-  let h = `<div class="ivbal" style="${c < 0 ? 'background:#B05A52' : ''}"><span>${c < 0 ? 'صرفت أكثر من عهدتك' : 'العهدة اللي معك'}</span><b>${M(Math.abs(c), c < 0 ? '−' : '', 'big')}</b></div>`;
-  if (t > 0) h += `<div class="ivbal" style="background:#B05A52;margin-top:8px"><span>لك عند المدير (من جيبك)</span><b>${M(t, '', 'big')}</b></div>`;
-  if (!isPreview) h += S.invForm ? invFormHtml(d) : `<button class="bigdo" onclick="S.invForm=true;S.ishots=[];rerenderEmp()">${I('receipt', 15, 2.2)}أرسل فاتورة</button>`;
+  let h = `<div class="tbl2 ivb"><div class="tbr ${c < 0 ? 'neg' : ''}"><span class="ic">${I('wallet', 16)}</span><span class="k">${c < 0 ? 'صرفت أكثر من عهدتك' : 'العهدة اللي معك'}</span><span class="v">${M(Math.abs(c), c < 0 ? '−' : '', 'big')}</span></div>${t > 0 ? `<div class="tbr neg"><span class="ic">${I('hand-coins', 16)}</span><span class="k">لك عند المدير (من جيبك)</span><span class="v">${M(t, '', 'big')}</span></div>` : ''}</div>`;
+  if (!isPreview) h += S.invForm ? invFormHtml(d) : `<button class="btn2 cu ivsend" onclick="S.invForm=true;S.ishots=[];rerenderEmp()">${I('receipt', 17)}أرسل فاتورة</button>`;
   const items = iv.items || [];
   if (!items.length) return h + emptyHtml('receipt', 'ما أرسلت فواتير للحين');
   return h + '<div class="card" style="margin-top:14px;padding-top:4px;padding-bottom:4px">' + items.map(x => {
