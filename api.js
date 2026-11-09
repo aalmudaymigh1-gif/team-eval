@@ -854,6 +854,31 @@
     }
   };
 
+  /* إذا رابط صورة أو فيديو انتهى أو انبطل (تدوير مفتاح التوقيع)، نطلب رابط جديد مرة وحدة بدون ما يبان للمستخدم */
+  const SIGN_MARK = '/storage/v1/object/sign/' + BUCKET + '/';
+  function pathOf(u) {
+    const i = String(u || '').indexOf(SIGN_MARK);
+    if (i < 0) return '';
+    try { return decodeURIComponent(u.slice(i + SIGN_MARK.length).split('?')[0]); } catch (e) { return ''; }
+  }
+  async function healMedia(el) {
+    const bad = el.currentSrc || el.src || '';
+    const p = pathOf(bad);
+    if (!p) return;
+    const n = +(el.dataset.rs || 0);
+    if (n >= 2) return;
+    el.dataset.rs = n + 1;
+    if (!(fresh(p) && UC[p].u !== bad)) { delete UC[p]; saveUC(); await signMany([p]).catch(() => {}); }
+    const nu = UC[p] && UC[p].u;
+    if (!nu || nu === bad) return;
+    el.src = nu;
+    if (el.tagName === 'VIDEO' && el.load) el.load();
+  }
+  document.addEventListener('error', e => {
+    const el = e.target;
+    if (el && (el.tagName === 'IMG' || el.tagName === 'VIDEO')) healMedia(el);
+  }, true);
+
   window.API = API;
   window.fileUrl = fileUrl;
 })();
