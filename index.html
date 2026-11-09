@@ -750,6 +750,26 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .etabs.e4{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;overflow:visible}
 .etabs.e4 button{min-width:0;padding-inline:2px;white-space:nowrap;font-size:14px}
 .rpl{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.rph .rchip{flex:none;font-size:12px;font-weight:500;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.rchip.dec{background:var(--amber-soft);color:#85642B}
+.rchip.new{background:var(--acc-soft);color:var(--acc-dk)}
+.rchip.old{background:var(--red-soft);color:var(--red)}
+.rpm2{font-size:12px;color:var(--muted);margin-top:1px}
+.rst{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.rst span{display:inline-flex;align-items:center;gap:5px;font-size:12px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:#55554f}
+.rst i{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block}
+.rst i.l{background:transparent;border:1.5px solid var(--faint)}
+.rst i.d{background:var(--acc)}
+.rpv{list-style:none;margin:8px 0 0;padding:0}
+.rpv li{position:relative;padding:3px 14px 3px 0;font-size:15px;line-height:1.55;overflow-wrap:anywhere}
+.rpv li:before{content:"";position:absolute;right:2px;top:12px;width:5px;height:5px;border-radius:50%;background:var(--green)}
+.rpv .tg2{margin-inline-start:6px}
+.rpmore{font-size:13px;color:var(--muted);padding-right:14px}
+.rpfold{display:flex;align-items:center;gap:12px;width:100%;margin-top:14px;min-height:54px;padding:0 14px;background:var(--surface);border:1px solid var(--line);border-radius:18px;font:inherit;color:inherit;text-align:right;cursor:pointer}
+.rpfold .ic{width:30px;height:30px;border-radius:9px;background:var(--fill);color:var(--muted);display:flex;align-items:center;justify-content:center;flex:none}
+.rpfold .k{flex:1;font-size:15px}
+.rpfold .v{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.rpfold .cv2{display:flex;transition:transform .2s}.rpfold .cv2.on{transform:rotate(-90deg)}
 .rpc{display:block;width:100%;text-align:start;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px 16px;font:inherit;color:var(--text);cursor:pointer}
 .rpc:active{background:var(--fill)}
 .rph{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
@@ -952,7 +972,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=77"></script>
 <script>
-const APP_VER = '77';
+const APP_VER = '78';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -2071,7 +2091,7 @@ function taskRowHtml(t, showProj) {
 function openTask(id) { S.td = id; S.armed = null; renderAdmin(); toTop(); }
 function closeTask() { if (S.rec) recStop(true); S.td = null; S.armed = null; renderAdmin(); toTop(); }
 async function approveTask(id) {
-  try { S.data = await call('apiTaskApprove', BOOT.key, id); renderAdmin(); toast('اعتمدتها'); }
+  try { S.data = await call('apiTaskApprove', BOOT.key, id); renderAdmin(); toast('تم الاعتماد'); }
   catch (e) { toastErr(e); }
 }
 function askReturn(id) {
@@ -2410,8 +2430,8 @@ function wBadge(x) {
 function invSt(x, emp) {
   if (x.kind === 'give') return ['', x.paidBy === 'own' ? (emp ? 'رجعت لك' : 'سداد') : x.paidBy === 'ret' ? (emp ? 'رجّعته للمدير' : 'رجّع الباقي') : (emp ? 'استلمت عهدة' : 'عهدة')];
   if (x.status === 'review') return ['a', emp ? 'تنتظر' : 'تنتظر مراجعتك'];
-  if (x.status === 'returned') return ['late', 'رجعت'];
-  return ['', 'انعتمدت'];
+  if (x.status === 'returned') return ['late', 'مرتجعة'];
+  return ['', 'معتمدة'];
 }
 function invPhotosHtml(x, admin) {
   if (!x.nph) return '';
@@ -2691,7 +2711,7 @@ function renderFinProj(c, k) {
 }
 
 async function invApprove(id) {
-  try { S.data = await call('apiInvApprove', BOOT.key, id); renderAdmin(); toast('اعتمدتها'); }
+  try { S.data = await call('apiInvApprove', BOOT.key, id); renderAdmin(); toast('تم الاعتماد'); }
   catch (e) { toastErr(e); }
 }
 function askInvReturn(id) {
@@ -3792,27 +3812,41 @@ function rpAdminView() {
   $('#view').innerHTML = tvSeg(S.data) + rpSummaryHtml();
   fb.innerHTML = I('plus', 26, 2.5); fb.setAttribute('aria-label', 'إضافة تقرير'); fb.classList.remove('hide');
 }
+/* الإصدار 78: بطاقات التقارير مرتّبة: شارة الحالة، وأرقام الحالية واللاحقة والمنجزة، وأول عملين، و«بلا تقارير» سطر واحد */
+function rpSeen() { try { return JSON.parse(lsGet('rp_seen') || 'null'); } catch (e) { return null; } }
+function rpMarkSeen(id) { const a = rpSeen() || []; if (!a.includes(id)) { a.push(id); lsSet('rp_seen', JSON.stringify(a.slice(-300))); } }
+function rpIsNew(r) { const a = rpSeen(); return !!(a && r.by !== 'admin' && !a.includes(r.id)); }
+function rpAgeDays(r) { const t = rpToday(); if (!t || !r.date) return 0; return Math.round((Date.parse(t + 'T12:00:00Z') - Date.parse(r.date + 'T12:00:00Z')) / 864e5); }
 function rpSummaryHtml() {
   const ps = rpProjs(), withR = ps.filter(p => rpLast(p.id)), none = ps.filter(p => !rpLast(p.id));
-  withR.sort((a, b) => { const ra = rpLast(a.id), rb = rpLast(b.id); return (rpPend(rb) ? 1 : 0) - (rpPend(ra) ? 1 : 0) || (rb.ts || 0) - (ra.ts || 0); });
+  if (rpSeen() === null && RP.reps) lsSet('rp_seen', JSON.stringify(RP.reps.map(r => r.id).slice(-300)));
+  const rank = r => rpPend(r) ? 2 : rpIsNew(r) ? 1 : 0;
+  withR.sort((a, b) => { const ra = rpLast(a.id), rb = rpLast(b.id); return rank(rb) - rank(ra) || (rb.ts || 0) - (ra.ts || 0); });
   let h = withR.length ? '<div class="rpl">' + withR.map(p => rpCardHtml(rpLast(p.id))).join('') + '</div>' : emptyHtml('file-text', 'لا توجد تقارير بعد. التقارير التي يرسلها الموظفون تظهر هنا');
-  if (none.length && withR.length) h += `<div class="rph2">مشاريع بلا تقارير</div><div class="tbl2">${none.map(p => tbRow('folder', esc(p.name), '<span class="lv">إضافة تقرير</span>', `rpOpenForm('${p.id}',true)`)).join('')}</div>`;
+  if (none.length && withR.length) {
+    h += `<button class="rpfold" aria-expanded="${!!RP.noneOpen}" onclick="RP.noneOpen=!RP.noneOpen;rpRerender()"><span class="ic">${I('folder', 16)}</span><span class="k">مشاريع بلا تقارير</span><span class="v">${none.length}<span class="cv2 ${RP.noneOpen ? 'on' : ''}">${I('chevron-left', 16)}</span></span></button>`;
+    if (RP.noneOpen) h += `<div class="tbl2" style="margin-top:8px">${none.map(p => tbRow('folder', esc(p.name), '<span class="lv">إضافة تقرير</span>', `rpOpenForm('${p.id}',true)`)).join('')}</div>`;
+  }
   return h;
 }
 function rpCardHtml(r) {
-  const dec = rpArr(r.decide), up = rpArr(r.up), rest = rpArr(r.cur).filter(x => !up.includes(x)), nd = rpArr(r.done).length, nl = rpArr(r.later).length;
-  const decH = dec.length ? (r.reply
-    ? `<div class="rpd ok">${I('circle-check', 15)}<div><b>${rpReplyT(r.reply)}:</b> ${esc(dec.join('، '))}</div></div>`
-    : `<div class="rpd">${I('triangle-alert', 15)}<div><b>بانتظار قرارك:</b> ${esc(dec.join('، '))}</div></div>`) : '';
+  const dec = rpArr(r.decide), up = rpArr(r.up), cur = rpArr(r.cur), ord = up.filter(x => cur.includes(x)).concat(cur.filter(x => !up.includes(x)));
+  const nc = cur.length, nl = rpArr(r.later).length, nd = rpArr(r.done).length, age = rpAgeDays(r);
+  const chip = rpPend(r) ? '<span class="rchip dec">بانتظار قرارك</span>' : rpIsNew(r) ? '<span class="rchip new">جديد</span>' : age > 3 ? `<span class="rchip old">من ${age} ${age <= 10 ? 'أيام' : 'يوماً'}</span>` : '';
+  const st = [nc ? `<span><i></i>${nc === 1 ? 'عمل حالي واحد' : nc === 2 ? 'عملان حاليان' : nc + ' حالية'}</span>` : '',
+    nl ? `<span><i class="l"></i>${nl === 1 ? 'عمل لاحق واحد' : nl === 2 ? 'عملان لاحقان' : nl + ' لاحقة'}</span>` : '',
+    nd ? `<span><i class="d"></i>${nd === 1 ? 'عمل أُنجز' : nd === 2 ? 'عملان أُنجزا' : nd + ' أُنجزت'}</span>` : ''].join('');
+  const decH = dec.length && !r.reply ? `<div class="rpd">${I('triangle-alert', 15)}<div><b>القرار:</b> ${esc(dec.join('، '))}</div></div>` : '';
+  const more = ord.length - 2;
   return `<button class="rpc" onclick="rpOpen('${r.id}')">
-    <div class="rph"><b>${esc(rpPName(r.proj))}</b><span class="rpm">${esc(rpBy(r))} · ${esc(rpRel(r.date))}</span></div>
+    <div class="rph"><b>${esc(rpPName(r.proj))}</b>${chip}</div>
+    <div class="rpm2">${esc(rpBy(r))} · ${esc(rpRel(r.date))}</div>
+    ${st ? `<div class="rst">${st}</div>` : ''}
     ${decH}
-    ${up.length ? `<div class="rpr up">${I('clock', 13)}<span><b>حان وقته:</b> ${esc(up.join('، '))}</span></div>` : ''}
-    ${rest.length ? `<div class="rpr"><b>المتبقي:</b> ${esc(rest.join('، '))}</div>` : (up.length ? '' : '<div class="rpr">لا توجد أعمال متبقية</div>')}
-    ${nd || nl ? `<div class="rpr lt">${nd ? `<span class="okc">${I('check-check', 13)}أُنجز ${nd}</span>` : ''}${nl ? `<span>${I('history', 13)}${rpNLater(nl)}</span>` : ''}</div>` : ''}
+    ${ord.length ? '<ul class="rpv">' + ord.slice(0, 2).map(x => `<li>${esc(x)}${up.includes(x) ? '<span class="tg2 g">حان وقته</span>' : ''}</li>`).join('') + '</ul>' + (more > 0 ? `<div class="rpmore">${more === 1 ? 'وعمل آخر' : more === 2 ? 'وعملان آخران' : 'و' + more + (more <= 10 ? ' أعمال أخرى' : ' عملاً آخر')}</div>` : '') : '<div class="rpmore" style="padding:6px 0 0">لا توجد أعمال حالية</div>'}
   </button>`;
 }
-function rpOpen(id) { RP.open = id; RP.hist = null; RP.draft = ''; rpRerender(); toTop(); }
+function rpOpen(id) { rpMarkSeen(id); RP.open = id; RP.hist = null; RP.draft = ''; rpRerender(); toTop(); }
 function rpClose() { RP.open = null; RP.draft = ''; rpRerender(); toTop(); }
 function rpOpenHist(p) { RP.hist = p; RP.unArm = null; rpRerender(); toTop(); }
 function rpCloseHist() { RP.hist = null; rpRerender(); toTop(); }
@@ -4310,7 +4344,7 @@ function nfDay(ms) { return new Intl.DateTimeFormat('en-CA', {timeZone: 'Asia/Ri
 function nfTime(ms) { const p = new Intl.DateTimeFormat('en-GB', {timeZone: 'Asia/Riyadh', hour: '2-digit', minute: '2-digit', hour12: false}).format(new Date(ms)).split(':'); return hm12(+p[0], p[1]); }
 function nfIcon(t) {
   return /تقرير/.test(t) ? 'file-text' : /إثبات/.test(t) ? 'check-check' : /فاتور/.test(t) ? 'receipt' : /وصل|طلع|البيت|الدوام/.test(t) ? 'map-pin'
-    : /اعتمد|انعتمد/.test(t) ? 'circle-check' : /توجيه/.test(t) ? 'clipboard-list' : /مهم|شرح/.test(t) ? 'list-checks' : /رد/.test(t) ? 'message-circle' : 'bell';
+    : /اعتمد|انعتمد|اعتُمد/.test(t) ? 'circle-check' : /توجيه/.test(t) ? 'clipboard-list' : /مهم|شرح/.test(t) ? 'list-checks' : /رد/.test(t) ? 'message-circle' : 'bell';
 }
 function nfRow(x) {
   const go = x.u && /^[a-z]:[A-Za-z0-9_-]+$/.test(x.u);
@@ -4439,7 +4473,7 @@ async function doApprove(id) {
   b.disabled = true; b.textContent = 'جاري الاعتماد…';
   try {
     S.data = await call('apiTaskApprove2', BOOT.key, id, ($('#apc') || {}).value || '');
-    ovClose(); renderAdmin(); toast('اعتمدتها');
+    ovClose(); renderAdmin(); toast('تم الاعتماد');
   } catch (e) {
     b.disabled = false; b.innerHTML = I('check', 17, 2.5) + 'اعتمدها';
     const er = $('#aperr'); if (er) er.textContent = e;
