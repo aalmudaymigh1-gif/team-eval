@@ -878,6 +878,7 @@
       flush();
       return r;
     },
+    async apiRepNow(id, item, undo) { return rpc('rep_later_now', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), undo: !!undo }); },
     async apiRepDecDel(id, item) { return rpc('rep_dec_del', { k: CRED.k || '', id: String(id || ''), item: String(item || '') }); },
     async apiNotifs() { return rpc('notif_list', { k: CRED.k || '', t: CRED.t || '' }); },
     async apiTaskApprove2(k, id, txt) {
