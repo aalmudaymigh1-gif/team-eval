@@ -5,6 +5,8 @@
   const sb = supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
   const BUCKET = 'files';
   const FN_URL = SB_URL + '/functions/v1/push';
+  const FILES_URL = SB_URL + '/functions/v1/files';
+  let CRED = {};
   const NOTIFY = ['tasks_add', 'task_return', 'task_update', 'inv_approve', 'inv_return'];
   function flush() {
     fetch(FN_URL, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: '{"op":"flush"}', keepalive: true }).catch(() => {});
@@ -46,8 +48,8 @@
   const gemp = (t, op, a) => rpc('guide_emp', { t: t, op: op, a: a || {} });
 
   let RAW = null;
-  async function loadAdmin(k) { RAW = norm(await rpc('admin_raw', { k: k })); return RAW; }
-  async function loadEmp(t) { RAW = norm(await rpc('emp_raw', { t: t })); return RAW; }
+  async function loadAdmin(k) { CRED = { k: k }; RAW = norm(await rpc('admin_raw', { k: k })); return RAW; }
+  async function loadEmp(t) { CRED = { t: t }; RAW = norm(await rpc('emp_raw', { t: t })); return RAW; }
 
   function norm(r) {
     r.employees = (r.employees || []).map(e => ({ id: e.id, name: e.name, salary: Number(e.salary) || 0, max: Number(e.max) || 0,
@@ -77,11 +79,28 @@
     if (u.length > 8 * 1024 * 1024) throw new Error('الصورة كبيرة، جرّب وحدة ثانية');
     return new Blob([u], { type: m[1] });
   }
-  async function put(path, blob, type) {
-    const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType: type, upsert: false, cacheControl: '31536000' });
-    if (error) throw new Error(friendly(error));
-    return path;
+  function put(path, blob, type, onProgress) {
+    return new Promise((res, rej) => {
+      const x = new XMLHttpRequest();
+      x.open('POST', SB_URL + '/storage/v1/object/' + BUCKET + '/' + path);
+      x.setRequestHeader('apikey', SB_KEY);
+      x.setRequestHeader('Authorization', 'Bearer ' + SB_KEY);
+      x.setRequestHeader('Content-Type', type || blob.type || 'application/octet-stream');
+      x.setRequestHeader('x-upsert', 'false');
+      x.setRequestHeader('cache-control', 'max-age=31536000');
+      if (onProgress && x.upload) x.upload.onprogress = ev => { if (ev.lengthComputable) onProgress(ev.loaded / ev.total); };
+      x.onload = () => {
+        if (x.status >= 200 && x.status < 300) return res(path);
+        let m = ''; try { m = JSON.parse(x.responseText).message || ''; } catch (e) {}
+        rej(new Error(m || 'ما ارتفع الملف، جرّب مرة ثانية'));
+      };
+      x.onerror = () => rej(new Error('ما فيه اتصال، تأكد من النت وجرّب مرة ثانية'));
+      x.ontimeout = () => rej(new Error('الاتصال تأخر، جرّب مرة ثانية'));
+      x.send(blob);
+    });
   }
+  /* الصورة اللي ارتفعت ما ترتفع مرة ثانية لو أعاد المحاولة */
+  const UPD = new Map();
   const thumbOf = p => /\.jpg$/.test(p) ? p.replace(/\.jpg$/, '_t.jpg') : '';
   async function makeThumb(blob) {
     let src;
@@ -101,8 +120,9 @@
     return path;
   }
 
-  /* روابط الصور: تنطلب دفعة وحدة وتنحفظ في المتصفح 6 أيام عشان الصورة تنفتح من الكاش */
-  const LS = 'urlc1', TTL = 7 * 86400, KEEP = 6 * 864e5;
+  /* روابط الصور (من الإصدار 60): تطلع من دالة files بعد التحقق من الصلاحية، صالحة ساعة، وتنحفظ 50 دقيقة */
+  const LS = 'urlc2', KEEP = 50 * 60000;
+  try { localStorage.removeItem('urlc1'); } catch (e) {}
   let UC = {};
   try { UC = JSON.parse(localStorage.getItem(LS) || '{}') || {}; } catch (e) { UC = {}; }
   (function prune() { const n = Date.now(); Object.keys(UC).forEach(k => { if (!UC[k] || UC[k].x < n) delete UC[k]; }); })();
@@ -114,10 +134,15 @@
     if (!need.length) return;
     for (let i = 0; i < need.length; i += 100) {
       const part = need.slice(i, i + 100);
-      const { data, error } = await sb.storage.from(BUCKET).createSignedUrls(part, TTL);
-      if (error) throw new Error('ما قدرت أفتح الملف');
-      const x = Date.now() + KEEP;
-      (data || []).forEach((d, j) => { const p = d.path || part[j]; UC[p] = { u: d.signedUrl || '', x: x }; });
+      let j = null;
+      try {
+        const r = await fetch(FILES_URL, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.assign({ op: 'sign', paths: part }, CRED)) });
+        j = await r.json().catch(() => null);
+        if (!r.ok) throw new Error((j && j.error) || 'ما قدرت أفتح الملف');
+      } catch (e) { throw new Error(friendly(e)); }
+      const x = Date.now() + KEEP, urls = (j && j.urls) || {};
+      part.forEach(p => { if (urls[p]) UC[p] = { u: urls[p], x: x }; });
     }
     saveUC();
   }
@@ -315,7 +340,7 @@
   function invOut_(x, pmap) {
     return { id: x.id, ts: x.ts, emp: x.emp, kind: x.kind, amount: x.amount, desc: x.desc, project: x.project,
       pname: x.project ? (pmap[x.project] || '') : '', nph: x.photos.length, photos: x.photos, status: x.status, reason: x.reason,
-      method: x.method || '', warrantyUntil: x.warrantyUntil || '', vendor: x.vendor || '', task: x.task || '',
+      method: x.method || '', warrantyUntil: x.warrantyUntil || '', vendor: x.vendor || '', task: x.task || '', taskDeleted: !!x.taskDeleted,
       paidBy: ['card', 'own', 'ret'].indexOf(x.paidBy) >= 0 ? x.paidBy : 'cash' };
   }
 
@@ -410,10 +435,13 @@
   async function empUpload(token, dataUrls, max) {
     const list = (Array.isArray(dataUrls) ? dataUrls : [dataUrls]).filter(Boolean).slice(0, max);
     return Promise.all(list.map(async d => {
+      if (UPD.has(d)) return UPD.get(d);
       const blob = dataUrlBlob(d);
       if (blob.size > 5 * 1024 * 1024) throw new Error('الصورة كبيرة، جرّب وحدة ثانية');
       const r = await eexec(token, 'ticket', {});
-      return putImg(r.path, blob);
+      const p = await putImg(r.path, blob);
+      UPD.set(d, p);
+      return p;
     }));
   }
 
@@ -470,7 +498,16 @@
       return adminDo(k, 'settings_save', out);
     },
 
-    async apiNewAdminLink(k) { return aexec(k, 'admin_newkey', {}); },
+    async apiAdminLogin(code, label) { return rpc('admin_login', { code: String(code || '').trim(), label: String(label || '').slice(0, 60) }); },
+    async apiAdminCode(k) { return rpc('admin_code_new', { k: k }); },
+    async apiAdminRotate(k) { return rpc('admin_rotate', { k: k }); },
+    async apiAdminLogout(k) { return rpc('admin_logout', { k: k }); },
+    async apiCleanup(k, apply) {
+      const r = await fetch(FILES_URL, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ op: 'cleanup', k: k, apply: !!apply }) });
+      const j = await r.json().catch(() => null);
+      if (!r.ok) throw new Error((j && j.error) || 'ما قدرت أجيب الملفات');
+      return j;
+    },
 
     async apiPreview(k, empId) {
       await loadAdmin(k);
@@ -572,7 +609,7 @@
     },
 
     async apiTasksAdd(k, x) {
-      await loadAdmin(k);
+      if (!RAW || !RAW.employees || CRED.k !== k) await loadAdmin(k);
       const act = RAW.employees.filter(e => e.active).map(e => e.id);
       const ids = (x.emps || []).filter((id, i, a) => a.indexOf(id) === i && act.indexOf(id) >= 0);
       if (!ids.length) throw new Error('اختر الموظف');
@@ -601,10 +638,8 @@
     async apiTaskDelete(k, id) { return adminDo(k, 'task_del', { id: id }); },
     async apiTasksDelete(k, ids) {
       if (!Array.isArray(ids) || !ids.length) throw new Error('ما حددت مهام');
-      let err = null;
-      for (const id of ids) { try { await aexec(k, 'task_del', { id: String(id) }); } catch (e) { err = e; } }
+      await rpc('tasks_del', { k: k, ids: ids.map(String) });
       await loadAdmin(k);
-      if (err) throw new Error('بعض المهام ما انحذفت، اسحب الصفحة لتحت وجرّب مرة ثانية');
       return adminPayload_();
     },
 
@@ -650,12 +685,15 @@
     prefetch: prefetch,
 
     async apiUploadImg(k, dataUrl) {
+      if (UPD.has(dataUrl)) return UPD.get(dataUrl);
       const blob = dataUrlBlob(dataUrl);
       const r = await aexec(k, 'ticket', { kind: 'img', ext: 'jpg' });
-      return putImg(r.path, blob);
+      const p = await putImg(r.path, blob);
+      UPD.set(dataUrl, p);
+      return p;
     },
 
-    async apiUploadVid(k, file) {
+    async apiUploadVid(k, file, onProgress) {
       if (!file) throw new Error('ما وصل الفيديو، جرّب مرة ثانية');
       if (file.size > MAX_VID) throw new Error('الفيديو أكبر من الحد، صوّره أقصر');
       const ext = ((String(file.name || '').match(/\.(\w{2,4})$/) || [])[1] || 'mp4').toLowerCase();
@@ -663,7 +701,7 @@
       let type = String(file.type || '');
       if (['video/mp4', 'video/quicktime', 'video/webm', 'video/3gpp'].indexOf(type) < 0) type = known[ext] || 'video/mp4';
       const r = await aexec(k, 'ticket', { kind: 'vid', ext: ext === 'm4v' ? 'mp4' : ext });
-      return put(r.path, file, type);
+      return put(r.path, file, type, onProgress);
     },
 
     async apiUploadAud(k, blob) {
@@ -696,7 +734,7 @@
       const paths = await empUpload(token, dataUrls, 3);
       if (!paths.length) throw new Error('صوّر الفاتورة');
       const w = Math.round(Number(x.warranty) || 0);
-      await eexec(token, 'inv_add', { amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
+      await eexec(token, 'inv_add', { cid: String(x.cid || ''), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
       flush();
       return API.apiEmp(token);
     },
