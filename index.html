@@ -539,7 +539,6 @@ h1{font-size:17px;font-weight:600;letter-spacing:0}
 .btn2.cu,.bigdo,.save .btn,.dock .btn{background:var(--acc)!important;border-color:var(--acc)!important;color:#fff!important;border-radius:18px!important;font-weight:500!important}
 .badge,.pill{font-weight:500;border-radius:999px}
 .badge.wait{background:var(--acc-soft);color:var(--acc-dk)}
-.tg.on{background:var(--acc)}
 .attgo{background:var(--acc)!important;border-radius:var(--r2)!important}
 .pgh2,.ivbal,.ec,.stc{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--line2)}
 .gban{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--line2)!important;box-shadow:none!important}
@@ -619,10 +618,10 @@ img.ph{cursor:zoom-in}
 .fxh{display:flex;align-items:baseline;justify-content:space-between;margin:14px 2px 12px}
 .fxh h2{font-size:17px;font-weight:600;margin:0}.fxh span{color:var(--muted);font-size:13px}
 .fxs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
-.fxs div{background:var(--surface);border:1px solid var(--line2);border-radius:18px;padding:11px 10px;min-width:0}
+.fxs div{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:11px 10px;min-width:0}
 .fxs b{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-bottom:6px}
 .fxs small{display:block;font-size:12px;color:var(--faint);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fxa{background:var(--amber-soft,#F8F1E4);border:1px solid #EFE2C8;border-radius:18px;margin-bottom:14px;overflow:hidden}
+.fxa{background:var(--surface);border:1px solid var(--line);border-radius:18px;margin-bottom:14px;overflow:hidden}
 .fxa .r{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;font:inherit;font-size:14px;color:var(--text);background:none;border:0;text-align:start;cursor:pointer}
 .fxa .r+.r{border-top:1px solid #EFE2C8}.fxa .dt{width:8px;height:8px;border-radius:50%;background:var(--amber);flex:none}
 .fxa .r em{margin-inline-start:auto;font-style:normal;color:var(--muted);display:flex;align-items:center;gap:6px}
@@ -661,7 +660,7 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .tbh{display:flex;align-items:center;gap:10px;margin:22px 2px 8px}
 .tbh .n{flex:1;min-width:0}.tbh .n b{display:block;font-size:17px;font-weight:600;line-height:1.35}.tbh .n span{font-size:13px;color:var(--muted)}
 .tbh .rate{flex:none;height:34px;padding:0 14px;border-radius:17px;border:0;background:var(--acc-dk);color:#fff;font:inherit;font-size:13px;display:flex;align-items:center;gap:6px;cursor:pointer}
-.tbl2{background:#fff;border:1px solid var(--line2);border-radius:18px;overflow:hidden}
+.tbl2{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
 .tbr{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;padding:0 14px;background:none;border:0;border-top:1px solid var(--line);font:inherit;color:inherit;text-align:right;cursor:pointer}
 .tbr:first-child{border-top:0}.tbr:active{background:var(--fill)}
 .tbr .ic{width:30px;height:30px;border-radius:9px;background:var(--fill);color:var(--muted);display:flex;align-items:center;justify-content:center;flex:none}
@@ -671,12 +670,12 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .imp{display:flex;gap:7px;align-items:flex-start;margin-top:12px;font-size:13px;line-height:1.7;color:var(--muted)}.imp svg{color:var(--red);flex:none;margin-top:3px}.imp b{color:var(--text);font-weight:500}
 
 /* الإصدار 55: برواز حول كل موظف (اسمه وفروعه)، ومهامه في صفحته */
-.tfr{border:1px solid var(--line2);border-radius:22px;padding:0 12px 12px;margin-top:14px}.tfr .tbh{margin-top:12px}
+.tfr{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:0 12px 12px;margin-top:14px}.tfr .tbh{margin-top:12px}
 
 /* الإصدار 56: قفل مجموعة المشروع، وترتيب الفريق، وقوائم المالية بيضا بدال الأشرطة الزرقا */
 
 .fseg{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 0}.fseg .lnk{padding:0;display:flex;align-items:center;gap:5px;flex:none}
-.fxs div{background:#fff!important}.fxa{background:#fff!important;border-color:var(--line2)!important}.fxa .r+.r{border-top-color:var(--line)!important}
+.fxa .r+.r{border-top-color:var(--line)}
 .fxl2{margin-top:10px}
 .tbr.ar{opacity:.6}.tbr.ordr{cursor:default}.tbr.ordr:active{background:none}
 .tbr .ord{display:flex;gap:6px;flex:none}.tbr .ord button{width:34px;height:34px;border-radius:10px;border:0;background:var(--fill);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer}.tbr .ord button[disabled]{opacity:.3}
@@ -684,8 +683,6 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .fxt.tord{margin:12px 2px 0}
 .pgh2 .pge{display:flex;align-items:center;gap:8px;flex:none}.pgh2 .cg{display:flex;transition:transform .2s var(--ease);transform:rotate(-90deg)}.pgrp.cl .pgh2 .cg{transform:none}
 /* الإصدار 57: كل البطاقات بلون بطاقات التقييم، و«رتّب» المشاريع مثل الفريق، والرواتب من يوم 28، والإعدادات فروع */
-.tbl2,.fxs div,.fxa{background:var(--surface)!important;border-color:var(--line)!important}
-.tfr{background:var(--surface);border-color:var(--line)}
 .fseg .ordb{background:none;border:0;font:inherit;font-size:13px;color:var(--acc-dk);display:flex;align-items:center;gap:6px;cursor:pointer;flex:none;padding:0 2px}
 .fxs.two{grid-template-columns:1fr 1fr}
 .fxs div.due b,.fxs div.due small{color:var(--red)}
