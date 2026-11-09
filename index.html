@@ -640,6 +640,12 @@ img.ph{cursor:zoom-in}
 .fxbt{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
 .fxbt button{background:#fff;border:1px solid var(--line2);border-radius:14px;padding:9px 2px;font:inherit;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--text);cursor:pointer;line-height:1.25}
 .fxbt button.rd{color:var(--red)}
+.fxlf{margin:8px 0 2px}
+.fxlf button{padding:6px 16px!important;font-size:13px!important}
+.tm .rb{color:#55554f}
+.tbh .n .ls{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.tbh .n .ls.on{color:var(--green)}
+.tbh .n .ls.on:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-inline-end:5px;vertical-align:1px}
 .fxl .str .tm{font-size:12px}
 body.kb .tabs,body.kb .fab{opacity:0!important;pointer-events:none!important;transform:translateY(24px)!important}
 
@@ -973,9 +979,9 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=77"></script>
+<script src="api.js?v=80"></script>
 <script>
-const APP_VER = '79';
+const APP_VER = '80';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -1712,7 +1718,7 @@ function mountTabs() {
   if (old) old.remove();
   if (t) { t.id = 'tabsDock'; document.body.appendChild(t); }
 }
-function go(v) { NF.open = false; RP.open = null; RP.hist = null; S.tsub = null; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false, due: false}); S.view = v; lsSet('adm_view', v); S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
+function go(v) { NF.open = false; RP.open = null; RP.hist = null; S.tsub = null; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false, due: false, lf: 'all'}); S.view = v; lsSet('adm_view', v); S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
 function rerender() { renderAdmin(); }
 
 /* ---------- تسجيل ---------- */
@@ -1849,9 +1855,16 @@ function teamEmp(d, e) {
   const rv = ts.filter(t => t.status === 'review').length, op = ts.filter(t => t.status === 'open' || t.status === 'returned').length, lt = ts.filter(t => t.late).length;
   const tv = [rv ? rv + ' تنتظرك' : '', op ? op + ' مفتوحة' : '', lt ? `<span class="lt">${lt} متأخرة</span>` : ''].filter(Boolean).join(' · ');
   const lv = [m.misses ? m.misses + ' تقصير' : '', m.stars ? m.stars + ' مميز' : ''].filter(Boolean).join(' · ');
-  return `<div class="tfr"><div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span></div>
+  return `<div class="tfr"><div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span>${seenHtml(e.seen)}</div>
       <button class="lnkb" onclick="tsub('${e.id}','link')" aria-label="رابط صفحته">${I('link', 16)}</button><button class="rate" onclick="rateEmp('${e.id}')">${I('clipboard-check', 14)}قيّمه</button></div>
     <div class="tbl2">${m.track ? tbRow('history', 'المواقف', lv || 'ما فيه', `tsub('${e.id}','log')`) : tbRow('sparkles', 'الحافز', M(m.bonus, '', 'pos') + (lv ? ` <span class="lv">· ${lv}</span>` : ''), `tsub('${e.id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${e.id}')`) : ''}${tbRow('list-checks', 'المهام', tv || 'ما عنده', `tsub('${e.id}','tasks')`)}</div></div>`;
+}
+/* الإصدار 80: آخر ظهور للموظف في التطبيق */
+function seenHtml(ms) {
+  if (!ms) return '<span class="ls">ما فتح التطبيق بعد</span>';
+  const now = Date.now(), d = nfDay(ms), t = (S.data || {}).today || nfDay(now), y = nfDay(now - 864e5);
+  if (now - ms < 10 * 60e3) return '<span class="ls on">متصل الآن</span>';
+  return `<span class="ls">آخر ظهور ${d === t ? 'اليوم' : d === y ? 'أمس' : dmy(d).slice(0, 5)} ${nfTime(ms)}</span>`;
 }
 function teamTasksHtml(d, e) {
   const list = allTasks().filter(t => t.emp === e.id);
@@ -2656,15 +2669,15 @@ function renderFinRv(c) {
 
 function finLedger(c, e) {
   const L = [], mine = c.items.filter(x => x.emp === e.id);
-  mine.filter(x => x.kind === 'give').forEach(x => L.push({ts: x.ts, h: `<div class="str"><span><b style="font-weight:600">${x.paidBy === 'own' ? 'سدّدت له' : x.paidBy === 'ret' ? 'رجّع من العهدة' : 'عطيته عهدة'}</b>${x.desc && !['عهدة', 'سداد', 'رجّع الباقي'].includes(x.desc) ? ' · ' + esc(x.desc) : ''}<div class="tm">${dmyt(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}</div></span>
+  mine.filter(x => x.kind === 'give').forEach(x => L.push({ts: x.ts, k: 'c', dc: x.paidBy === 'own' ? 0 : x.paidBy === 'ret' ? -x.amount : x.amount, h: `<div class="str"><span><b style="font-weight:600">${x.paidBy === 'own' ? 'سدّدت له' : x.paidBy === 'ret' ? 'رجّع من العهدة' : 'عطيته عهدة'}</b>${x.desc && !['عهدة', 'سداد', 'رجّع الباقي'].includes(x.desc) ? ' · ' + esc(x.desc) : ''}<div class="tm">${dmyt(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}%%B%%</div></span>
       <span style="display:flex;align-items:center;gap:4px"><b class="iva ${x.paidBy === 'ret' ? 'r' : 'g'}">${M(x.amount, x.paidBy === 'ret' ? '−' : '+', x.paidBy === 'ret' ? 'neg' : 'pos')}</b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`}));
   mine.filter(x => x.kind === 'inv' && x.status === 'ok').forEach(x => {
     const fromC = (x.paidBy || 'cash') === 'cash';
-    L.push({ts: x.ts, h: `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">فاتورة · ${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmyt(x.ts)} · ${esc(x.pname || 'عام')}${fromC ? ' · من العهدة' : ''}</div></span><b class="iva">${M(x.amount, fromC ? '−' : '', fromC ? 'neg' : '')} ‹</b></div></button>`});
+    L.push({ts: x.ts, k: 'c', dc: fromC ? -x.amount : 0, h: `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">فاتورة · ${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmyt(x.ts)} · ${esc(x.pname || 'عام')}${fromC ? ' · من العهدة' : ''}%%B%%</div></span><b class="iva">${M(x.amount, fromC ? '−' : '', fromC ? 'neg' : '')} ‹</b></div></button>`});
   });
   (e.tx || []).forEach(t => {
     const armed = S.armed === 'tx_' + t.id;
-    L.push({ts: t.date, h: `<div class="str"><span><b style="font-weight:600">${esc(txText(t))}</b>${t.note ? ' · ' + esc(t.note) : ''}<div class="tm">${dmy(t.date)}</div></span>
+    L.push({ts: t.date, k: 's', h: `<div class="str"><span><b style="font-weight:600">${esc(txText(t))}</b>${t.note ? ' · ' + esc(t.note) : ''}<div class="tm">${dmy(t.date)}</div></span>
       <span style="display:flex;align-items:center;gap:4px"><b class="iva">${M(t.amount, t.kind === 'ded' ? '−' : '', t.kind === 'ded' ? 'neg' : '')}</b><button class="ed ${armed ? 'arm' : ''}" style="${armed ? 'color:var(--red);font-size:13px' : ''}" onclick="armTx('${t.id}')" aria-label="حذف">${armed ? 'احذف؟' : I('trash-2', 15)}</button></span></div>`});
   });
   return L.sort((a, b) => a.ts < b.ts ? 1 : a.ts > b.ts ? -1 : 0);
@@ -2689,8 +2702,15 @@ function renderFinEmp(c, id) {
       <button onclick="openForm('${id}','loan')">${I('banknote', 18)}سلفة</button>
       <button onclick="openForm('${id}','adv')">${I('wallet', 18)}راتب مقدم</button>
       <button class="rd" onclick="openForm('${id}','ded')">${I('circle-dollar-sign', 18)}خصم</button></div>`}</div>`;
-  const L = finLedger(c, e), show = S.fx.all ? L : L.slice(0, 12);
-  h += `<div class="sech">كل حركاته<span>${L.length}</span></div>`;
+  /* الإصدار 80: فلتر الحركات (الكل · العهدة · الراتب)، و«العهدة» فيها الرصيد بعد كل حركة */
+  const lf = ['c', 's'].includes(S.fx.lf) ? S.fx.lf : 'all', LA = finLedger(c, e);
+  let bal = 0, bOk = true;
+  LA.slice().reverse().forEach(x => { if (x.k === 'c' && x.dc) { bal = Math.round((bal + x.dc) * 100) / 100; x.bal = bal; } });
+  if (Math.abs(bal - (p.c || 0)) > 0.01) bOk = false;
+  const L = LA.filter(x => lf === 'all' || x.k === lf).map(x => ({ts: x.ts, h: x.h.replace('%%B%%', lf === 'c' && bOk && x.bal !== undefined ? ` · <span class="rb">معه بعدها ${M(x.bal, x.bal < 0 ? '−' : '', 't')}</span>` : '')}));
+  const show = S.fx.all ? L : L.slice(0, 12);
+  h += `<div class="sech">${lf === 'c' ? 'حركات العهدة' : lf === 's' ? 'حركات الراتب' : 'كل حركاته'}<span>${L.length}</span></div>`;
+  h += `<div class="segc fxlf">${[['all', 'الكل'], ['c', 'العهدة'], ['s', 'الراتب']].map(o => `<button class="${lf === o[0] ? 'on' : ''}" onclick="S.fx.lf='${o[0]}';S.fx.all=false;renderFin()">${o[1]}</button>`).join('')}</div>`;
   h += L.length ? `<div class="card fxl" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${show.map(x => x.h).join('')}
       ${L.length > 12 ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كلها (' + L.length + ')'}</button>` : ''}</div>` : emptyHtml('wallet', 'ما فيه حركات للحين');
   $('#view').innerHTML = h;
@@ -3603,7 +3623,8 @@ async function sendDone(id) {
 
 /* ---------- التحديث ---------- */
 
-let lastLoad = Date.now(), refreshing = false;
+let lastLoad = Date.now(), refreshing = false, seenAt = Date.now();
+function seenPing() { if (Date.now() - seenAt < 300000 || /^preview/.test(BOOT.key || BOOT.token || '')) return; seenAt = Date.now(); API.seen(APP_VER, BOOT.page === 'admin' ? devLabel() : ''); }
 async function refresh(silent) {
   if (refreshing || S.busy) return;
   if (S.upN) { if (!silent) toast('انتظر لين يخلص الرفع', null, 'in'); return; }
@@ -3730,7 +3751,7 @@ async function refresh(silent) {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') healSoon(300);
     if (document.visibilityState === 'hidden' && S.rec) recStop();
-    if (document.visibilityState === 'visible') { if (Date.now() - lastLoad > 60000) refresh(true); else checkUpdate(); }
+    if (document.visibilityState === 'visible') { if (Date.now() - lastLoad > 60000) refresh(true); else checkUpdate(); seenPing(); }
   });
   window.addEventListener('error', () => toastErr('صار خطأ، اسحب الصفحة لتحت عشان تحدّث'));
 })();

@@ -439,7 +439,7 @@
         const mine = logs.filter(l => l.emp === e.id);
         const unpaid = monthsRange_(startMonth_(e, logs, fin), now).filter(mk => !isPaid_(fin, e.id, mk));
         return {
-          id: e.id, name: e.name, salary: e.salary, max: e.max, token: e.token, track: e.track, attend: e.attend, guide: e.guide,
+          id: e.id, name: e.name, salary: e.salary, max: e.max, token: e.token, track: e.track, attend: e.attend, guide: e.guide, seen: (RAW.seen || {})[e.id] || 0,
           month: calcMonth_(e, logs, now),
           recent: groups_(mine).slice(0, 15),
           unpaid: unpaid.map(mk => finMonth_(e, fin, logs, mk)),
