@@ -875,6 +875,15 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .mchip.arm button{background:var(--red);color:#fff}
 .mchip.add{color:var(--acc-dk);border-style:dashed;padding:8px 14px;cursor:pointer}
 #ov .sheet:has(#apc)>*{flex-shrink:0}
+/* الإصدار 66: الأعمال الحالية حيّة */
+.rpi.cur li{border-bottom:1px solid var(--line);padding-top:9px;padding-bottom:9px}
+.rpi.cur li:last-child{border-bottom:0}
+.rpi.cur li:before{background:var(--green);width:7px;height:7px;top:19px;right:1px;animation:livep 2s infinite}
+@keyframes livep{0%{box-shadow:0 0 0 0 rgba(47,133,90,.45)}70%{box-shadow:0 0 0 6px rgba(47,133,90,0)}100%{box-shadow:0 0 0 0 rgba(47,133,90,0)}}
+@media (prefers-reduced-motion:reduce){.rpi.cur li:before{animation:none}}
+.rpmeta .edl+.edl{margin-inline-start:12px}
+.edl.ok{color:var(--green)}
+#ov .sheet:has(#shm)>*{flex-shrink:0}
 </style>
 </head>
 <body>
@@ -884,9 +893,9 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=65"></script>
+<script src="api.js?v=66"></script>
 <script>
-const APP_VER = '65';
+const APP_VER = '66';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -3591,7 +3600,7 @@ async function rpLoad(manual) {
   if (manual) { RP.failed = false; rpRerender(); }
   try {
     const d = await API.apiRepList();
-    RP.reps = rpArr(d && d.reps); if (d && d.projs) RP.projs = d.projs;
+    RP.reps = rpArr(d && d.reps); if (d && d.projs) RP.projs = d.projs; if (d && d.shares) RP.shares = d.shares;
     RP.failed = false;
   } catch (e) {
     if (RP.reps === null) RP.failed = true;
@@ -3655,9 +3664,9 @@ function rpClose() { RP.open = null; RP.draft = ''; rpRerender(); toTop(); }
 function rpOpenHist(p) { RP.hist = p; rpRerender(); toTop(); }
 function rpCloseHist() { RP.hist = null; rpRerender(); toTop(); }
 
-function rpItems(arr, tags) {
+function rpItems(arr, tags, cls) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
-  return '<ul class="rpi">' + arr.map((x, i) => `<li>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>` : ''}</li>`).join('') + '</ul>';
+  return '<ul class="rpi ' + (cls || '') + '">' + arr.map((x, i) => `<li>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>` : ''}</li>`).join('') + '</ul>';
 }
 function rpLaterHtml(arr) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
@@ -3713,7 +3722,7 @@ function rpDetailHtml(isAdmin) {
   const tags = cur.map(x => up.includes(x) ? ['حان وقته', 'g'] : prev && !pCur.includes(x) ? ['جديد'] : null);
   const me = rpData() || {}, own = !isAdmin && r.by === me.id, notes = rpArr(r.notes);
   let h = `<button class="back" onclick="rpClose()">${I('arrow-right', 17)}${isAdmin ? 'التقارير' : 'تقاريري'}</button><h2>${esc(rpPName(r.proj))}</h2>
-    <div class="rpmeta">${I('file-text', 15)}<span>تقرير ${esc(rpBy(r))} · ${esc(dayLabel(r.date))}${all.length > 1 ? ` · ${all.length - i} من ${all.length}` : ''}${r.edited ? ' · <span class="edt">عدّله المدير العام</span>' : ''}</span>${isAdmin ? `<button class="edl" onclick="rpOpenEdit('${r.id}')">${I('pencil', 15)}تعديل</button>` : ''}</div>`;
+    <div class="rpmeta">${I('file-text', 15)}<span>تقرير ${esc(rpBy(r))} · ${esc(dayLabel(r.date))}${all.length > 1 ? ` · ${all.length - i} من ${all.length}` : ''}${r.edited ? ' · <span class="edt">عدّله المدير العام</span>' : ''}</span>${isAdmin ? `<button class="edl" onclick="rpOpenEdit('${r.id}')">${I('pencil', 15)}تعديل</button>${RP.pinged === r.id ? `<button class="edl ok">${I('check', 15, 2.5)}أُرسل التنبيه</button>` : `<button class="edl" onclick="rpShareOpen('${r.id}')">${I('bell-ring', 15)}تنبيه</button>`}` : ''}</div>`;
   if (dec.length) {
     h += `<div class="rpdec ${r.reply ? 'done' : ''}"><div class="rplab">${I(r.reply ? 'circle-check' : 'triangle-alert', 15)}القرارات والاعتمادات المطلوبة</div>${rpItems(dec)}`;
     if (r.reply) h += `<div class="rprep">${r.reply === 'ok' ? 'تم الاعتماد' : r.reply === 'no' ? 'لم يُعتمد' : 'تم الرد بملاحظة'}${isAdmin ? ` <button class="lnk" onclick="rpReply('${r.id}','')">تعديل</button>` : ''}</div>`;
@@ -3721,7 +3730,7 @@ function rpDetailHtml(isAdmin) {
     else h += '<div class="rprep">بانتظار رد المدير العام</div>';
     h += '</div>';
   }
-  h += `<div class="lbl">الأعمال الحالية</div>${rpItems(cur, tags)}`;
+  h += `<div class="lbl">الأعمال الحالية</div>${rpItems(cur, tags, 'cur')}`;
   h += `<div class="lbl">أُنجز في هذا التقرير</div>${rpDoneHtml(rpArr(r.done))}`;
   if (rpArr(r.removed).length) h += `<div class="rpgone rm">${I('x', 14, 2.5)}<div><b>حُذفت دون إنجاز:</b> ${esc(r.removed.join('، '))}</div></div>`;
   h += `<div class="lbl">الأعمال اللاحقة</div>${rpLaterHtml(rpArr(r.later))}`;
@@ -3759,14 +3768,29 @@ function rpEmpHtml(d, isPreview) {
   if (RP.reps === null) return rpLoadingHtml();
   const ps = rpProjs().slice().sort((a, b) => (b.mine ? 1 : 0) - (a.mine ? 1 : 0));
   if (!ps.length) return emptyHtml('folder', 'لا توجد مشاريع نشطة');
-  if (!ps.some(p => p.id === RP.eProj)) { const s = lsGet('rp_proj'); RP.eProj = ps.some(p => p.id === s) ? s : ps[0].id; }
-  let h = `<div class="qlab" style="margin-top:16px">${I('folder', 14)}المشروع</div><div class="qch">${ps.map(p => `<button class="${RP.eProj === p.id ? 'on' : ''}" onclick="rpPickProj('${p.id}')">${esc(p.name)}</button>`).join('')}</div>`;
-  if (RP.sent && RP.sent.proj === RP.eProj) h += `<div class="note good rsent">${I('circle-check', 16)}<div><b>تم إرسال تقرير ${esc(rpPName(RP.sent.proj))}</b><br>${esc(dayLabel(RP.sent.date))}</div></div>`;
-  if (!isPreview) h += `<button class="btn2 cu qbig" onclick="rpOpenForm('${RP.eProj}',false)">${I('file-text', 17)}إعداد تقرير</button>`;
-  const mine = rpOf(RP.eProj);
-  h += `<div class="rph2">تقارير ${esc(rpPName(RP.eProj))}</div>`;
-  h += mine.length ? '<div class="rpl">' + mine.map(r => rpEmpRowHtml(r, d)).join('') + '</div>' : emptyHtml('file-text', 'لا توجد تقارير لهذا المشروع بعد');
+  let h = '';
+  if (RP.sent) h += `<div class="note good rsent" style="margin-top:16px">${I('circle-check', 16)}<div><b>تم إرسال تقرير ${esc(rpPName(RP.sent.proj))}</b><br>${esc(dayLabel(RP.sent.date))}</div></div>`;
+  if (!isPreview) h += `<button class="btn2 cu qbig" style="margin-top:16px" onclick="rpOpenForm(null,false)">${I('file-text', 17)}إعداد تقرير</button>`;
+  const seen = {}, sh = rpArr(RP.shares).filter(x => { const r = (RP.reps || []).find(y => y.id === x.rep); if (!r || seen[x.rep]) return false; seen[x.rep] = 1; return true; }).slice(0, 5);
+  if (sh.length) h += `<div class="rph2">وصلك من المدير العام</div><div class="rpl">${sh.map(x => rpEmpCardHtml((RP.reps || []).find(y => y.id === x.rep), d, x)).join('')}</div>`;
+  const withR = ps.filter(p => rpLast(p.id)), none = ps.filter(p => !rpLast(p.id));
+  withR.sort((a, b) => (b.mine ? 1 : 0) - (a.mine ? 1 : 0) || (rpLast(b.id).ts || 0) - (rpLast(a.id).ts || 0));
+  h += `<div class="rph2">تقارير المشاريع</div>` + (withR.length ? `<div class="rpl">${withR.map(p => rpEmpCardHtml(rpLast(p.id), d, null)).join('')}</div>` : emptyHtml('file-text', 'لا توجد تقارير بعد'));
+  if (none.length && !isPreview) h += `<div class="tbl2" style="margin-top:12px">${none.map(p => tbRow('folder', esc(p.name), '<span class="lv">إعداد تقرير</span>', `rpOpenForm('${p.id}',false)`)).join('')}</div>`;
   return h;
+}
+function rpEmpCardHtml(r, d, share) {
+  const dec = rpArr(r.decide), up = rpArr(r.up), rest = rpArr(r.cur).filter(x => !up.includes(x)), n = rpOf(r.proj).length, nd = rpArr(r.done).length;
+  const notes = rpArr(r.notes), last = notes[notes.length - 1];
+  return `<button class="rpc" onclick="rpOpen('${r.id}')">
+    <div class="rph"><b>${esc(rpPName(r.proj))}</b><span class="rpm">${esc(rpBy(r))} · ${esc(rpRel(r.date))}</span></div>
+    ${share ? `<div class="rpd ok">${I('bell-ring', 15)}<div><b>المدير العام:</b> ${esc(share.msg || 'راجع هذا التقرير')}</div></div>` : ''}
+    ${dec.length ? (r.reply ? `<div class="rpd ok">${I('circle-check', 15)}<div><b>${rpReplyT(r.reply)}:</b> ${esc(dec.join('، '))}</div></div>` : `<div class="rpd">${I('triangle-alert', 15)}<div><b>بانتظار قرار المدير العام:</b> ${esc(dec.join('، '))}</div></div>`) : ''}
+    ${!share && last && r.by === (d || {}).id ? `<div class="rpd ok">${I('message-circle', 15)}<div><b>ملاحظة المدير العام:</b> ${esc(last.text)}</div></div>` : ''}
+    ${up.length ? `<div class="rpr up">${I('clock', 13)}<span><b>حان وقته:</b> ${esc(up.join('، '))}</span></div>` : ''}
+    ${rest.length ? `<div class="rpr"><b>المتبقي:</b> ${esc(rest.join('، '))}</div>` : ''}
+    <div class="rpr lt">${nd ? `<span class="okc">${I('check-check', 13)}أُنجز ${nd}</span>` : ''}<span>${I('file-text', 13)}${n === 1 ? 'تقرير واحد' : n === 2 ? 'تقريران' : n + ' تقارير'}</span>${r.edited ? '<span>عدّله المدير العام</span>' : ''}</div>
+  </button>`;
 }
 function rpPickProj(id) { RP.eProj = id; RP.sent = null; lsSet('rp_proj', id); rerenderEmp(); }
 function rpEmpRowHtml(r, d) {
@@ -3795,7 +3819,7 @@ function rpHead() {
 function rpOpenForm(p, isAdmin) {
   const ps = rpProjs();
   if (!ps.length) return toast('لا توجد مشاريع نشطة', null, 'in');
-  const pid = p || (ps.find(x => !rpLast(x.id)) || ps[0]).id;
+  const pid = p || (isAdmin ? (ps.find(x => !rpLast(x.id)) || ps[0]).id : (ps.some(x => x.id === RP.eProj) ? RP.eProj : (ps.find(x => x.mine) || ps[0]).id));
   RP.form = {proj: pid, admin: isAdmin, decide: '', files: [], err: '', sent: false, pick: !p, nl: '', na: '', nc: '', extra: false, cid: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()).replace(/[^a-z0-9]/gi, '').slice(0, 24)};
   rpFill();
   S.sheet = true;
@@ -3856,7 +3880,7 @@ function rpDraw() {
       <button class="btn2 cu qbig" onclick="ovClose()">حسناً</button>`);
     return;
   }
-  const ap = rpProjs();
+  const ap = rpProjs().slice().sort((a, b) => (b.mine ? 1 : 0) - (a.mine ? 1 : 0));
   ovOpen(`<label class="shh">تقرير ${esc(rpPName(f.proj))}</label>
     <div class="sub" style="margin:-6px 0 6px">${esc(dayLabel(rpToday()))}${f.admin ? ' · من المدير العام' : ''}</div>
     ${f.pick ? `<div class="qlab">${I('folder', 14)}المشروع</div><div class="qch">${ap.map(x => `<button class="${f.proj === x.id ? 'on' : ''}" onclick="RP.form.proj='${x.id}';rpFill();rpDraw()">${esc(x.name)}</button>`).join('')}</div>` : ''}
@@ -4169,6 +4193,47 @@ async function addMedia(id, inp) {
     S.data = await call('apiTaskMedia', BOOT.key, id, m);
     S.upN--; toastDone(ld); renderAdmin(); toast('انضاف للشرح');
   } catch (e) { S.upN--; toastDone(ld); toastErr(e); }
+}
+
+/* الإصدار 66: إرسال التقرير (تنبيه) */
+function rpShareDefault(r) {
+  if (r.by !== 'admin') return [r.by];
+  return (S.data.employees || []).filter(e => (e.tasks || []).some(t => t.project === r.proj) || (RP.reps || []).some(x => x.proj === r.proj && x.by === e.id)).map(e => e.id);
+}
+function rpShareOpen(id) {
+  const r = (RP.reps || []).find(x => x.id === id);
+  if (!r) return;
+  RP.share = {id: id, emps: rpShareDefault(r), msg: '', busy: false, err: ''};
+  rpShareDraw();
+}
+function rpShareDraw() {
+  const f = RP.share, r = (RP.reps || []).find(x => x.id === f.id);
+  if (!f || !r) return;
+  const es = (S.data.employees || []);
+  ovOpen(`<label class="shh">إرسال التقرير</label>
+    <div class="sub" style="margin:-6px 0 8px">تقرير ${esc(rpPName(r.proj))} · ${esc(rpDay(r.date))}</div>
+    <div class="qlab">${I('users', 14)}إلى</div>
+    <div class="qch">${es.map(e => `<button class="${f.emps.includes(e.id) ? 'on' : ''}" onclick="rpShareTog('${e.id}')">${esc(shortName(e.name))}</button>`).join('')}</div>
+    <label class="qlab" for="shm">${I('message-circle', 14)}رسالة (اختياري)</label>
+    <textarea id="shm" class="rta sm" placeholder="مثال: راجع القرار المطلوب قبل الأحد" oninput="RP.share.msg=this.value;rpGrow(this)">${esc(f.msg)}</textarea>
+    <div class="rhint">${I('info', 13)}يصلهم إشعار، ويظهر التقرير عندهم تحت «وصلك من المدير العام»</div>
+    <div class="err">${esc(f.err)}</div>
+    <button class="btn2 cu qbig" ${f.busy ? 'disabled' : ''} onclick="rpShareSend()">${f.busy ? 'جاري الإرسال…' : I('send', 17) + 'إرسال'}</button>`);
+  rpGrowAll();
+}
+function rpShareTog(id) { const f = RP.share; const i = f.emps.indexOf(id); if (i >= 0) f.emps.splice(i, 1); else f.emps.push(id); rpShareDraw(); }
+async function rpShareSend() {
+  const f = RP.share;
+  if (!f || f.busy) return;
+  if (!f.emps.length) { f.err = 'اختر موظفاً واحداً على الأقل'; return rpShareDraw(); }
+  f.busy = true; f.err = ''; rpShareDraw();
+  try { await call('apiRepShare', f.id, f.emps, f.msg || ''); }
+  catch (e) { f.busy = false; f.err = String(e); if (RP.share === f) rpShareDraw(); else toastErr(e); return; }
+  const names = f.emps.map(id => shortName(((S.data.employees || []).find(e => e.id === id) || {}).name || '')).filter(Boolean);
+  RP.share = null; ovClose();
+  RP.pinged = f.id; rpRerender();
+  toast('أُرسل التنبيه لـ' + names.join(' و'));
+  setTimeout(() => { if (RP.pinged === f.id) { RP.pinged = null; rpRerender(); } }, 4000);
 }
 
 /* الإصدار 53: الصفحة الفرعية عنوانها الكبير اسمها، والرجوع رابط صغير فوقه */
