@@ -895,6 +895,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .tkb.on{background:var(--green);border-color:var(--green)}
 @media (prefers-reduced-motion:reduce){.tkb i{animation:none}}
 .tkb.up{color:var(--acc-dk)}.tkb.up.on{background:var(--acc-soft);border-color:var(--acc)}
+.crow.nock{padding-right:4px}
 .nwl small{display:block;font-size:12px;color:var(--muted);line-height:1.5}
 .tdx{display:flex;flex-direction:column;gap:12px}
 .tdx h3{margin:2px 0 0;font-size:17px;font-weight:600}
@@ -922,7 +923,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=69"></script>
 <script>
-const APP_VER = '72';
+const APP_VER = '73';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -3915,22 +3916,22 @@ function rpSwitchProj(id) {
 function rpWillMove(x) { return !!x.after && RP.form.items.some(i => i.t === x.after && i.done); }
 function rpCurHtml() {
   const f = RP.form;
-  const rows = f.items.map((x, i) => `<div class="crow ${x.done ? 'dn' : ''}"><button class="ck" onclick="rpTog(${i})" aria-label="${x.done ? 'إلغاء الإنجاز' : 'تم الإنجاز'}">${x.done ? I('check', 15, 3) : ''}</button><span class="ct">${esc(x.t)}${x.x ? '<small>عمل منجز لم يكن مسجلاً</small>' : ''}</span>${!f.admin || (x.done && !x.x) ? '' : `<button class="mx2" onclick="rpRmCur(${i})" aria-label="حذف">${I('x', 14, 2.5)}</button>`}</div>`).join('');
+  const rows = f.items.map((x, i) => `<div class="crow ${x.done ? 'dn' : ''} ${f.admin ? '' : 'nock'}">${f.admin ? `<button class="ck" onclick="rpTog(${i})" aria-label="${x.done ? 'إلغاء الإنجاز' : 'تم الإنجاز'}">${x.done ? I('check', 15, 3) : ''}</button>` : ''}<span class="ct">${esc(x.t)}${x.x ? '<small>عمل منجز لم يكن مسجلاً</small>' : ''}</span>${!f.admin || (x.done && !x.x) ? '' : `<button class="mx2" onclick="rpRmCur(${i})" aria-label="حذف">${I('x', 14, 2.5)}</button>`}</div>`).join('');
   const nd = f.items.filter(x => x.done).length;
   return `<div class="lbox">${rows || '<div class="rpe" style="padding:8px 2px">لا توجد أعمال حالية</div>'}
     <div class="ladd one"><input id="f_nc" placeholder="${f.extra ? 'عمل أُنجز ولم يكن مسجلاً' : 'عمل حالي جديد'}" value="${esc(f.nc)}" oninput="RP.form.nc=this.value;rpDraftSave()" onkeydown="if(event.key==='Enter')rpAddCur()"><button class="btn2" onclick="rpAddCur()">${I('plus', 16)}إضافة</button></div>
-    <button class="lnk xtra" onclick="RP.form.extra=!RP.form.extra;rpRefCur()">${f.extra ? 'إضافة عمل حالي بدلاً من ذلك' : '+ عمل منجز لم يكن مسجلاً'}</button></div>
-    ${f.admin ? '' : `<div class="rhint">${I('lock', 13)}لا يمكن حذف الأعمال، ضع ✓ على ما أُنجز. الحذف من المدير العام فقط</div>`}
+    ${f.admin ? `<button class="lnk xtra" onclick="RP.form.extra=!RP.form.extra;rpRefCur()">${f.extra ? 'إضافة عمل حالي بدلاً من ذلك' : '+ عمل منجز لم يكن مسجلاً'}</button>` : ''}</div>
+    ${f.admin ? '' : `<div class="rhint">${I('lock', 13)}لتسجيل إنجاز عمل افتح التقرير واضغط الدائرة جنبه، وأرفق صورة أو ملاحظة. لا يمكن حذف الأعمال، الحذف من المدير العام فقط</div>`}
     ${nd ? `<div class="rhint ok">${I('check-check', 13)}${nd === 1 ? 'عمل واحد سيُنقل' : nd === 2 ? 'عملان سيُنقلان' : nd + ' أعمال ستُنقل'} إلى سجل الإنجاز عند الإرسال</div>` : ''}`;
 }
 function rpRefCur() { const b = document.getElementById('f_cur'); if (b) b.innerHTML = rpCurHtml(); rpRefLater(); }
-function rpTog(i) { const x = RP.form.items[i]; x.done = !x.done; rpRefCur(); }
+function rpTog(i) { if (!RP.form.admin) return; const x = RP.form.items[i]; x.done = !x.done; rpRefCur(); }
 function rpRmCur(i) { const f = RP.form; if (!f.admin) return; const x = f.items.splice(i, 1)[0]; if (x) f.rm.push(x.t); rpRefCur(); }
 function rpAddCur() {
   const f = RP.form, t = (f.nc || '').trim();
   if (!t) return toast('اكتب العمل أولاً', null, 'er');
   if (f.items.some(x => x.t === t)) return toast('هذا العمل مضاف من قبل', null, 'er');
-  f.items.push(f.extra ? {t: t, done: true, x: true} : {t: t, done: false}); f.nc = ''; f.extra = false;
+  f.items.push(f.extra && f.admin ? {t: t, done: true, x: true} : {t: t, done: false}); f.nc = ''; f.extra = false;
   rpRefCur();
 }
 function rpLaterFormHtml() {
@@ -3965,7 +3966,7 @@ function rpDraw() {
     ${f.pick ? `<div class="qlab">${I('folder', 14)}المشروع</div><div class="qch">${ap.map(x => `<button class="${f.proj === x.id ? 'on' : ''}" onclick="rpSwitchProj('${x.id}')">${esc(x.name)}</button>`).join('')}</div>` : ''}
     <div class="qlab">${I('list-checks', 14)}الأعمال الحالية</div>
     ${f.draftAt ? `<div class="rhint ok">${I('history', 13)}استُعيدت المسودة المحفوظة ${esc(nfTime(f.draftAt))} <button class="lnk" style="font-size:12px;padding:0 4px" onclick="rpDraftDrop()">تجاهلها</button></div>` : ''}
-    ${f.from ? `<div class="rhint">${I('history', 13)}منقولة من تقرير ${esc(rpDay(f.from))}. ضع علامة ✓ على ما أُنجز</div>` : ''}
+    ${f.from ? `<div class="rhint">${I('history', 13)}منقولة من تقرير ${esc(rpDay(f.from))}${f.admin ? '. ضع علامة ✓ على ما أُنجز' : ''}</div>` : ''}
     <div id="f_cur">${rpCurHtml()}</div>
     <div class="qlab">${I('history', 14)}الأعمال اللاحقة</div>
     <div class="rhint">أعمال لم يحن وقتها. اربطها بالعمل الذي تبدأ بعده لتنتقل تلقائياً عند إنجازه</div>
@@ -4016,7 +4017,7 @@ async function rpSend() {
   const dec = rpLines(f.decide);
   const moved = f.later.filter(rpWillMove), keep = f.later.filter(x => !rpWillMove(x));
   const cur = f.items.filter(x => !x.done).map(x => x.t).concat(moved.map(x => x.t).filter(t => !f.items.some(x => x.t === t)));
-  const done = f.items.filter(x => x.done).map(x => x.t);
+  const done = f.admin ? f.items.filter(x => x.done).map(x => x.t) : [];
   const gone = f.admin ? rpArr(f.bc).filter(t => !f.items.some(x => x.t === t)) : [];
   S.upN++;
   try {
@@ -4216,6 +4217,7 @@ function rpDraftLoad(f) {
   f.items = rpArr(d.items); f.later = rpArr(d.later); f.decide = d.decide || ''; f.nc = d.nc || ''; f.nl = d.nl || ''; f.draftAt = d.at; f.rm = rpArr(d.rm);
   if (Array.isArray(d.bc)) { f.base = d.base || ''; f.bc = d.bc; f.bl = rpArr(d.bl); }
   if (rpStale(f)) rpRebase(f);
+  if (!f.admin) f.items.forEach(x => { x.done = false; delete x.x; });
   if (!f.admin && l) {
     rpArr(l.cur).forEach(t => { if (!f.items.some(x => x.t === t)) f.items.push({t: t, done: false}); });
     rpArr(l.later).forEach(x => { if (!f.later.some(y => y.t === x.t) && !f.items.some(y => y.t === x.t)) f.later.push({t: x.t, after: x.after || ''}); });
