@@ -1390,6 +1390,7 @@ async function loadAdmin() {
   if (!(await adminAuth())) return;
   try {
     S.data = await call('apiAdmin', BOOT.key);
+    API.seen(APP_VER, devLabel());
     if (!S.emp && S.data.employees.length) S.emp = S.data.employees[0].id;
     S.date = S.data.today;
     renderAdmin();
@@ -3010,7 +3011,7 @@ function rulesHtml(st) {
 /* ================= صفحة الموظف ================= */
 
 async function loadEmp() {
-  try { renderEmp(await call('apiEmp', BOOT.token), false); }
+  try { renderEmp(await call('apiEmp', BOOT.token), false); API.seen(APP_VER, ''); }
   catch (e) { $('#app').innerHTML = '<div class="load">' + esc(e) + '</div>'; }
 }
 

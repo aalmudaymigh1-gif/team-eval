@@ -647,6 +647,7 @@
     },
 
     oldCount() { return (RAW && RAW.tasksOld) || 0; },
+    seen(ver, label) { rpc('app_seen_mark', { k: CRED.k || '', t: CRED.t || '', ver: String(ver || ''), label: String(label || '').slice(0, 60) }).catch(() => {}); },
     async apiTasksOld(k, q) {
       const old = await rpc('admin_tasks_old', { k: k, q: String(q || ''), lim: 200 });
       const n = norm({ tasks: old || [] }).tasks, have = new Set(RAW.tasks.map(t => t.id));
