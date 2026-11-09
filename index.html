@@ -840,6 +840,18 @@ b,strong,th,h2,h3,h4{font-weight:600}
 #ov .sheet:has(#f_cur)>*{flex-shrink:0}
 a.rdoc{text-decoration:none;color:var(--text)}
 .rpf img{cursor:zoom-in}
+/* الإصدار 64: أزرار التعديل */
+.edl{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--acc-dk);background:none;border:0;padding:6px 0;font-family:inherit;cursor:pointer;min-height:34px}
+.rpmeta .edl{margin-inline-start:auto;flex:none}
+.rpmeta>span{min-width:0}
+.edt{color:var(--acc-dk);font-size:12px}
+.ecm{display:flex;justify-content:flex-end;margin-top:-4px}
+.dhead .pen{width:34px;height:34px;border-radius:50%;background:var(--fill);border:0;color:var(--muted);display:flex;align-items:center;justify-content:center;flex:none;padding:0;cursor:pointer}
+.erow{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
+.erow input{flex:1;min-width:0;border:1.5px solid var(--line2)!important;padding:9px 11px;font-size:16px;border-radius:12px;background:#fff;color:var(--text)}
+.erow.dn input{color:var(--muted)}
+.ehint{font-size:12px;color:var(--muted);margin:2px 0 4px}
+#ov .sheet:has(#e_dec)>*,#ov .sheet:has(#cmt_e)>*{flex-shrink:0}
 </style>
 </head>
 <body>
@@ -849,9 +861,9 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=63"></script>
+<script src="api.js?v=64"></script>
 <script>
-const APP_VER = '63';
+const APP_VER = '64';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -1962,7 +1974,7 @@ function renderTaskDetail() {
   const ps = (d.projects || []).filter(x => !x.archived || x.id === t.project);
   const id = t.id, np = (t.proofs || []).length, armDel = S.armed === 'task_' + id;
   $('#view').innerHTML = `<button class="back" onclick="closeTask()">${I('arrow-right', 17)}${S.view === 'team' && S.tsub ? 'مهام ' + esc(shortName((empById(S.tsub.id) || {}).name || '')) : 'المهام'}</button>
-    <div class="dhead"><input class="dtitle" value="${esc(t.title)}" aria-label="عنوان المهمة" onchange="updTask('${id}',{title:this.value})">${pillHtml(p)}</div>
+    <div class="dhead"><input class="dtitle" value="${esc(t.title)}" aria-label="عنوان المهمة" onchange="updTask('${id}',{title:this.value})"><button class="pen" aria-label="تعديل العنوان" onclick="const i=this.previousElementSibling;i.focus();i.setSelectionRange(i.value.length,i.value.length)">${I('pencil', 15)}</button>${pillHtml(p)}</div>
     <div class="dprops">
       <label class="dp"><span>الموظف</span><select onchange="updTask('${id}',{emp:this.value})">${d.employees.map(e => `<option value="${e.id}" ${t.emp === e.id ? 'selected' : ''}>${esc(e.name)}</option>`).join('')}</select></label>
       <label class="dp"><span>المشروع</span><select onchange="updTask('${id}',{project:this.value})">${t.project ? '' : '<option value="" selected>اختر المشروع</option>'}${ps.map(x => `<option value="${x.id}" ${t.project === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
@@ -1977,7 +1989,7 @@ function renderTaskDetail() {
     ${vOf(t) || t.status !== 'done' ? `<div class="lbl">الشرح الصوتي</div><div id="dVoice">${dVoiceHtml(t)}</div>` : ''}
     ${mOf(t).length ? `<div class="lbl">الشرح</div>${mediaHtml(t)}` : ''}
     ${np ? `<div class="lbl">إثبات الإنجاز${t.doneAt ? ' · ' + dmy(t.doneAt) : ''}</div>${proofHtml(t)}` : ''}
-    ${t.comment && t.status !== 'open' ? `<div class="note good">${I('message-circle', 16)}<div><b>${esc(t.ename)}:</b> ${esc(t.comment)}</div></div>` : ''}
+    ${t.comment && t.status !== 'open' ? `<div class="note good">${I('message-circle', 16)}<div><b>${esc(t.ename)}:</b> ${esc(t.comment)}${t.cmtEdited ? ' <span class="edt">عدّله المدير</span>' : ''}</div></div><div class="ecm"><button class="edl" onclick="openCmtEdit('${id}')">${I('pencil', 15)}تعديل ملاحظة الموظف</button></div>` : ''}
     <div class="abar">${detailActions(t)}</div>
     <button class="del ${armDel ? 'arm' : ''}" style="margin:16px auto 0;display:flex" onclick="delTask('${id}')">${I('trash-2', 15)}${armDel ? 'تأكيد حذف المهمة' : 'حذف المهمة'}</button>`;
   if (vOf(t)) vFetch([vOf(t).id]);
@@ -2009,7 +2021,7 @@ function ovOpen(html) {
   document.documentElement.classList.add('lock');
   if (top) { const sh = o.querySelector('.sheet'); if (sh) sh.scrollTop = top; }
 }
-function ovClose() { if (S.rec && S.rec.where === 'tf') recStop(true); vStopIf('tf'); if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); document.documentElement.classList.remove('lock'); S.sheet = false; RP.form = null; }
+function ovClose() { if (S.rec && S.rec.where === 'tf') recStop(true); vStopIf('tf'); if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); document.documentElement.classList.remove('lock'); S.sheet = false; RP.form = null; RP.edit = null; }
 function openSheet() {
   const d = S.data, tf = S.tf;
   if (!d.employees.length) return toast('أضف موظف من الإعدادات أول', null, 'in');
@@ -3666,7 +3678,7 @@ function rpDetailHtml(isAdmin) {
   const tags = cur.map(x => up.includes(x) ? ['حان وقته', 'g'] : prev && !pCur.includes(x) ? ['جديد'] : null);
   const me = rpData() || {}, own = !isAdmin && r.by === me.id, notes = rpArr(r.notes);
   let h = `<button class="back" onclick="rpClose()">${I('arrow-right', 17)}${isAdmin ? 'التقارير' : 'تقاريري'}</button><h2>${esc(rpPName(r.proj))}</h2>
-    <div class="rpmeta">${I('file-text', 15)}تقرير ${esc(rpBy(r))} · ${esc(dayLabel(r.date))}${all.length > 1 ? ` · ${all.length - i} من ${all.length}` : ''}</div>`;
+    <div class="rpmeta">${I('file-text', 15)}<span>تقرير ${esc(rpBy(r))} · ${esc(dayLabel(r.date))}${all.length > 1 ? ` · ${all.length - i} من ${all.length}` : ''}${r.edited ? ' · <span class="edt">عدّله المدير</span>' : ''}</span>${isAdmin ? `<button class="edl" onclick="rpOpenEdit('${r.id}')">${I('pencil', 15)}تعديل</button>` : ''}</div>`;
   if (dec.length) {
     h += `<div class="rpdec ${r.reply ? 'done' : ''}"><div class="rplab">${I(r.reply ? 'circle-check' : 'triangle-alert', 15)}القرارات والاعتمادات المطلوبة</div>${rpItems(dec)}`;
     if (r.reply) h += `<div class="rprep">${r.reply === 'ok' ? 'تم الاعتماد' : r.reply === 'no' ? 'لم يُعتمد' : 'تم الرد بملاحظة'}${isAdmin ? ` <button class="lnk" onclick="rpReply('${r.id}','')">تعديل</button>` : ''}</div>`;
@@ -3725,7 +3737,7 @@ function rpPickProj(id) { RP.eProj = id; RP.sent = null; lsSet('rp_proj', id); r
 function rpEmpRowHtml(r, d) {
   const dec = rpArr(r.decide), notes = rpArr(r.notes), last = notes[notes.length - 1], nl = rpArr(r.later).length;
   return `<button class="rpc" onclick="rpOpen('${r.id}')">
-    <div class="rph"><b>${esc(dayLabel(r.date))}</b><span class="rpm">${esc(rpBy(r))}</span></div>
+    <div class="rph"><b>${esc(dayLabel(r.date))}</b><span class="rpm">${esc(rpBy(r))}${r.edited ? ' · عدّله المدير' : ''}</span></div>
     <div class="rpr">المنجزة: ${rpArr(r.done).length} · الحالية: ${rpArr(r.cur).length}${nl ? ` · اللاحقة: ${nl}` : ''}${dec.length ? ` · القرار: ${r.reply ? rpReplyT(r.reply) : 'بانتظار المدير'}` : ''}</div>
     ${last && r.by === (d || {}).id ? `<div class="rpd ok">${I('message-circle', 15)}<div><b>ملاحظة المدير:</b> ${esc(last.text)}</div></div>` : ''}
   </button>`;
@@ -3883,6 +3895,96 @@ async function rpSend() {
   try { const d = await API.apiRepList(); RP.reps = rpArr(d.reps); if (d.projs) RP.projs = d.projs; } catch (e) { RP.need = true; }
   if (RP.form === f) rpDraw(); else toast('تم إرسال التقرير');
   rpRerender();
+}
+
+/* الإصدار 64: تعديل التقرير وملاحظة الموظف */
+function rpOpenEdit(id) {
+  const r = (RP.reps || []).find(x => x.id === id);
+  if (!r) return;
+  const cur = rpArr(r.cur).map(t => ({t: t, o: t}));
+  RP.edit = {id: id, by: r.by, proj: r.proj, date: r.date, cur: cur, done: rpArr(r.done).slice(), later: rpArr(r.later).map(x => ({t: x.t, after: x.after || ''})), decide: rpArr(r.decide).join('\n'), nc: '', err: '', busy: false};
+  S.sheet = true;
+  rpEditDraw();
+}
+function rpEditAfter(a) {
+  if (!a) return 'غير مرتبطة بعمل';
+  const c = RP.edit.cur.find(x => x.o === a);
+  return c ? 'تبدأ بعد: ' + c.t : 'تبدأ بعد: ' + a;
+}
+function rpEditDraw() {
+  const f = RP.edit;
+  if (!f) return;
+  const row = (k, i, v) => `<div class="erow ${k === 'done' ? 'dn' : ''}"><input value="${esc(v)}" aria-label="العمل" oninput="RP.edit.${k}[${i}]${k === 'cur' ? '.t' : k === 'later' ? '.t' : ''}=this.value"><button class="mx2" onclick="rpEditRm('${k}',${i})" aria-label="حذف">${I('x', 14, 2.5)}</button></div>`;
+  ovOpen(`<label class="shh">تعديل تقرير ${esc(rpPName(f.proj))}</label>
+    <div class="sub" style="margin:-6px 0 6px">تقرير ${esc(f.by === 'admin' ? 'المدير' : rpBy({by: f.by, byName: ((RP.reps || []).find(x => x.id === f.id) || {}).byName}))} · ${esc(rpDay(f.date))}</div>
+    <div class="qlab">${I('list-checks', 14)}الأعمال الحالية</div>
+    <div class="lbox">${f.cur.map((x, i) => row('cur', i, x.t)).join('') || '<div class="rpe" style="padding:8px 2px">لا توجد أعمال حالية</div>'}
+      <div class="ladd one"><input id="e_nc" placeholder="عمل حالي جديد" value="${esc(f.nc)}" oninput="RP.edit.nc=this.value" onkeydown="if(event.key==='Enter')rpEditAdd()"><button class="btn2" onclick="rpEditAdd()">${I('plus', 16)}إضافة</button></div></div>
+    <div class="qlab">${I('check-check', 14)}أُنجز في هذا التقرير</div>
+    <div class="lbox">${f.done.map((x, i) => row('done', i, x)).join('') || '<div class="rpe" style="padding:8px 2px">لا يوجد</div>'}</div>
+    <div class="qlab">${I('history', 14)}الأعمال اللاحقة</div>
+    <div class="lbox">${f.later.map((x, i) => row('later', i, x.t) + `<div class="ehint">${esc(rpEditAfter(x.after))}</div>`).join('') || '<div class="rpe" style="padding:8px 2px">لا يوجد</div>'}</div>
+    <label class="qlab" for="e_dec">${I('triangle-alert', 14)}القرارات والاعتمادات المطلوبة</label>
+    <textarea id="e_dec" class="rta sm" placeholder="لا توجد قرارات" oninput="RP.edit.decide=this.value;rpGrow(this)">${esc(f.decide)}</textarea>
+    ${f.by !== 'admin' ? `<div class="rhint">${I('info', 13)}يرى الموظف علامة «عدّله المدير» على التقرير</div>` : ''}
+    <div class="err">${esc(f.err)}</div>
+    <button class="btn2 cu qbig" ${f.busy ? 'disabled' : ''} onclick="rpEditSave()">${f.busy ? 'جاري الحفظ…' : I('check', 17, 2.5) + 'حفظ التعديل'}</button>`);
+  rpGrowAll();
+}
+function rpEditRm(k, i) { RP.edit[k].splice(i, 1); rpEditDraw(); }
+function rpEditAdd() {
+  const f = RP.edit, t = (f.nc || '').trim();
+  if (!t) return toast('اكتب العمل أولاً', null, 'er');
+  f.cur.push({t: t, o: ''}); f.nc = '';
+  rpEditDraw();
+}
+async function rpEditSave() {
+  const f = RP.edit;
+  if (!f || f.busy) return;
+  const cur = f.cur.map(x => ({t: String(x.t || '').trim(), o: x.o})).filter(x => x.t);
+  const later = f.later.map(x => {
+    let a = x.after || '';
+    if (a) { const c = f.cur.find(y => y.o === a); a = c && String(c.t || '').trim() ? String(c.t).trim() : ''; }
+    return {t: String(x.t || '').trim(), after: a};
+  }).filter(x => x.t);
+  const a = {cur: cur.map(x => x.t), done: f.done.map(x => String(x || '').trim()).filter(Boolean), later: later, decide: rpLines(f.decide)};
+  if (!a.cur.length && !a.done.length && !a.later.length && !a.decide.length) { f.err = 'أدخل عملاً واحداً على الأقل'; return rpEditDraw(); }
+  f.busy = true; f.err = ''; rpEditDraw();
+  try {
+    await call('apiRepEdit', f.id, a);
+    const d = await API.apiRepList(); RP.reps = rpArr(d.reps);
+  } catch (e) {
+    f.busy = false; f.err = String(e);
+    if (RP.edit === f) rpEditDraw(); else toastErr(e);
+    return;
+  }
+  if (RP.edit === f) ovClose();
+  rpRerender();
+  toast('حُفظ التعديل');
+}
+function openCmtEdit(id) {
+  const t = allTasks().find(x => x.id === id);
+  if (!t) return;
+  S.sheet = true;
+  ovOpen(`<label class="shh">تعديل ملاحظة الموظف</label>
+    <div class="sub" style="margin:-6px 0 6px">${esc(t.title)}</div>
+    <textarea id="cmt_e" class="rta" oninput="rpGrow(this)">${esc(t.comment || '')}</textarea>
+    <div class="rhint">${I('info', 13)}تظهر عليها علامة «عدّله المدير»</div>
+    <div class="err" id="cmt_err"></div>
+    <button class="btn2 cu qbig" id="cmt_b" onclick="saveCmtEdit('${id}')">${I('check', 17, 2.5)}حفظ التعديل</button>`);
+  rpGrowAll();
+}
+async function saveCmtEdit(id) {
+  const b = $('#cmt_b'), el = $('#cmt_e');
+  if (!b || b.disabled) return;
+  b.disabled = true; b.textContent = 'جاري الحفظ…';
+  try {
+    S.data = await call('apiTaskComment', BOOT.key, id, el.value);
+    ovClose(); renderAdmin(); toast('حُفظ التعديل');
+  } catch (e) {
+    b.disabled = false; b.innerHTML = I('check', 17, 2.5) + 'حفظ التعديل';
+    const er = $('#cmt_err'); if (er) er.textContent = e;
+  }
 }
 
 /* الإصدار 53: الصفحة الفرعية عنوانها الكبير اسمها، والرجوع رابط صغير فوقه */
