@@ -884,6 +884,21 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .rpmeta .edl+.edl{margin-inline-start:12px}
 .edl.ok{color:var(--green)}
 #ov .sheet:has(#shm)>*{flex-shrink:0}
+/* الإصدار 67 */
+.tkl{list-style:none;margin:0;padding:0}
+.tkl li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px;line-height:1.6;overflow-wrap:anywhere}
+.tkl li:last-child{border-bottom:0}
+.tkl li>span{flex:1;min-width:0}
+.tkb{width:30px;height:30px;border-radius:50%;border:1.8px solid var(--line2);background:#fff;flex:none;display:flex;align-items:center;justify-content:center;padding:0;position:relative;cursor:pointer;color:#fff}
+.tkb:before{content:"";position:absolute;inset:-7px}
+.tkb i{width:7px;height:7px;border-radius:50%;background:var(--green);animation:livep 2s infinite}
+.tkb.on{background:var(--green);border-color:var(--green)}
+@media (prefers-reduced-motion:reduce){.tkb i{animation:none}}
+.rpi.dn li small{display:block;font-size:12px;color:var(--muted)}
+.rpi li.decx{display:flex;align-items:center;gap:8px}
+.rpi li.decx>span{flex:1;min-width:0}
+.dx{min-width:30px;height:30px;border-radius:999px;border:0;background:rgba(0,0,0,.06);color:#85642B;display:flex;align-items:center;justify-content:center;padding:0 8px;font:inherit;font-size:12px;cursor:pointer;flex:none}
+.dx.arm{background:var(--red);color:#fff}
 </style>
 </head>
 <body>
@@ -893,9 +908,9 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=66"></script>
+<script src="api.js?v=67"></script>
 <script>
-const APP_VER = '66';
+const APP_VER = '67';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -3672,11 +3687,21 @@ function rpLaterHtml(arr) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
   return '<ul class="rpi lat">' + arr.map(x => `<li>${esc(x.t)}<small>${x.after ? 'تبدأ بعد: ' + esc(x.after) : 'غير مرتبطة بعمل'}</small></li>`).join('') + '</ul>';
 }
-function rpDoneHtml(arr) {
+function rpDoneHtml(arr, ticks) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
-  return '<ul class="rpi dn">' + arr.map(x => `<li>${I('check', 13, 3)}${esc(x)}</li>`).join('') + '</ul>';
+  const tk = rpArr(ticks);
+  return '<ul class="rpi dn">' + arr.map(x => { const k = tk.filter(y => y.t === x).pop(); return `<li>${I('check', 13, 3)}${esc(x)}${k ? `<small>${esc(k.by === 'admin' ? 'المدير العام' : shortName(k.name || ''))} · ${esc(rpTickWhen(k.at))}</small>` : ''}</li>`; }).join('') + '</ul>';
 }
-function rpHistOf(p) { return rpOf(p).filter(r => rpArr(r.done).length).map(r => ({date: r.date, by: rpBy(r), items: rpArr(r.done)})); }
+function rpTickWhen(ms) { const d = nfDay(ms), t = rpToday(); return (d === t ? 'اليوم' : rpDay(d)) + ' ' + nfTime(ms); }
+function rpHistOf(p) {
+  const gs = [], add = (date, by, it) => { let g = gs.find(x => x.date === date && x.by === by); if (!g) { g = {date: date, by: by, items: []}; gs.push(g); } g.items.push(it); };
+  rpOf(p).forEach(r => {
+    const tk = rpArr(r.ticks), tt = tk.map(x => x.t);
+    rpArr(r.done).filter(x => !tt.includes(x)).forEach(x => add(r.date, rpBy(r), x));
+    tk.forEach(x => { if (rpArr(r.done).includes(x.t)) add(nfDay(x.at), x.by === 'admin' ? 'المدير العام' : shortName(x.name || ''), x.t); });
+  });
+  return gs.sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
+}
 function rpHistHtml(isAdmin) {
   const p = RP.hist, gs = rpHistOf(p), n = gs.reduce((a, g) => a + g.items.length, 0);
   let h = `<button class="back" onclick="rpCloseHist()">${I('arrow-right', 17)}${RP.open ? 'التقرير' : isAdmin ? 'التقارير' : 'تقاريري'}</button><h2>سجل الإنجاز</h2>
@@ -3724,15 +3749,15 @@ function rpDetailHtml(isAdmin) {
   let h = `<button class="back" onclick="rpClose()">${I('arrow-right', 17)}${isAdmin ? 'التقارير' : 'تقاريري'}</button><h2>${esc(rpPName(r.proj))}</h2>
     <div class="rpmeta">${I('file-text', 15)}<span>تقرير ${esc(rpBy(r))} · ${esc(dayLabel(r.date))}${all.length > 1 ? ` · ${all.length - i} من ${all.length}` : ''}${r.edited ? ' · <span class="edt">عدّله المدير العام</span>' : ''}</span>${isAdmin ? `<button class="edl" onclick="rpOpenEdit('${r.id}')">${I('pencil', 15)}تعديل</button>${RP.pinged === r.id ? `<button class="edl ok">${I('check', 15, 2.5)}أُرسل التنبيه</button>` : `<button class="edl" onclick="rpShareOpen('${r.id}')">${I('bell-ring', 15)}تنبيه</button>`}` : ''}</div>`;
   if (dec.length) {
-    h += `<div class="rpdec ${r.reply ? 'done' : ''}"><div class="rplab">${I(r.reply ? 'circle-check' : 'triangle-alert', 15)}القرارات والاعتمادات المطلوبة</div>${rpItems(dec)}`;
+    h += `<div class="rpdec ${r.reply ? 'done' : ''}"><div class="rplab">${I(r.reply ? 'circle-check' : 'triangle-alert', 15)}القرارات والاعتمادات المطلوبة</div>${isAdmin ? rpDecList(r, dec) : rpItems(dec)}`;
     if (r.reply) h += `<div class="rprep">${r.reply === 'ok' ? 'تم الاعتماد' : r.reply === 'no' ? 'لم يُعتمد' : 'تم الرد بملاحظة'}${isAdmin ? ` <button class="lnk" onclick="rpReply('${r.id}','')">تعديل</button>` : ''}</div>`;
     else if (isAdmin) h += `<div class="grid2"><button class="btn2 cu" onclick="rpReply('${r.id}','ok')">${I('check', 17, 2.5)}اعتماد</button><button class="btn2 rd" onclick="rpReply('${r.id}','no')">رفض</button></div><div class="rhint" style="margin:8px 0 0">يُرسل نص الملاحظة أدناه مع الاعتماد أو الرفض</div>`;
     else h += '<div class="rprep">بانتظار رد المدير العام</div>';
     h += '</div>';
   }
-  h += `<div class="lbl">الأعمال الحالية</div>${rpItems(cur, tags, 'cur')}`;
+  h += `<div class="lbl">الأعمال الحالية</div>${rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags) : rpItems(cur, tags, 'cur')}`;
   h += `<div class="lbl">الأعمال اللاحقة</div>${rpLaterHtml(rpArr(r.later))}`;
-  h += `<div class="lbl">أُنجز في هذا التقرير</div>${rpDoneHtml(rpArr(r.done))}`;
+  h += `<div class="lbl">أُنجز في هذا التقرير</div>${rpDoneHtml(rpArr(r.done), r.ticks)}`;
   if (rpArr(r.removed).length) h += `<div class="rpgone rm">${I('x', 14, 2.5)}<div><b>حُذفت دون إنجاز:</b> ${esc(r.removed.join('، '))}</div></div>`;
   if (rpArr(r.files).length) h += `<div class="lbl">المرفقات</div>${rpFilesHtml(r.files)}`;
   if (isAdmin) {
@@ -4234,6 +4259,51 @@ async function rpShareSend() {
   RP.pinged = f.id; rpRerender();
   toast('أُرسل التنبيه لـ' + names.join(' و'));
   setTimeout(() => { if (RP.pinged === f.id) { RP.pinged = null; rpRerender(); } }, 4000);
+}
+
+/* الإصدار 67: صح الإنجاز من صفحة التقرير، وحذف القرار */
+function rpCanTick(r, isAdmin) {
+  const l = rpLast(r.proj);
+  if (!l || l.id !== r.id) return false;
+  if (isAdmin) return BOOT.page === 'admin' && !S.preview;
+  if (S.empPreview) return false;
+  return !!(rpProjs().find(p => p.id === r.proj) || {}).mine;
+}
+function rpTickList(r, cur, tags) {
+  return '<ul class="tkl">' + cur.map((x, i) => `<li><button class="tkb" onclick="rpTick('${r.id}',${i},this)" aria-label="تم الإنجاز"><i></i></button><span>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>` : ''}</span></li>`).join('') + `</ul><div class="rhint" style="margin-top:6px">${I('info', 13)}اضغط الدائرة إذا أُنجز العمل</div>`;
+}
+async function rpTickReload() { const d = await API.apiRepList(); RP.reps = rpArr(d.reps); if (d.projs) RP.projs = d.projs; if (d.shares) RP.shares = d.shares; }
+async function rpTick(id, i, btn) {
+  if (RP.busy) return;
+  const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
+  const item = rpArr(r.cur)[i]; if (!item) return;
+  RP.busy = true;
+  if (btn) { btn.classList.add('on'); btn.innerHTML = I('check', 15, 3); }
+  try {
+    await call('apiRepTick', id, item, false);
+    await rpTickReload();
+    RP.busy = false; rpRerender();
+    toast('انتقل إلى سجل الإنجاز', () => rpUntick(id, item));
+  } catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
+async function rpUntick(id, item) {
+  if (RP.busy) return;
+  RP.busy = true;
+  try { await call('apiRepTick', id, item, true); await rpTickReload(); RP.busy = false; rpRerender(); toast('رجع إلى الأعمال الحالية'); }
+  catch (e) { RP.busy = false; toastErr(e); }
+}
+function rpDecList(r, dec) {
+  return '<ul class="rpi">' + dec.map((x, i) => { const arm = RP.armDec === r.id + '|' + i; return `<li class="decx"><span>${esc(x)}</span><button class="dx ${arm ? 'arm' : ''}" onclick="rpDecDel('${r.id}',${i})" aria-label="حذف القرار">${arm ? 'تأكيد الحذف' : I('x', 14, 2.5)}</button></li>`; }).join('') + '</ul>';
+}
+let rpDecT;
+async function rpDecDel(id, i) {
+  const k = id + '|' + i;
+  if (RP.armDec !== k) { RP.armDec = k; rpRerender(); clearTimeout(rpDecT); rpDecT = setTimeout(() => { if (RP.armDec === k) { RP.armDec = null; rpRerender(); } }, 4000); return; }
+  RP.armDec = null;
+  const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
+  const item = rpArr(r.decide)[i]; if (!item) return;
+  try { await call('apiRepDecDel', id, item); await rpTickReload(); rpRerender(); toast('حُذف القرار'); }
+  catch (e) { toastErr(e); rpRerender(); }
 }
 
 /* الإصدار 53: الصفحة الفرعية عنوانها الكبير اسمها، والرجوع رابط صغير فوقه */

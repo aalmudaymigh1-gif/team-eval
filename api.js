@@ -873,6 +873,12 @@
       flush();
       return r;
     },
+    async apiRepTick(id, item, undo) {
+      const r = await rpc('rep_tick', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), undo: !!undo });
+      flush();
+      return r;
+    },
+    async apiRepDecDel(id, item) { return rpc('rep_dec_del', { k: CRED.k || '', id: String(id || ''), item: String(item || '') }); },
     async apiNotifs() { return rpc('notif_list', { k: CRED.k || '', t: CRED.t || '' }); },
     async apiTaskApprove2(k, id, txt) {
       await rpc('task_approve2', { k: k, id: String(id || ''), txt: String(txt || '') });
