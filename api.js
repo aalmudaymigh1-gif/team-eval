@@ -544,6 +544,11 @@
       return { id: r.id, data: adminPayload_() };
     },
 
+    async apiTaskRemind(k, id) {
+      await rpc('task_remind', { k: k, id: String(id) });
+      flush();
+      return true;
+    },
     async apiEmpOrder(k, ids) {
       if (!Array.isArray(ids) || !ids.length) throw new Error('ما فيه ترتيب');
       await rpc('emp_order', { k: k, ids: ids.map(String) });
@@ -594,6 +599,14 @@
     },
 
     async apiTaskDelete(k, id) { return adminDo(k, 'task_del', { id: id }); },
+    async apiTasksDelete(k, ids) {
+      if (!Array.isArray(ids) || !ids.length) throw new Error('ما حددت مهام');
+      let err = null;
+      for (const id of ids) { try { await aexec(k, 'task_del', { id: String(id) }); } catch (e) { err = e; } }
+      await loadAdmin(k);
+      if (err) throw new Error('بعض المهام ما انحذفت، اسحب الصفحة لتحت وجرّب مرة ثانية');
+      return adminPayload_();
+    },
 
     async apiTaskReturn(k, id, reason) {
       const r = String(reason || '').trim().slice(0, 300);
