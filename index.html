@@ -922,7 +922,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=69"></script>
 <script>
-const APP_VER = '69';
+const APP_VER = '70';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -4320,10 +4320,11 @@ function rpTdDraw() {
   const tiles = d.files.map((f, i) => `<div class="mi">${f.t === 'i' ? `<img alt="" src="${f.d}">` : 'فيديو'}${d.busy ? '' : `<button class="x" onclick="rpTdRm(${i})" aria-label="حذف">×</button>`}</div>`).join('');
   ovOpen(`<div class="tdx">
     <h3>توثيق الإنجاز</h3>
+    <div class="rhint" style="margin:-4px 0 0">${I('info', 13)}وثّق الإنجاز بصورة أو فيديو أو بملاحظة مكتوبة</div>
     <div class="it"><i></i>${esc(d.item)}</div>
-    <div><div class="shh">صورة أو فيديو للإنجاز<span class="req">مطلوب</span></div>
+    <div><div class="shh">صورة أو فيديو</div>
     <div class="mst">${tiles}${d.files.length < 5 && !d.busy ? `<label class="madd">${I('camera', 20)}إضافة<input type="file" multiple accept="${RP_TD_ACC}" style="display:none" onchange="rpTdPick(this)"></label>` : ''}</div></div>
-    <div><div class="shh" style="margin-bottom:6px">ملاحظة (اختياري)</div><textarea id="td_note" placeholder="اكتب ملاحظة عن الإنجاز" oninput="RP.td.note=this.value" ${d.busy ? 'disabled' : ''}>${esc(d.note)}</textarea></div>
+    <div><div class="shh" style="margin-bottom:6px">ملاحظة</div><textarea id="td_note" placeholder="اكتب ملاحظة عن الإنجاز" oninput="RP.td.note=this.value" ${d.busy ? 'disabled' : ''}>${esc(d.note)}</textarea></div>
     <div class="err">${esc(d.err)}</div>
     <button class="btn" id="td_go" ${d.busy ? 'disabled' : ''} onclick="rpTdSave()">${d.busy ? esc(d.prog || 'جاري الحفظ…') : I('check', 17, 2.5) + 'تم الإنجاز'}</button></div>`);
 }
@@ -4349,7 +4350,9 @@ function rpTdRm(i) { const d = RP.td; if (!d || d.busy) return; d.files.splice(i
 async function rpTdSave() {
   const d = RP.td;
   if (!d || d.busy) return;
-  if (!d.files.length) { d.err = 'أرفق صورة أو فيديو يوثّق الإنجاز'; return rpTdDraw(); }
+  const nt = String(d.note || '').trim();
+  if (!d.files.length && !nt) { d.err = 'أرفق صورة أو اكتب ملاحظة عن الإنجاز'; return rpTdDraw(); }
+  if (!d.files.length && nt.length < 10) { d.err = 'الملاحظة قصيرة، اكتب 10 حروف على الأقل'; return rpTdDraw(); }
   d.busy = true; d.err = ''; d.prog = 'جاري الحفظ…'; rpTdDraw();
   const pg = () => { const b = document.getElementById('td_go'); if (b && RP.td === d) b.textContent = d.prog; };
   S.upN++;
