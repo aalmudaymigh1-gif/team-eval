@@ -937,19 +937,23 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=74"></script>
+<script src="api.js?v=76"></script>
 <script>
-const APP_VER = '75';
-let verAt = 0;
+const APP_VER = '76';
+let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
   if (!force && Date.now() - verAt < 20000) return false;
   if (S.upN || S.rec || S.vup || !AU.paused || S.gr || CAM.stream || CAM.shot || S.doing || S.invForm || S.form || S.gform || S.ret || S.sheet || tfFilled().length || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) return false;
   verAt = Date.now();
   try {
+    /* الإصدار 76: أول نشيك تاريخ الملف بطلب صغير (HEAD). ننزّل الصفحة كاملة بس إذا تغيّر */
+    const h = await fetch(location.href.split('#')[0], {method: 'HEAD', cache: 'no-store'}).catch(() => null);
+    const lm = h && h.ok ? Date.parse(h.headers.get('last-modified') || '') : NaN;
+    if (isFinite(lm) && isFinite(DOC_LM) && lm <= DOC_LM + 2000) return false;
     const t = await fetch(location.href.split('#')[0], {cache: 'reload'}).then(r => r.ok ? r.text() : '');
     const m = /const APP_VER = '([^']+)'/.exec(t);
-    if (!m || m[1] === APP_VER) return false;
+    if (!m || m[1] === APP_VER) { if (isFinite(lm)) DOC_LM = lm; return false; }
     toastLoad('فيه تحديث جديد، لحظة…');
     setTimeout(() => location.reload(), 400);
     return true;

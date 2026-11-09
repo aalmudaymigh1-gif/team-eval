@@ -1,5 +1,33 @@
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+
+/* الإصدار 76: الملفات الثابتة (api.js برقم إصداره، مكتبة Supabase، الأيقونات) تنحفظ في الجوال وما تنزل كل مرة.
+   الصفحة نفسها وطلبات البيانات تروح للنت دائماً */
+const CACHE = 'te-static-1';
+self.addEventListener('activate', e => e.waitUntil((async () => {
+  for (const k of await caches.keys()) if (k !== CACHE) await caches.delete(k);
+  await self.clients.claim();
+})()));
+function isStatic(u) {
+  if (u.origin === self.location.origin) return (/\/api\.js$/.test(u.pathname) && /^\?v=\d+$/.test(u.search)) || /\/icon-\d+\.png$/.test(u.pathname);
+  return u.hostname === 'cdn.jsdelivr.net' && u.pathname.indexOf('/npm/@supabase/supabase-js@2/') === 0;
+}
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  let u; try { u = new URL(req.url); } catch (err) { return; }
+  if (!isStatic(u)) return;
+  e.respondWith((async () => {
+    const c = await caches.open(CACHE);
+    const hit = await c.match(req);
+    if (hit) return hit;
+    const res = await fetch(req);
+    if (res.ok || res.type === 'opaque') {
+      await c.put(req, res.clone());
+      if (/\/api\.js$/.test(u.pathname)) for (const k of await c.keys()) { const ku = new URL(k.url); if (/\/api\.js$/.test(ku.pathname) && ku.search !== u.search) await c.delete(k); }
+    }
+    return res;
+  })());
+});
 
 self.addEventListener('push', e => {
   let d = {};

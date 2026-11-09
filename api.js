@@ -466,20 +466,48 @@
     if (r && r.dup) out.__dup = true;
     return out;
   }
+  /* الإصدار 76: العملية وتحديث البيانات في طلب واحد (admin_exec2 و emp_exec2). لو الدالة مو موجودة يرجع للطريقة القديمة */
+  let X2 = true;
+  async function exec2(fn, args, op, a) {
+    if (!X2) return null;
+    try { return await withRid(x => rpc(fn, Object.assign({}, args, { op: op, a: x, days: 90 })), op, a || {}); }
+    catch (e) { if (!noFn(e)) throw e; X2 = false; return null; }
+  }
   async function adminDo(k, op, a) {
+    const x2 = await exec2('admin_exec2', { k: k }, op, a);
+    if (x2) {
+      CRED = { k: k }; RAW = norm(x2.raw);
+      if (NOTIFY.indexOf(op) >= 0) flush();
+      const out = adminPayload_();
+      if (x2.r && x2.r.dup) out.__dup = true;
+      return out;
+    }
     const r = await aexec(k, op, a);
     if (NOTIFY.indexOf(op) >= 0) flush();
     return reloadAdmin(k, r);
+  }
+  async function empDo(t, op, a) {
+    const x2 = await exec2('emp_exec2', { t: t }, op, a);
+    if (x2) {
+      CRED = { t: t }; RAW = norm(x2.raw);
+      flush();
+      const emp = empById(RAW.me);
+      if (!emp) throw new Error('الرابط غير صالح');
+      const out = empPayload_(emp);
+      if (x2.r && x2.r.dup) out.__dup = true;
+      return out;
+    }
+    const r = await eexec(t, op, a);
+    flush();
+    return reloadEmp(t, r);
   }
   const empById = id => RAW.employees.filter(e => e.id === id)[0];
 
   async function attDo(token, op, dataUrl, pos, project) {
     const paths = await empUpload(token, [dataUrl], 1);
     const p = pos || {};
-    const r = await eexec(token, op, { photo: paths[0], lat: p.lat == null ? '' : String(p.lat), lng: p.lng == null ? '' : String(p.lng),
+    return empDo(token, op, { photo: paths[0], lat: p.lat == null ? '' : String(p.lat), lng: p.lng == null ? '' : String(p.lng),
       acc: p.acc == null ? '' : String(Math.round(p.acc)), project: project || '' });
-    flush();
-    return reloadEmp(token, r);
   }
   async function empUpload(token, dataUrls, max) {
     const list = (Array.isArray(dataUrls) ? dataUrls : [dataUrls]).filter(Boolean).slice(0, max);
@@ -499,7 +527,7 @@
     async apiAdmin(k) { await loadAdmin(k); return adminPayload_(); },
 
     async apiAdd(k, x) {
-      await loadAdmin(k);
+      if (!RAW || CRED.k !== k) await loadAdmin(k);
       if (!RAW.employees.some(e => e.id === x.emp)) throw new Error('اختر الموظف');
       if (!/^\d{4}-\d{2}-\d{2}$/.test(String(x.date || ''))) throw new Error('التاريخ غير صحيح');
       if (isPaid_(RAW.fin, x.emp, x.date.slice(0, 7))) throw new Error('راتب هالشهر انصرف وتقفل، ما ينفع تسجل فيه');
@@ -521,7 +549,7 @@
     },
 
     async apiDelete(k, group) {
-      await loadAdmin(k);
+      if (!RAW || CRED.k !== k) await loadAdmin(k);
       const l = RAW.logs.filter(v => v.group === group)[0];
       if (l && isPaid_(RAW.fin, l.emp, l.date.slice(0, 7))) throw new Error('راتب هالشهر انصرف وتقفل');
       return adminDo(k, 'log_del', { grp: group });
@@ -559,14 +587,14 @@
     },
 
     async apiPreview(k, empId) {
-      await loadAdmin(k);
+      if (!RAW || CRED.k !== k) await loadAdmin(k);
       const emp = empById(empId);
       if (!emp) throw new Error('الموظف غير موجود');
       return empPayload_(emp);
     },
 
     async apiFinAdd(k, x) {
-      await loadAdmin(k);
+      if (!RAW || CRED.k !== k) await loadAdmin(k);
       const emp = empById(x.emp);
       if (!emp) throw new Error('اختر الموظف');
       const amount = Math.round(Number(x.amount) || 0);
@@ -610,7 +638,7 @@
     },
 
     async apiFinDelete(k, id) {
-      await loadAdmin(k);
+      if (!RAW || CRED.k !== k) await loadAdmin(k);
       const fin = RAW.fin;
       const r = fin.filter(f => f.id === id)[0];
       if (!r) throw new Error('الحركة غير موجودة');
@@ -726,9 +754,7 @@
       const paths = await empUpload(token, dataUrls || [], 5);
       const x = extra || {}, a = { id: id, comment: String(comment || ''), proofs: paths };
       if (x.amount !== undefined) { a.amount = cleanAmount_(x.amount); a.vendor = String(x.vendor || '').trim(); a.paidBy = x.paidBy || 'cash'; }
-      const r = await eexec(token, 'task_done', a);
-      flush();
-      return reloadEmp(token, r);
+      return empDo(token, 'task_done', a);
     },
 
     async apiProofAdmin(k, id, fid) { return imgUrl(fid); },
@@ -789,9 +815,7 @@
       const paths = await empUpload(token, dataUrls, 3);
       if (!paths.length) throw new Error('صوّر الفاتورة');
       const w = Math.round(Number(x.warranty) || 0);
-      const r = await eexec(token, 'inv_add', { cid: String(x.cid || ''), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
-      flush();
-      return reloadEmp(token, r);
+      return empDo(token, 'inv_add', { cid: String(x.cid || ''), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
     },
     /* الإصدار 74: تصحيح فاتورة رجّعها المدير العام وإعادة إرسالها بنفس السجل */
     async apiInvResend(token, id, x, dataUrls, keep) {
@@ -803,9 +827,7 @@
       const old = (keep || []).filter(Boolean).slice(0, 3);
       const paths = old.concat(await empUpload(token, dataUrls || [], Math.max(0, 3 - old.length)));
       if (!paths.length) throw new Error('صوّر الفاتورة');
-      const r = await eexec(token, 'inv_resend', { id: String(id), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: String(x.project || ''), photos: paths, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
-      flush();
-      return reloadEmp(token, r);
+      return empDo(token, 'inv_resend', { id: String(id), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: String(x.project || ''), photos: paths, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
     },
 
     async apiInvApprove(k, id) { return adminDo(k, 'inv_approve', { id: id }); },
