@@ -684,6 +684,19 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .fseg .ordb{background:none;border:0;font:inherit;font-size:13px;color:var(--acc-dk);display:flex;align-items:center;gap:6px;cursor:pointer;flex:none;padding:0 2px}
 .fxs.two{grid-template-columns:1fr 1fr}
 .fxs div.due b,.fxs div.due small{color:var(--red)}
+.fxs button.due{background:var(--surface);border:1px solid var(--red-line);border-radius:18px;padding:11px 10px;min-width:0;text-align:right;font:inherit;color:inherit;cursor:pointer;position:relative}
+.fxs button.due b{display:block;font-size:12px;color:var(--red);font-weight:400;margin-bottom:6px}
+.fxs button.due small{display:block;font-size:12px;color:var(--red);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fxs button.due span.mn.mn{color:var(--red)!important}
+.fxs button.due .chv{position:absolute;left:8px;top:9px;color:var(--red);display:flex}
+.fxs button.due.on{background:var(--red-soft)}
+.fxs button.due:active{transform:scale(.98)}
+.fxdue .fqr{gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.fxdue .fqr:first-of-type{border-top:0}
+.fxdue .fqn{flex:1;min-width:0;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:right;cursor:pointer;display:flex;flex-direction:column}
+.fxdue .fqn .sub{font-size:12px}
+.fxdue .fqa{display:flex;align-items:center;gap:8px;flex:none}
+.fxdue .fqa .btn2{padding:7px 12px;font-size:13px}
 .fxs div.due span.mn.mn{color:var(--red)!important}
 .setv .blk{margin-top:16px}
 .setv .tbr .v{color:var(--muted)}
@@ -863,6 +876,9 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .nfr .tx b{display:block;font-size:15px;font-weight:500;overflow-wrap:anywhere}
 .nfr .tx small{display:block;font-size:13px;color:var(--muted);line-height:1.5;overflow-wrap:anywhere}
 .nfr .tm{font-size:12px;color:var(--faint);flex:none;padding-top:2px}
+.nfb{width:100%;background:none;border:0;border-bottom:1px solid var(--line);font:inherit;color:inherit;text-align:right;cursor:pointer}
+.nfb:last-child{border-bottom:0}.nfb:active{background:var(--fill)}
+.nfr .nfgo{display:flex;justify-content:flex-end;margin-top:6px;color:var(--faint)}
 .nfr.new .tx b:after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--acc);margin-inline-start:6px;vertical-align:2px}
 .cfm{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:300;padding:24px}
 .cfm>div{background:#fff;border-radius:22px;padding:22px 20px 16px;width:100%;max-width:340px;text-align:center}
@@ -923,7 +939,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=74"></script>
 <script>
-const APP_VER = '74';
+const APP_VER = '75';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -1028,7 +1044,11 @@ if ('serviceWorker' in navigator && BOOT.page !== 'denied') {
   navigator.serviceWorker.register('sw.js').then(() => {
     if (PUSH.ok && Notification.permission === 'granted') pushSubscribe().catch(() => {});
   }).catch(() => {});
-  navigator.serviceWorker.addEventListener('message', ev => { if (ev.data && ev.data.type === 'refresh' && typeof refresh === 'function') refresh(); });
+  navigator.serviceWorker.addEventListener('message', ev => {
+    if (!ev.data) return;
+    if (ev.data.type === 'open') { nfFromPush(ev.data.t || '', ev.data.b || ''); return; }
+    if (ev.data.type === 'refresh' && typeof refresh === 'function') refresh();
+  });
 }
 
 /* ---------- الحضور والانصراف ---------- */
@@ -1614,7 +1634,9 @@ async function loadAdmin() {
     API.seen(APP_VER, devLabel());
     if (!S.emp && S.data.employees.length) S.emp = S.data.employees[0].id;
     S.date = S.data.today;
+    S.view = startView(S.data);
     renderAdmin();
+    nfPendingGo();
   } catch (e) { if (/الرابط غير صالح/.test(String(e))) { setSession(''); return renderLogin('انتهت الجلسة في هالجهاز. ادخل من جديد.'); } const td = document.getElementById('tabsDock'); if (td) td.remove(); $('#app').innerHTML = '<div class="load"><div class="ei">' + I('triangle-alert', 28) + '</div>' + esc(e) + '<br><button class="btn2" style="margin:16px auto 0" onclick="location.reload()">' + I('refresh-cw', 16) + 'حاول مرة ثانية</button></div>'; }
 }
 
@@ -1650,7 +1672,7 @@ function mountTabs() {
   if (old) old.remove();
   if (t) { t.id = 'tabsDock'; document.body.appendChild(t); }
 }
-function go(v) { NF.open = false; RP.open = null; RP.hist = null; S.tsub = null; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false}); S.view = v; S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
+function go(v) { NF.open = false; RP.open = null; RP.hist = null; S.tsub = null; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false, due: false}); S.view = v; lsSet('adm_view', v); S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
 function rerender() { renderAdmin(); }
 
 /* ---------- تسجيل ---------- */
@@ -2530,10 +2552,18 @@ function renderFin() {
   const cnt = (n, one, two, many) => n === 1 ? one : n === 2 ? two : n + ' ' + many;
   let h = `<div class="fxh"><span>${esc(d.month)}</span></div>
     <div class="fxs${nUn ? '' : ' two'}">
-      ${nUn ? `<div class="due"><b>رواتب ما انصرفت</b>${M(unpaid)}<small>${nUn + ' من ' + d.employees.length + ' موظفين'}</small></div>` : ''}
+      ${nUn ? `<button class="due tap ${S.fx.due ? 'on' : ''}" onclick="S.fx.due=!S.fx.due;S.armed=null;renderFin()" aria-expanded="${!!S.fx.due}"><b>رواتب ما انصرفت</b>${M(unpaid)}<small>${nUn + ' من ' + d.employees.length + ' موظفين'}</small><span class="chv">${I(S.fx.due ? 'x' : 'chevron-left', 14)}</span></button>` : ''}
       <div><b>عهد عند الموظفين</b>${M(cust)}<small>${withC.length ? esc(withC.map(e => shortName(e.name)).join('، ')) : 'ما عند أحد عهدة'}</small></div>
       <div><b>مصاريف الشهر</b>${M(exp)}<small>${okM.length ? cnt(okM.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير') : 'ما فيه فواتير'}</small></div>
     </div>`;
+  if (nUn && S.fx.due) {
+    const rows = [];
+    d.employees.forEach(e => e.unpaid.filter(dueU).forEach(u => rows.push({e, u})));
+    h += `<div class="card fxdue"><div class="ctitle">${I('banknote', 17)}رواتب مستحقة</div>${rows.map(({e, u}) => {
+      const k = 'payq_' + e.id + u.month, arm = S.armed === k;
+      return `<div class="row fqr"><button class="fqn" onclick="openSt('${e.id}')"><b>${esc(e.name)}</b><span class="sub">${esc(u.label)} · الصافي</span></button><span class="fqa">${M(Math.max(0, u.net))}<button class="btn2 ${arm ? 'arm' : 'cu'}" onclick="payQuick('${e.id}','${u.month}')">${arm ? 'تأكيد الصرف' : 'اصرف'}</button></span></div>`;
+    }).join('')}<div class="sub" style="margin-top:6px">يُصرف الصافي المحسوب. لتغيير المبلغ افتح الموظف.</div></div>`;
+  }
   const acts = [];
   if (rv.length) acts.push(`<button class="r" onclick="openFinRv()"><span class="dt"></span>${cnt(rv.length, 'فاتورة تنتظر', 'فاتورتين تنتظر', 'فواتير تنتظر')} اعتمادك<em>${M(rv.reduce((a, x) => a + x.amount, 0), '', 't')}${I('chevron-left', 15)}</em></button>`);
   owe.forEach(e => acts.push(`<button class="r" onclick="openSt('${e.id}')"><span class="dt"></span>${esc(shortName(e.name))} له عندك من جيبه<em>${M(c.parts[e.id].o, '', 't')}${I('chevron-left', 15)}</em></button>`));
@@ -2542,7 +2572,8 @@ function renderFin() {
   const nAct = (d.projects || []).filter(p => !p.archived).length;
   h += `<div class="fseg"><div class="segc"><button class="${seg === 'e' ? 'on' : ''}" onclick="S.fx.seg='e';S.fx.ord=false;renderFin()">الموظفين</button><button class="${seg === 'p' ? 'on' : ''}" onclick="S.fx.seg='p';renderFin()">المشاريع</button></div>${seg === 'p' && nAct > 1 && !S.fx.ord ? `<button class="ordb" onclick="S.fx.ord=true;renderFin()">${I('list-checks', 16)}رتّب</button>` : ''}</div>`;
   if (seg === 'e') {
-    const ev = e => { const pt = c.parts[e.id] || {}, v = [];
+    const ev = e => { const pt = c.parts[e.id] || {}, v = [], du = e.unpaid.filter(dueU)[0];
+      if (du) v.push(`<span class="badge a">راتب ${esc(du.label)}</span>`);
       if ((pt.c || 0) < 0) v.push(`<span class="lt">عهدة ${M(pt.c, '', 't')}</span>`); else if (pt.c > 0) v.push('عهدة ' + M(pt.c, '', 't'));
       if (pt.o > 0) v.push(`<span class="lt">له ${M(pt.o, '', 't')}</span>`);
       return v.join(' · ') || 'ما معه عهدة'; };
@@ -2894,6 +2925,14 @@ async function saveFin() {
   catch (e) { un(); $('#ferr').textContent = e; }
 }
 
+/* الإصدار 75: صرف الراتب من قائمة «رواتب مستحقة» بالصافي المحسوب */
+async function payQuick(emp, month) {
+  const k = 'payq_' + emp + month;
+  if (S.armed !== k) { S.armed = k; renderFin(); return; }
+  lockBtn('جاري تسجيل الصرف…');
+  try { S.data = await call('apiPay', BOOT.key, {emp, month, amount: ''}); S.armed = null; renderAdmin(); toast('تسجل الصرف'); }
+  catch (e) { S.armed = null; renderFin(); toastErr(e); }
+}
 async function pay(emp, month) {
   const k = 'pay_' + emp + month;
   if (S.armed !== k) { S.armed = k; renderFin(); return; }
@@ -3249,7 +3288,7 @@ function rulesHtml(st) {
 /* ================= صفحة الموظف ================= */
 
 async function loadEmp() {
-  try { renderEmp(await call('apiEmp', BOOT.token), false); API.seen(APP_VER, ''); }
+  try { renderEmp(await call('apiEmp', BOOT.token), false); API.seen(APP_VER, ''); nfPendingGo(); }
   catch (e) { $('#app').innerHTML = '<div class="load">' + esc(e) + '</div>'; }
 }
 
@@ -3731,7 +3770,7 @@ function rpAdminView() {
   if (RP.open) {
     const h = rpDetailHtml(true);
     if (h) { $('#view').innerHTML = h; rpAfterDetail(); return; }
-    RP.open = null;
+    if (!RP.loading) RP.open = null;
   }
   $('#view').innerHTML = tvSeg(S.data) + rpSummaryHtml();
   fb.innerHTML = I('plus', 26, 2.5); fb.setAttribute('aria-label', 'إضافة تقرير'); fb.classList.remove('hide');
@@ -3917,7 +3956,7 @@ function rpEmpRowHtml(r, d) {
 function rpEmpSub(d) {
   if (RP.reps === null || !(RP.open || RP.hist)) return '';
   const body = RP.hist ? rpHistHtml(false) : rpDetailHtml(false);
-  if (!body) { RP.open = null; return ''; }
+  if (!body) { if (!RP.loading) RP.open = null; return ''; }
   return body;
 }
 function rpHead() {
@@ -3926,7 +3965,7 @@ function rpHead() {
   const h1 = top.querySelector('h1'), back = v.querySelector(':scope > .back'), h2 = v.querySelector(':scope > h2');
   if (h2) { h1.textContent = h2.textContent; h2.remove(); }
   top.classList.add('subp');
-  if (back) h1.parentNode.insertBefore(back, h1);
+  if (back) { h1.parentNode.querySelectorAll(':scope > .back').forEach(x => x.remove()); h1.parentNode.insertBefore(back, h1); }
 }
 
 function rpOpenForm(p, isAdmin) {
@@ -4238,7 +4277,44 @@ function nfIcon(t) {
     : /اعتمد|انعتمد/.test(t) ? 'circle-check' : /توجيه/.test(t) ? 'clipboard-list' : /مهم|شرح/.test(t) ? 'list-checks' : /رد/.test(t) ? 'message-circle' : 'bell';
 }
 function nfRow(x) {
-  return `<div class="nfr ${x.at > NF.prev ? 'new' : ''}"><span class="ic">${I(nfIcon(x.t || ''), 16)}</span><div class="tx"><b>${esc(x.t || '')}</b>${x.b ? `<small>${esc(x.b)}</small>` : ''}</div><span class="tm">${esc(nfTime(x.at))}</span></div>`;
+  const go = x.u && /^[a-z]:[A-Za-z0-9_-]+$/.test(x.u);
+  const inner = `<span class="ic">${I(nfIcon(x.t || ''), 16)}</span><div class="tx"><b>${esc(x.t || '')}</b>${x.b ? `<small>${esc(x.b)}</small>` : ''}</div><span class="tm">${esc(nfTime(x.at))}${go ? `<span class="nfgo">${I('chevron-left', 16, 2.2)}</span>` : ''}</span>`;
+  return go ? `<button class="nfr nfb ${x.at > NF.prev ? 'new' : ''}" onclick="goLink('${x.u}')">${inner}</button>` : `<div class="nfr ${x.at > NF.prev ? 'new' : ''}">${inner}</div>`;
+}
+/* الإصدار 75: الإشعار يفتح الشي نفسه. الرابط محفوظ مع الإشعار في السيرفر: t مهمة، f:rv فواتير تنتظر، r تقرير، e:tasks و e:inv تبويب الموظف */
+function goLink(u) {
+  const i = String(u || '').indexOf(':'); if (i < 1) return;
+  const k = u.slice(0, i), id = u.slice(i + 1);
+  NF.open = false;
+  if (BOOT.page === 'admin') {
+    if (S.preview) S.preview = null;
+    if (k === 't') { go('task'); S.tview = 't'; if (allTasks().some(t => t.id === id)) openTask(id); return; }
+    if (k === 'f') { go('fin'); openFinRv(); return; }
+    if (k === 'r') { go('task'); S.tview = 'r'; if (!rpArr(RP.reps).some(r => r.id === id)) RP.need = true; rpOpen(id); return; }
+    return renderAdmin();
+  }
+  if (k === 'r') { S.etab = 'rep'; RP.sent = null; RP.hist = null; RP.open = id; if (!rpArr(RP.reps).some(r => r.id === id)) rpLoad(); rerenderEmp(); toTop(); return; }
+  S.etab = id === 'inv' ? 'inv' : 'tasks'; rerenderEmp(); toTop();
+}
+async function nfFromPush(t, b, fresh) {
+  if (BOOT.page !== 'admin' && BOOT.page !== 'emp') return;
+  try { const d = await API.apiNotifs(); NF.items = rpArr(d && d.items); } catch (e) { return fresh ? null : refresh(); }
+  const it = NF.items.find(x => x.t === t && x.b === b) || NF.items.find(x => x.t === t);
+  if (!fresh) await refresh();
+  if (it && it.u) goLink(it.u); else nfPaint();
+}
+function nfPendingGo() {
+  const h = new URLSearchParams(String(location.hash || '').slice(1)), t = h.get('nt');
+  if (t === null) return;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  nfFromPush(t, h.get('nb') || '', true);
+}
+/* الإصدار 75: المدير يفتح على «المهام» إذا فيه إثبات ينتظر، وعلى «المالية» إذا فيه فاتورة تنتظر، وإلا على آخر تبويب */
+function startView(d) {
+  if (d.employees.some(e => (e.tasks || []).some(t => t.status === 'review'))) return 'task';
+  if (((d.inv || {}).items || []).some(x => x.kind === 'inv' && x.status === 'review')) return 'fin';
+  const v = lsGet('adm_view');
+  return ['rec', 'team', 'task', 'fin', 'set'].includes(v) ? v : 'rec';
 }
 function nfRender() {
   const v = $('#view'); if (!v) return;

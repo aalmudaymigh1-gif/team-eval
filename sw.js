@@ -10,14 +10,16 @@ self.addEventListener('push', e => {
   }));
 });
 
+/* الإصدار 75: الضغط على الإشعار يفتح الشي نفسه. التطبيق يطابق العنوان والنص مع قائمة الإشعارات ويروح للرابط المحفوظ معها */
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  const url = (e.notification.data && e.notification.data.url) || './';
+  const n = e.notification, url = String((n.data && n.data.url) || './').split('#')[0];
+  const msg = { type: 'open', t: n.title || '', b: n.body || '' };
   e.waitUntil((async () => {
     const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     for (const c of all) {
-      if ('focus' in c) { try { c.postMessage({ type: 'refresh' }); } catch (err) {} return c.focus(); }
+      if ('focus' in c) { try { c.postMessage(msg); } catch (err) {} return c.focus(); }
     }
-    return self.clients.openWindow(url);
+    return self.clients.openWindow(url + '#nt=' + encodeURIComponent(msg.t) + '&nb=' + encodeURIComponent(msg.b));
   })());
 });
