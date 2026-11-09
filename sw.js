@@ -1,5 +1,6 @@
 self.addEventListener('install', () => self.skipWaiting());
 
+/* الإصدار 81: ملف الترجمة i18n.js برقم إصداره ينحفظ مثل api.js، والإشعار يطلع بلغته (dir auto) */
 /* الإصدار 76: الملفات الثابتة (api.js برقم إصداره، مكتبة Supabase، الأيقونات) تنحفظ في الجوال وما تنزل كل مرة.
    الصفحة نفسها وطلبات البيانات تروح للنت دائماً */
 const CACHE = 'te-static-1';
@@ -8,7 +9,7 @@ self.addEventListener('activate', e => e.waitUntil((async () => {
   await self.clients.claim();
 })()));
 function isStatic(u) {
-  if (u.origin === self.location.origin) return (/\/api\.js$/.test(u.pathname) && /^\?v=\d+$/.test(u.search)) || /\/icon-\d+\.png$/.test(u.pathname);
+  if (u.origin === self.location.origin) return (/\/(api|i18n)\.js$/.test(u.pathname) && /^\?v=\d+$/.test(u.search)) || /\/icon-\d+\.png$/.test(u.pathname);
   return u.hostname === 'cdn.jsdelivr.net' && u.pathname.indexOf('/npm/@supabase/supabase-js@2/') === 0;
 }
 self.addEventListener('fetch', e => {
@@ -23,7 +24,7 @@ self.addEventListener('fetch', e => {
     const res = await fetch(req);
     if (res.ok || res.type === 'opaque') {
       await c.put(req, res.clone());
-      if (/\/api\.js$/.test(u.pathname)) for (const k of await c.keys()) { const ku = new URL(k.url); if (/\/api\.js$/.test(ku.pathname) && ku.search !== u.search) await c.delete(k); }
+      if (/\/(api|i18n)\.js$/.test(u.pathname)) for (const k of await c.keys()) { const ku = new URL(k.url); if (ku.pathname === u.pathname && ku.search !== u.search) await c.delete(k); }
     }
     return res;
   })());
@@ -33,7 +34,7 @@ self.addEventListener('push', e => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch (err) { d = { title: e.data ? e.data.text() : '' }; }
   e.waitUntil(self.registration.showNotification(d.title || 'تقييم الفريق', {
-    body: d.body || '', icon: 'icon-192.png', badge: 'icon-192.png', dir: 'rtl', lang: 'ar',
+    body: d.body || '', icon: 'icon-192.png', badge: 'icon-192.png', dir: 'auto',
     tag: d.tag || undefined, data: { url: d.url || './' }
   }));
 });
