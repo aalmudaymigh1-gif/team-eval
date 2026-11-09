@@ -922,7 +922,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=69"></script>
 <script>
-const APP_VER = '70';
+const APP_VER = '71';
 let verAt = 0;
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -3880,16 +3880,17 @@ function rpFill() {
 function rpWillMove(x) { return !!x.after && RP.form.items.some(i => i.t === x.after && i.done); }
 function rpCurHtml() {
   const f = RP.form;
-  const rows = f.items.map((x, i) => `<div class="crow ${x.done ? 'dn' : ''}"><button class="ck" onclick="rpTog(${i})" aria-label="${x.done ? 'إلغاء الإنجاز' : 'تم الإنجاز'}">${x.done ? I('check', 15, 3) : ''}</button><span class="ct">${esc(x.t)}${x.x ? '<small>عمل منجز لم يكن مسجلاً</small>' : ''}</span>${x.done && !x.x ? '' : `<button class="mx2" onclick="rpRmCur(${i})" aria-label="حذف">${I('x', 14, 2.5)}</button>`}</div>`).join('');
+  const rows = f.items.map((x, i) => `<div class="crow ${x.done ? 'dn' : ''}"><button class="ck" onclick="rpTog(${i})" aria-label="${x.done ? 'إلغاء الإنجاز' : 'تم الإنجاز'}">${x.done ? I('check', 15, 3) : ''}</button><span class="ct">${esc(x.t)}${x.x ? '<small>عمل منجز لم يكن مسجلاً</small>' : ''}</span>${!f.admin || (x.done && !x.x) ? '' : `<button class="mx2" onclick="rpRmCur(${i})" aria-label="حذف">${I('x', 14, 2.5)}</button>`}</div>`).join('');
   const nd = f.items.filter(x => x.done).length;
   return `<div class="lbox">${rows || '<div class="rpe" style="padding:8px 2px">لا توجد أعمال حالية</div>'}
     <div class="ladd one"><input id="f_nc" placeholder="${f.extra ? 'عمل أُنجز ولم يكن مسجلاً' : 'عمل حالي جديد'}" value="${esc(f.nc)}" oninput="RP.form.nc=this.value;rpDraftSave()" onkeydown="if(event.key==='Enter')rpAddCur()"><button class="btn2" onclick="rpAddCur()">${I('plus', 16)}إضافة</button></div>
     <button class="lnk xtra" onclick="RP.form.extra=!RP.form.extra;rpRefCur()">${f.extra ? 'إضافة عمل حالي بدلاً من ذلك' : '+ عمل منجز لم يكن مسجلاً'}</button></div>
+    ${f.admin ? '' : `<div class="rhint">${I('lock', 13)}لا يمكن حذف الأعمال، ضع ✓ على ما أُنجز. الحذف من المدير العام فقط</div>`}
     ${nd ? `<div class="rhint ok">${I('check-check', 13)}${nd === 1 ? 'عمل واحد سيُنقل' : nd === 2 ? 'عملان سيُنقلان' : nd + ' أعمال ستُنقل'} إلى سجل الإنجاز عند الإرسال</div>` : ''}`;
 }
 function rpRefCur() { const b = document.getElementById('f_cur'); if (b) b.innerHTML = rpCurHtml(); rpRefLater(); }
 function rpTog(i) { const x = RP.form.items[i]; x.done = !x.done; rpRefCur(); }
-function rpRmCur(i) { RP.form.items.splice(i, 1); rpRefCur(); }
+function rpRmCur(i) { if (!RP.form.admin) return; RP.form.items.splice(i, 1); rpRefCur(); }
 function rpAddCur() {
   const f = RP.form, t = (f.nc || '').trim();
   if (!t) return toast('اكتب العمل أولاً', null, 'er');
@@ -3900,7 +3901,7 @@ function rpAddCur() {
 function rpLaterFormHtml() {
   const f = RP.form, cur = f.items.filter(x => !x.done).map(x => x.t);
   const rows = f.later.map((x, i) => `<div class="lrow ${rpWillMove(x) ? 'mv' : ''}"><div class="lt"><b>${esc(x.t)}</b><small>${x.after ? (rpWillMove(x) ? I('check', 12, 3) + 'أُنجز «' + esc(x.after) + '»، وستنتقل إلى الأعمال الحالية عند الإرسال' : 'تبدأ بعد: ' + esc(x.after)) : 'غير مرتبطة بعمل'}</small></div>
-    ${!x.after ? `<button class="lmv" onclick="rpMoveNow(${i})">نقل إلى الحالية</button>` : ''}<button class="mx2" onclick="rpRmLater(${i})" aria-label="حذف">${I('x', 14, 2.5)}</button></div>`).join('');
+    ${!x.after ? `<button class="lmv" onclick="rpMoveNow(${i})">نقل إلى الحالية</button>` : ''}${f.admin ? `<button class="mx2" onclick="rpRmLater(${i})" aria-label="حذف">${I('x', 14, 2.5)}</button>` : ''}</div>`).join('');
   return `<div class="lbox">${rows || '<div class="rpe" style="padding:8px 2px">لا توجد أعمال لاحقة</div>'}
     <div class="ladd"><input id="f_nl" placeholder="عمل لاحق جديد" value="${esc(f.nl)}" oninput="RP.form.nl=this.value;rpDraftSave()">
       <select id="f_na" aria-label="تبدأ بعد" onchange="RP.form.na=this.value"><option value="">تبدأ بعد: غير مرتبطة</option>${cur.map((c, i) => `<option value="${i}" ${f.na === String(i) ? 'selected' : ''}>تبدأ بعد: ${esc(c.length > 34 ? c.slice(0, 34) + '…' : c)}</option>`).join('')}</select>
@@ -3913,7 +3914,7 @@ function rpAddLater() {
   f.later.push({t: t, after: f.na !== '' && cur[+f.na] ? cur[+f.na] : ''}); f.nl = ''; f.na = '';
   rpRefLater();
 }
-function rpRmLater(i) { RP.form.later.splice(i, 1); rpRefLater(); }
+function rpRmLater(i) { if (!RP.form.admin) return; RP.form.later.splice(i, 1); rpRefLater(); }
 function rpMoveNow(i) { const f = RP.form, x = f.later.splice(i, 1)[0]; if (!f.items.some(y => y.t === x.t)) f.items.push({t: x.t, done: false}); rpRefCur(); }
 function rpDraw() {
   const f = RP.form;
@@ -4160,6 +4161,10 @@ function rpDraftLoad(f) {
   const l = rpLast(f.proj);
   if (!d || d.base !== (l ? l.id : '') || Date.now() - (d.at || 0) > 14 * 864e5) return;
   f.items = rpArr(d.items); f.later = rpArr(d.later); f.decide = d.decide || ''; f.nc = d.nc || ''; f.nl = d.nl || ''; f.draftAt = d.at;
+  if (!f.admin && l) {
+    rpArr(l.cur).forEach(t => { if (!f.items.some(x => x.t === t)) f.items.push({t: t, done: false}); });
+    rpArr(l.later).forEach(x => { if (!f.later.some(y => y.t === x.t) && !f.items.some(y => y.t === x.t)) f.later.push({t: x.t, after: x.after || ''}); });
+  }
 }
 function rpDraftClear(f) { clearTimeout(rpDT); try { localStorage.removeItem(rpDraftKey(f)); } catch (e) {} }
 function rpDraftDrop() { const f = RP.form; if (!f) return; rpDraftClear(f); f.draftAt = 0; rpFill(); rpDraftClear(f); f.draftAt = 0; rpDraw(); }
