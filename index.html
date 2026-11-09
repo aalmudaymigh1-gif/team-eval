@@ -749,6 +749,9 @@ b,strong,th,h2,h3,h4{font-weight:600}
 /* الإصدار 62: تقارير تقدم الأعمال، وخط النظام (نفس خط الآيفون وواتساب) */
 .etabs.e4{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;overflow:visible}
 .etabs.e4 button{min-width:0;padding-inline:2px;white-space:nowrap;font-size:14px}
+.etabs.e4 button{padding:8px 4px!important;display:inline-flex;align-items:center;justify-content:center}
+.etabs.e4 button .nb{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;margin-inline-start:5px;border-radius:999px;background:var(--fill);color:#55554f;font-size:12px;font-weight:600}
+.etabs.e4 button.on .nb{background:rgba(255,255,255,.28);color:#fff}
 .rpl{display:flex;flex-direction:column;gap:10px;margin-top:12px}
 .rph .rchip{flex:none;font-size:12px;font-weight:500;border-radius:999px;padding:2px 9px;white-space:nowrap}
 .rchip.dec{background:var(--amber-soft);color:#85642B}
@@ -972,7 +975,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=77"></script>
 <script>
-const APP_VER = '78';
+const APP_VER = '79';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -3343,7 +3346,7 @@ function renderEmp(d, isPreview) {
   $('#app').innerHTML = `
     ${isPreview ? `<button class="back" onclick="closePreview()">${I('arrow-right', 17)}رجوع للفريق</button><div class="note info">${I('eye', 16)}هذي معاينة، والموظف يشوف نفس الصفحة.</div>` : ''}
     <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>`}</div>${isPreview ? '' : pushHtml()}${tasksTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) : ''}
-    <div class="segc etabs e4"><button class="${S.etab === 'tasks' ? 'on' : ''}" onclick="S.etab='tasks';rerenderEmp()">مهامي${nOpen ? ' (' + nOpen + ')' : ''}</button><button class="${S.etab === 'rep' ? 'on' : ''}" onclick="S.etab='rep';RP.sent=null;RP.open=null;RP.hist=null;rerenderEmp()">تقاريري</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري${nRetInv ? ' (' + nRetInv + ')' : ''}</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">حافزي</button></div>
+    <div class="segc etabs e4"><button class="${S.etab === 'tasks' ? 'on' : ''}" onclick="S.etab='tasks';rerenderEmp()">مهامي${nOpen ? '<span class="nb">' + nOpen + '</span>' : ''}</button><button class="${S.etab === 'rep' ? 'on' : ''}" onclick="S.etab='rep';RP.sent=null;RP.open=null;RP.hist=null;rerenderEmp()">تقاريري</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري${nRetInv ? '<span class="nb">' + nRetInv + '</span>' : ''}</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">حافزي</button></div>
     ${S.etab === 'inv' ? empInvHtml(d, isPreview) : S.etab === 'rep' ? rpEmpHtml(d, isPreview) : tasksTab ? empTasksHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
   if (!isPreview) prefetchImgs();
   if (tasksTab) vFetch((d.tasks || []).filter(t => t.status === 'open' || t.status === 'returned').map(t => (vOf(t) || {}).id));
@@ -3815,7 +3818,7 @@ function rpAdminView() {
 /* الإصدار 78: بطاقات التقارير مرتّبة: شارة الحالة، وأرقام الحالية واللاحقة والمنجزة، وأول عملين، و«بلا تقارير» سطر واحد */
 function rpSeen() { try { return JSON.parse(lsGet('rp_seen') || 'null'); } catch (e) { return null; } }
 function rpMarkSeen(id) { const a = rpSeen() || []; if (!a.includes(id)) { a.push(id); lsSet('rp_seen', JSON.stringify(a.slice(-300))); } }
-function rpIsNew(r) { const a = rpSeen(); return !!(a && r.by !== 'admin' && !a.includes(r.id)); }
+function rpIsNew(r, me) { const a = rpSeen(); return !!(a && r.by !== (me || 'admin') && !a.includes(r.id)); }
 function rpAgeDays(r) { const t = rpToday(); if (!t || !r.date) return 0; return Math.round((Date.parse(t + 'T12:00:00Z') - Date.parse(r.date + 'T12:00:00Z')) / 864e5); }
 function rpSummaryHtml() {
   const ps = rpProjs(), withR = ps.filter(p => rpLast(p.id)), none = ps.filter(p => !rpLast(p.id));
@@ -3829,24 +3832,29 @@ function rpSummaryHtml() {
   }
   return h;
 }
-function rpCardHtml(r) {
+function rpCardHtml(r, o) {
+  o = o || {};
   const dec = rpArr(r.decide), up = rpArr(r.up), cur = rpArr(r.cur), ord = up.filter(x => cur.includes(x)).concat(cur.filter(x => !up.includes(x)));
-  const nc = cur.length, nl = rpArr(r.later).length, nd = rpArr(r.done).length, age = rpAgeDays(r);
-  const chip = rpPend(r) ? '<span class="rchip dec">بانتظار قرارك</span>' : rpIsNew(r) ? '<span class="rchip new">جديد</span>' : age > 3 ? `<span class="rchip old">من ${age} ${age <= 10 ? 'أيام' : 'يوماً'}</span>` : '';
+  const nc = cur.length, nl = rpArr(r.later).length, nd = rpArr(r.done).length, age = rpAgeDays(r), me = (o.d || {}).id;
+  const notes = rpArr(r.notes), last = notes[notes.length - 1];
+  const chip = o.share ? '<span class="rchip new">تنبيه</span>' : rpPend(r) ? `<span class="rchip dec">${o.emp ? 'بانتظار المدير العام' : 'بانتظار قرارك'}</span>` : rpIsNew(r, me) ? '<span class="rchip new">جديد</span>' : age > 3 ? `<span class="rchip old">من ${age} ${age <= 10 ? 'أيام' : 'يوماً'}</span>` : '';
   const st = [nc ? `<span><i></i>${nc === 1 ? 'عمل حالي واحد' : nc === 2 ? 'عملان حاليان' : nc + ' حالية'}</span>` : '',
     nl ? `<span><i class="l"></i>${nl === 1 ? 'عمل لاحق واحد' : nl === 2 ? 'عملان لاحقان' : nl + ' لاحقة'}</span>` : '',
     nd ? `<span><i class="d"></i>${nd === 1 ? 'عمل أُنجز' : nd === 2 ? 'عملان أُنجزا' : nd + ' أُنجزت'}</span>` : ''].join('');
-  const decH = dec.length && !r.reply ? `<div class="rpd">${I('triangle-alert', 15)}<div><b>القرار:</b> ${esc(dec.join('، '))}</div></div>` : '';
+  const decH = (o.share ? `<div class="rpd ok">${I('bell-ring', 15)}<div><b>تنبيه من المدير العام:</b> ${esc(o.share.msg || 'راجع تقرير المشروع')}</div></div>` : '')
+    + (dec.length && !r.reply ? `<div class="rpd">${I('triangle-alert', 15)}<div><b>القرار:</b> ${esc(dec.join('، '))}</div></div>` : '')
+    + (dec.length && r.reply ? `<div class="rpd ok">${I('circle-check', 15)}<div><b>${rpReplyT(r.reply)}:</b> ${esc(dec.join('، '))}</div></div>` : '')
+    + (o.emp && !o.share && last && r.by === me ? `<div class="rpd ok">${I('message-circle', 15)}<div><b>ملاحظة المدير العام:</b> ${esc(last.text)}</div></div>` : '');
   const more = ord.length - 2;
   return `<button class="rpc" onclick="rpOpen('${r.id}')">
     <div class="rph"><b>${esc(rpPName(r.proj))}</b>${chip}</div>
-    <div class="rpm2">${esc(rpBy(r))} · ${esc(rpRel(r.date))}</div>
+    <div class="rpm2">${esc(rpBy(r))} · ${esc(rpRel(r.date))}${r.edited ? ' · عدّله المدير العام' : ''}</div>
     ${st ? `<div class="rst">${st}</div>` : ''}
     ${decH}
     ${ord.length ? '<ul class="rpv">' + ord.slice(0, 2).map(x => `<li>${esc(x)}${up.includes(x) ? '<span class="tg2 g">حان وقته</span>' : ''}</li>`).join('') + '</ul>' + (more > 0 ? `<div class="rpmore">${more === 1 ? 'وعمل آخر' : more === 2 ? 'وعملان آخران' : 'و' + more + (more <= 10 ? ' أعمال أخرى' : ' عملاً آخر')}</div>` : '') : '<div class="rpmore" style="padding:6px 0 0">لا توجد أعمال حالية</div>'}
   </button>`;
 }
-function rpOpen(id) { rpMarkSeen(id); RP.open = id; RP.hist = null; RP.draft = ''; rpRerender(); toTop(); }
+function rpOpen(id) { rpMarkSeen(id); if (BOOT.page === 'emp') { const r = (RP.reps || []).find(x => x.id === id); if (r) rpShMark(r.proj); } RP.open = id; RP.hist = null; RP.draft = ''; rpRerender(); toTop(); }
 function rpClose() { RP.open = null; RP.draft = ''; rpRerender(); toTop(); }
 function rpOpenHist(p) { RP.hist = p; RP.unArm = null; rpRerender(); toTop(); }
 function rpCloseHist() { RP.hist = null; rpRerender(); toTop(); }
@@ -3985,20 +3993,27 @@ async function rpReply(id, v) {
   } catch (e) { RP.busy = false; toastErr(e); }
 }
 
+/* الإصدار 79: صفحة «تقاريري» بنفس بطاقات المدير العام، والتنبيه يطلع على بطاقة المشروع نفسها بدل قسم لحاله */
+function rpShSeen() { try { return JSON.parse(lsGet('rp_shs') || '{}'); } catch (e) { return {}; } }
+function rpShareFor(p) { const sn = rpShSeen()[p] || 0, now = Date.now(); return rpArr(RP.shares).find(x => { const r = (RP.reps || []).find(y => y.id === x.rep); return r && r.proj === p && (x.at || 0) > sn && now - (x.at || 0) < 7 * 864e5; }) || null; }
+function rpShMark(p) { const m = rpShSeen(); m[p] = Date.now(); lsSet('rp_shs', JSON.stringify(m)); }
 function rpEmpHtml(d, isPreview) {
   rpEnsure();
   if (RP.reps === null) return rpLoadingHtml();
   const ps = rpProjs().slice().sort((a, b) => (b.mine ? 1 : 0) - (a.mine ? 1 : 0));
   if (!ps.length) return emptyHtml('folder', 'لا توجد مشاريع نشطة');
+  if (rpSeen() === null) lsSet('rp_seen', JSON.stringify(RP.reps.map(r => r.id).slice(-300)));
   let h = '';
   if (RP.sent) h += `<div class="note good rsent" style="margin-top:16px">${I('circle-check', 16)}<div><b>تم إرسال تقرير ${esc(rpPName(RP.sent.proj))}</b><br>${esc(dayLabel(RP.sent.date))}</div></div>`;
   if (!isPreview) h += `<button class="btn2 cu qbig" style="margin-top:16px" onclick="rpOpenForm(null,false)">${I('file-text', 17)}إعداد تقرير</button>`;
-  const seen = {}, sh = rpArr(RP.shares).filter(x => { const r = (RP.reps || []).find(y => y.id === x.rep); if (!r || seen[x.rep]) return false; seen[x.rep] = 1; return true; }).slice(0, 5);
-  if (sh.length) h += `<div class="rph2">وصلك من المدير العام</div><div class="rpl">${sh.map(x => rpEmpCardHtml((RP.reps || []).find(y => y.id === x.rep), d, x)).join('')}</div>`;
   const withR = ps.filter(p => rpLast(p.id)), none = ps.filter(p => !rpLast(p.id));
-  withR.sort((a, b) => (b.mine ? 1 : 0) - (a.mine ? 1 : 0) || (rpLast(b.id).ts || 0) - (rpLast(a.id).ts || 0));
-  h += `<div class="rph2">تقارير المشاريع</div>` + (withR.length ? `<div class="rpl">${withR.map(p => rpEmpCardHtml(rpLast(p.id), d, null)).join('')}</div>` : emptyHtml('file-text', 'لا توجد تقارير بعد'));
-  if (none.length && !isPreview) h += `<div class="tbl2" style="margin-top:12px">${none.map(p => tbRow('folder', esc(p.name), '<span class="lv">إعداد تقرير</span>', `rpOpenForm('${p.id}',false)`)).join('')}</div>`;
+  const rank = p => { const r = rpLast(p.id); return rpShareFor(p.id) ? 3 : rpIsNew(r, d.id) ? 2 : p.mine ? 1 : 0; };
+  withR.sort((a, b) => rank(b) - rank(a) || (rpLast(b.id).ts || 0) - (rpLast(a.id).ts || 0));
+  h += withR.length ? `<div class="rpl">${withR.map(p => rpCardHtml(rpLast(p.id), {emp: true, d: d, share: rpShareFor(p.id)})).join('')}</div>` : emptyHtml('file-text', 'لا توجد تقارير بعد');
+  if (none.length && !isPreview) {
+    h += `<button class="rpfold" aria-expanded="${!!RP.noneOpen}" onclick="RP.noneOpen=!RP.noneOpen;rerenderEmp()"><span class="ic">${I('folder', 16)}</span><span class="k">مشاريع بلا تقارير</span><span class="v">${none.length}<span class="cv2 ${RP.noneOpen ? 'on' : ''}">${I('chevron-left', 16)}</span></span></button>`;
+    if (RP.noneOpen) h += `<div class="tbl2" style="margin-top:8px">${none.map(p => tbRow('folder', esc(p.name), '<span class="lv">إعداد تقرير</span>', `rpOpenForm('${p.id}',false)`)).join('')}</div>`;
+  }
   return h;
 }
 function rpEmpCardHtml(r, d, share) {
@@ -4538,7 +4553,7 @@ function rpShareDraw() {
     <div class="qch">${es.map(e => `<button class="${f.emps.includes(e.id) ? 'on' : ''}" onclick="rpShareTog('${e.id}')">${esc(shortName(e.name))}</button>`).join('')}</div>
     <label class="qlab" for="shm">${I('message-circle', 14)}رسالة (اختياري)</label>
     <textarea id="shm" class="rta sm" placeholder="مثال: راجع القرار المطلوب قبل الأحد" oninput="RP.share.msg=this.value;rpGrow(this)">${esc(f.msg)}</textarea>
-    <div class="rhint">${I('info', 13)}يصلهم إشعار، ويظهر التقرير عندهم تحت «وصلك من المدير العام»</div>
+    <div class="rhint">${I('info', 13)}يصلهم إشعار، ويظهر التنبيه على بطاقة المشروع عندهم</div>
     <div class="err">${esc(f.err)}</div>
     <button class="btn2 cu qbig" ${f.busy ? 'disabled' : ''} onclick="rpShareSend()">${f.busy ? 'جاري الإرسال…' : I('send', 17) + 'إرسال'}</button>`);
   rpGrowAll();
