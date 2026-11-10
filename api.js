@@ -458,6 +458,7 @@
       rules: settings_(),
       projects: RAW.projects.filter(p => !p.archived).map(p => ({ id: p.id, name: p.name, lat: p.lat, lng: p.lng })),
       attend: !!emp.attend,
+      alerts: (RAW.alerts || []).filter(a => a.kind === 'task'),
       lang: emp.lang || 'ar',
       guideOn: !!emp.guide,
       guides: RAW.guides.map(g => {
@@ -484,6 +485,7 @@
       inv: { bal: bal, parts: parts, items: RAW.invoices.slice().reverse().map(x => invOut_(x, pmap)) },
       attendance: RAW.attendance,
       attCfg: attCfg_(),
+      alerts: RAW.alerts || [],
       guides: RAW.guides.map(g => ({ id: g.id, ts: g.ts, title: g.title, points: g.points, q: g.q,
         reads: RAW.greads.filter(x => x.guide === g.id).map(x => Object.assign({ name: (empById(x.emp) || {}).name || '' }, x)) })),
       projects: projects.map(p => ({ id: p.id, name: p.name, archived: p.archived, lat: p.lat, lng: p.lng,
@@ -772,9 +774,10 @@
     },
 
     async apiTaskRemind(k, id) {
-      await rpc('task_remind', { k: k, id: String(id) });
+      const r = await rpc('task_remind', { k: k, id: String(id) });
       flush();
-      return true;
+      if (RAW && r && r.id) (RAW.alerts = RAW.alerts || []).unshift({ id: r.id, kind: 'task', ref: String(id), item: null, emp: (RAW.tasks.find(t => t.id === String(id)) || {}).emp || '', msg: '', at: Date.now(), seen: null });
+      return r || true;
     },
     async apiEmpOrder(k, ids) {
       if (!Array.isArray(ids) || !ids.length) throw new Error('ما فيه ترتيب');
@@ -1056,6 +1059,10 @@
     },
     async apiRepNow(id, item, undo) { return rpc('rep_later_now', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), undo: !!undo }); },
     async apiRepUndone(id, item) { const r = await rpc('rep_undone', { k: CRED.k || '', id: String(id || ''), item: String(item || '') }); flush(); return r; },
+    /* الإصدار 86: اعتماد الإنجاز أو إرجاعه، والتنبيه على عمل محدد، وتسجيل مشاهدة التنبيه */
+    async apiRepReview(id, item, ok, note) { const r = await rpc('rep_review', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), ok: !!ok, note: String(note || '') }); flush(); return r; },
+    async apiRepAlert(id, item, emps, msg) { const r = await rpc('rep_alert', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), emps: emps || [], msg: String(msg || '') }); flush(); return r; },
+    async apiAlertSeen(id) { const r = await rpc('alert_seen', { t: CRED.t || '', id: String(id || '') }); flush(); return r; },
     async apiRepDecDel(id, item) { return rpc('rep_dec_del', { k: CRED.k || '', id: String(id || ''), item: String(item || '') }); },
     async trGet(texts, lang) { return rpc('tr_get', { k: CRED.k || '', t: CRED.t || '', texts: texts, tl: lang }); },
     async apiNotifs() { return rpc('notif_list', { k: CRED.k || '', t: CRED.t || '' }); },
