@@ -87,7 +87,7 @@
 
   function norm(r) {
     r.employees = (r.employees || []).map(e => ({ id: e.id, name: e.name, salary: Number(e.salary) || 0, max: Number(e.max) || 0,
-      token: e.token || '', active: e.active !== false, track: !!e.track, attend: !!e.attend, guide: !!e.guide, lang: e.lang || 'ar' }));
+      token: e.token || '', active: e.active !== false, track: !!e.track, attend: !!e.attend, guide: !!e.guide, lang: e.lang || 'ar', payDay: Number(e.payDay) || 28, payNext: !!e.payNext }));
     r.guides = (r.guides || []).map(g => Object.assign({}, g, { points: Array.isArray(g.points) ? g.points : [], q: g.q && typeof g.q === 'object' ? g.q : null }));
     r.greads = (r.greads || []).map(x => Object.assign({}, x, { secs: Number(x.secs) || 0, wrong: Number(x.wrong) || 0 }));
     r.attendance = (r.attendance || []).map(x => Object.assign({}, x, { homeLat: x.homeLat == null ? null : Number(x.homeLat), homeLng: x.homeLng == null ? null : Number(x.homeLng), inLat: x.inLat == null ? null : Number(x.inLat), inLng: x.inLng == null ? null : Number(x.inLng),
@@ -235,6 +235,46 @@
     return { start: s.WORK_START || '07:00', grace: Number(s.GRACE_MIN || 15), auto: (s.ATT_AUTO || '1') === '1' };
   }
   function projMap_(ps) { const m = {}; ps.forEach(p => { m[p.id] = p.name; }); return m; }
+  /* الإصدار 83: موعد صرف راتب الشهر لكل موظف (يوم + نفس الشهر أو الشهر اللي بعده) */
+  function dueDate_(emp, mk) {
+    let y = Number(mk.slice(0, 4)), m = Number(mk.slice(5, 7));
+    if (emp.payNext) { m++; if (m > 12) { m = 1; y++; } }
+    return y + '-' + String(m).padStart(2, '0') + '-' + String(Math.min(28, Math.max(1, emp.payDay || 28))).padStart(2, '0');
+  }
+  const rr2 = n => Math.round(n * 100) / 100;
+  const fromP_ = p => Number((p.details && p.details.fromParts) || 0);
+  function payDetails_(f) {
+    return { base: f.base, bonus: f.bonus, points: f.points, target: f.target, max: f.max,
+      advance: f.advance, inst: f.inst, deds: f.deds, loanParts: f.loanParts, net: f.net };
+  }
+  /* الإصدار 83: الرواتب المتراكمة والدفعات. الدفعة تتوزع على أقدم راتب ما انصرف، والشهر اللي يكتمل يتقفل بصرف «سُدد بالدفعات» */
+  function salSt_(emp, fin, logs, now) {
+    const mine = fin.filter(f => f.emp === emp.id);
+    const parts = mine.filter(f => f.kind === 'part').sort((a, b) => a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0);
+    const pays = mine.filter(f => f.kind === 'pay');
+    let credit = rr2(parts.reduce((s, p) => s + p.amount, 0) - pays.reduce((s, p) => s + fromP_(p), 0));
+    const open = monthsRange_(startMonth_(emp, logs, fin), now).filter(mk => !isPaid_(fin, emp.id, mk)).map(mk => finMonth_(emp, fin, logs, mk));
+    open.forEach(m => { const c = Math.max(0, Math.min(credit, Math.max(0, m.net))); m.credit = rr2(c); credit = rr2(credit - c); });
+    const months = pays.filter(p => fromP_(p) > 0).map(p => ({ month: p.month, label: monthLabel_(p.month), due: p.amount, paid: p.amount, left: 0, closed: true, cap: fromP_(p), date: p.date }))
+      .concat(open.map(m => ({ month: m.month, label: m.label, due: Math.max(0, m.net), paid: m.credit, left: rr2(Math.max(0, m.net) - m.credit), closed: false, cap: Math.max(0, m.net), dueDate: m.due })))
+      .sort((a, b) => a.month < b.month ? -1 : 1);
+    const due = rr2(months.reduce((s, m) => s + m.due, 0)), paid = rr2(months.reduce((s, m) => s + m.paid, 0));
+    const cash = rr2(months.filter(m => m.closed).reduce((s, m) => s + m.due - m.cap, 0));
+    const caps = months.map(m => m.cap); let cum = 0;
+    const hist = parts.map(p => {
+      let r = p.amount; const al = [];
+      months.forEach((m, i) => {
+        if (r <= 0 || caps[i] <= 0) return;
+        const rest = caps[i] < m.cap, tk = Math.min(caps[i], r);
+        caps[i] = rr2(caps[i] - tk); r = rr2(r - tk);
+        al.push({ label: m.label, take: tk, done: caps[i] === 0, rest: rest });
+      });
+      cum = rr2(cum + p.amount);
+      return { id: p.id, date: p.date, amount: p.amount, note: p.note, al: al, extra: r, after: rr2(Math.max(0, due - cash - cum)) };
+    });
+    return { show: parts.length > 0 || open.length > 1, open: open, months: months, parts: hist.reverse(), due: due, paid: paid, left: rr2(due - paid),
+      lastPart: parts.length ? parts[parts.length - 1].id : '' };
+  }
   function isPaid_(fin, empId, mk) { return fin.some(f => f.kind === 'pay' && f.emp === empId && f.month === mk); }
   function startMonth_(emp, logs, fin) {
     let s = (RAW.settings && RAW.settings.START) || '2026-11';
@@ -298,7 +338,7 @@
     const pay = fin.filter(f => f.kind === 'pay' && f.emp === emp.id && f.month === mk)[0];
     if (pay && pay.details) {
       const d = pay.details;
-      return { month: mk, label: monthLabel_(mk), paid: true, paidAmount: pay.amount, paidDate: pay.date, payId: pay.id,
+      return { month: mk, label: monthLabel_(mk), paid: true, paidAmount: pay.amount, paidDate: pay.date, payId: pay.id, due: dueDate_(emp, mk), fromParts: fromP_(pay), viaParts: !!d.part,
         base: d.base, bonus: d.bonus, points: d.points, target: d.target, max: d.max,
         advance: d.advance, inst: d.inst, deds: d.deds || [], loanParts: d.loanParts || {}, net: d.net, warn10: false, track: !!emp.track };
     }
@@ -307,7 +347,7 @@
     const due = loanDue_(emp, fin, mk);
     const deds = fin.filter(f => f.kind === 'ded' && f.emp === emp.id && f.month === mk).map(f => ({ note: f.note, amount: f.amount }));
     const dedT = deds.reduce((s, f) => s + f.amount, 0);
-    return { month: mk, label: monthLabel_(mk), paid: false,
+    return { month: mk, label: monthLabel_(mk), paid: false, due: dueDate_(emp, mk),
       base: emp.salary, bonus: c.bonus, points: c.points, target: 20, max: c.max,
       advance: advance, inst: due.total, deds: deds, loanParts: due.parts,
       net: emp.salary + c.bonus - advance - due.total - dedT,
@@ -323,7 +363,7 @@
   }
   function txList_(rows) {
     return rows.slice().sort((a, b) => a.ts < b.ts ? 1 : a.ts > b.ts ? -1 : 0).map(f => ({
-      id: f.id, date: f.date, kind: f.kind, amount: f.amount, months: f.months, start: f.start,
+      id: f.id, date: f.date, kind: f.kind, amount: f.amount, months: f.months, start: f.start, via: !!(f.details && f.details.part),
       month: f.month, label: f.month ? monthLabel_(f.month) : (f.start ? monthLabel_(f.start) : ''), note: f.note }));
   }
   function groups_(rows) {
@@ -390,6 +430,7 @@
       tasks: tasksFor_(emp.id, RAW.tasks, todayS, pmap),
       month: calcMonth_(emp, logs, now),
       fin: finMonth_(emp, fin, logs, now),
+      sal: salSt_(emp, fin, logs, now),
       entries: groups_(mine.filter(l => l.date.slice(0, 7) === now)),
       history: monthsRange_(startMonth_(emp, logs, fin), now).reverse().map(mk => {
         const f = finMonth_(emp, fin, logs, mk);
@@ -438,12 +479,12 @@
       settings: settings_(),
       employees: emps.map(e => {
         const mine = logs.filter(l => l.emp === e.id);
-        const unpaid = monthsRange_(startMonth_(e, logs, fin), now).filter(mk => !isPaid_(fin, e.id, mk));
+        const sal = salSt_(e, fin, logs, now);
         return {
-          id: e.id, name: e.name, salary: e.salary, max: e.max, token: e.token, track: e.track, attend: e.attend, guide: e.guide, lang: e.lang, seen: (RAW.seen || {})[e.id] || 0,
+          id: e.id, name: e.name, salary: e.salary, max: e.max, token: e.token, track: e.track, attend: e.attend, guide: e.guide, lang: e.lang, payDay: e.payDay, payNext: e.payNext, sal: sal, seen: (RAW.seen || {})[e.id] || 0,
           month: calcMonth_(e, logs, now),
           recent: groups_(mine).slice(0, 15),
-          unpaid: unpaid.map(mk => finMonth_(e, fin, logs, mk)),
+          unpaid: sal.open,
           loans: loanBalances_(e, fin),
           tx: txList_(fin.filter(f => f.emp === e.id)).slice(0, 15),
           tasks: tasksFor_(e.id, tasks, todayS, pmap)
@@ -629,12 +670,16 @@
       const mk = String(x.month || '');
       if (!/^\d{4}-\d{2}$/.test(mk) || mk > nowMonth()) throw new Error('الشهر غير صحيح');
       if (isPaid_(RAW.fin, emp.id, mk)) throw new Error('هالشهر انصرف من قبل');
-      const f = finMonth_(emp, RAW.fin, RAW.logs, mk);
-      const paid = x.amount === '' || x.amount == null ? f.net : Math.round(Number(x.amount));
-      if (!(paid >= 0)) throw new Error('المبلغ غير صحيح');
-      const details = { base: f.base, bonus: f.bonus, points: f.points, target: f.target, max: f.max,
-        advance: f.advance, inst: f.inst, deds: f.deds, loanParts: f.loanParts, net: f.net };
-      return adminDo(k, 'fin_add', { date: RAW.today, emp: emp.id, kind: 'pay', amount: paid, months: 0, start: '', month: mk,
+      const st = salSt_(emp, RAW.fin, RAW.logs, nowMonth());
+      const f = st.open.filter(m => m.month === mk)[0] || finMonth_(emp, RAW.fin, RAW.logs, mk);
+      const cr = f.credit || 0;
+      const cashv = x.amount === '' || x.amount == null ? Math.max(0, f.net) - cr : rr2(Number(x.amount));
+      if (!(cashv >= 0)) throw new Error('المبلغ غير صحيح');
+      const date = /^\d{4}-\d{2}-\d{2}$/.test(x.date || '') ? x.date : RAW.today;
+      if (date > RAW.today) throw new Error('تاريخ التسليم بعد اليوم');
+      const details = payDetails_(f);
+      if (cr > 0) details.fromParts = cr;
+      return adminDo(k, 'fin_add', { date: date, emp: emp.id, kind: 'pay', amount: rr2(cashv + cr), months: 0, start: '', month: mk,
         note: String(x.note || '').slice(0, 200), details: details });
     },
 
@@ -647,9 +692,37 @@
       if (r.kind === 'loan' && fin.some(f => f.kind === 'pay' && f.emp === r.emp && f.details && f.details.loanParts && f.details.loanParts[r.id])) {
         throw new Error('فيه أقساط من هالسلفة انخصمت، احذف الصرف أول');
       }
+      if (r.kind === 'pay' && r.details && r.details.part) throw new Error('هذا الشهر انسدد بدفعة، احذف الدفعة نفسها');
       if (r.kind === 'pay' && fin.some(f => f.kind === 'pay' && f.emp === r.emp && f.month > r.month)) throw new Error('احذف صرف الشهور اللي بعده أول');
+      if (r.kind === 'part' && fin.some(f => f.kind === 'part' && f.emp === r.emp && f.ts > r.ts)) throw new Error('احذف الدفعات اللي بعدها أول');
       return adminDo(k, 'fin_del', { id: id });
     },
+
+    async apiSalPart(k, x) {
+      await loadAdmin(k);
+      const emp = empById(x.emp);
+      if (!emp) throw new Error('الموظف غير موجود');
+      const amount = cleanAmount_(x.amount);
+      const date = /^\d{4}-\d{2}-\d{2}$/.test(x.date || '') ? x.date : RAW.today;
+      if (date > RAW.today) throw new Error('تاريخ التسليم بعد اليوم');
+      const st = salSt_(emp, RAW.fin, RAW.logs, nowMonth());
+      const left = rr2(st.open.reduce((s, m) => s + Math.max(0, m.net) - m.credit, 0));
+      if (amount > left + 0.001) throw new Error('المبلغ أكثر من المتبقي (' + left.toLocaleString('en-US') + ')');
+      let credit = rr2(st.open.reduce((s, m) => s + m.credit, 0) + amount);
+      const close = [];
+      for (const m of st.open) {
+        const net = Math.max(0, m.net);
+        if (net <= 0) continue;
+        if (credit + 0.001 < net) break;
+        const det = payDetails_(m); det.fromParts = net;
+        close.push({ month: m.month, amount: net, details: det });
+        credit = rr2(credit - net);
+      }
+      return adminDo(k, 'sal_part', { emp: emp.id, amount: amount, date: date, note: String(x.note || '').trim().slice(0, 200), close: close });
+    },
+    async apiEmpPayday(k, empId, day, next) { return adminDo(k, 'emp_payday', { emp: empId, day: Number(day), next: !!next }); },
+    async apiRepLaterAdd(id, item, aft) { return rpc('rep_later_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), aft: String(aft || '') }); },
+    async apiRepCurOrder(id, items) { return rpc('rep_cur_order', { k: CRED.k || '', id: String(id || ''), items: (items || []).map(String) }); },
 
     async apiProjectAdd(k, name) {
       const n = String(name || '').trim().replace(/\s+/g, ' ').slice(0, 60);
