@@ -987,7 +987,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .slp .h{display:flex;justify-content:space-between;align-items:center;gap:8px}.slp .h b{font-weight:600;font-size:15px}
 .slp .h .sub{display:flex;align-items:center;gap:4px}
 .slp .al{font-size:12.5px;color:#55554f;margin-top:5px;line-height:1.65;background:var(--fill);border-radius:10px;padding:6px 9px}
-.pdate{margin:10px 0 0}.pdate input{margin-top:0}
+.pdate{margin:10px 0 0;background:#fff}.pdate .dp input{margin-top:0;min-width:0;-webkit-appearance:none;appearance:none}
 .rchb{margin-inline-start:auto;background:none;border:0;font:inherit;font-size:13px;color:var(--acc-dk);display:flex;align-items:center;gap:5px;cursor:pointer;padding:6px 2px;min-height:36px}
 .rchb.dn{font-size:14px;font-weight:600}
 .ordl{list-style:none;margin:8px 0 0;padding:0}
@@ -1071,7 +1071,7 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=83"></script>
 <script>
-const APP_VER = '83';
+const APP_VER = '84';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -3021,7 +3021,7 @@ function payHtml(e, u) {
   S.pd = S.pd || {};
   const pdk = e.id + u.month, pdv = S.pd[pdk] || today;
   return `<div class="hair"></div>
-    <div class="row" style="margin-bottom:6px"><b>راتب ${esc(u.label)}</b><span class="badge ${ds === 'soon' ? '' : 'a'}">${ds === 'late' ? 'متأخر' : ds === 'today' ? 'مستحق اليوم' : 'ما انصرف'}</span></div>
+    <div class="row" style="margin-bottom:6px"><b>راتب ${esc(u.label)}</b><span class="badge a">${ds === 'late' ? 'متأخر' : ds === 'today' ? 'مستحق اليوم' : 'ما انصرف'}</span></div>
     <div class="row sub" style="margin-bottom:4px"><span>موعد الصرف</span><span>${esc(dueL(u.due, true))}</span></div>
     ${salaryTable(u)}
     ${cr > 0 ? `<div class="row" style="margin-top:6px"><span class="sub">استلم منه بالدفعات</span><span class="pos">${M(cr, '−')}</span></div><div class="row"><b>باقي له</b>${M(Math.max(0, u.net - cr))}</div>` : ''}
@@ -3031,7 +3031,7 @@ function payHtml(e, u) {
       <input id="pay_${e.id}${u.month}" type="number" inputmode="numeric" value="${Math.max(0, Math.round((u.net - cr) * 100) / 100)}" aria-label="المبلغ">
       <button class="btn2 ${armed?'arm':'cu'}" onclick="pay('${e.id}','${u.month}')">${armed?'تأكيد الصرف':I('check', 16, 2.5) + 'تم الصرف'}</button>
     </div>
-    <div class="field pdate"><span>تاريخ التسليم</span><input type="date" id="pd_${pdk}" value="${pdv}" max="${today}" onchange="S.pd['${pdk}']=this.value"></div>
+    <div class="dprops pdate"><label class="dp"><span>تاريخ التسليم</span><input type="date" id="pd_${pdk}" value="${pdv}" max="${today}" onchange="S.pd['${pdk}']=this.value"></label></div>
     <div class="err" id="perr_${e.id}${u.month}"></div>`;
 }
 
@@ -3139,8 +3139,8 @@ function salCardHtml(e, admin) {
     }).join('')}</div>`;
   if (admin) {
     if (f) h += `<div class="hair"></div><div class="ctitle" style="font-size:14px">${I('hand-coins', 16)}تسجيل دفعة</div>
-      <div class="grid2" style="margin-top:10px"><div class="field"><span>المبلغ</span><input id="sp_amt" type="number" inputmode="decimal" value="${esc(f.amount || '')}" oninput="S.form.amount=this.value"></div>
-      <div class="field"><span>تاريخ التسليم</span><input id="sp_date" type="date" value="${esc(f.date || today)}" max="${today}" onchange="S.form.date=this.value"></div></div>
+      <div class="field" style="margin-top:10px"><span>المبلغ</span><input id="sp_amt" type="number" inputmode="decimal" value="${esc(f.amount || '')}" oninput="S.form.amount=this.value"></div>
+      <div class="dprops pdate" style="margin:0 0 12px"><label class="dp"><span>تاريخ التسليم</span><input id="sp_date" type="date" value="${esc(f.date || today)}" max="${today}" onchange="S.form.date=this.value"></label></div>
       <div class="field"><span>ملاحظة (اختياري)</span><input id="sp_note" value="${esc(f.note || '')}" oninput="S.form.note=this.value"></div>
       <div class="sub" style="margin:-4px 0 10px">تتوزع على أقدم راتب ما انصرف. الباقي ${M(st.left, '', 't')}</div>
       <div class="grid2"><button class="btn2 cu" onclick="savePart('${e.id}')">${I('check', 16, 2.5)}حفظ الدفعة</button><button class="btn2" onclick="S.form=null;renderFin()">إلغاء</button></div><div class="err" id="sperr"></div>`;
