@@ -642,7 +642,8 @@ img.ph{cursor:zoom-in}
 .fxbt button.rd{color:var(--red)}
 .fxlf{margin:8px 0 2px}
 .fxlf button{padding:6px 16px!important;font-size:13px!important}
-.tm .rb{color:#55554f}
+.tm .rb{color:#55554f;display:block;margin-top:2px}
+.fxln{font-size:12px;margin:6px 4px 0}
 .tbh .n .ls{display:block;font-size:12px;color:var(--muted);margin-top:1px}
 .tbh .n .ls.on{color:var(--green)}
 .tbh .n .ls.on:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-inline-end:5px;vertical-align:1px}
@@ -1033,9 +1034,9 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=81"></script>
+<script src="api.js?v=82"></script>
 <script>
-const APP_VER = '81';
+const APP_VER = '82';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
@@ -1737,6 +1738,7 @@ async function loadAdmin() {
     S.date = S.data.today;
     S.view = startView(S.data);
     renderAdmin();
+    lgAdminContent();
     nfPendingGo();
   } catch (e) { if (/الرابط غير صالح/.test(String(e))) { setSession(''); return renderLogin('انتهت الجلسة في هالجهاز. ادخل من جديد.'); } const td = document.getElementById('tabsDock'); if (td) td.remove(); $('#app').innerHTML = '<div class="load"><div class="ei">' + I('triangle-alert', 28) + '</div>' + esc(e) + '<br><button class="btn2" style="margin:16px auto 0" onclick="location.reload()">' + I('refresh-cw', 16) + 'حاول مرة ثانية</button></div>'; }
 }
@@ -2762,10 +2764,12 @@ function renderFinEmp(c, id) {
   let bal = 0, bOk = true;
   LA.slice().reverse().forEach(x => { if (x.k === 'c' && x.dc) { bal = Math.round((bal + x.dc) * 100) / 100; x.bal = bal; } });
   if (Math.abs(bal - (p.c || 0)) > 0.01) bOk = false;
-  const L = LA.filter(x => lf === 'all' || x.k === lf).map(x => ({ts: x.ts, h: x.h.replace('%%B%%', lf === 'c' && bOk && x.bal !== undefined ? ` · <span class="rb">معه بعدها ${M(x.bal, x.bal < 0 ? '−' : '', 't')}</span>` : '')}));
+  /* الإصدار 82: «العهدة» فيها بس اللي يغيّر العهدة (عطيته، رجّع، فواتير العهدة). فواتير «أنا» و«من جيبه» والسداد تطلع في «الكل» */
+  const L = LA.filter(x => lf === 'all' || (x.k === lf && (lf !== 'c' || x.dc))).map(x => ({ts: x.ts, h: x.h.replace('%%B%%', lf === 'c' && bOk && x.bal !== undefined ? `<span class="rb">معه بعدها ${M(x.bal, x.bal < 0 ? '−' : '', 't')}</span>` : '')}));
   const show = S.fx.all ? L : L.slice(0, 12);
   h += `<div class="sech">${lf === 'c' ? 'حركات العهدة' : lf === 's' ? 'حركات الراتب' : 'كل حركاته'}<span>${L.length}</span></div>`;
-  h += `<div class="segc fxlf">${[['all', 'الكل'], ['c', 'العهدة'], ['s', 'الراتب']].map(o => `<button class="${lf === o[0] ? 'on' : ''}" onclick="S.fx.lf='${o[0]}';S.fx.all=false;renderFin()">${o[1]}</button>`).join('')}</div>`;
+  h += `<div class="segc fxlf">${[['all', 'الكل'], ['c', 'العهدة'], ['s', 'الراتب']].map(o => `<button class="${lf === o[0] ? 'on' : ''}" onclick="S.fx.lf='${o[0]}';S.fx.all=false;renderFin()">${o[1]}</button>`).join('')}</div>`
+    + (lf === 'c' && LA.some(x => x.k === 'c' && !x.dc) ? '<div class="sub fxln">فواتير «أنا» و«من جيبه» ما تغيّر العهدة، تطلع في «الكل»</div>' : '');
   h += L.length ? `<div class="card fxl" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${show.map(x => x.h).join('')}
       ${L.length > 12 ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كلها (' + L.length + ')'}</button>` : ''}</div>` : emptyHtml('wallet', 'ما فيه حركات للحين');
   $('#view').innerHTML = h;
@@ -3150,7 +3154,7 @@ async function delGuide(id) {
 async function setLang(id, lang, sel) {
   const e = empById(id), old = e.lang || 'ar';
   if (sel) sel.disabled = true;
-  try { S.data = await call('apiEmpLang', BOOT.key, id, lang); renderAdmin(); toast('صفحته صارت بـ' + ((LANGS.find(l => l[0] === lang) || [])[1] || lang)); }
+  try { S.data = await call('apiEmpLang', BOOT.key, id, lang); renderAdmin(); lgAdminContent(); toast('صفحته صارت بـ' + ((LANGS.find(l => l[0] === lang) || [])[1] || lang)); }
   catch (err) { if (sel) { sel.value = old; sel.disabled = false; } $('#e_' + id).textContent = err; }
 }
 async function toggleGuide(id) {
@@ -3412,17 +3416,26 @@ function rulesHtml(st) {
 /* الإصدار 81: صفحة الموظف بلغته. المدير يختار اللغة من الإعدادات، وملف الترجمة ينزل بس للي لغته غير العربي */
 const LANGS = [['ar', 'العربية'], ['en', 'English'], ['hi', 'हिन्दी'], ['bn', 'বাংলা']];
 let LGP = null;
-function lgLoad(lang) {
-  if (!lang || lang === 'ar') return Promise.resolve();
-  if (window.LG && LG.on) return Promise.resolve();
+function lgFile() {
   if (!LGP) LGP = new Promise(res => {
     const sc = document.createElement('script');
     sc.src = 'i18n.js?v=' + APP_VER;
-    sc.onload = () => { try { LG.start(lang); } catch (e) {} res(); };
-    sc.onerror = () => { LGP = null; res(); };
+    sc.onload = () => res(true);
+    sc.onerror = () => { LGP = null; res(false); };
     document.head.appendChild(sc);
   });
   return LGP;
+}
+function lgLoad(lang) {
+  if (!lang || lang === 'ar') return Promise.resolve();
+  return lgFile().then(ok => { if (ok && window.LG && !LG.on) { try { LG.start(lang); } catch (e) {} } });
+}
+/* الإصدار 82: كلام المدير العام يوصل العامل بلغته، وكلام العامل يوصل المدير العام بالعربي (ترجمة بالذكاء الاصطناعي في السيرفر) */
+function lgAdminContent() {
+  if (BOOT.page !== 'admin' || !S.data) return;
+  const ol = (S.data.employees || []).filter(e => e.lang && e.lang !== 'ar');
+  if (!ol.length || (window.LG && LG.c && LG.c.on)) return;
+  lgFile().then(ok => { if (ok && window.LG) { try { LG.content('admin', 'ar', ol.some(e => e.lang === 'en')); } catch (e) {} } });
 }
 if (BOOT.page === 'emp' && !/^preview/.test(BOOT.token || '')) { const l0 = lsGet('te_lang'); if (l0 && l0 !== 'ar') { document.documentElement.setAttribute('dir', 'ltr'); lgLoad(l0); } }
 async function loadEmp() {
@@ -3431,6 +3444,7 @@ async function loadEmp() {
     if (lang !== was) { lsSet('te_lang', lang); if (window.LG && LG.on) { location.reload(); return; } }
     if (lang === 'ar') document.documentElement.setAttribute('dir', 'rtl');
     await lgLoad(lang);
+    if (lang !== 'ar' && window.LG && LG.content) { try { LG.content('emp', lang); } catch (e) {} }
     renderEmp(d, false); API.seen(APP_VER, ''); nfPendingGo();
   }
   catch (e) { $('#app').innerHTML = '<div class="load">' + esc(e) + '</div>'; }

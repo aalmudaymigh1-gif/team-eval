@@ -585,6 +585,114 @@
     });
     obs.observe(document.body, {childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ATTR});
   };
+
+  /* الإصدار 82: ترجمة الكلام نفسه (اللي يكتبه المدير العام أو الموظف) بالذكاء الاصطناعي عن طريق السيرفر. تنحفظ مرة وحدة لكل نص */
+  var C = LG.c = {on: false, mode: '', tl: '', latin: false, map: {}, wm: new WeakMap(), q: {}, busy: false, tries: 0, off: false, t: 0};
+  var RUN_AR = /[؀-ۿ](?:[؀-ۿ\s\d.,،؛؟?!()\-\/«»"'%+]*[؀-ۿ»)])?/g;
+  var RUN_IN = /[ऀ-৿](?:[ऀ-৿\s\d.,?!()\-\/"'%+|]*[ऀ-৿)])?/g;
+  var LAT = /^[A-Za-z][A-Za-z0-9\s.,'!?()\-\/:&]*$/;
+  var ORIG = {en: 'Show original', hi: 'मूल देखें', bn: 'মূল দেখুন', ar: 'الأصل'};
+  var TRAN = {en: 'Show translation', hi: 'अनुवाद देखें', bn: 'অনুবাদ দেখুন', ar: 'الترجمة'};
+  function cKey() { return 'te_tr_' + C.tl; }
+  function cLoad() { try { C.map = JSON.parse(localStorage.getItem(cKey()) || '{}') || {}; } catch (e) { C.map = {}; } }
+  function cSave() {
+    try {
+      var ks = Object.keys(C.map);
+      if (ks.length > 900) ks.slice(0, ks.length - 900).forEach(function (k) { delete C.map[k]; });
+      localStorage.setItem(cKey(), JSON.stringify(C.map));
+    } catch (e) {}
+  }
+  function runs(v) {
+    if (C.mode === 'emp') return v.match(RUN_AR) || [];
+    var r = v.match(RUN_IN) || [];
+    if (!r.length && C.latin && !AR.test(v)) { var t = v.trim(); if (t.length >= 6 && LAT.test(t) && /[A-Za-z]{2,}\s+[A-Za-z]{2,}/.test(t)) r = [t]; }
+    return r;
+  }
+  function skip(n) {
+    var p = n.parentNode;
+    return !p || (p.closest && p.closest('[data-notr],textarea,script,style,input,select,option,[contenteditable]'));
+  }
+  function cNode(n) {
+    if (skip(n)) return;
+    var info = C.wm.get(n), v = n.nodeValue;
+    if (info && (info.orig || v === info.out)) return;
+    var rs = runs(v).filter(function (x) { return x.trim().length >= 2; });
+    if (!rs.length) return;
+    var miss = false, out = v;
+    rs.forEach(function (r) {
+      var k = r.trim(), o = C.map[k];
+      if (o == null) { miss = true; C.q[k] = 1; return; }
+      out = out.split(k).join(o);
+    });
+    if (miss || out === v) return;
+    C.wm.set(n, {src: v, out: out, orig: false});
+    n.nodeValue = out;
+    var nx = n.nextSibling;
+    if (v.trim().length >= 24 && !(nx && nx.nodeType === 1 && nx.classList && nx.classList.contains('tro'))) {
+      var sp = document.createElement('span');
+      sp.className = 'tro'; sp.setAttribute('data-notr', ''); sp.setAttribute('role', 'button');
+      sp.textContent = ORIG[C.tl === 'ar' ? 'ar' : C.mode === 'emp' ? LG.lang : 'ar'] || ORIG.en;
+      sp.onclick = function (ev) { ev.stopPropagation(); ev.preventDefault(); LG.flip(sp); };
+      if (n.parentNode) n.parentNode.insertBefore(sp, n.nextSibling);
+    }
+  }
+  LG.flip = function (sp) {
+    var n = sp.previousSibling, info = n && C.wm.get(n);
+    if (!info) return;
+    info.orig = !info.orig;
+    n.nodeValue = info.orig ? info.src : info.out;
+    var l = C.mode === 'emp' ? LG.lang : 'ar';
+    sp.textContent = (info.orig ? TRAN : ORIG)[l] || ORIG.en;
+  };
+  function cScan(root) {
+    if (!C.on || !root) return;
+    if (root.nodeType === 3) { cNode(root); return; }
+    if (root.nodeType !== 1) return;
+    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), n, list = [];
+    while ((n = w.nextNode())) list.push(n);
+    list.forEach(cNode);
+    cKick();
+  }
+  function cKick() {
+    if (C.off || C.busy || !Object.keys(C.q).length) return;
+    clearTimeout(C.t);
+    C.t = setTimeout(cFetch, 200);
+  }
+  async function cFetch() {
+    var ks = Object.keys(C.q).filter(function (k) { return C.map[k] == null; }).slice(0, 60);
+    if (!ks.length) { C.q = {}; return; }
+    if (!window.API || !API.trGet) return;
+    C.busy = true;
+    var r = null;
+    try { r = await API.trGet(ks, C.tl); } catch (e) { r = null; }
+    C.busy = false;
+    if (!r) { C.tries++; if (C.tries < 4) { C.t = setTimeout(cFetch, 5000); } return; }
+    if (r.off) { C.off = true; C.q = {}; return; }
+    var got = 0;
+    Object.keys(r.done || {}).forEach(function (k) { var o = r.done[k]; if (o && typeof o === 'string') { C.map[k] = o; got++; } delete C.q[k]; });
+    if (got) { cSave(); cScan(document.body); }
+    if (r.wait > 0) { C.tries++; if (C.tries < 12) C.t = setTimeout(cFetch, C.tries < 4 ? 2500 : 6000); }
+    else { C.tries = 0; ks.forEach(function (k) { if (C.map[k] == null) delete C.q[k]; }); if (Object.keys(C.q).length) cKick(); }
+  }
+  LG.content = function (mode, tl, latin) {
+    if (C.on || !tl) return;
+    C.on = true; C.mode = mode; C.tl = tl; C.latin = !!latin;
+    cLoad();
+    if (!document.getElementById('trocss')) {
+      var st = document.createElement('style'); st.id = 'trocss';
+      st.textContent = '.tro{display:block;font-size:12px;font-weight:400;color:var(--faint,#999);text-decoration:underline;margin-top:2px;cursor:pointer;width:max-content}';
+      document.head.appendChild(st);
+    }
+    cScan(document.body);
+    new MutationObserver(function (ms) {
+      for (var i = 0; i < ms.length; i++) {
+        var m = ms[i];
+        if (m.type === 'childList') m.addedNodes.forEach(function (x) { if (x.nodeType === 3) cNode(x); else cScan(x); });
+        else if (m.type === 'characterData') cNode(m.target);
+      }
+      cKick();
+    }).observe(document.body, {childList: true, subtree: true, characterData: true});
+  };
   LG.untr = function (s) {
     if (!LG.on || !s) return s;
     if (LG.back[s] != null) return LG.back[s];
