@@ -1125,9 +1125,9 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=92"></script>
+<script src="api.js?v=93"></script>
 <script>
-const APP_VER = '92';
+const APP_VER = '93';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -2240,14 +2240,14 @@ function drawSel(list) {
   const ids = new Set(allTasks().map(t => t.id)); S.tsel = S.tsel.filter(x => ids.has(x));
   const n = S.tsel.length, v = selVisible(), all = v.length && v.every(x => S.tsel.includes(x)), arm = S.armed === 'tdel';
   hd.innerHTML = `<div class="fxt tord"><button onclick="selAll()">${all ? 'إلغاء تحديد الكل' : 'تحديد الكل'}</button><button class="dn" onclick="togSel()">تم</button></div>`;
-  const w = n === 1 ? 'مهمة وحدة' : n === 2 ? 'مهمتين' : n + ' مهام';
+  const w = n === 1 ? 'مهمة وحدة' : n === 2 ? 'مهمتين' : n + (n > 10 ? ' مهمة' : ' مهام');
   bar.innerHTML = `<div class="selbar"><button class="btn2 ${arm ? 'arm' : 'rd'}" ${n ? '' : 'disabled'} onclick="delSel()">${I('trash-2', 17)}${!n ? 'حدد المهام اللي تبي تحذفها' : arm ? 'تأكيد حذف ' + w : 'حذف ' + w}</button></div>`;
 }
 async function delSel() {
   const ids = (S.tsel || []).slice(); if (!ids.length || S.busy) return;
   if (S.armed !== 'tdel') { S.armed = 'tdel'; drawTaskList(); return; }
   S.busy = true;
-  try { S.data = await call('apiTasksDelete', BOOT.key, ids); S.tsel = null; S.armed = null; S.busy = false; renderAdmin(); toast(ids.length === 1 ? 'انحذفت المهمة' : ids.length === 2 ? 'انحذفت مهمتين' : 'انحذفت ' + ids.length + ' مهام'); }
+  try { S.data = await call('apiTasksDelete', BOOT.key, ids); S.tsel = null; S.armed = null; S.busy = false; renderAdmin(); toast(ids.length === 1 ? 'انحذفت المهمة' : ids.length === 2 ? 'انحذفت مهمتين' : 'انحذفت ' + ids.length + (ids.length > 10 ? ' مهمة' : ' مهام')); }
   catch (e) { S.busy = false; S.armed = null; S.tsel = null; toastErr(e); refresh(true); }
 }
 
@@ -2256,7 +2256,7 @@ function grpClosed() { if (!S.gcl) { try { S.gcl = JSON.parse(lsGet('gcl') || '{
 function togGrp(k) { const c = grpClosed(); if (c[k]) delete c[k]; else c[k] = 1; lsSet('gcl', JSON.stringify(c)); if (S.view === 'team') renderTeam(); else drawTaskList(); }
 function pgrpHtml(g) {
   const cl = !!grpClosed()[g.key], n = g.items.length;
-  return `<div class="pgrp ep ${cl ? 'cl' : ''}"><button class="pgh2" onclick="togGrp('${esc(g.key)}')" aria-expanded="${!cl}"><span>${esc(g.name)}</span><span class="pge"><span class="n">${n === 1 ? 'مهمة وحدة' : n === 2 ? 'مهمتين' : n + ' مهام'}</span><span class="cg">${I('chevron-left', 16)}</span></span></button>${cl ? '' : g.items.map(t => taskRowHtml(t, false)).join('')}</div>`;
+  return `<div class="pgrp ep ${cl ? 'cl' : ''}"><button class="pgh2" onclick="togGrp('${esc(g.key)}')" aria-expanded="${!cl}"><span>${esc(g.name)}</span><span class="pge"><span class="n">${n === 1 ? 'مهمة وحدة' : n === 2 ? 'مهمتين' : n + (n > 10 ? ' مهمة' : ' مهام')}</span><span class="cg">${I('chevron-left', 16)}</span></span></button>${cl ? '' : g.items.map(t => taskRowHtml(t, false)).join('')}</div>`;
 }
 function taskRowHtml(t, showProj) {
   const today = S.data.today, p = pillOf(t, t.b, false);
@@ -2348,7 +2348,7 @@ function detailActions(t) {
   if (t.status === 'done') return `<button class="btn2 rd" onclick="askReturn('${id}')">${I('rotate-ccw', 16)}ما خلصت، رجّعها له</button>`;
   const arm = S.armed === 'close_' + id;
   const invR = t.inv && t.inv.status === 'returned';
-  const cb = `<button class="btn2 ${arm ? 'arm' : ''}" onclick="closeByAdmin('${id}')">${I('check-check', 17)}${arm ? (invR ? 'فاتورتها مرجّعة، الإغلاق يعتمدها معها. اضغط مرة ثانية' : 'تأكيد: خلصت ' + (t.proof === 'note' ? 'بدون ملاحظة من الموظف' : t.proof === 'invoice' ? 'بدون فاتورة' : 'بدون صورة إثبات')) : 'خلّصتها أنا'}</button>`;
+  const cb = `<button class="btn2 ${arm ? 'arm' : ''}" onclick="closeByAdmin('${id}')">${I('check-check', 17)}${arm ? (invR ? 'فاتورتها مرتجعة، الإغلاق يعتمدها معها. اضغط مرة ثانية' : 'تأكيد: خلصت ' + (t.proof === 'note' ? 'بدون ملاحظة من الموظف' : t.proof === 'invoice' ? 'بدون فاتورة' : 'بدون صورة إثبات')) : 'خلّصتها أنا'}</button>`;
   if (arm) return cb;
   return `<div class="grid2"><button class="btn2 cu" id="pingb" onclick="pingTask('${id}')">${I('bell-ring', 17)}ذكّره</button>${cb}</div>`;
 }
@@ -2790,7 +2790,7 @@ function renderFin() {
   const cnt = (n, one, two, many, sing) => n === 1 ? one : n === 2 ? two : n + ' ' + (n > 10 && sing ? sing : many);
   let h = `<div class="fxh"><span>${esc(d.month)}</span></div>
     <div class="fxs${nUn ? '' : ' two'}">
-      ${nUn ? `<button class="due tap ${S.fx.due ? 'on' : ''}" onclick="S.fx.due=!S.fx.due;S.armed=null;renderFin()" aria-expanded="${!!S.fx.due}"><b>رواتب ما انصرفت</b>${M(unpaid)}<small>${nUn + ' من ' + d.employees.length + ' موظفين'}</small><span class="chv">${I(S.fx.due ? 'x' : 'chevron-left', 14)}</span></button>` : ''}
+      ${nUn ? `<button class="due tap ${S.fx.due ? 'on' : ''}" onclick="S.fx.due=!S.fx.due;S.armed=null;renderFin()" aria-expanded="${!!S.fx.due}"><b>رواتب ما انصرفت</b>${M(unpaid)}<small>${nUn + ' من ' + d.employees.length + (d.employees.length > 10 ? ' موظفاً' : ' موظفين')}</small><span class="chv">${I(S.fx.due ? 'x' : 'chevron-left', 14)}</span></button>` : ''}
       <div><b>عهد عند الموظفين</b>${M(cust)}<small>${withC.length ? esc(withC.map(e => shortName(e.name)).join('، ')) : 'ما عند أحد عهدة'}</small></div>
       <div><b>مصاريف الشهر</b>${M(exp)}<small>${okM.length ? cnt(okM.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير', 'فاتورة') : 'ما فيه فواتير'}</small></div>
     </div>`;
@@ -2879,7 +2879,7 @@ function renderFinEmp(c, id) {
   if (rv.length) h += `<div class="sech a" style="margin-top:4px">تنتظر اعتمادك<span>${rv.length}</span></div>` + rv.map(x => invRowHtml(x, false)).join('') + '<div style="height:12px"></div>';
   /* الإصدار 92: الفواتير المرجّعة اللي ما صحّحها الموظف تبان هنا وتنحذف */
   const rt = mine.filter(x => x.kind === 'inv' && x.status === 'returned');
-  if (rt.length) h += `<button class="dtog" style="padding:6px 2px 10px;color:var(--red)" onclick="S.fx.rt=!S.fx.rt;S.armed=null;renderFin()" aria-expanded="${!!S.fx.rt}">فواتير مرجّعة عنده (${rt.length}) · ${rt.reduce((a, x) => a + x.amount, 0).toLocaleString('en-US')}${S.fx.rt ? ' · إخفاء' : ''}</button>` + (S.fx.rt ? `<div class="sub" style="margin:0 2px 8px">رجّعتها له وما صحّحها. ما تنحسب في العهدة ولا المصاريف. الحذف نهائي.</div>` + rt.map(x => invRowHtml(x, false)).join('') + '<div style="height:12px"></div>' : '');
+  if (rt.length) h += `<button class="dtog" style="padding:6px 2px 10px;color:var(--red)" onclick="S.fx.rt=!S.fx.rt;S.armed=null;renderFin()" aria-expanded="${!!S.fx.rt}">فواتير مرتجعة عنده (${rt.length}) · ${rt.reduce((a, x) => a + x.amount, 0).toLocaleString('en-US')}${S.fx.rt ? ' · إخفاء' : ''}</button>` + (S.fx.rt ? `<div class="sub" style="margin:0 2px 8px">رجّعتها له وما صحّحها. ما تنحسب في العهدة ولا المصاريف. الحذف نهائي.</div>` + rt.map(x => invRowHtml(x, false)).join('') + '<div style="height:12px"></div>' : '');
   h += salCardHtml(e, true);
   h += `<div class="card">${salActHtml(e)}${e.unpaid.length ? (pm => e.unpaid.map(u => u.month === pm ? payHtml(e, u) : payRowHtml(e, u)).join(''))((e.unpaid.find(u => S.fx.pm === e.id + u.month) || e.unpaid.find(u => S.armed === 'pay_' + e.id + u.month) || e.unpaid[0]).month) : `<div class="row"><b>الراتب</b><span class="badge">${I('check', 12, 3)} كل الرواتب منصرفة</span></div>`}
     ${e.loans.length ? `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('hand-coins', 14)}السلف</div>
@@ -3814,12 +3814,12 @@ function empTasksHtml(d, isPreview) {
   const today = d.today, mode = isPreview ? 'preview' : 'emp';
   const ts = (d.tasks || []).map(t => Object.assign({}, t, {b: tBucket(t, today)}));
   const open = ts.filter(t => t.status === 'open' || t.status === 'returned'), ret = ts.filter(t => t.status === 'returned').sort(byUrgent);
-  const cnt = open.length === 1 ? 'عندك مهمة وحدة' : open.length === 2 ? 'عندك مهمتين' : 'عندك ' + open.length + ' مهام';
+  const cnt = open.length === 1 ? 'عندك مهمة وحدة' : open.length === 2 ? 'عندك مهمتين' : 'عندك ' + open.length + (open.length > 10 ? ' مهمة' : ' مهام');
   let h = open.length ? '' : emptyHtml('check-check', 'ما عليك مهام الحين، يعطيك العافية');
   if (ret.length) h += `<div class="sech r">رجعت لك</div>` + ret.map(t => empCardHtml(t, mode, false)).join('');
   projGroups(ts.filter(t => t.status === 'open')).forEach((g, i) => {
     const hot = g.items.some(t => t.urgent || t.late), k = g.key || 'gen', on = S.eopen[k] !== undefined ? S.eopen[k] : (i === 0 || hot);
-    h += `<div class="pgrp ep"><button class="pgh2" aria-expanded="${on}" onclick="S.eopen['${k}']=${on ? 'false' : 'true'};rerenderEmp()"><span>${esc(g.name)}</span><span class="n">${g.items.length === 1 ? 'مهمة وحدة' : g.items.length === 2 ? 'مهمتين' : g.items.length + ' مهام'}<span class="chev ${on ? 'up' : ''}">${I('arrow-right', 15, 2.5)}</span></span></button>${on ? g.items.map(t => empCardHtml(t, mode, true)).join('') : ''}</div>`;
+    h += `<div class="pgrp ep"><button class="pgh2" aria-expanded="${on}" onclick="S.eopen['${k}']=${on ? 'false' : 'true'};rerenderEmp()"><span>${esc(g.name)}</span><span class="n">${g.items.length === 1 ? 'مهمة وحدة' : g.items.length === 2 ? 'مهمتين' : g.items.length + (g.items.length > 10 ? ' مهمة' : ' مهام')}<span class="chev ${on ? 'up' : ''}">${I('arrow-right', 15, 2.5)}</span></span></button>${on ? g.items.map(t => empCardHtml(t, mode, true)).join('') : ''}</div>`;
   });
   const rv = ts.filter(t => t.status === 'review');
   if (rv.length) h += `<div class="sech a">انرسلت، تنتظر المدير العام</div>` + rv.map(t => empCardHtml(t, mode, false)).join('');
@@ -4561,7 +4561,7 @@ function rpEmpCardHtml(r, d, share) {
     ${!share && last && r.by === (d || {}).id ? `<div class="rpd ok">${I('message-circle', 15)}<div><b>ملاحظة المدير العام:</b> ${esc(last.text)}</div></div>` : ''}
     ${up.length ? `<div class="rpr up">${I('clock', 13)}<span><b>حان وقته:</b> ${esc(up.join('، '))}</span></div>` : ''}
     ${rest.length ? `<div class="rpr"><b>المتبقي:</b> ${esc(rest.join('، '))}</div>` : ''}
-    <div class="rpr lt">${nd ? `<span class="okc">${I('check-check', 13)}أُنجز ${nd}</span>` : ''}<span>${I('file-text', 13)}${n === 1 ? 'تقرير واحد' : n === 2 ? 'تقريران' : n + ' تقارير'}</span>${r.edited ? '<span>عدّله المدير العام</span>' : ''}</div>
+    <div class="rpr lt">${nd ? `<span class="okc">${I('check-check', 13)}أُنجز ${nd}</span>` : ''}<span>${I('file-text', 13)}${n === 1 ? 'تقرير واحد' : n === 2 ? 'تقريران' : n + (n > 10 ? ' تقريراً' : ' تقارير')}</span>${r.edited ? '<span>عدّله المدير العام</span>' : ''}</div>
   </button>`;
 }
 function rpPickProj(id) { RP.eProj = id; RP.sent = null; lsSet('rp_proj', id); rerenderEmp(); }
