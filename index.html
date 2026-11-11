@@ -541,6 +541,7 @@ h1{font-size:17px;font-weight:600;letter-spacing:0}
 .segc{background:none!important;padding:0!important;gap:8px!important;justify-content:flex-start}
 .segc button{flex:0 0 auto!important;border:1px solid var(--line2)!important;background:#fff!important;border-radius:999px!important;padding:8px 20px!important;color:var(--muted)!important;font-weight:400!important}
 .segc button.on{background:var(--acc)!important;border-color:var(--acc)!important;color:#fff!important;box-shadow:none!important}
+.segc.wr{flex-wrap:wrap}
 .btn2{border-radius:999px!important;border:1px solid var(--line2)!important;background:#fff;font-weight:400}
 .btn2.cu,.bigdo,.save .btn,.dock .btn{background:var(--acc)!important;border-color:var(--acc)!important;color:#fff!important;border-radius:18px!important;font-weight:500!important}
 .badge,.pill{font-weight:500;border-radius:999px}
@@ -1124,9 +1125,9 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=90"></script>
+<script src="api.js?v=91"></script>
 <script>
-const APP_VER = '90';
+const APP_VER = '91';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1403,12 +1404,12 @@ function loadAttPhotos() {
     } catch (e) {}
   });
 }
-function attRowLines(r, ps) {
+function attRowLines(r, ps, today) {
   const p = projOf(ps, r.project), L = [];
   L.push('طلع من البيت ' + t12(r.home));
   if (r.in) L.push('وصل ' + (p ? esc(p.name) : 'المشروع') + ' ' + t12(r.in) + ' · الطريق ' + hrs(r.inMs - r.homeMs));
   if (r.out) L.push('طلع ' + t12(r.out) + ' · اشتغل ' + hrs(r.outMs - r.inMs) + ' ساعة');
-  else if (r.in) L.push('له ' + hrs(Date.now() - r.inMs) + ' ساعة في الشغل');
+  else if (r.in) L.push(today && r.date < today ? 'ما سجّل طلوعه من المشروع' : 'له ' + hrs(Date.now() - r.inMs) + ' ساعة في الشغل');
   return L.join('<br>');
 }
 function attLinks(r) {
@@ -1441,8 +1442,8 @@ function renderAttLog(empId) {
   if (!list.length) return $('#view').innerHTML = h + emptyHtml('map-pin', 'ما سجّل حضور للحين');
   h += '<div class="card" style="padding-top:2px;padding-bottom:2px">' + list.map(r => {
     const arm = S.armed === 'att_' + r.id;
-    return `<div class="atr"><div style="flex:1"><b>${esc(dayLabel(r.date))}</b> ${r.late ? `<span class="badge late">متأخر ${r.late} د</span>` : ''} ${r.in ? attFlag(r, d.projects) : '<span class="badge a">ما وصل المشروع</span>'}
-      <div class="sub" style="line-height:1.8">${attRowLines(r, d.projects)}</div>
+    return `<div class="atr"><div style="flex:1"><b>${esc(dayLabel(r.date))}</b> ${r.late ? `<span class="badge late">متأخر ${r.late} د</span>` : ''} ${r.in ? attFlag(r, d.projects) : '<span class="badge a">ما وصل المشروع</span>'}${r.in && !r.out && r.date < d.today ? ' <span class="badge a">بدون طلوع</span>' : ''}
+      <div class="sub" style="line-height:1.8">${attRowLines(r, d.projects, d.today)}</div>
       <div class="atph">${attPhotoHtml(r.homePhoto)}${attPhotoHtml(r.inPhoto)}${attPhotoHtml(r.outPhoto)}</div>
       <div class="ilinks" style="margin-top:6px;flex-wrap:wrap">${attLinks(r)}
       <button class="lnk dl ${arm ? 'arm' : ''}" onclick="delAtt('${r.id}')">${arm ? 'تأكيد الحذف' : 'حذف'}</button></div></div></div>`;
@@ -1459,19 +1460,25 @@ async function delAtt(id) {
 /* الإعدادات */
 function attSetCard(d) {
   const c = d.attCfg || {start: '07:00', grace: 15, auto: true};
-  if (S.attAuto == null) S.attAuto = c.auto;
   return `<div class="card">${ctitle('clock', 'الحضور والانصراف')}
     <div class="grid2" style="margin-top:10px">
       <div class="field"><span>بداية الدوام</span><input id="at_start" type="time" value="${esc(c.start)}"></div>
       <div class="field"><span>سماح التأخير (دقيقة)</span><input id="at_grace" type="number" inputmode="numeric" value="${c.grace}"></div>
     </div>
-    <div class="trow"><div class="n"><b>التأخير ينحسب تقصير</b><small>يتسجّل «الحضور والمواعيد» تلقائي لو تأخر بعد السماح</small></div><button class="tg ${S.attAuto ? 'on' : ''}" onclick="S.attAuto=!S.attAuto;this.classList.toggle('on',S.attAuto)" aria-label="التأخير ينحسب تقصير"></button></div>
+    <div class="trow"><div class="n"><b>التأخير ينحسب تقصير</b><small>يتسجّل «الحضور والمواعيد» تلقائي لو تأخر بعد السماح</small></div><button class="tg ${c.auto ? 'on' : ''}" onclick="toggleAttAuto()" aria-label="التأخير ينحسب تقصير"></button></div>
     <div class="sub" style="margin:-4px 0 10px">التأخير ينحسب على وقت وصوله للمشروع. الجمعة إجازة. ولو ما سجّل «طلعت من البيت» لين نص ساعة بعد بداية الدوام يجيك إشعار.</div>
     <button class="btn2 cu" style="width:100%" onclick="saveAttSet()">${I('check', 16, 2.5)}حفظ</button><div class="err" id="aterr"></div></div>`;
 }
 async function saveAttSet() {
-  try { S.data = await call('apiAttSettings', BOOT.key, {start: $('#at_start').value, grace: $('#at_grace').value, auto: S.attAuto}); S.attAuto = null; renderAdmin(); toast('انحفظ'); }
+  const c = S.data.attCfg || {auto: true};
+  try { S.data = await call('apiAttSettings', BOOT.key, {start: $('#at_start').value, grace: $('#at_grace').value, auto: c.auto}); renderAdmin(); toast('انحفظ'); }
   catch (e) { $('#aterr').textContent = e; }
+}
+/* الإصدار 91: مفتاح «التأخير ينحسب تقصير» يحفظ فوراً مثل باقي المفاتيح، واللي مكتوب في خانتي الوقت والسماح يبقى */
+async function toggleAttAuto() {
+  const c = S.data.attCfg || {start: '07:00', grace: 15, auto: true}, ks = ($('#at_start') || {}).value, kg = ($('#at_grace') || {}).value;
+  try { S.data = await call('apiAttSettings', BOOT.key, {start: c.start, grace: c.grace, auto: !c.auto}); renderAdmin(); const a = $('#at_start'), b = $('#at_grace'); if (a && ks != null) a.value = ks; if (b && kg != null) b.value = kg; toast(!c.auto ? 'التأخير صار ينحسب تقصير' : 'التأخير ما عاد ينحسب تقصير'); }
+  catch (e) { const x = $('#aterr'); if (x) x.textContent = e; }
 }
 async function toggleAtt(id) {
   const e = empById(id);
@@ -1876,7 +1883,7 @@ function mountTabs() {
   if (old) old.remove();
   if (t) { t.id = 'tabsDock'; document.body.appendChild(t); }
 }
-function go(v) { NF.open = false; RP.open = null; RP.hist = null; S.tsub = null; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false, due: false, lf: 'all'}); S.view = v; lsSet('adm_view', v); S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
+function go(v) { S.ed = null; NF.open = false; RP.open = null; RP.hist = null; S.tsub = null; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false, due: false, lf: 'all'}); S.view = v; lsSet('adm_view', v); S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
 function rerender() { renderAdmin(); }
 
 /* ---------- تسجيل ---------- */
@@ -3036,7 +3043,7 @@ function askInvAdd() {
     <input placeholder="وصف المشتريات" value="${esc(f.desc)}" oninput="S.ai.desc=this.value">
     <select aria-label="المشروع" onchange="S.ai.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
     <div class="sub" style="margin:6px 0 4px">مين دفع؟</div>
-    <div class="segc">${[['', 'أنا']].concat(d.employees.map(e => [e.id, 'عهدة ' + shortName(e.name)])).map(o => `<button class="${f.emp === o[0] ? 'on' : ''}" onclick="S.ai.emp='${o[0]}';askInvAdd()">${esc(o[1])}</button>`).join('')}</div>
+    <div class="segc wr">${[['', 'أنا']].concat(d.employees.map(e => [e.id, 'عهدة ' + shortName(e.name)])).map(o => `<button class="${f.emp === o[0] ? 'on' : ''}" onclick="S.ai.emp='${o[0]}';askInvAdd()">${esc(o[1])}</button>`).join('')}</div>
     <div class="shots">${f.shots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة الفاتورة"><button class="x" onclick="S.ai.shots.splice(${i},1);askInvAdd()" aria-label="حذف الصورة">×</button></div>`).join('')}
     ${f.shots.length < 3 ? `<label class="madd">${I('camera', 20)}صورة (اختياري)<input type="file" accept="${ACC_IMG}" multiple style="display:none" onchange="pickAi(this)"></label>` : ''}</div>
     <div class="sub">تنحفظ معتمدة على طول${f.emp ? '، وتنخصم من عهدته' : ''}.</div>
@@ -3503,10 +3510,10 @@ async function finishGuide(ans) {
 function renderSet() {
   const d = S.data, k = S.ssub || '';
   const form = (e) => `<div class="card">
-      <div class="field"><span>الاسم</span><input id="n_${e.id}" value="${esc(e.name)}"></div>
+      <div class="field"><span>الاسم</span><input id="n_${e.id}" value="${esc(edV(e, 'n'))}" oninput="edIn('${e.id}','n',this.value)"></div>
       <div class="grid2">
-        <div class="field"><span>الراتب الأساسي (ريال)</span><input id="s_${e.id}" type="number" inputmode="numeric" value="${e.salary||''}"></div>
-        <div class="field"><span>الحافز الأساسي (ريال)</span><input id="m_${e.id}" type="number" inputmode="numeric" value="${e.max||''}"></div>
+        <div class="field"><span>الراتب الأساسي (ريال)</span><input id="s_${e.id}" type="number" inputmode="numeric" value="${esc(edV(e, 's'))}" oninput="edIn('${e.id}','s',this.value)"></div>
+        <div class="field"><span>الحافز الأساسي (ريال)</span><input id="m_${e.id}" type="number" inputmode="numeric" value="${esc(edV(e, 'm'))}" oninput="edIn('${e.id}','m',this.value)"></div>
       </div>
       <div class="trow"><div class="n"><b>متابعة فقط</b><small>يتابع تقييمه بدون حافز</small></div><button class="tg ${e.track?'on':''}" onclick="toggleTrack('${e.id}')" aria-label="متابعة فقط"></button></div>
       <div class="trow"><div class="n"><b>حضور وانصراف</b><small>يصوّر لما يطلع من البيت ولما يوصل المشروع ولما يطلع منه</small></div><button class="tg ${e.attend?'on':''}" onclick="toggleAtt('${e.id}')" aria-label="حضور وانصراف"></button></div>
@@ -3514,7 +3521,7 @@ function renderSet() {
       <div class="trow"><div class="n"><b>لغة صفحته</b><small>رابطه يفتح على هذي اللغة</small></div><select class="lsel" onchange="setLang('${e.id}', this.value, this)" aria-label="لغة صفحته">${LANGS.map(l => `<option value="${l[0]}" ${(e.lang || 'ar') === l[0] ? 'selected' : ''}>${l[1]}</option>`).join('')}</select></div>
       <div class="trow" style="border-bottom:0;padding-bottom:4px"><div class="n"><b>موعد صرف راتبه</b><small>راتب ${esc((S.data.month || ''))} يستحق ${esc(dueL(payDue(e, (S.data.today || '').slice(0, 7)), true))}</small></div></div>
       <div class="psel"><select id="pdd_${e.id}" onchange="setPayday('${e.id}')" aria-label="يوم الصرف">${Array.from({length: 28}, (_, i) => `<option value="${i + 1}" ${(e.payDay || 28) === i + 1 ? 'selected' : ''}>يوم ${i + 1}</option>`).join('')}</select><select id="pdn_${e.id}" onchange="setPayday('${e.id}')" aria-label="من أي شهر"><option value="0" ${e.payNext ? '' : 'selected'}>من نفس الشهر</option><option value="1" ${e.payNext ? 'selected' : ''}>من الشهر اللي بعده</option></select></div>
-      <div class="grid2"><button class="btn2" onclick="saveEmp('${e.id}')">حفظ</button>
+      <div class="grid2"><button class="btn2 ${edDirty(e) ? 'cu' : ''}" id="sv_${e.id}" onclick="saveEmp('${e.id}')">حفظ</button>
       <button class="btn2 ${S.armed==='tok_'+e.id?'arm':''}" onclick="newToken('${e.id}')">${S.armed==='tok_'+e.id?'تأكيد: الرابط القديم يوقف':'رابط جديد له'}</button></div>
       <div class="err" id="e_${e.id}"></div></div>`;
   const back = `<button class="back" onclick="ssub(null)">${I('arrow-right', 17)}الإعدادات</button>`;
@@ -3574,7 +3581,7 @@ function renderSet() {
       ${tbRow('info', 'طريقة الحساب', '', "ssub('rules')")}
     </div></div></div>`;
 }
-function ssub(k) { S.ssub = k; S.armed = null; renderSet(); toTop(); }
+function ssub(k) { S.ssub = k; S.armed = null; S.ed = null; renderSet(); toTop(); }
 
 function projectsCard(d) {
   const ps = d.projects || [], act = ps.filter(p => !p.archived), arch = ps.filter(p => p.archived);
@@ -3609,10 +3616,15 @@ async function saveTarget() {
   catch (e) { $('#terr').textContent = e; }
 }
 
+/* الإصدار 91: اللي ينكتب في خانات الموظف (الاسم والراتب والحافز) يبقى لو انضغط أي مفتاح قبل «حفظ»، وزر «حفظ» يتلوّن */
+function edSaved(e) { return {n: e.name || '', s: String(e.salary || ''), m: String(e.max || '')}; }
+function edV(e, k) { const dr = (S.ed || {})[e.id]; return dr && dr[k] != null ? dr[k] : edSaved(e)[k]; }
+function edDirty(e) { const dr = (S.ed || {})[e.id], sv = edSaved(e); return !!dr && ['n', 's', 'm'].some(k => dr[k] != null && String(dr[k]).trim() !== sv[k]); }
+function edIn(id, k, v) { S.ed = S.ed || {}; (S.ed[id] = S.ed[id] || {})[k] = v; const e = empById(id), b = $('#sv_' + id); if (e && b) b.classList.toggle('cu', edDirty(e)); }
 async function saveEmp(id) {
   const k = id || 'new';
   const x = {id, name: $('#n_'+k).value, salary: $('#s_'+k).value, max: $('#m_'+k).value};
-  try { S.data = await call('apiSaveEmp', BOOT.key, x); if (!id) S.ssub = null; renderAdmin(); toast(id ? 'انحفظ' : 'انضاف الموظف'); }
+  try { S.data = await call('apiSaveEmp', BOOT.key, x); if (id && S.ed) delete S.ed[id]; if (!id) S.ssub = null; renderAdmin(); toast(id ? 'انحفظ' : 'انضاف الموظف'); }
   catch (e) { $('#e_'+k).textContent = e; }
 }
 
@@ -3797,7 +3809,7 @@ function empTasksHtml(d, isPreview) {
   const rv = ts.filter(t => t.status === 'review');
   if (rv.length) h += `<div class="sech a">انرسلت، تنتظر المدير العام</div>` + rv.map(t => empCardHtml(t, mode, false)).join('');
   const done = ts.filter(t => t.status === 'done').slice(0, 10);
-  if (done.length) h += `<button class="dtog" onclick="S.eShowDone=!S.eShowDone;rerenderEmp()">${S.eShowDone ? 'إخفاء اللي خلصت' : 'خلصت (' + done.length + ')'}</button>` + (S.eShowDone ? done.map(t => `<div class="tli dn"><span class="tt d">${esc(t.title)}</span><span class="tm">${dmy(t.doneAt)}</span></div>`).join('') : '');
+  if (done.length) h += `<button class="dtog" onclick="S.eShowDone=!S.eShowDone;rerenderEmp()">${S.eShowDone ? 'إخفاء اللي خلصت' : 'خلصت (' + done.length + ')'}</button>` + (S.eShowDone ? done.map(t => `<div class="tli dn"><span class="tt d">${esc(t.title)}</span><span class="tm">${dmy(t.doneAt)}</span></div>${t.apNote ? `<div class="note good" style="margin:0 0 8px"><div><b>تعليق المدير العام:</b> ${esc(t.apNote)}</div></div>` : ''}`).join('') : '');
   return h;
 }
 
@@ -3849,7 +3861,10 @@ async function startDone(id, input) {
   if (!files.length) return;
   if (S.doing !== id) { S.doing = id; S.shots = []; S.cm = ''; S.dinv = null; }
   S.shotLoading = true; rerenderEmp();
-  for (const f of files.slice(0, Math.max(0, 5 - S.shots.length))) {
+  /* الإصدار 91: مهمة الفاتورة حدها 3 صور من الاختيار نفسه */
+  const tk = ((S.empData || {}).tasks || []).find(x => x.id === id), mx = tk && tk.proof === 'invoice' ? 3 : 5;
+  if (files.length > mx - S.shots.length) toast('الحد ' + mx + ' صور، أخذت أول ' + Math.max(0, mx - S.shots.length), null, 'er');
+  for (const f of files.slice(0, Math.max(0, mx - S.shots.length))) {
     try { S.shots.push(await resizeImg(f)); } catch (e) { toastErr(e); }
   }
   S.shotLoading = false; rerenderEmp();
@@ -4336,7 +4351,8 @@ function rpTickWhen(ms) { const d = nfDay(ms), t = rpToday(); return (d === t ? 
 function rpHistOf(p) {
   const gs = [], add = (date, by, it, rid) => { let g = gs.find(x => x.date === date && x.by === by); if (!g) { g = {date: date, by: by, items: [], rids: []}; gs.push(g); } g.items.push(it); g.rids.push(rid); };
   rpOf(p).forEach(r => {
-    const tk = rpArr(r.ticks).filter(x => rpSt(x) === 'ok'), tt = tk.map(x => x.t);
+    /* الإصدار 91: العمل اللي له أكثر من سجل إنجاز يطلع مرة وحدة بآخر سجل */
+    const tk0 = rpArr(r.ticks).filter(x => rpSt(x) === 'ok'), tk = tk0.filter(x => !tk0.some(y => y !== x && y.t === x.t && (y.at > x.at || (y.at === x.at && tk0.indexOf(y) > tk0.indexOf(x))))), tt = tk.map(x => x.t);
     rpArr(r.done).filter(x => !tt.includes(x)).forEach(x => add(r.date, rpBy(r), x, r.id));
     tk.forEach(x => { if (rpArr(r.done).includes(x.t)) add(nfDay(x.at), x.by === 'admin' ? 'المدير العام' : shortName(x.name || ''), x.t, r.id); });
   });
@@ -4650,6 +4666,7 @@ function rpRefLater() { const b = document.getElementById('f_later'); if (b) b.i
 function rpAddLater() {
   const f = RP.form, t = (f.nl || '').trim(), cur = f.items.filter(x => !x.done).map(x => x.t);
   if (!t) return toast('اكتب العمل اللاحق أولاً', null, 'er');
+  if (f.later.some(x => x.t === t) || cur.includes(t)) return toast('هذا العمل مضاف من قبل', null, 'er');
   f.later.push({t: t, after: f.na !== '' && cur[+f.na] ? cur[+f.na] : ''}); f.nl = ''; f.na = '';
   rpRefLater();
 }
@@ -4761,7 +4778,7 @@ function rpOpenEdit(id) {
   const r = (RP.reps || []).find(x => x.id === id);
   if (!r) return;
   const cur = rpArr(r.cur).map(t => ({t: t, o: t}));
-  RP.edit = {id: id, by: r.by, proj: r.proj, date: r.date, cur: cur, done: rpArr(r.done).slice(), later: rpArr(r.later).map(x => ({t: x.t, after: x.after || ''})), decide: rpArr(r.decide).join('\n'), nc: '', err: '', busy: false, rev: r.rev, orig: rpEditSnap(r), warn: ''};
+  RP.edit = {id: id, by: r.by, proj: r.proj, date: r.date, cur: cur, done: rpArr(r.done).slice(), doneO: rpArr(r.done).slice(), later: rpArr(r.later).map(x => ({t: x.t, after: x.after || '', o: x.t})), decide: rpArr(r.decide).join('\n'), nc: '', err: '', busy: false, rev: r.rev, orig: rpEditSnap(r), warn: ''};
   RP.edit.sig0 = rpEditSig(RP.edit);
   S.sheet = true;
   rpEditDraw();
@@ -4770,7 +4787,7 @@ function rpOpenEdit(id) {
 function rpEditSnap(r) { return {cur: rpArr(r.cur).slice(), done: rpArr(r.done).slice(), later: rpArr(r.later).map(x => x.t)}; }
 function rpEditMerge(f, r) {
   const o = f.orig, add = [], has = t => f.cur.some(x => x.t === t) || f.done.includes(t) || f.later.some(x => x.t === t);
-  rpArr(r.done).filter(t => !o.done.includes(t) && !f.done.includes(t)).forEach(t => { f.cur = f.cur.filter(x => x.t !== t); f.later = f.later.filter(x => x.t !== t); f.done.push(t); add.push(t); });
+  rpArr(r.done).filter(t => !o.done.includes(t) && !f.done.includes(t)).forEach(t => { f.cur = f.cur.filter(x => x.t !== t); f.later = f.later.filter(x => x.t !== t); f.done.push(t); if (f.doneO) f.doneO.push(t); add.push(t); });
   rpArr(r.cur).filter(t => !o.cur.includes(t)).forEach(t => { if (o.later.includes(t)) f.later = f.later.filter(x => x.t !== t); if (!has(t)) { f.cur.push({t: t, o: t}); add.push(t); } });
   rpArr(r.later).filter(x => !o.later.includes(x.t) && !has(x.t)).forEach(x => { f.later.push({t: x.t, after: x.after || ''}); add.push(x.t); });
   f.rev = r.rev; f.orig = rpEditSnap(r);
@@ -4811,10 +4828,11 @@ function rpEditAddLater() {
   f.later.push({t: t, after: ''}); f.nl = '';
   rpEditDraw();
 }
-function rpEditRm(k, i) { RP.edit[k].splice(i, 1); rpEditDraw(); }
+function rpEditRm(k, i) { RP.edit[k].splice(i, 1); if (k === 'done' && RP.edit.doneO) RP.edit.doneO.splice(i, 1); rpEditDraw(); }
 function rpEditAdd() {
   const f = RP.edit, t = (f.nc || '').trim();
   if (!t) return toast('اكتب العمل أولاً', null, 'er');
+  if (f.cur.some(x => x.t === t) || f.later.some(x => x.t === t)) return toast('هذا العمل مضاف من قبل', null, 'er');
   f.cur.push({t: t, o: ''}); f.nc = '';
   rpEditDraw();
 }
@@ -4829,6 +4847,11 @@ async function rpEditSave() {
   }).filter(x => x.t);
   const a = {cur: cur.map(x => x.t), done: f.done.map(x => String(x || '').trim()).filter(Boolean), later: later, decide: rpLines(f.decide)};
   if (f.rev != null) a.rev = f.rev;
+  /* الإصدار 91: لو تغيّر نص عمل، ينرسل النص القديم مع الجديد عشان توثيقه وطلب اعتماده يتبعونه */
+  const ren = [], rn = (o, n) => { n = String(n || '').trim(); if (o && n && n !== o) ren.push({o: o, n: n}); };
+  f.cur.forEach(x => rn(x.o, x.t)); f.done.forEach((x, i) => rn((f.doneO || [])[i], x)); f.later.forEach(x => rn(x.o, x.t));
+  const allT = a.cur.concat(a.done, a.later.map(x => x.t)), ren2 = ren.filter(x => !allT.includes(x.o) && allT.includes(x.n));
+  if (ren2.length) a.ren = ren2;
   if (!a.cur.length && !a.done.length && !a.later.length && !a.decide.length) { f.err = 'أدخل عملاً واحداً على الأقل'; return rpEditDraw(); }
   f.busy = true; f.err = ''; rpEditDraw();
   try {
@@ -4994,7 +5017,7 @@ function nfRender() {
 }
 
 function rpSig(f) { return JSON.stringify([f.items, f.later, String(f.decide || '').trim(), String(f.nc || '').trim(), String(f.nl || '').trim(), (f.files || []).length]); }
-function rpEditSig(f) { return JSON.stringify([f.cur.map(x => x.t), f.done, f.later, String(f.decide || ''), String(f.nc || '').trim()]); }
+function rpEditSig(f) { return JSON.stringify([f.cur.map(x => x.t), f.done, f.later.map(x => ({t: x.t, after: x.after})), String(f.decide || ''), String(f.nc || '').trim()]); }
 function rpDraftKey(f) { return 'rp_draft:' + f.proj + ':' + (f.admin ? 'a' : 'e'); }
 let rpDT;
 function rpDraftSave() {
@@ -5163,7 +5186,7 @@ function rpTickList(r, cur, tags, isAdmin) {
   const all = rpArr(r.cur);
   return '<ul class="tkl">' + cur.map((x, i) => {
     const j = all.indexOf(x), k = rpTk(r, x), ret = rpSt(k) === 'ret';
-    return `<li><button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button><span>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${ret ? `<small class="retn">${I('rotate-ccw', 12)}ملاحظة المدير العام: ${esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>` : ''}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell" onclick="rpShareOpen('${r.id}',${j})" aria-label="تنبيه على هذا العمل">${I('bell', 15)}</button>` : ''}</li>`;
+    return `<li><button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button><span>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}` : ''}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell" onclick="rpShareOpen('${r.id}',${j})" aria-label="تنبيه على هذا العمل">${I('bell', 15)}</button>` : ''}</li>`;
   }).join('') + `</ul><div class="rhint" style="margin-top:6px">${I('info', 13)}${isAdmin ? 'اضغط الدائرة إذا أُنجز العمل، والجرس لتنبيه الموظف على عمل محدد' : 'اضغط الدائرة إذا أنجزت العمل، ويُرسل للمدير العام للاعتماد'}</div>`;
 }
 function rpLreqRows(r) {

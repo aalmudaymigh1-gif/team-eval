@@ -64,8 +64,10 @@
     const key = ridKey(op, a), now = Date.now();
     Object.keys(RID).forEach(x => { if (RID[x].exp && RID[x].exp < now) delete RID[x]; });
     if (!RID[key]) RID[key] = { id: newRid(), exp: 0 };
-    const r = await fn(Object.assign({}, a, { rid: RID[key].id }));
-    RID[key].exp = Date.now() + 20000;
+    /* الإصدار 91: الرقم ينمسح أول ما ترد العملية بنجاح، عشان نفس العملية بنفس المحتوى تنحفظ لو انعادت عن قصد. يبقى 20 ثانية بس لو الرد تأخر (ممكن التطبيق حسبها فشلت)، ويبقى لو فشلت */
+    const ent = RID[key], t0 = Date.now();
+    const r = await fn(Object.assign({}, a, { rid: ent.id }));
+    if (Date.now() - t0 < 10000) { if (RID[key] === ent) delete RID[key]; } else ent.exp = Date.now() + 20000;
     return r;
   }
   const aexec = (k, op, a) => withRid(x => rpc('admin_exec', { k: k, op: op, a: x }), op, a || {});
