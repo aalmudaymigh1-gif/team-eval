@@ -1112,9 +1112,9 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=86"></script>
+<script src="api.js?v=87"></script>
 <script>
-const APP_VER = '86';
+const APP_VER = '87';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -3782,7 +3782,7 @@ function proofFormHtml(t) {
       <div class="sub" style="margin:4px 0 -2px">دفعت من؟</div>
       <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'المدير العام']].map(o => `<button class="${f.paidBy === o[0] ? 'on' : ''}" onclick="S.dinv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>` : ''}
     <input placeholder="تعليق (اختياري)" value="${esc(S.cm || '')}" oninput="S.cm=this.value">
-    <button class="btn" ${S.shots.length && !S.busy && !S.shotLoading ? '' : 'disabled'} onclick="sendDone('${t.id}')">${S.busy ? 'جاري الإرسال…' : I('send', 17) + 'إرسال'}</button>
+    <button class="btn" id="sendb" ${S.shots.length && !S.busy && !S.shotLoading ? '' : 'disabled'} onclick="sendDone('${t.id}')">${S.busy ? esc(S.upProg || 'جاري الإرسال…') : I('send', 17) + 'إرسال'}</button>
     <button class="btn2" style="width:100%;border:0" onclick="S.doing=null;S.shots=[];S.dinv=null;rerenderEmp()">إلغاء</button>
     <div class="err" id="uperr"></div></div>`;
 }
@@ -3924,13 +3924,15 @@ async function sendDone(id) {
     if (!String(f.vendor || '').trim()) return err('اكتب اسم المحل');
     extra = {amount: f.amount, vendor: f.vendor, paidBy: f.paidBy || 'cash'};
   }
-  S.busy = true; rerenderEmp();
+  S.busy = true; S.upProg = ''; rerenderEmp();
+  /* الإصدار 87: يبين كم صورة ارتفعت ونسبتها، ولو علّق الرفع يطلع خطأ واضح بعد مهلة قصيرة، والصور اللي ارتفعت ما تنعاد */
+  const prog = (dn, n, pc) => { S.upProg = dn >= n ? 'جاري الإرسال…' : 'جاري رفع الصور: ' + dn + ' من ' + n + ' · ' + pc + '%'; const b = document.getElementById('sendb'); if (b) b.textContent = S.upProg; };
   try {
-    const d = await callT(120000, 'apiTaskDone', BOOT.token, id, S.cm || '', pf === 'note' ? [] : S.shots, extra);
-    S.busy = false; S.doing = null; S.shots = []; S.cm = ''; S.dinv = null;
+    const d = await callT(240000, 'apiTaskDone', BOOT.token, id, S.cm || '', pf === 'note' ? [] : S.shots, extra, prog);
+    S.busy = false; S.upProg = ''; S.doing = null; S.shots = []; S.cm = ''; S.dinv = null;
     renderEmp(d, false); toast('انرسلت، يعطيك العافية');
   } catch (e) {
-    S.busy = false; rerenderEmp(); err(e);
+    S.busy = false; S.upProg = ''; rerenderEmp(); err(e);
   }
 }
 
@@ -3954,7 +3956,12 @@ async function rfRetry(btn) {
 }
 function seenPing() { if (Date.now() - seenAt < 300000 || /^preview/.test(BOOT.key || BOOT.token || '')) return; seenAt = Date.now(); API.seen(APP_VER, BOOT.page === 'admin' ? devLabel() : ''); }
 async function refresh(silent) {
-  if ((refreshing && Date.now() - refreshing < 45000) || S.busy) return;
+  if (refreshing && Date.now() - refreshing < 45000) return;
+  /* الإصدار 87: وقت الإرسال السحب للتحديث كان ما يسوي شي بصمت. الحين رسالة، ويتحدّث لحاله أول ما يخلص */
+  if (S.busy) {
+    if (!silent) { toast('انتظر لين يخلص الإرسال، وبعدها يتحدّث لحاله', null, 'in'); if (!refresh.wait) { const t0 = Date.now(); refresh.wait = setInterval(() => { if (!S.busy || Date.now() - t0 > 300000) { clearInterval(refresh.wait); refresh.wait = 0; if (!S.busy) refresh(true); } }, 1500); } }
+    return;
+  }
   if (S.upN) { if (!silent) toast('انتظر لين يخلص الرفع', null, 'in'); return; }
   if (S.gr) return;
   if (silent && (S.doing || S.invForm || S.form || S.gform || S.ret || S.sheet || tfFilled().length || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || ''))) return;
@@ -4186,13 +4193,22 @@ function rpAdminView() {
   fb.innerHTML = I('plus', 26, 2.5); fb.setAttribute('aria-label', 'إضافة تقرير'); fb.classList.remove('hide');
 }
 /* الإصدار 78: بطاقات التقارير مرتّبة: شارة الحالة، وأرقام الحالية واللاحقة والمنجزة، وأول عملين، و«بلا تقارير» سطر واحد */
-function rpSeen() { try { return JSON.parse(lsGet('rp_seen') || 'null'); } catch (e) { return null; } }
-function rpMarkSeen(id) { const a = rpSeen() || []; if (!a.includes(id)) { a.push(id); lsSet('rp_seen', JSON.stringify(a.slice(-300))); } }
-function rpIsNew(r, me) { const a = rpSeen(); return !!(a && r.by !== (me || 'admin') && !a.includes(r.id)); }
-function rpAgeDays(r) { const t = rpToday(); if (!t || !r.date) return 0; return Math.round((Date.parse(t + 'T12:00:00Z') - Date.parse(r.date + 'T12:00:00Z')) / 864e5); }
+/* الإصدار 87: التقرير صار واحد مستمر، فـ«تحديث جديد» و«بدون تحديث من X أيام» تنحسب من آخر تحديث ومين حدّثه، مو من تاريخ إنشاء التقرير */
+function rpUpdMs(r) { return r ? (r.upd || (r.ts || 0) * 1000) : 0; }
+function rpSeen() {
+  let v; try { v = JSON.parse(lsGet('rp_seen2') || 'null'); } catch (e) { v = null; }
+  if (v) return v;
+  let old; try { old = JSON.parse(lsGet('rp_seen') || 'null'); } catch (e) { old = null; }
+  if (Array.isArray(old) && RP.reps) { v = {}; RP.reps.forEach(r => { v[r.id] = rpUpdMs(r); }); lsSet('rp_seen2', JSON.stringify(v)); return v; }
+  return null;
+}
+function rpSeedSeen() { if (rpSeen() === null && RP.reps) { const v = {}; RP.reps.forEach(r => { v[r.id] = rpUpdMs(r); }); lsSet('rp_seen2', JSON.stringify(v)); } }
+function rpMarkSeen(id) { const v = rpSeen() || {}, r = (RP.reps || []).find(x => x.id === id); v[id] = Math.max(v[id] || 0, rpUpdMs(r) || Date.now()); const ks = Object.keys(v); if (ks.length > 300) delete v[ks[0]]; lsSet('rp_seen2', JSON.stringify(v)); }
+function rpIsNew(r, me) { const v = rpSeen(); if (!v || !r) return false; const who = r.updId || r.by; return who !== (me || 'admin') && rpUpdMs(r) > (v[r.id] || 0); }
+function rpAgeDays(r) { const t = rpToday(), u = rpUpdMs(r); if (!t || !u) return 0; const d = new Date(u + 3 * 36e5).toISOString().slice(0, 10); return Math.max(0, Math.round((Date.parse(t + 'T12:00:00Z') - Date.parse(d + 'T12:00:00Z')) / 864e5)); }
 function rpSummaryHtml() {
   const ps = rpProjs(), withR = ps.filter(p => rpLast(p.id)), none = ps.filter(p => !rpLast(p.id));
-  if (rpSeen() === null && RP.reps) lsSet('rp_seen', JSON.stringify(RP.reps.map(r => r.id).slice(-300)));
+  rpSeedSeen();
   const rank = r => rpPend(r) || rpPendL(r).length ? 2 : rpIsNew(r) ? 1 : 0;
   withR.sort((a, b) => { const ra = rpLast(a.id), rb = rpLast(b.id); return rank(rb) - rank(ra) || (rb.upd || 0) - (ra.upd || 0); });
   let h = withR.length ? '<div class="rpl">' + withR.map(p => rpCardHtml(rpLast(p.id))).join('') + '</div>' : emptyHtml('file-text', 'لا توجد تقارير بعد. التقارير التي يرسلها الموظفون تظهر هنا');
@@ -4208,7 +4224,7 @@ function rpCardHtml(r, o) {
   const nc = cur.length, nl = rpArr(r.later).length, nd = rpArr(r.done).length, age = rpAgeDays(r), me = (o.d || {}).id;
   const notes = rpArr(r.notes), last = notes[notes.length - 1];
   const npd = rpPendL(r).length, nret = o.emp ? rpArr(r.cur).filter(x => { const k = rpTk(r, x); return rpSt(k) === 'ret' && k.by === me; }).length : 0;
-  const chip = o.share ? '<span class="rchip new">تنبيه</span>' : !o.emp && npd ? `<span class="rchip dec">بانتظار اعتمادك (${npd})</span>` : nret ? '<span class="rchip old">أُعيد إليك عمل</span>' : rpPend(r) ? `<span class="rchip dec">${o.emp ? 'بانتظار المدير العام' : 'بانتظار قرارك'}</span>` : rpIsNew(r, me) ? '<span class="rchip new">جديد</span>' : age > 3 ? `<span class="rchip old">من ${age} ${age <= 10 ? 'أيام' : 'يوماً'}</span>` : '';
+  const chip = o.share ? '<span class="rchip new">تنبيه</span>' : !o.emp && npd ? `<span class="rchip dec">بانتظار اعتمادك (${npd})</span>` : nret ? '<span class="rchip old">أُعيد إليك عمل</span>' : rpPend(r) ? `<span class="rchip dec">${o.emp ? 'بانتظار المدير العام' : 'بانتظار قرارك'}</span>` : rpIsNew(r, me) ? '<span class="rchip new">تحديث جديد</span>' : age > 3 ? `<span class="rchip old">بدون تحديث من ${age} ${age <= 10 ? 'أيام' : 'يوماً'}</span>` : '';
   const st = [nc ? `<span><i></i>${nc === 1 ? 'عمل حالي واحد' : nc === 2 ? 'عملان حاليان' : nc + ' حالية'}</span>` : '',
     nl ? `<span><i class="l"></i>${nl === 1 ? 'عمل لاحق واحد' : nl === 2 ? 'عملان لاحقان' : nl + ' لاحقة'}</span>` : '',
     nd ? `<span><i class="d"></i>${nd === 1 ? 'عمل أُنجز' : nd === 2 ? 'عملان أُنجزا' : nd + ' أُنجزت'}</span>` : ''].join('');
@@ -4430,8 +4446,9 @@ function rpEmpHtml(d, isPreview) {
   if (RP.sent) h += `<div class="note good rsent" style="margin-top:16px">${I('circle-check', 16)}<div><b>تم تحديث تقرير ${esc(rpPName(RP.sent.proj))}</b><br>${esc(dayLabel(RP.sent.date))}</div></div>`;
   if (!isPreview) h += `<button class="btn2 cu qbig" style="margin-top:16px" onclick="rpOpenForm(null,false)">${I('file-text', 17)}تحديث تقرير</button>`;
   const withR = ps.filter(p => rpLast(p.id)), none = ps.filter(p => !rpLast(p.id));
+  rpSeedSeen();
   const rank = p => { const r = rpLast(p.id); return rpShareFor(p.id) ? 3 : rpIsNew(r, d.id) ? 2 : p.mine ? 1 : 0; };
-  withR.sort((a, b) => rank(b) - rank(a) || (rpLast(b.id).ts || 0) - (rpLast(a.id).ts || 0));
+  withR.sort((a, b) => rank(b) - rank(a) || rpUpdMs(rpLast(b.id)) - rpUpdMs(rpLast(a.id)));
   h += withR.length ? `<div class="rpl">${withR.map(p => rpCardHtml(rpLast(p.id), {emp: true, d: d, share: rpShareFor(p.id)})).join('')}</div>` : emptyHtml('file-text', 'لا توجد تقارير بعد');
   if (none.length && !isPreview) {
     h += `<button class="rpfold" aria-expanded="${!!RP.noneOpen}" onclick="RP.noneOpen=!RP.noneOpen;rerenderEmp()"><span class="ic">${I('folder', 16)}</span><span class="k">مشاريع بلا تقارير</span><span class="v">${none.length}<span class="cv2 ${RP.noneOpen ? 'on' : ''}">${I('chevron-left', 16)}</span></span></button>`;
@@ -4673,10 +4690,20 @@ function rpOpenEdit(id) {
   const r = (RP.reps || []).find(x => x.id === id);
   if (!r) return;
   const cur = rpArr(r.cur).map(t => ({t: t, o: t}));
-  RP.edit = {id: id, by: r.by, proj: r.proj, date: r.date, cur: cur, done: rpArr(r.done).slice(), later: rpArr(r.later).map(x => ({t: x.t, after: x.after || ''})), decide: rpArr(r.decide).join('\n'), nc: '', err: '', busy: false};
+  RP.edit = {id: id, by: r.by, proj: r.proj, date: r.date, cur: cur, done: rpArr(r.done).slice(), later: rpArr(r.later).map(x => ({t: x.t, after: x.after || ''})), decide: rpArr(r.decide).join('\n'), nc: '', err: '', busy: false, rev: r.rev, orig: rpEditSnap(r), warn: ''};
   RP.edit.sig0 = rpEditSig(RP.edit);
   S.sheet = true;
   rpEditDraw();
+}
+/* الإصدار 87: «تعديل» يرسل رقم نسخة التقرير. لو تغيّر التقرير بعد ما فتحته (مثلاً أضاف الموظف عمل) يرفض السيرفر، وهنا ينضاف الجديد للنافذة وتراجع وتحفظ، بدل ما ينمسح */
+function rpEditSnap(r) { return {cur: rpArr(r.cur).slice(), done: rpArr(r.done).slice(), later: rpArr(r.later).map(x => x.t)}; }
+function rpEditMerge(f, r) {
+  const o = f.orig, add = [], has = t => f.cur.some(x => x.t === t) || f.done.includes(t) || f.later.some(x => x.t === t);
+  rpArr(r.done).filter(t => !o.done.includes(t) && !f.done.includes(t)).forEach(t => { f.cur = f.cur.filter(x => x.t !== t); f.later = f.later.filter(x => x.t !== t); f.done.push(t); add.push(t); });
+  rpArr(r.cur).filter(t => !o.cur.includes(t)).forEach(t => { if (o.later.includes(t)) f.later = f.later.filter(x => x.t !== t); if (!has(t)) { f.cur.push({t: t, o: t}); add.push(t); } });
+  rpArr(r.later).filter(x => !o.later.includes(x.t) && !has(x.t)).forEach(x => { f.later.push({t: x.t, after: x.after || ''}); add.push(x.t); });
+  f.rev = r.rev; f.orig = rpEditSnap(r);
+  f.warn = add.length ? 'تغيّر التقرير بعد ما فتحت التعديل. انضاف هنا: ' + add.join('، ') + '. راجع واحفظ.' : 'تغيّر التقرير بعد ما فتحت التعديل. راجع واحفظ.';
 }
 function rpEditAfter(a) {
   if (!a) return 'غير مرتبطة بعمل';
@@ -4687,12 +4714,14 @@ function rpEditDraw() {
   const f = RP.edit;
   if (!f) return;
   const row = (k, i, v) => `<div class="erow ${k === 'done' ? 'dn' : ''}"><input value="${esc(v)}" aria-label="العمل" oninput="RP.edit.${k}[${i}]${k === 'cur' ? '.t' : k === 'later' ? '.t' : ''}=this.value"><button class="mx2" onclick="rpEditRm('${k}',${i})" aria-label="حذف">${I('x', 14, 2.5)}</button></div>`;
+  const r0 = (RP.reps || []).find(x => x.id === f.id);
   ovOpen(`<label class="shh">تعديل تقرير ${esc(rpPName(f.proj))}</label>
-    <div class="sub" style="margin:-6px 0 6px">تقرير ${esc(f.by === 'admin' ? 'المدير العام' : rpBy({by: f.by, byName: ((RP.reps || []).find(x => x.id === f.id) || {}).byName}))} · ${esc(rpDay(f.date))}</div>
+    <div class="sub" style="margin:-6px 0 6px">${r0 ? 'آخر تحديث: ' + esc(rpUpdBy(r0)) + ' · ' + esc(rpTickWhen(rpUpdMs(r0))) : ''}</div>
+    ${f.warn ? `<div class="note warn" style="margin:0 0 8px">${I('triangle-alert', 16)}<div>${esc(f.warn)}</div></div>` : ''}
     <div class="qlab">${I('list-checks', 14)}الأعمال الحالية</div>
     <div class="lbox">${f.cur.map((x, i) => row('cur', i, x.t)).join('') || '<div class="rpe" style="padding:8px 2px">لا توجد أعمال حالية</div>'}
       <div class="ladd one"><input id="e_nc" placeholder="عمل حالي جديد" value="${esc(f.nc)}" oninput="RP.edit.nc=this.value" onkeydown="if(event.key==='Enter')rpEditAdd()"><button class="btn2" onclick="rpEditAdd()">${I('plus', 16)}إضافة</button></div></div>
-    <div class="qlab">${I('check-check', 14)}أُنجز في هذا التقرير</div>
+    <div class="qlab">${I('check-check', 14)}الأعمال المنجزة</div>
     <div class="lbox">${f.done.map((x, i) => row('done', i, x)).join('') || '<div class="rpe" style="padding:8px 2px">لا يوجد</div>'}</div>
     <div class="qlab">${I('history', 14)}الأعمال اللاحقة</div>
     <div class="lbox">${f.later.map((x, i) => row('later', i, x.t) + `<div class="ehint">${esc(rpEditAfter(x.after))}</div>`).join('') || '<div class="rpe" style="padding:8px 2px">لا يوجد</div>'}
@@ -4728,13 +4757,19 @@ async function rpEditSave() {
     return {t: String(x.t || '').trim(), after: a};
   }).filter(x => x.t);
   const a = {cur: cur.map(x => x.t), done: f.done.map(x => String(x || '').trim()).filter(Boolean), later: later, decide: rpLines(f.decide)};
+  if (f.rev != null) a.rev = f.rev;
   if (!a.cur.length && !a.done.length && !a.later.length && !a.decide.length) { f.err = 'أدخل عملاً واحداً على الأقل'; return rpEditDraw(); }
   f.busy = true; f.err = ''; rpEditDraw();
   try {
     await call('apiRepEdit', f.id, a);
-    const d = await API.apiRepList(); RP.reps = rpArr(d.reps);
+    try { await rpTickReload(); } catch (e) { RP.need = true; }
   } catch (e) {
-    f.busy = false; f.err = String(e);
+    f.busy = false;
+    if (String(e).indexOf('تغيّر التقرير') >= 0) {
+      try { await rpTickReload(); } catch (e2) {}
+      const r = (RP.reps || []).find(x => x.id === f.id);
+      if (r) { rpEditMerge(f, r); f.err = ''; } else f.err = String(e);
+    } else f.err = String(e);
     if (RP.edit === f) rpEditDraw(); else toastErr(e);
     return;
   }
@@ -5035,7 +5070,8 @@ async function rpShareSend() {
   if (!f || f.busy) return;
   if (!f.emps.length) { f.err = 'اختر موظفاً واحداً على الأقل'; return rpShareDraw(); }
   f.busy = true; f.err = ''; rpShareDraw();
-  try { await call('apiRepAlert', f.id, f.item || '', f.emps, f.msg || ''); try { await rpTickReload(); } catch (e) {} }
+  f.rid = f.rid || (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+  try { await call('apiRepAlert', f.id, f.item || '', f.emps, f.msg || '', f.rid); try { await rpTickReload(); } catch (e) {} }
   catch (e) { f.busy = false; f.err = String(e); if (RP.share === f) rpShareDraw(); else toastErr(e); return; }
   const names = f.emps.map(id => shortName(((S.data.employees || []).find(e => e.id === id) || {}).name || '')).filter(Boolean);
   RP.share = null; ovClose();

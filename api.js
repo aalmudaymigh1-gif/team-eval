@@ -122,13 +122,18 @@
       x.setRequestHeader('Content-Type', type || blob.type || 'application/octet-stream');
       x.setRequestHeader('x-upsert', 'false');
       x.setRequestHeader('cache-control', 'max-age=31536000');
-      if (onProgress && x.upload) x.upload.onprogress = ev => { if (ev.lengthComputable) onProgress(ev.loaded / ev.total); };
+      /* الإصدار 87: لو ما تقدّم الرفع 45 ثانية (نت ضعيف أو مقطوع) يتوقف ويطلع خطأ واضح، بدل ما يعلّق بدون نهاية */
+      let wd; const kick = () => { clearTimeout(wd); wd = setTimeout(() => { try { x.abort(); } catch (e) {} rej(new Error('تعذّر رفع الملف لأن الاتصال ضعيف. اللي ارتفع محفوظ، وأعد المحاولة يكمل الباقي')); }, 45000); };
+      if (x.upload) x.upload.onprogress = ev => { kick(); if (onProgress && ev.lengthComputable) onProgress(ev.loaded / ev.total); };
+      x.onloadend = () => clearTimeout(wd);
+      kick();
       x.onload = () => {
+        clearTimeout(wd);
         if (x.status >= 200 && x.status < 300) return res(path);
         let m = ''; try { m = JSON.parse(x.responseText).message || ''; } catch (e) {}
         rej(new Error(m || 'ما ارتفع الملف، جرّب مرة ثانية'));
       };
-      x.onerror = () => rej(new Error('ما فيه اتصال، تأكد من النت وجرّب مرة ثانية'));
+      x.onerror = () => { clearTimeout(wd); rej(new Error('ما فيه اتصال، تأكد من النت وجرّب مرة ثانية')); };
       x.ontimeout = () => rej(new Error('الاتصال تأخر، جرّب مرة ثانية'));
       x.send(blob);
     });
@@ -147,10 +152,10 @@
     c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
     return new Promise(r => c.toBlob(r, 'image/jpeg', 0.72));
   }
-  async function putImg(path, blob) {
+  async function putImg(path, blob, onProg) {
     const t = thumbOf(path);
     const thumbJob = t ? makeThumb(blob).then(tb => tb ? put(t, tb, 'image/jpeg') : null).catch(() => null) : null;
-    await Promise.all([put(path, blob, blob.type), thumbJob]);
+    await Promise.all([put(path, blob, blob.type, onProg), thumbJob]);
     return path;
   }
 
@@ -569,15 +574,17 @@
     return empDo(token, op, { photo: paths[0], lat: p.lat == null ? '' : String(p.lat), lng: p.lng == null ? '' : String(p.lng),
       acc: p.acc == null ? '' : String(Math.round(p.acc)), project: project || '' });
   }
-  async function empUpload(token, dataUrls, max) {
+  async function empUpload(token, dataUrls, max, onProg) {
     const list = (Array.isArray(dataUrls) ? dataUrls : [dataUrls]).filter(Boolean).slice(0, max);
-    return Promise.all(list.map(async d => {
+    const pr = list.map(d => UPD.has(d) ? 1 : 0), tell = () => { if (onProg) onProg(pr.filter(v => v >= 1).length, list.length, Math.round(pr.reduce((a, v) => a + v, 0) / (list.length || 1) * 100)); };
+    tell();
+    return Promise.all(list.map(async (d, i) => {
       if (UPD.has(d)) return UPD.get(d);
       const blob = dataUrlBlob(d);
       if (blob.size > 5 * 1024 * 1024) throw new Error('الصورة كبيرة، جرّب وحدة ثانية');
       const r = await eexec(token, 'ticket', {});
-      const p = await putImg(r.path, blob);
-      UPD.set(d, p);
+      const p = await putImg(r.path, blob, v => { pr[i] = Math.min(v, 0.99); tell(); });
+      UPD.set(d, p); pr[i] = 1; tell();
       return p;
     }));
   }
@@ -867,8 +874,8 @@
       return adminDo(k, 'task_update', a);
     },
 
-    async apiTaskDone(token, id, comment, dataUrls, extra) {
-      const paths = await empUpload(token, dataUrls || [], 5);
+    async apiTaskDone(token, id, comment, dataUrls, extra, onProg) {
+      const paths = await empUpload(token, dataUrls || [], 5, onProg);
       const x = extra || {}, a = { id: id, comment: String(comment || ''), proofs: paths };
       if (x.amount !== undefined) { a.amount = cleanAmount_(x.amount); a.vendor = String(x.vendor || '').trim(); a.paidBy = x.paidBy || 'cash'; }
       return empDo(token, 'task_done', a);
@@ -1061,7 +1068,7 @@
     async apiRepUndone(id, item) { const r = await rpc('rep_undone', { k: CRED.k || '', id: String(id || ''), item: String(item || '') }); flush(); return r; },
     /* الإصدار 86: اعتماد الإنجاز أو إرجاعه، والتنبيه على عمل محدد، وتسجيل مشاهدة التنبيه */
     async apiRepReview(id, item, ok, note) { const r = await rpc('rep_review', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), ok: !!ok, note: String(note || '') }); flush(); return r; },
-    async apiRepAlert(id, item, emps, msg) { const r = await rpc('rep_alert', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), emps: emps || [], msg: String(msg || '') }); flush(); return r; },
+    async apiRepAlert(id, item, emps, msg, rid) { const r = await rpc('rep_alert', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), emps: emps || [], msg: String(msg || ''), rid: String(rid || '') }); flush(); return r; },
     async apiAlertSeen(id) { const r = await rpc('alert_seen', { t: CRED.t || '', id: String(id || '') }); flush(); return r; },
     async apiRepDecDel(id, item) { return rpc('rep_dec_del', { k: CRED.k || '', id: String(id || ''), item: String(item || '') }); },
     async trGet(texts, lang) { return rpc('tr_get', { k: CRED.k || '', t: CRED.t || '', texts: texts, tl: lang }); },
