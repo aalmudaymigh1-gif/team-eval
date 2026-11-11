@@ -851,6 +851,7 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .lrow.mv .lt small{color:var(--green)}
 .lrow.mv .lt small svg{flex:none;margin-top:3px}
 .lmv{font:inherit;font-size:12px;border:1px solid var(--line2);background:#fff;color:var(--acc-dk);border-radius:999px;padding:6px 10px;flex:none;min-height:34px}
+.lmv.on{background:var(--amber-soft);border-color:var(--amber);color:#85642B}
 .mx2{width:34px;height:34px;border-radius:50%;border:0;background:var(--fill);color:var(--muted);display:flex;align-items:center;justify-content:center;flex:none;padding:0}
 .ladd{display:grid;gap:8px;margin-top:10px}
 .ladd input,.ladd select{border:1.5px solid var(--line2)!important;padding:10px 12px;font-size:16px;width:100%;color:var(--text);-webkit-appearance:none;appearance:none}
@@ -976,6 +977,8 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .pdl .rvf .grid2{margin-top:8px}
 .pdl .btn2{font-size:14px}
 .tg2.r{color:var(--red);background:var(--red-soft)}
+.tg2.a{color:#85642B;background:var(--amber-soft)}
+.tkl li>.tkb.wt{flex:none;background:var(--amber-soft);color:#85642B;border:0;cursor:default}
 .retn{display:flex;gap:5px;align-items:flex-start;font-size:13px;color:#7E3F39;background:var(--red-soft);border-radius:10px;padding:5px 8px;margin-top:5px;line-height:1.5}
 .retn svg{flex:none;margin-top:3px}
 .tkt{display:block;font-size:12px;color:var(--muted);margin-top:2px}
@@ -1112,9 +1115,9 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=87"></script>
+<script src="api.js?v=88"></script>
 <script>
-const APP_VER = '87';
+const APP_VER = '88';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1177,12 +1180,14 @@ const dmyt = s => { const m = /[ T](\d\d):(\d\d)/.exec(s || ''); return dmy(s) +
 const signed = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n);
 const nqt = n => n === 1 ? 'نقطة' : n === 2 ? 'نقطتين' : n <= 10 ? 'نقاط' : 'نقطة';
 const TRUST = 'الأمانة والمصداقية';
+const HEAVY = [TRUST];
+const heavy = c => HEAVY.indexOf(c) >= 0;
 const ICONS = {"hourglass":"<path d=\"M5 22h14\"/><path d=\"M5 2h14\"/><path d=\"M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22\"/><path d=\"M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2\"/>","wifi-off":"<path d=\"M12 20h.01\"/><path d=\"M8.5 16.429a5 5 0 0 1 7 0\"/><path d=\"M5 12.859a10 10 0 0 1 5.17-2.69\"/><path d=\"M19 12.859a10 10 0 0 0-2.007-1.523\"/><path d=\"M2 8.82a15 15 0 0 1 4.177-2.643\"/><path d=\"M22 8.82a15 15 0 0 0-11.288-3.764\"/><path d=\"m2 2 20 20\"/>","log-in":"<path d=\"m10 17 5-5-5-5\"/><path d=\"M15 12H3\"/><path d=\"M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4\"/>","smartphone":"<rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\"/><path d=\"M12 18h.01\"/>","folder-x":"<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\"/><path d=\"m9.5 10.5 5 5\"/><path d=\"m14.5 10.5-5 5\"/>","rotate-cw":"<path d=\"M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8\"/><path d=\"M21 3v5h-5\"/>","square-check":"<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\"/><path d=\"m9 12 2 2 4-4\"/>","bell":"<path d=\"M10.268 21a2 2 0 0 0 3.464 0\"/><path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\"/>","bell-ring":"<path d=\"M10.268 21a2 2 0 0 0 3.464 0\"/><path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\"/><path d=\"M22 8c0-2.3-.8-4.3-2-6\"/><path d=\"M4 2C2.8 3.7 2 5.7 2 8\"/>","clipboard-check":"<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\"/> <path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/> <path d=\"m9 14 2 2 4-4\"/>","users":"<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/> <path d=\"M16 3.128a4 4 0 0 1 0 7.744\"/> <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\"/> <circle cx=\"9\" cy=\"7\" r=\"4\"/>","list-checks":"<path d=\"M13 5h8\"/> <path d=\"M13 12h8\"/> <path d=\"M13 19h8\"/> <path d=\"m3 17 2 2 4-4\"/> <path d=\"m3 7 2 2 4-4\"/>","wallet":"<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\"/> <path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\"/>","settings":"<path d=\"M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915\"/> <circle cx=\"12\" cy=\"12\" r=\"3\"/>","check":"<path d=\"M20 6 9 17l-5-5\"/>","x":"<path d=\"M18 6 6 18\"/> <path d=\"m6 6 12 12\"/>","star":"<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\"/>","refresh-cw":"<path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\"/> <path d=\"M21 3v5h-5\"/> <path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\"/> <path d=\"M8 16H3v5\"/>","calendar":"<path d=\"M8 2v3\"/> <path d=\"M16 2v3\"/> <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/> <path d=\"M3 9h18\"/>","user":"<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/> <circle cx=\"12\" cy=\"7\" r=\"4\"/>","clock":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M12 6v6l4 2\"/>","hammer":"<path d=\"m15 12-9.373 9.373a1 1 0 0 1-3.001-3L12 9\"/> <path d=\"m18 15 4-4\"/> <path d=\"m21.5 11.5-1.914-1.914A2 2 0 0 1 19 8.172v-.344a2 2 0 0 0-.586-1.414l-1.657-1.657A6 6 0 0 0 12.516 3H9l1.243 1.243A6 6 0 0 1 12 8.485V10l2 2h1.172a2 2 0 0 1 1.414.586L18.5 14.5\"/>","wrench":"<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z\"/>","shield-check":"<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/> <path d=\"m9 12 2 2 4-4\"/>","handshake":"<path d=\"m11 17 2 2a1 1 0 1 0 3-3\"/> <path d=\"m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4\"/> <path d=\"m21 3 1 11h-2\"/> <path d=\"M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3\"/> <path d=\"M3 4h8\"/>","clipboard-list":"<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\"/> <path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/> <path d=\"M12 11h4\"/> <path d=\"M12 16h4\"/> <path d=\"M8 11h.01\"/> <path d=\"M8 16h.01\"/>","sparkles":"<path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\"/> <path d=\"M20 2v4\"/> <path d=\"M22 4h-4\"/> <circle cx=\"4\" cy=\"20\" r=\"2\"/>","shirt":"<path d=\"M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z\"/>","circle-check":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"m16 9-5.5 5.5L8 12\"/>","circle-x":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"m15 9-6 6\"/> <path d=\"m9 9 6 6\"/>","message-circle":"<path d=\"M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719\"/>","copy":"<rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\"/> <path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\"/>","eye":"<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\"/> <circle cx=\"12\" cy=\"12\" r=\"3\"/>","plus":"<path d=\"M5 12h14\"/> <path d=\"M12 5v14\"/>","trash-2":"<path d=\"M10 11v6\"/> <path d=\"M14 11v6\"/> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\"/> <path d=\"M3 6h18\"/> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/>","rotate-ccw":"<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/> <path d=\"M3 3v5h5\"/>","image":"<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\"/> <circle cx=\"9\" cy=\"9\" r=\"2\"/> <path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\"/>","camera":"<path d=\"M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z\"/> <circle cx=\"12\" cy=\"13\" r=\"3\"/>","paperclip":"<path d=\"m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551\"/>","folder":"<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\"/>","archive":"<rect width=\"20\" height=\"5\" x=\"2\" y=\"3\" rx=\"1\"/> <path d=\"M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8\"/> <path d=\"M10 12h4\"/>","banknote":"<rect width=\"20\" height=\"12\" x=\"2\" y=\"6\" rx=\"2\"/> <circle cx=\"12\" cy=\"12\" r=\"2\"/> <path d=\"M6 12h.01M18 12h.01\"/>","hand-coins":"<path d=\"M11 15h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 17\"/> <path d=\"m7 21 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9\"/> <path d=\"m2 16 6 6\"/> <circle cx=\"16\" cy=\"9\" r=\"2.9\"/> <circle cx=\"6\" cy=\"5\" r=\"3\"/>","arrow-right":"<path d=\"M5 12h14\"/> <path d=\"m12 5 7 7-7 7\"/>","arrow-up":"<path d=\"m5 12 7-7 7 7\"/> <path d=\"M12 19V5\"/>","inbox":"<polyline points=\"22 12 16 12 14 15 10 15 8 12 2 12\"/> <path d=\"M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\"/>","link":"<path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\"/> <path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\"/>","info":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M12 16v-4\"/> <path d=\"M12 8h.01\"/>","send":"<path d=\"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z\"/> <path d=\"m21.854 2.147-10.94 10.939\"/>","check-check":"<path d=\"M18 6 7 17l-5-5\"/> <path d=\"m22 10-7.5 7.5L13 16\"/>","undo-2":"<path d=\"M9 14 4 9l5-5\"/> <path d=\"M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11\"/>","receipt":"<path d=\"M12 17V7\"/> <path d=\"M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8\"/> <path d=\"M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z\"/>","history":"<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/> <path d=\"M3 3v5h5\"/> <path d=\"M12 7v5l4 2\"/>","file-text":"<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/> <path d=\"M10 9H8\"/> <path d=\"M16 13H8\"/> <path d=\"M16 17H8\"/>","pencil":"<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\"/> <path d=\"m15 5 4 4\"/>","triangle-alert":"<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/> <path d=\"M12 9v4\"/> <path d=\"M12 17h.01\"/>","folder-plus":"<path d=\"M12 10v6\"/> <path d=\"M9 13h6\"/> <path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\"/>","circle-dollar-sign":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8\"/> <path d=\"M12 18V6\"/>","play":"<path d=\"M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z\"/>","user-round":"<circle cx=\"12\" cy=\"8\" r=\"5\"/> <path d=\"M20 21a8 8 0 0 0-16 0\"/>","mic":"<path d=\"M12 19v3\"/> <path d=\"M19 10v2a7 7 0 0 1-14 0v-2\"/> <rect x=\"9\" y=\"2\" width=\"6\" height=\"13\" rx=\"3\"/>","lock":"<rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\"/> <path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/>"};
 ICONS.search = '<circle cx="11" cy="11" r="8"/> <path d="m21 21-4.3-4.3"/>';
 ICONS.bell = '<path d="M10.268 21a2 2 0 0 0 3.464 0"/> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>';
 const I_FLIP = {'arrow-right': 1, 'chevron-left': 1};
 function I(n, s, sw) { return '<svg class="i' + (I_FLIP[n] ? ' fl' : '') + '" width="' + (s || 18) + '" height="' + (s || 18) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 2) + '" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[n] || '') + '</svg>'; }
-const CRIT_IC = {'الحضور والمواعيد':'clock','جودة الشغل':'hammer','إدارة العمال':'users','حل المشاكل':'wrench','متابعة الأعمال الموكلة':'clipboard-list','التركيز والانتباه':'eye','الأمانة والمصداقية':'shield-check','الاحترام وحسن التعامل':'handshake','الالتزام بالتعليمات':'clipboard-list','النظافة':'sparkles','الانضباط والمظهر':'shirt'};
+const CRIT_IC = {'الحضور والمواعيد':'clock','جودة الشغل':'hammer','إدارة العمال':'users','حل المشاكل':'wrench','متابعة الأعمال الموكلة':'clipboard-list','التركيز والانتباه':'eye','تأمين المشروع':'lock','الأمانة والمصداقية':'shield-check','الاحترام وحسن التعامل':'handshake','الالتزام بالتعليمات':'clipboard-list','النظافة':'sparkles','الانضباط والمظهر':'shirt'};
 function emptyHtml(icon, text) { return '<div class="empty"><div class="ei">' + I(icon, 24) + '</div>' + text + '</div>'; }
 function ctitle(icon, text, extra) { return '<div class="ctitle"><span class="ci">' + I(icon, 17) + '</span>' + text + (extra ? '<span class="sp">' + extra + '</span>' : '') + '</div>'; }
 function segc(items, cur, fn) { return '<div class="segc">' + items.map(x => '<button class="' + (cur === x[0] ? 'on' : '') + '" onclick="' + fn + '(\'' + x[0] + '\')">' + x[1] + '</button>').join('') + '</div>'; }
@@ -1874,14 +1879,14 @@ function renderRec() {
   const trk = emp.track;
   const row = (c, cls) => {
     const miss = S.misses.includes(c.n);
-    const amt = c.n === TRUST ? st.trust : st.miss;
+    const amt = heavy(c.n) ? st.trust : st.miss;
     return `<button class="gr ${miss ? 'off' : ''}" onclick="togMiss(${d.criteria.indexOf(c)})">
       <span class="gi ${cls}">${I(CRIT_IC[c.n] || 'check', 17, 2.2)}</span><span class="n">${esc(c.n)}</span>
       ${miss ? `<span class="pill r">تقصير${trk ? '' : ' · <bdi dir="ltr">−' + amt + '</bdi>'}</span>` : ''}
       <span class="mk ${miss ? 'no' : 'ok'}">${I(miss ? 'circle-x' : 'circle-check', 26, 2)}</span></button>`;
   };
   let ded = 0;
-  S.misses.forEach(c => { ded += c === TRUST ? st.trust : st.miss; });
+  S.misses.forEach(c => { ded += heavy(c) ? st.trust : st.miss; });
   const net = (S.star ? st.star : 0) - ded;
   const label = !S.misses.length && !S.star ? 'كل شي تمام' : 'حفظ التقييم';
   const empSub = e => e.track ? 'متابعة فقط' : 'حافز الشهر ' + M(e.month.bonus, '', 't pos');
@@ -2001,7 +2006,35 @@ function teamEmp(d, e) {
   const lv = [m.misses ? m.misses + ' تقصير' : '', m.stars ? m.stars + ' مميز' : ''].filter(Boolean).join(' · ');
   return `<div class="tfr"><div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span>${seenHtml(e.seen)}</div>
       <button class="lnkb" onclick="tsub('${e.id}','link')" aria-label="رابط صفحته">${I('link', 16)}</button><button class="rate" onclick="rateEmp('${e.id}')">${I('clipboard-check', 14)}قيّمه</button></div>
-    <div class="tbl2">${m.track ? tbRow('history', 'المواقف', lv || 'ما فيه', `tsub('${e.id}','log')`) : tbRow('sparkles', 'الحافز', M(m.bonus, '', 'pos') + (lv ? ` <span class="lv">· ${lv}</span>` : ''), `tsub('${e.id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${e.id}')`) : ''}${tbRow('list-checks', 'المهام', tv || 'ما عنده', `tsub('${e.id}','tasks')`)}</div></div>`;
+    <div class="tbl2">${m.track ? tbRow('history', 'المواقف', lv || 'ما فيه', `tsub('${e.id}','log')`) : tbRow('sparkles', 'الحافز', M(m.bonus, '', 'pos') + (lv ? ` <span class="lv">· ${lv}</span>` : ''), `tsub('${e.id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${e.id}')`) : ''}${tbRow('list-checks', 'المهام', tv || 'ما عنده', `tsub('${e.id}','tasks')`)}${e.salary ? tbRow('receipt', 'خصم مخالفة مرورية', '', `fineOpen('${e.id}')`) : ''}</div></div>`;
+}
+/* الإصدار 88: خصم مخالفة مرورية من صفحة الفريق، ينحفظ خصم عادي على أول شهر ما انصرف */
+function fineMonth(e) {
+  const ms = ((e.sal || {}).months) || [];
+  let mk = S.data.today.slice(0, 7);
+  while (ms.some(m => m.month === mk && m.closed)) { const y = +mk.slice(0, 4), m = +mk.slice(5, 7); mk = m === 12 ? (y + 1) + '-01' : y + '-' + String(m + 1).padStart(2, '0'); }
+  return mk;
+}
+function fineOpen(id) {
+  const e = empById(id);
+  if (!e) return;
+  const t = S.data.today;
+  ovOpen(`<label class="shh">خصم مخالفة مرورية</label><div class="sub" style="margin:-6px 0 8px">${esc(e.name)}</div>
+    <label class="dp"><span>المبلغ</span><input id="fn_a" type="number" inputmode="numeric" placeholder="مثلاً 150" style="text-align:left"></label>
+    <label class="dp"><span>تاريخ المخالفة</span><input id="fn_d" type="date" value="${t}" max="${t}"></label>
+    <textarea id="fn_n" class="rta sm" maxlength="150" placeholder="ملاحظة (اختياري): رقم المخالفة أو مكانها"></textarea>
+    <div class="rhint">${I('info', 13)}يُخصم من راتب ${monthLbl(fineMonth(e))} (أول شهر لم يُصرف)، ويظهر في حركاته وفي تفاصيل راتبه</div>
+    <div class="err" id="fn_e"></div>
+    <button class="btn2 cu qbig" onclick="fineSave('${id}')">${I('check', 17, 2.5)}حفظ الخصم</button>`);
+}
+async function fineSave(id) {
+  const a = $('#fn_a').value, dt = $('#fn_d').value, n = $('#fn_n').value.trim(), er = $('#fn_e');
+  if (!(Number(a) > 0)) { er.textContent = 'اكتب المبلغ'; return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dt) || dt > S.data.today) { er.textContent = 'اختر تاريخ المخالفة'; return; }
+  const note = 'مخالفة مرورية بتاريخ ' + dueL(dt, true) + (n ? ' · ' + n : '');
+  const un = lockBtn();
+  try { S.data = await call('apiFinAdd', BOOT.key, {emp: id, kind: 'ded', amount: a, note: note}); ovClose(); renderAdmin(); toast('تم حفظ الخصم'); }
+  catch (x) { un(); er.textContent = x; }
 }
 /* الإصدار 80: آخر ظهور للموظف في التطبيق */
 function seenHtml(ms) {
@@ -3620,7 +3653,7 @@ function rulesHtml(st) {
     <div>• كل موقف مميز فوق الواجب يزيد ${M(st.star, '', 't')}، لين ${M(st.starCap, '', 't')} بالشهر.</div>
     <div>• إذا خلص الشهر بدون ولا تقصير، مكافأة ${M(st.clean, '', 't')}.</div>
     <div>• الحافز ينصرف مع راتب نفس الشهر، والسلف والراتب المقدم ينخصمون من الراتب.</div>
-    <div class="sub" style="margin-top:8px">الأداء: الحضور والمواعيد، جودة الشغل، إدارة العمال، حل المشاكل، متابعة الأعمال الموكلة، التركيز والانتباه.<br>السلوك: الأمانة والمصداقية، الاحترام وحسن التعامل، الالتزام بالتعليمات، النظافة، الانضباط والمظهر.</div></div>`;
+    <div class="sub" style="margin-top:8px">الأداء: الحضور والمواعيد، جودة الشغل، إدارة العمال، حل المشاكل، متابعة الأعمال الموكلة، التركيز والانتباه، تأمين المشروع.<br>السلوك: الأمانة والمصداقية، الاحترام وحسن التعامل، الالتزام بالتعليمات، النظافة، الانضباط والمظهر.</div></div>`;
 }
 
 /* ================= صفحة الموظف ================= */
@@ -4119,7 +4152,10 @@ function rpPend(r) { return !!(r && rpArr(r.decide).length && !r.reply); }
 function rpTk(r, t) { const a = rpArr(r && r.ticks); for (let i = a.length - 1; i >= 0; i--) if (a[i].t === t) return a[i]; return null; }
 function rpSt(k) { return k ? (k.st || 'ok') : ''; }
 function rpPendL(r) { return rpArr(r && r.cur).filter(x => rpSt(rpTk(r, x)) === 'pend'); }
-function rpNPend() { return rpProjs().filter(p => { const r = rpLast(p.id); return rpPend(r) || rpPendL(r).length; }).length; }
+/* الإصدار 88: طلبات نقل الأعمال اللاحقة للحالية (req على العمل اللاحق) */
+function rpReqL(r) { return rpArr(r && r.later).filter(x => x && x.req); }
+function rpNowOf(r, t) { const a = rpArr(r && r.nows); for (let i = a.length - 1; i >= 0; i--) if (a[i].t === t) return a[i]; return null; }
+function rpNPend() { return rpProjs().filter(p => { const r = rpLast(p.id); return rpPend(r) || rpPendL(r).length || rpReqL(r).length; }).length; }
 function rpUpdBy(r) { return r.updBy ? (r.updBy === 'المدير العام' ? r.updBy : shortName(r.updBy)) : rpBy(r); }
 function rpBy(r) { return r.by === 'admin' ? 'المدير العام' : shortName(r.byName || ''); }
 function rpDay(s) { const d = new Date(s + 'T12:00:00'); return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_AR[d.getMonth()]; }
@@ -4183,7 +4219,7 @@ function rpAdminView() {
   const fb = $('#fab');
   fb.classList.add('hide');
   if (RP.reps === null) { $('#view').innerHTML = tvSeg(S.data) + rpLoadingHtml(); return; }
-  if (RP.hist) { $('#view').innerHTML = rpHistHtml(true); return; }
+  if (RP.hist) { $('#view').innerHTML = rpHistHtml(true); rpAfterDetail(); return; }
   if (RP.open) {
     const h = rpDetailHtml(true);
     if (h) { $('#view').innerHTML = h; rpAfterDetail(); return; }
@@ -4209,7 +4245,7 @@ function rpAgeDays(r) { const t = rpToday(), u = rpUpdMs(r); if (!t || !u) retur
 function rpSummaryHtml() {
   const ps = rpProjs(), withR = ps.filter(p => rpLast(p.id)), none = ps.filter(p => !rpLast(p.id));
   rpSeedSeen();
-  const rank = r => rpPend(r) || rpPendL(r).length ? 2 : rpIsNew(r) ? 1 : 0;
+  const rank = r => rpPend(r) || rpPendL(r).length || rpReqL(r).length ? 2 : rpIsNew(r) ? 1 : 0;
   withR.sort((a, b) => { const ra = rpLast(a.id), rb = rpLast(b.id); return rank(rb) - rank(ra) || (rb.upd || 0) - (ra.upd || 0); });
   let h = withR.length ? '<div class="rpl">' + withR.map(p => rpCardHtml(rpLast(p.id))).join('') + '</div>' : emptyHtml('file-text', 'لا توجد تقارير بعد. التقارير التي يرسلها الموظفون تظهر هنا');
   if (none.length && withR.length) {
@@ -4223,7 +4259,7 @@ function rpCardHtml(r, o) {
   const dec = rpArr(r.decide), up = rpArr(r.up), cur = rpArr(r.cur), ord = up.filter(x => cur.includes(x)).concat(cur.filter(x => !up.includes(x)));
   const nc = cur.length, nl = rpArr(r.later).length, nd = rpArr(r.done).length, age = rpAgeDays(r), me = (o.d || {}).id;
   const notes = rpArr(r.notes), last = notes[notes.length - 1];
-  const npd = rpPendL(r).length, nret = o.emp ? rpArr(r.cur).filter(x => { const k = rpTk(r, x); return rpSt(k) === 'ret' && k.by === me; }).length : 0;
+  const npd = rpPendL(r).length + rpReqL(r).length, nret = o.emp ? rpArr(r.cur).filter(x => { const k = rpTk(r, x); return rpSt(k) === 'ret' && k.by === me; }).length : 0;
   const chip = o.share ? '<span class="rchip new">تنبيه</span>' : !o.emp && npd ? `<span class="rchip dec">بانتظار اعتمادك (${npd})</span>` : nret ? '<span class="rchip old">أُعيد إليك عمل</span>' : rpPend(r) ? `<span class="rchip dec">${o.emp ? 'بانتظار المدير العام' : 'بانتظار قرارك'}</span>` : rpIsNew(r, me) ? '<span class="rchip new">تحديث جديد</span>' : age > 3 ? `<span class="rchip old">بدون تحديث من ${age} ${age <= 10 ? 'أيام' : 'يوماً'}</span>` : '';
   const st = [nc ? `<span><i></i>${nc === 1 ? 'عمل حالي واحد' : nc === 2 ? 'عملان حاليان' : nc + ' حالية'}</span>` : '',
     nl ? `<span><i class="l"></i>${nl === 1 ? 'عمل لاحق واحد' : nl === 2 ? 'عملان لاحقان' : nl + ' لاحقة'}</span>` : '',
@@ -4241,18 +4277,18 @@ function rpCardHtml(r, o) {
     ${ord.length ? '<ul class="rpv">' + ord.slice(0, 2).map(x => `<li>${esc(x)}${up.includes(x) ? '<span class="tg2 g">حان وقته</span>' : ''}</li>`).join('') + '</ul>' + (more > 0 ? `<div class="rpmore">${more === 1 ? 'وعمل آخر' : more === 2 ? 'وعملان آخران' : 'و' + more + (more <= 10 ? ' أعمال أخرى' : ' عملاً آخر')}</div>` : '') : '<div class="rpmore" style="padding:6px 0 0">لا توجد أعمال حالية</div>'}
   </button>`;
 }
-function rpOpen(id) { id = rpResolve(id); rpMarkSeen(id); if (BOOT.page === 'emp') { const r = (RP.reps || []).find(x => x.id === id); if (r) rpShMark(r.proj); alSeenRep(id); } RP.open = id; RP.hist = null; RP.draft = ''; RP.rv = null; rpRerender(); toTop(); }
+function rpOpen(id) { id = rpResolve(id); rpMarkSeen(id); if (BOOT.page === 'emp') { const r = (RP.reps || []).find(x => x.id === id); if (r) rpShMark(r.proj); alSeenRep(id); } RP.open = id; RP.hist = null; RP.draft = ''; RP.rv = null; RP.lrv = null; rpRerender(); toTop(); }
 function rpClose() { RP.open = null; RP.draft = ''; rpRerender(); toTop(); }
 function rpOpenHist(p) { RP.hist = p; RP.unArm = null; rpRerender(); toTop(); }
 function rpCloseHist() { RP.hist = null; rpRerender(); toTop(); }
 
 function rpItems(arr, tags, cls) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
-  return '<ul class="rpi ' + (cls || '') + '">' + arr.map((x, i) => `<li>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>` : ''}</li>`).join('') + '</ul>';
+  return '<ul class="rpi ' + (cls || '') + '">' + arr.map((x, i) => `<li>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}</li>`).join('') + '</ul>';
 }
 function rpLaterHtml(arr) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
-  return '<ul class="rpi lat">' + arr.map(x => `<li>${esc(x.t)}<small>${x.after ? 'تبدأ بعد: ' + esc(x.after) : 'غير مرتبطة بعمل'}</small></li>`).join('') + '</ul>';
+  return '<ul class="rpi lat">' + arr.map(x => `<li>${esc(x.t)}${rpReqTag(x)}<small>${x.after ? 'تبدأ بعد: ' + esc(x.after) : 'غير مرتبطة بعمل'}</small>${rpReqLine(x)}</li>`).join('') + '</ul>';
 }
 function rpDoneHtml(arr, ticks, docOnly) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
@@ -4342,7 +4378,7 @@ function rpDetailHtml(isAdmin) {
   if (!r) return '';
   /* الإصدار 86: تقرير واحد مستمر للمشروع. انشال «التقارير السابقة» والترقيم، وصار فيه «بانتظار الاعتماد» */
   const dec = rpArr(r.decide), up = rpArr(r.up), pend = rpPendL(r), cur = rpArr(r.cur).filter(x => !pend.includes(x));
-  const tags = cur.map(x => up.includes(x) ? ['حان وقته', 'g'] : rpSt(rpTk(r, x)) === 'ret' ? ['أُعيد للعمل', 'r'] : null);
+  const tags = cur.map(x => { const nw = rpNowOf(r, x); if (nw && nw.apr && rpSt(rpTk(r, x)) !== 'ret' && Date.now() - nw.apr < 3 * 864e5) return ['معتمد', 'g', `<small class="tkt">اعتُمد نقله للحالية · ${esc(rpTickWhen(nw.apr))}</small>`]; return up.includes(x) ? ['حان وقته', 'g'] : rpSt(rpTk(r, x)) === 'ret' ? ['أُعيد للعمل', 'r'] : null; });
   const notes = rpArr(r.notes);
   let h = `<button class="back" onclick="rpClose()">${I('arrow-right', 17)}${isAdmin ? 'التقارير' : 'تقاريري'}</button><h2>${esc(rpPName(r.proj))}</h2>
     <div class="rpmeta">${I('file-text', 15)}<span>آخر تحديث: ${esc(rpUpdBy(r))} · ${esc(rpTickWhen(r.upd || r.ts * 1000))}${r.edited ? ' · <span class="edt">عدّله المدير العام</span>' : ''}</span>${isAdmin ? `<button class="edl" onclick="rpOpenEdit('${r.id}')">${I('pencil', 15)}تعديل</button>${RP.pinged === r.id ? `<button class="edl ok">${I('check', 15, 2.5)}أُرسل التنبيه</button>` : `<button class="edl" onclick="rpShareOpen('${r.id}')">${I('bell-ring', 15)}تنبيه</button>`}` : ''}</div>`;
@@ -4357,9 +4393,9 @@ function rpDetailHtml(isAdmin) {
   const lat = rpArr(r.later), nh = rpHistOf(r.proj).reduce((a, g) => a + g.items.length, 0);
   const canOrd = isAdmin && rpCanTick(r, true) && cur.length > 1, ordm = canOrd && RP.ord && RP.ord.id === r.id;
   if (r.ord && cur.length > 1 && !tags[0]) tags[0] = ['الأهم', 'g'];
-  h += rpPendHtml(r, pend, isAdmin);
+  h += rpPendHtml(r, pend, isAdmin, isAdmin ? rpReqL(r) : []);
   h += `<div class="rpcard now"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${canOrd ? (ordm ? `<button class="rchb dn" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur')}</div>`;
-  h += `<div class="rpcard lt"><div class="rch"><span class="ci">${I('history', 16)}</span>الأعمال اللاحقة<span class="cn">${lat.length}</span></div>${rpCanTick(r, isAdmin) && lat.length ? rpNowList(r, lat) : rpLaterHtml(lat)}${rpCanTick(r, isAdmin) && !ordm ? rpLaterAddHtml(r) : ''}</div>`;
+  h += `<div class="rpcard lt"><div class="rch"><span class="ci">${I('history', 16)}</span>الأعمال اللاحقة<span class="cn">${lat.length}</span></div>${rpCanTick(r, isAdmin) && lat.length ? rpNowList(r, lat, isAdmin) : rpLaterHtml(lat)}${rpCanTick(r, isAdmin) && !ordm ? rpLaterAddHtml(r) : ''}</div>`;
   h += `<div class="tbl2 rphr">${tbRow('check-check', 'الأعمال المنجزة', nh === 1 ? 'عمل واحد' : nh === 2 ? 'عملان' : nh + ' منجزة', `rpOpenHist('${r.proj}')`)}</div>`;
   if (rpArr(r.removed).length) h += `<div class="rpgone rm">${I('x', 14, 2.5)}<div><b>حُذفت دون إنجاز:</b> ${esc(r.removed.join('، '))}</div></div>`;
   if (rpArr(r.files).length) h += `<div class="lbl">المرفقات</div>${rpFilesHtml(r.files)}`;
@@ -4372,10 +4408,11 @@ function rpDetailHtml(isAdmin) {
   return h;
 }
 /* الإصدار 86: بطاقة «بانتظار الاعتماد». للمدير العام زرّين: اعتماد الإنجاز، أو إرجاع للعمل مع ملاحظة تظهر للموظف */
-function rpPendHtml(r, pend, isAdmin) {
-  if (!pend.length) return '';
+function rpPendHtml(r, pend, isAdmin, reqs) {
+  reqs = reqs || [];
+  if (!pend.length && !reqs.length) return '';
   const all = rpArr(r.cur);
-  return `<div class="rpcard pd"><div class="rch"><span class="ci">${I('hourglass', 16)}</span>بانتظار الاعتماد<span class="cn">${pend.length}</span></div><ul class="pdl">${pend.map(x => {
+  return `<div class="rpcard pd"><div class="rch"><span class="ci">${I('hourglass', 16)}</span>بانتظار الاعتماد<span class="cn">${pend.length + reqs.length}</span></div><ul class="pdl">${reqs.map(x => rpReqItem(r, x)).join('')}${pend.map(x => {
     const k = rpTk(r, x), i = all.indexOf(x), rv = RP.rv && RP.rv.id === r.id && RP.rv.t === x;
     const who = k.by === 'admin' ? 'المدير العام' : shortName(k.name || '');
     let act = '';
@@ -4569,8 +4606,14 @@ function rpAddCur() {
 }
 function rpLaterFormHtml() {
   const f = RP.form, cur = f.items.filter(x => !x.done).map(x => x.t);
-  const rows = f.later.map((x, i) => `<div class="lrow ${rpWillMove(x) ? 'mv' : ''}"><div class="lt"><b>${esc(x.t)}</b><small>${x.after ? (rpWillMove(x) ? I('check', 12, 3) + 'أُنجز «' + esc(x.after) + '»، وستنتقل إلى الأعمال الحالية عند الإرسال' : 'تبدأ بعد: ' + esc(x.after)) : 'غير مرتبطة بعمل'}</small></div>
-    ${!x.after ? `<button class="lmv" onclick="rpMoveNow(${i})">نقل إلى الحالية</button>` : ''}${f.admin ? `<button class="mx2" onclick="rpRmLater(${i})" aria-label="حذف">${I('x', 14, 2.5)}</button>` : ''}</div>`).join('');
+  const lr = rpLast(f.proj), st = t => rpArr(lr && lr.later).find(y => y.t === t) || {};
+  const mvb = (x, i) => {
+    if (f.admin) return `<button class="lmv" onclick="rpMoveNow(${i})">نقل إلى الحالية</button>`;
+    if (st(x.t).req) return '<span class="tg2 a" style="flex:none">بانتظار الاعتماد</span>';
+    return `<button class="lmv ${x.ask ? 'on' : ''}" onclick="rpAsk(${i})">${x.ask ? 'إلغاء طلب النقل' : 'طلب نقل للحالية'}</button>`;
+  };
+  const rows = f.later.map((x, i) => `<div class="lrow ${rpWillMove(x) ? 'mv' : ''}"><div class="lt"><b>${esc(x.t)}</b><small>${x.after ? (rpWillMove(x) ? I('check', 12, 3) + 'أُنجز «' + esc(x.after) + '»، وستنتقل إلى الأعمال الحالية عند الإرسال' : 'تبدأ بعد: ' + esc(x.after)) : 'غير مرتبطة بعمل'}</small>${!f.admin && x.ask && !st(x.t).req ? '<small>يُرسل طلب النقل للمدير العام مع التقرير، وينتقل بعد موافقته</small>' : !f.admin && !x.ask && st(x.t).rej ? rpReqLine(st(x.t)) : ''}</div>
+    ${!x.after ? mvb(x, i) : ''}${f.admin ? `<button class="mx2" onclick="rpRmLater(${i})" aria-label="حذف">${I('x', 14, 2.5)}</button>` : ''}</div>`).join('');
   return `<div class="lbox">${rows || '<div class="rpe" style="padding:8px 2px">لا توجد أعمال لاحقة</div>'}
     <div class="ladd"><input id="f_nl" placeholder="عمل لاحق جديد" value="${esc(f.nl)}" oninput="RP.form.nl=this.value;rpDraftSave()">
       <select id="f_na" aria-label="تبدأ بعد" onchange="RP.form.na=this.value"><option value="">تبدأ بعد: غير مرتبطة</option>${cur.map((c, i) => `<option value="${i}" ${f.na === String(i) ? 'selected' : ''}>تبدأ بعد: ${esc(c.length > 34 ? c.slice(0, 34) + '…' : c)}</option>`).join('')}</select>
@@ -4584,12 +4627,13 @@ function rpAddLater() {
   rpRefLater();
 }
 function rpRmLater(i) { const f = RP.form; if (!f.admin) return; const x = f.later.splice(i, 1)[0]; if (x) f.rm.push(x.t); rpRefLater(); }
-function rpMoveNow(i) { const f = RP.form, x = f.later.splice(i, 1)[0]; if (!f.items.some(y => y.t === x.t)) f.items.push({t: x.t, done: false}); rpRefCur(); }
+function rpAsk(i) { const f = RP.form, x = f && f.later[i]; if (!x || f.admin) return; x.ask = !x.ask; rpRefLater(); }
+function rpMoveNow(i) { const f = RP.form; if (!f.admin) return rpAsk(i); const x = f.later.splice(i, 1)[0]; if (!f.items.some(y => y.t === x.t)) f.items.push({t: x.t, done: false}); rpRefCur(); }
 function rpDraw() {
   const f = RP.form;
   if (!f) return;
   if (f.sent) {
-    ovOpen(`<div class="rok"><div class="rokc">${I('check', 30, 2.5)}</div><b>تم حفظ التقرير</b><div>${esc(rpPName(f.proj))}</div><div class="sub">${esc(dayLabel(rpToday()))}</div>${f.nDone ? `<div class="rokm">${I('check-check', 14)}${f.nDone <= 2 || f.nDone > 10 ? 'نُقل ' : 'نُقلت '}${rpNDone(f.nDone)} إلى سجل الإنجاز</div>` : ''}${f.moved.length ? `<div class="rokm">${I('clock', 14)}انتقل إلى الأعمال الحالية: ${esc(f.moved.join('، '))}</div>` : ''}${f.dupNote ? `<div class="rokm">${I('info', 14)}وصل التقرير من المحاولة الأولى، ولم تُضَف التعديلات التي أجريتها بعدها</div>` : ''}</div>
+    ovOpen(`<div class="rok"><div class="rokc">${I('check', 30, 2.5)}</div><b>تم حفظ التقرير</b><div>${esc(rpPName(f.proj))}</div><div class="sub">${esc(dayLabel(rpToday()))}</div>${f.nDone ? `<div class="rokm">${I('check-check', 14)}${f.nDone <= 2 || f.nDone > 10 ? 'نُقل ' : 'نُقلت '}${rpNDone(f.nDone)} إلى سجل الإنجاز</div>` : ''}${f.moved.length ? `<div class="rokm">${I('clock', 14)}انتقل إلى الأعمال الحالية: ${esc(f.moved.join('، '))}</div>` : ''}${f.asked ? `<div class="rokm">${I('hourglass', 14)}${f.asked === 1 ? 'أُرسل طلب نقل عمل واحد إلى الأعمال الحالية' : 'أُرسل طلب نقل ' + f.asked + ' أعمال إلى الأعمال الحالية'}، بانتظار اعتماد المدير العام</div>` : ''}${f.dupNote ? `<div class="rokm">${I('info', 14)}وصل التقرير من المحاولة الأولى، ولم تُضَف التعديلات التي أجريتها بعدها</div>` : ''}</div>
       <button class="btn2 cu qbig" onclick="ovClose()">حسناً</button>`);
     return;
   }
@@ -4663,8 +4707,8 @@ async function rpSend() {
     }
     f.prog = 'جاري الإرسال…'; rpProg(f);
     if (!f.tried) { f.tried = true; f.trySig = rpSig(f); }
-    const res = await call('apiRepAdd', {proj: f.proj, cid: f.cid, cur: cur, done: done, later: keep, up: moved.map(x => x.t), removed: gone, decide: dec, files: files});
-    f.dupNote = !!(res && res.dup && f.trySig !== rpSig(f));
+    const res = await call('apiRepAdd', {proj: f.proj, cid: f.cid, cur: cur, done: done, later: keep.map(x => ({t: x.t, after: x.after || ''})), ask: f.admin ? [] : keep.filter(x => x.ask).map(x => x.t), up: moved.map(x => x.t), removed: gone, decide: dec, files: files});
+    f.dupNote = !!(res && res.dup && f.trySig !== rpSig(f)); f.asked = res && res.ask ? res.ask : 0;
   } catch (e) {
     S.upN = Math.max(0, S.upN - 1);
     f.busy = false; f.err = String(e).replace(/^Error: /, '');
@@ -5092,7 +5136,7 @@ function rpTickList(r, cur, tags, isAdmin) {
   const all = rpArr(r.cur);
   return '<ul class="tkl">' + cur.map((x, i) => {
     const j = all.indexOf(x), k = rpTk(r, x), ret = rpSt(k) === 'ret';
-    return `<li><button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button><span>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>` : ''}${ret ? `<small class="retn">${I('rotate-ccw', 12)}ملاحظة المدير العام: ${esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>` : ''}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell" onclick="rpShareOpen('${r.id}',${j})" aria-label="تنبيه على هذا العمل">${I('bell', 15)}</button>` : ''}</li>`;
+    return `<li><button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button><span>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${ret ? `<small class="retn">${I('rotate-ccw', 12)}ملاحظة المدير العام: ${esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>` : ''}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell" onclick="rpShareOpen('${r.id}',${j})" aria-label="تنبيه على هذا العمل">${I('bell', 15)}</button>` : ''}</li>`;
   }).join('') + `</ul><div class="rhint" style="margin-top:6px">${I('info', 13)}${isAdmin ? 'اضغط الدائرة إذا أُنجز العمل، والجرس لتنبيه الموظف على عمل محدد' : 'اضغط الدائرة إذا أنجزت العمل، ويُرسل للمدير العام للاعتماد'}</div>`;
 }
 function rpLaterAddHtml(r) {
@@ -5239,8 +5283,42 @@ async function rpTdSave() {
   else if (res.dup) toast('الطلب مرسل من قبل، بانتظار الاعتماد', null, 'in');
   else toast('انرسل للمدير العام للاعتماد', () => rpUntick(id, item));
 }
-function rpNowList(r, arr) {
-  return '<ul class="tkl nwl">' + arr.map((x, i) => `<li><button class="tkb up" onclick="rpNow('${r.id}',${i},this)" aria-label="نقل إلى الأعمال الحالية">${I('arrow-up', 15, 2.5)}</button><span>${esc(x.t)}<small>${x.after ? 'تبدأ بعد: ' + esc(x.after) : 'غير مرتبطة بعمل'}</small></span></li>`).join('') + `</ul><div class="rhint" style="margin-top:6px">${I('info', 13)}اضغط السهم لنقل العمل إلى الأعمال الحالية</div>`;
+function rpNowList(r, arr, isAdmin) {
+  return '<ul class="tkl nwl">' + arr.map((x, i) => {
+    const b = !isAdmin && x.req ? `<span class="tkb wt" aria-label="بانتظار الاعتماد">${I('hourglass', 15)}</span>`
+      : `<button class="tkb up" onclick="rpNow('${r.id}',${i},this)" aria-label="${isAdmin ? 'نقل إلى الأعمال الحالية' : 'طلب نقل إلى الأعمال الحالية'}">${I('arrow-up', 15, 2.5)}</button>`;
+    return `<li>${b}<span>${esc(x.t)}${rpReqTag(x)}<small>${x.after ? 'تبدأ بعد: ' + esc(x.after) : 'غير مرتبطة بعمل'}</small>${rpReqLine(x)}</span></li>`;
+  }).join('') + `</ul><div class="rhint" style="margin-top:6px">${I('info', 13)}${isAdmin ? 'اضغط السهم لنقل العمل إلى الأعمال الحالية' : 'اضغط السهم لطلب نقل العمل للحالية، وينتقل بعد موافقة المدير العام'}</div>`;
+}
+/* الإصدار 88: حالة طلب النقل على العمل اللاحق */
+function rpReqTag(x) { return x && x.req ? '<span class="tg2 a">بانتظار الاعتماد</span>' : x && x.rej ? '<span class="tg2 r">مرفوض</span>' : ''; }
+function rpReqLine(x) {
+  if (!x) return '';
+  if (x.req) { const mine = BOOT.page === 'emp' && S.empData && x.req.by === S.empData.id; return `<small class="tkt">${mine ? 'طلبت' : 'طلب ' + esc(shortName(x.req.name || ''))} نقله للحالية · ${esc(rpTickWhen(x.req.at))}</small>`; }
+  if (x.rej) return `<small class="retn">${I('x', 12)}${x.rej.note ? 'ملاحظة المدير العام: ' + esc(x.rej.note) : 'لم يعتمد المدير العام نقله للحالية'} · ${esc(rpTickWhen(x.rej.at))}</small>`;
+  return '';
+}
+function rpReqItem(r, x) {
+  const i = rpArr(r.later).indexOf(x), rv = RP.lrv && RP.lrv.id === r.id && RP.lrv.t === x.t;
+  const act = !rpCanTick(r, true) ? '' : rv ? `<div class="rvf"><textarea id="lrv_note" class="rta sm" placeholder="سبب الرفض (اختياري)، يظهر للموظف على العمل" oninput="RP.lrv.note=this.value;rpGrow(this)">${esc(RP.lrv.note || '')}</textarea><div class="grid2"><button class="btn2 rd" onclick="rpLaterRev('${r.id}',${i},false,this)">${I('x', 15)}رفض</button><button class="btn2" onclick="RP.lrv=null;rpRerender()">إلغاء</button></div></div>`
+    : `<div class="grid2 pdb"><button class="btn2 cu" onclick="rpLaterRev('${r.id}',${i},true,this)">${I('check', 16, 2.5)}موافق، انقله</button><button class="btn2 rd" onclick="rpLrvOpen('${r.id}',${i})">${I('x', 15)}رفض</button></div>`;
+  return `<li><div class="pt">${esc(x.t)}</div><div class="pm"><b>طلب نقل للحالية</b> · ${esc(shortName(x.req.name || ''))} · ${esc(rpTickWhen(x.req.at))}</div>${act}</li>`;
+}
+function rpLrvOpen(id, i) { const r = (RP.reps || []).find(x => x.id === id); if (!r) return; RP.lrv = {id: id, t: (rpArr(r.later)[i] || {}).t, note: ''}; rpRerender(); setTimeout(() => { const t = document.getElementById('lrv_note'); if (t) t.focus(); }, 50); }
+async function rpLaterRev(id, i, ok, btn) {
+  if (RP.busy) return;
+  const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
+  const x = rpArr(r.later)[i]; if (!x) return;
+  const note = ok ? '' : String((RP.lrv && RP.lrv.note) || '').trim();
+  RP.busy = true;
+  if (btn) { btn.disabled = true; btn.innerHTML = ok ? 'جاري النقل…' : 'جاري الرفض…'; }
+  try {
+    await call('apiRepLaterReview', id, x.t, ok, note);
+    RP.lrv = null;
+    await rpTickReload();
+    RP.busy = false; rpRerender();
+    toast(ok ? 'انتقل إلى الأعمال الحالية، ووصل الموظف إشعار' : 'تم رفض الطلب، ووصل الموظف إشعار');
+  } catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
 }
 async function rpNow(id, i, btn) {
   if (RP.busy) return;
@@ -5249,16 +5327,18 @@ async function rpNow(id, i, btn) {
   RP.busy = true;
   if (btn) btn.classList.add('on');
   try {
-    await call('apiRepNow', id, x.t, false);
+    const res = await call('apiRepNow', id, x.t, false) || {};
     await rpTickReload();
     RP.busy = false; rpRerender();
-    toast('انتقل إلى الأعمال الحالية', () => rpUnnow(id, x.t));
+    if (res.req && res.dup) toast('الطلب مرسل من قبل، بانتظار الاعتماد', null, 'in');
+    else if (res.req) toast('أُرسل طلب النقل للمدير العام', () => rpUnnow(id, x.t, true));
+    else toast('انتقل إلى الأعمال الحالية', () => rpUnnow(id, x.t));
   } catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
 }
-async function rpUnnow(id, item) {
+async function rpUnnow(id, item, req) {
   if (RP.busy) return;
   RP.busy = true;
-  try { await call('apiRepNow', id, item, true); await rpTickReload(); RP.busy = false; rpRerender(); toast('رجع إلى الأعمال اللاحقة'); }
+  try { await call('apiRepNow', id, item, true); await rpTickReload(); RP.busy = false; rpRerender(); toast(req ? 'أُلغي طلب النقل' : 'رجع إلى الأعمال اللاحقة'); }
   catch (e) { RP.busy = false; toastErr(e); }
 }
 function rpDecList(r, dec) {

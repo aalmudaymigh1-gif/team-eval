@@ -13,6 +13,8 @@
   }
 
   const TRUST = 'الأمانة والمصداقية';
+  const HEAVY = [TRUST];
+  const heavy = c => HEAVY.indexOf(c) >= 0;
   const STAR_CRIT = 'موقف مميز';
   const MAX_MEDIA = 5, MAX_VID = 45 * 1024 * 1024;
   const DEF = { miss: 5, trust: 10, star: 5, starCap: 100, clean: 50 };
@@ -23,6 +25,7 @@
     { n: 'حل المشاكل', s: 'الأداء', short: 'حل المشاكل', bad: 'حاول تحل المشاكل البسيطة بنفسك وترجع لي بالكبيرة بس.' },
     { n: 'متابعة الأعمال الموكلة', s: 'الأداء', short: 'المتابعة', bad: 'اللي أوكّله لك سجّله وتابعه لين يخلص، لا يضيع منك.' },
     { n: 'التركيز والانتباه', s: 'الأداء', short: 'التركيز', bad: 'وقت الدوام للشغل، خلّ الجوال والسوالف بعدين.' },
+    { n: 'تأمين المشروع', s: 'الأداء', short: 'تأمين المشروع', bad: 'قبل ما تطلع تأكد إن الموقع مقفل والمواد والعدّة محفوظة.' },
     { n: 'الأمانة والمصداقية', s: 'السلوك', short: 'الأمانة', bad: 'الأمانة والوضوح في المصاريف والمعلومات خط أحمر، انتبه لها.' },
     { n: 'الاحترام وحسن التعامل', s: 'السلوك', short: 'الاحترام', bad: 'انتبه لأسلوبك في التعامل مع العمال والعملاء.' },
     { n: 'الالتزام بالتعليمات', s: 'السلوك', short: 'التعليمات', bad: 'نفّذ التعليمات مثل ما هي، وإذا عندك رأي قوله قبل التنفيذ.' },
@@ -325,8 +328,8 @@
       const k = l.date + '|' + l.crit;
       if (seen[k]) return;
       seen[k] = true;
-      if (l.crit === TRUST) trust++; else misses++;
-      mMap[l.crit] = (mMap[l.crit] || 0) + (l.crit === TRUST ? 3 : 1);
+      if (heavy(l.crit)) trust++; else misses++;
+      mMap[l.crit] = (mMap[l.crit] || 0) + (heavy(l.crit) ? 3 : 1);
     });
     const track = !!emp.track;
     const base = track ? 0 : (emp.max || 0);
@@ -395,7 +398,7 @@
       const g = l.group + l.type;
       if (!map[g]) { map[g] = { id: l.group, date: l.date, type: l.type, crits: [], note: l.note, pts: 0 }; order.push(g); }
       if (l.type === '+') map[g].pts += st.star;
-      else { map[g].crits.push(l.crit); map[g].pts -= l.crit === TRUST ? st.trust : st.miss; }
+      else { map[g].crits.push(l.crit); map[g].pts -= heavy(l.crit) ? st.trust : st.miss; }
     });
     return order.map(g => map[g]).sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
   }
@@ -1065,6 +1068,7 @@
       return r;
     },
     async apiRepNow(id, item, undo) { return rpc('rep_later_now', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), undo: !!undo }); },
+    async apiRepLaterReview(id, item, ok, note) { return rpc('rep_later_review', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), ok: !!ok, note: String(note || '') }); },
     async apiRepUndone(id, item) { const r = await rpc('rep_undone', { k: CRED.k || '', id: String(id || ''), item: String(item || '') }); flush(); return r; },
     /* الإصدار 86: اعتماد الإنجاز أو إرجاعه، والتنبيه على عمل محدد، وتسجيل مشاهدة التنبيه */
     async apiRepReview(id, item, ok, note) { const r = await rpc('rep_review', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), ok: !!ok, note: String(note || '') }); flush(); return r; },
