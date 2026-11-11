@@ -1068,6 +1068,7 @@
       return r;
     },
     async apiRepNow(id, item, undo) { return rpc('rep_later_now', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), undo: !!undo }); },
+    async apiRepLreqReview(id, rid, ok, note) { return rpc('rep_lreq_review', { k: CRED.k || '', id: String(id || ''), rid: String(rid || ''), ok: !!ok, note: String(note || '') }); },
     async apiRepLaterReview(id, item, ok, note) { return rpc('rep_later_review', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), ok: !!ok, note: String(note || '') }); },
     async apiRepUndone(id, item) { const r = await rpc('rep_undone', { k: CRED.k || '', id: String(id || ''), item: String(item || '') }); flush(); return r; },
     /* الإصدار 86: اعتماد الإنجاز أو إرجاعه، والتنبيه على عمل محدد، وتسجيل مشاهدة التنبيه */
