@@ -321,7 +321,7 @@ select:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-ring)}
 .ivbal{display:flex;justify-content:space-between;align-items:center;background:var(--acc);color:#fff;border-radius:var(--r2);padding:14px 16px;margin-top:14px}
 .ivbal span{font-size:13px;opacity:.9}.ivbal b{font-size:17px;font-weight:600}.ivbal small{font-size:13px;font-weight:500}
 .tabs button{font-size:12px}
-.shot .x{position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:15px;line-height:26px;padding:0;cursor:pointer}
+.shot .x{position:absolute;top:3px;left:3px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:15px;line-height:32px;padding:0;cursor:pointer}
 video.vid{height:auto;max-height:70vh;background:#000}
 .stc{background:var(--acc);color:#fff;border-radius:16px;padding:14px 16px;margin:12px 0}
 .stc .l{font-size:13px;opacity:.85}.stc .v{font-size:17px;font-weight:600;margin:2px 0 6px}.stc .v small{font-size:13px;font-weight:500;opacity:.8}
@@ -329,6 +329,12 @@ video.vid{height:auto;max-height:70vh;background:#000}
 .str{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
 .str:last-child{border-bottom:0}.str .tm{margin-top:2px}
 .str .ed{background:none;border:0;color:var(--muted);padding:4px;cursor:pointer}
+.str .ed,.slp .ed{min-width:40px;min-height:40px;display:inline-flex;align-items:center;justify-content:center}
+.slp .ed{background:none;border:0;color:var(--muted);cursor:pointer;vertical-align:middle}
+.ent .del{min-width:40px;justify-content:center}
+details.rul summary{min-height:44px}
+.payr{min-height:44px;display:block}.payr .row>span{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.slnx{margin:8px 2px 0}.slnx b{color:var(--red);font-weight:600}
 .ob{display:inline-block;background:#F8F1E4;color:#85642B;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:600;margin-inline-start:4px;vertical-align:1px}
 .stc.red{background:#B05A52}.stc .bigdo{background:#fff;color:#B05A52;width:100%;justify-content:center;border:0;margin-top:10px;font-family:inherit;cursor:pointer}
 .cb{display:inline-block;background:#F1F0F7;color:#5E578C;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:600;margin-inline-start:4px;vertical-align:1px}
@@ -451,9 +457,11 @@ video.vid{height:auto;max-height:70vh;background:#000}
 .gpi{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .gpi i{font-style:normal;min-width:22px;height:22px;border-radius:7px;background:var(--acc-soft);color:var(--acc);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}
 .gpi input{flex:1;min-width:0}
-.gpi>button{background:none;border:0;color:var(--faint);padding:4px;cursor:pointer}
-.gpi .gr{width:24px;height:24px;min-height:0;min-width:0;align-self:center;line-height:0;box-sizing:border-box;border-radius:50%;border:2px solid var(--line2);background:var(--surface);display:flex;align-items:center;justify-content:center;padding:0;color:#fff;flex:none}
+.gpi>button{background:none;border:0;color:var(--faint);padding:4px;cursor:pointer;min-width:40px;min-height:40px;display:flex;align-items:center;justify-content:center;flex:none}
+.gpi .gr{width:30px;height:30px;min-height:0;min-width:0;position:relative;align-self:center;line-height:0;box-sizing:border-box;border-radius:50%;border:2px solid var(--line2);background:var(--surface);display:flex;align-items:center;justify-content:center;padding:0;color:#fff;flex:none}
+.gpi .gr::after{content:'';position:absolute;inset:-9px}
 .gpi.go.on .gr{background:var(--green);border-color:var(--green)}
+.rchb.dn.fl{background:var(--acc);color:#fff;border-radius:999px;padding:8px 18px;min-height:40px;min-width:56px;justify-content:center}
 .gadd{display:inline-flex;align-items:center;gap:4px;font-size:13px}
 .gban{width:100%;display:flex;align-items:center;gap:12px;text-align:right;border:0;border-radius:var(--r2);padding:14px;margin-top:14px;background:linear-gradient(150deg,var(--acc),var(--acc-2));color:#fff;cursor:pointer;font:inherit;box-shadow:var(--sh)}
 .gbi{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex:none}
@@ -918,7 +926,8 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .cfm .btn2{width:100%;margin-top:8px}
 .medit{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .mchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);border-radius:999px;padding:4px 6px 4px 12px;font-size:13px;color:var(--text);background:#fff}
-.mchip button{border:0;background:var(--fill);color:var(--muted);border-radius:999px;min-width:28px;height:28px;display:flex;align-items:center;justify-content:center;padding:0 8px;font:inherit;font-size:12px;cursor:pointer}
+.mchip button{position:relative;border:0;background:var(--fill);color:var(--muted);border-radius:999px;min-width:36px;height:36px;display:flex;align-items:center;justify-content:center;padding:0 8px;font:inherit;font-size:12px;cursor:pointer}
+.mchip button::after{content:'';position:absolute;inset:-4px}
 .mchip.arm button{background:var(--red);color:#fff}
 .mchip.add{color:var(--acc-dk);border-style:dashed;padding:8px 14px;cursor:pointer}
 #ov .sheet:has(#apc)>*{flex-shrink:0}
@@ -991,7 +1000,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .ibell{flex:none;width:34px;height:34px;border:0;border-radius:10px;background:var(--fill);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .albn{display:flex;align-items:center;gap:7px;width:100%;margin-top:8px;padding:9px 11px;border:0;border-radius:12px;background:var(--acc-soft);color:#3F5A72;font:inherit;font-size:13px;text-align:start;cursor:pointer}
 .albn>span:first-of-type{flex:1;min-width:0}
-.albn .go{flex:none;font-weight:600;color:var(--acc-dk)}
+.albn .go{flex:none;font-weight:600;color:#fff;background:var(--acc);border-radius:999px;padding:8px 13px}
 .ecard.hl{box-shadow:0 0 0 2px var(--acc-ring)}
 .alst{margin-top:12px;border:1px solid var(--line);border-radius:var(--r);padding:8px 12px}
 .alst .alh{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:2px}
@@ -1028,7 +1037,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .slp{padding:10px 0;border-bottom:1px solid var(--line)}.slp:last-child{border-bottom:0}
 .slp .h{display:flex;justify-content:space-between;align-items:center;gap:8px}.slp .h b{font-weight:600;font-size:15px}
 .slp .h .sub{display:flex;align-items:center;gap:4px}
-.slp .al{font-size:12.5px;color:#55554f;margin-top:5px;line-height:1.65;background:var(--fill);border-radius:10px;padding:6px 9px}
+.slp .al{font-size:13px;color:#55554f;margin-top:5px;line-height:1.65;background:var(--fill);border-radius:10px;padding:6px 9px}
 .pdate{margin:10px 0 0;background:#fff}
 .salact{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .salact button{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line2);border-radius:999px;padding:8px 14px;font:inherit;font-size:13px;color:var(--acc-dk);cursor:pointer}
@@ -1115,9 +1124,9 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=89"></script>
+<script src="api.js?v=90"></script>
 <script>
-const APP_VER = '89';
+const APP_VER = '90';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1268,20 +1277,20 @@ function attFlag(r, ps) {
 
 /* عند الموظف */
 const ATT_STEP = {home: ['طلعت من البيت', 'صوّر الشارع', 'طلوع من البيت'], in: ['وصلت المشروع', 'صوّر المكان', 'وصول المشروع'], out: ['طلعت من المشروع', 'صوّر المكان', 'طلوع من المشروع']};
-function attStepsHtml(r) {
+function attStepsHtml(r, me) {
   const row = (done, cur, t, tm) => `<div class="ast ${done ? 'ok' : cur ? 'cur' : ''}"><span class="dot">${done ? I('check', 12, 3) : ''}</span><span>${t}${tm ? ' ' + tm : ''}</span></div>`;
-  return `<div class="asts">${row(!!(r && r.home), !r, 'طلع من البيت', r && r.home ? t12(r.home) : '')}${row(!!(r && r.in), r && r.home && !r.in, 'وصل المشروع', r && r.in ? t12(r.in) : '')}${row(!!(r && r.out), r && r.in && !r.out, 'طلع من المشروع', r && r.out ? t12(r.out) : '')}</div>`;
+  return `<div class="asts">${row(!!(r && r.home), !r, me ? 'طلعت من البيت' : 'طلع من البيت', r && r.home ? t12(r.home) : '')}${row(!!(r && r.in), r && r.home && !r.in, me ? 'وصلت المشروع' : 'وصل المشروع', r && r.in ? t12(r.in) : '')}${row(!!(r && r.out), r && r.in && !r.out, me ? 'طلعت من المشروع' : 'طلع من المشروع', r && r.out ? t12(r.out) : '')}</div>`;
 }
 function attCardHtml(d, isPreview) {
   if (!d.attend) return '';
   const r = (d.att || []).find(x => x.date === d.today);
   const p = r ? projOf(d.projects, r.project) : null, pn = p ? p.name : '';
   const btn = (mode, red) => isPreview ? '' : `<button class="attgo ${red ? 'red' : ''}" onclick="openCam('${mode}')">${I('camera', 24)}<b>${ATT_STEP[mode][0]}</b><span>${ATT_STEP[mode][1]} بالكاميرا الخلفية</span></button>`;
-  if (r && r.out) return `<div class="attc done">${attStepsHtml(r)}<div class="r1" style="margin-top:6px"><span>${esc(pn)}</span><span>اشتغلت ${hrs(r.outMs - r.inMs)} ساعة</span></div></div>`;
-  if (r && r.in) return `<div class="attc">${attStepsHtml(r)}<div class="r1" style="margin-top:6px"><span>${esc(pn)}</span><span>الطريق ${hrs(r.inMs - r.homeMs)}</span></div>
+  if (r && r.out) return `<div class="attc done">${attStepsHtml(r, !isPreview)}<div class="r1" style="margin-top:6px"><span>${esc(pn)}</span><span>اشتغلت ${hrs(r.outMs - r.inMs)} ساعة</span></div></div>`;
+  if (r && r.in) return `<div class="attc">${attStepsHtml(r, !isPreview)}<div class="r1" style="margin-top:6px"><span>${esc(pn)}</span><span>الطريق ${hrs(r.inMs - r.homeMs)}</span></div>
     <div class="el" id="attEl" data-ms="${r.inMs}">${hrs(Date.now() - r.inMs)} ساعة</div>${btn('out', true)}</div>`;
-  if (r && r.home) return `<div class="attc">${attStepsHtml(r)}<div class="el" id="attEl" data-ms="${r.homeMs}" style="font-size:17px">${hrs(Date.now() - r.homeMs)} ساعة في الطريق</div>${btn('in')}</div>`;
-  return isPreview ? '<div class="note info" style="margin-top:12px">ما سجّل طلوعه من البيت اليوم</div>' : `<div style="margin-top:12px">${attStepsHtml(null)}</div>${btn('home')}`;
+  if (r && r.home) return `<div class="attc">${attStepsHtml(r, !isPreview)}<div class="el" id="attEl" data-ms="${r.homeMs}" style="font-size:17px">${hrs(Date.now() - r.homeMs)} ساعة في الطريق</div>${btn('in')}</div>`;
+  return isPreview ? '<div class="note info" style="margin-top:12px">ما سجّل طلوعه من البيت اليوم</div>' : `<div style="margin-top:12px">${attStepsHtml(null, true)}</div>${btn('home')}`;
 }
 setInterval(() => { const el = document.getElementById('attEl'); if (el) el.textContent = el.textContent.replace(/^\S+/, hrs(Date.now() - Number(el.dataset.ms))); }, 30000);
 
@@ -1899,11 +1908,11 @@ function renderRec() {
       ${S.dateMode==='other' ? `<input type="date" value="${S.date}" max="${d.today}" onchange="S.date=this.value">` : ''}</div>
     <div class="blk"><div class="lab">${I('sparkles', 14)}الأداء — اضغط على اللي قصّر فيه</div><div class="gcard">${perf.map(c => row(c, '')).join('')}</div></div>
     <div class="blk"><div class="lab">${I('users', 14)}السلوك</div><div class="gcard">${beh.map(c => row(c, 'b')).join('')}</div></div>
-    ${S.misses.length ? `<div class="blk"><input placeholder="وش صار؟ (اختياري)" value="${esc(S.note)}" oninput="S.note=this.value"></div>` : ''}
+    ${S.misses.length ? `<div class="blk"><input placeholder="ملاحظة (اختياري)" value="${esc(S.note)}" oninput="S.note=this.value"></div>` : ''}
     <div class="blk"><div class="gcard"><div class="gr" onclick="togStar()"><span class="gi s">${I('star', 17, 2.4)}</span>
       <span class="n">موقف مميز <small>فوق الواجب${trk ? '' : ' · ' + M(st.star, '+', 't')}</small></span>
       <span class="tg st ${S.star ? 'on' : ''}"></span></div></div>
-      ${S.star ? `<input placeholder="وش سوّى؟ مثل: خلّص التشطيب قبل الموعد" value="${esc(S.starNote)}" oninput="S.starNote=this.value" style="margin-top:10px">` : ''}</div>
+      ${S.star ? `<input placeholder="وصف الموقف المميز" value="${esc(S.starNote)}" oninput="S.starNote=this.value" style="margin-top:10px">` : ''}</div>
     <div class="err" id="err"></div>
     <div class="dock"><div class="in">
       <div class="sum">
@@ -2020,7 +2029,7 @@ function fineOpen(id) {
   if (!e) return;
   const t = S.data.today;
   ovOpen(`<label class="shh">خصم مخالفة مرورية</label><div class="sub" style="margin:-6px 0 8px">${esc(e.name)}</div>
-    <label class="dp"><span>المبلغ</span><input id="fn_a" type="number" inputmode="numeric" placeholder="مثلاً 150" style="text-align:left"></label>
+    <label class="dp"><span>المبلغ</span><input id="fn_a" type="number" inputmode="numeric" placeholder="المبلغ" style="text-align:left"></label>
     <label class="dp"><span>تاريخ المخالفة</span><input id="fn_d" type="date" value="${t}" max="${t}"></label>
     <textarea id="fn_n" class="rta sm" maxlength="150" placeholder="ملاحظة (اختياري): رقم المخالفة أو مكانها"></textarea>
     <div class="rhint">${I('info', 13)}يُخصم من راتب ${monthLbl(fineMonth(e))} (أول شهر لم يُصرف)، ويظهر في حركاته وفي تفاصيل راتبه</div>
@@ -2048,7 +2057,7 @@ function teamTasksHtml(d, e) {
   list.forEach(t => { t.b = tBucket(t, d.today); });
   const rv = list.filter(t => t.b === 'review').sort(byUrgent), done = list.filter(t => t.b === 'done');
   let h = '';
-  if (rv.length) h += `<div class="sech a">تنتظر مراجعتك<span>${rv.length}</span></div>` + rv.map(t => taskRowHtml(t, true)).join('');
+  if (rv.length) h += `<div class="sech a">تنتظر اعتمادك<span>${rv.length}</span></div>` + rv.map(t => taskRowHtml(t, true)).join('');
   projGroups(list.filter(t => t.b === 'open')).forEach(g => {
     h += pgrpHtml(g);
   });
@@ -2126,7 +2135,7 @@ function tBucket(t, today) {
   return 'open';
 }
 function pillOf(t, b, emp) {
-  if (t.status === 'review') return ['a', emp ? 'انرسلت' : 'تنتظر مراجعتك'];
+  if (t.status === 'review') return ['a', emp ? 'انرسلت' : 'تنتظر اعتمادك'];
   if (t.status === 'done') return ['', t.lateDone ? 'خلصت متأخرة' : 'خلصت'];
   if (t.status === 'returned') return ['late', emp ? 'رجعت لك' : 'رجعت'];
   return null;
@@ -2210,13 +2219,13 @@ function drawTaskList() {
   const list = allTasks().filter(tqMatch);
   list.forEach(t => { t.b = tBucket(t, today); });
   const cnt = k => list.filter(t => t.b === k).length;
-  $('#tcards').innerHTML = [['review', 'تنتظر مراجعتك', 'a'], ['open', 'مفتوحة', 'n']].map(c => {
+  $('#tcards').innerHTML = [['review', 'تنتظر اعتمادك', 'a'], ['open', 'مفتوحة', 'n']].map(c => {
     const n = cnt(c[0]);
     return `<button class="sc ${c[2]} ${q.f === c[0] ? 'on' : ''} ${n ? '' : 'z'}" onclick="S.tq.f=S.tq.f==='${c[0]}'?'':'${c[0]}';drawTaskList()"><b>${n}</b><span>${c[1]}</span></button>`;
   }).join('');
   let h = '';
   const rv = list.filter(t => t.b === 'review').sort(byUrgent);
-  if (rv.length && q.f !== 'open') h += `<div class="sech a">تنتظر مراجعتك<span>${rv.length}</span></div>` + rv.map(t => taskRowHtml(t, true)).join('');
+  if (rv.length && q.f !== 'open') h += `<div class="sech a">تنتظر اعتمادك<span>${rv.length}</span></div>` + rv.map(t => taskRowHtml(t, true)).join('');
   if (q.f !== 'review') projGroups(list.filter(t => t.b === 'open')).forEach(g => {
     h += pgrpHtml(g);
   });
@@ -2289,7 +2298,7 @@ async function approveTask(id) {
 }
 function askReturn(id) {
   ovOpen(`<label class="shh" for="rr">وش الناقص؟</label>
-    <input id="rr" placeholder="مثلاً: الترويب ناقص عند المغسلة" onkeydown="if(event.key==='Enter')doReturn('${id}')">
+    <input id="rr" placeholder="اكتب سبب الإرجاع" onkeydown="if(event.key==='Enter')doReturn('${id}')">
     <div class="sub">الموظف يشوف السبب فوق المهمة، وترجع له مطلوبة.</div>
     <div class="err" id="rrerr"></div>
     <div class="g21"><button class="btn2 arm" onclick="doReturn('${id}')">رجّعها له</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
@@ -2319,8 +2328,13 @@ function renderTaskDetail() {
   const today = d.today, b = tBucket(t, today), p = pillOf(t, b, false);
   const ps = (d.projects || []).filter(x => !x.archived || x.id === t.project);
   const id = t.id, np = (t.proofs || []).length, armDel = S.armed === 'task_' + id;
+  /* الإصدار 90: المهمة اللي تنتظر الاعتماد يطلع إثباتها وملاحظة الموظف فوق */
+  const rvTop = t.status === 'review';
+  const pfH = `${np ? `<div class="lbl">إثبات الإنجاز${t.doneAt ? ' · ' + dmy(t.doneAt) : ''}</div>${proofHtml(t)}` : ''}
+    ${t.comment && t.status !== 'open' ? `<div class="note good">${I('message-circle', 16)}<div><b>${esc(t.ename)}:</b> ${esc(t.comment)}${t.cmtEdited ? ' <span class="edt">عدّله المدير العام</span>' : ''}</div></div><div class="ecm"><button class="edl" onclick="openCmtEdit('${id}')">${I('pencil', 15)}تعديل ملاحظة الموظف</button></div>` : ''}`;
   $('#view').innerHTML = `<button class="back" onclick="closeTask()">${I('arrow-right', 17)}${S.view === 'team' && S.tsub ? 'مهام ' + esc(shortName((empById(S.tsub.id) || {}).name || '')) : 'المهام'}</button>
     <div class="dhead"><input class="dtitle" value="${esc(t.title)}" aria-label="عنوان المهمة" onchange="updTask('${id}',{title:this.value})"><button class="pen" aria-label="تعديل العنوان" onclick="const i=this.previousElementSibling;i.focus();i.setSelectionRange(i.value.length,i.value.length)">${I('pencil', 15)}</button>${pillHtml(p)}</div>
+    ${rvTop ? pfH : ''}
     <div class="dprops">
       <label class="dp"><span>الموظف</span><select onchange="updTask('${id}',{emp:this.value})">${d.employees.map(e => `<option value="${e.id}" ${t.emp === e.id ? 'selected' : ''}>${esc(e.name)}</option>`).join('')}</select></label>
       <label class="dp"><span>المشروع</span><select onchange="updTask('${id}',{project:this.value})">${t.project ? '' : '<option value="" selected>اختر المشروع</option>'}${ps.map(x => `<option value="${x.id}" ${t.project === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
@@ -2334,8 +2348,7 @@ function renderTaskDetail() {
     <textarea class="dnote" placeholder="تعليمات أو تفاصيل للموظف…" onchange="updTask('${id}',{note:this.value})">${esc(t.note)}</textarea>
     ${vOf(t) || t.status !== 'done' ? `<div class="lbl">الشرح الصوتي</div><div id="dVoice">${dVoiceHtml(t)}</div>` : ''}
     ${mOf(t).length || t.status !== 'done' ? `<div class="lbl">الشرح</div>${mOf(t).length ? mediaHtml(t) : ''}${mEditHtml(t)}` : ''}
-    ${np ? `<div class="lbl">إثبات الإنجاز${t.doneAt ? ' · ' + dmy(t.doneAt) : ''}</div>${proofHtml(t)}` : ''}
-    ${t.comment && t.status !== 'open' ? `<div class="note good">${I('message-circle', 16)}<div><b>${esc(t.ename)}:</b> ${esc(t.comment)}${t.cmtEdited ? ' <span class="edt">عدّله المدير العام</span>' : ''}</div></div><div class="ecm"><button class="edl" onclick="openCmtEdit('${id}')">${I('pencil', 15)}تعديل ملاحظة الموظف</button></div>` : ''}
+    ${rvTop ? '' : pfH}
     ${t.status === 'done' && t.apNote ? `<div class="note good">${I('check-check', 16)}<div><b>تعليقك عند الاعتماد:</b> ${esc(t.apNote)}</div></div>` : ''}
     <div class="abar">${detailActions(t)}</div>
     <div id="alst">${taskAlertsHtml(id)}</div>
@@ -2348,7 +2361,7 @@ function detailActions(t) {
   if (t.status === 'done') return `<button class="btn2 rd" onclick="askReturn('${id}')">${I('rotate-ccw', 16)}ما خلصت، رجّعها له</button>`;
   const arm = S.armed === 'close_' + id;
   const invR = t.inv && t.inv.status === 'returned';
-  const cb = `<button class="btn2 ${arm ? 'arm' : ''}" onclick="closeByAdmin('${id}')">${I('check-check', 17)}${arm ? (invR ? 'فاتورتها مرجّعة، الإغلاق يعتمدها معها. اضغط مرة ثانية' : 'تأكيد: خلصت بدون صورة إثبات') : 'خلّصتها أنا'}</button>`;
+  const cb = `<button class="btn2 ${arm ? 'arm' : ''}" onclick="closeByAdmin('${id}')">${I('check-check', 17)}${arm ? (invR ? 'فاتورتها مرجّعة، الإغلاق يعتمدها معها. اضغط مرة ثانية' : 'تأكيد: خلصت ' + (t.proof === 'note' ? 'بدون ملاحظة من الموظف' : t.proof === 'invoice' ? 'بدون فاتورة' : 'بدون صورة إثبات')) : 'خلّصتها أنا'}</button>`;
   if (arm) return cb;
   return `<div class="grid2"><button class="btn2 cu" id="pingb" onclick="pingTask('${id}')">${I('bell-ring', 17)}ذكّره</button>${cb}</div>`;
 }
@@ -2630,7 +2643,7 @@ function wBadge(x) {
 
 function invSt(x, emp) {
   if (x.kind === 'give') return ['', x.paidBy === 'own' ? (emp ? 'رجعت لك' : 'سداد') : x.paidBy === 'ret' ? (emp ? 'رجّعته للمدير' : 'رجّع الباقي') : (emp ? 'استلمت عهدة' : 'عهدة')];
-  if (x.status === 'review') return ['a', emp ? 'تنتظر' : 'تنتظر مراجعتك'];
+  if (x.status === 'review') return ['a', emp ? 'تنتظر' : 'تنتظر اعتمادك'];
   if (x.status === 'returned') return ['late', 'مرتجعة'];
   return ['', 'معتمدة'];
 }
@@ -2763,10 +2776,10 @@ function finCtx() {
 function pickProj(cur, list) { const ok = id => id && list.some(p => p.id === id); return ok(cur) ? cur : ok(lsGet('tf_proj')) ? lsGet('tf_proj') : ((list[0] || {}).id || ''); }
 function shortName(n) { const w = String(n || '').trim().split(/\s+/); return /^(ابو|أبو|ام|أم|بن)$/.test(w[0]) && w[1] ? w[0] + ' ' + w[1] : w[0]; }
 function projName(k) { if (!k) return 'بدون مشروع'; const p = (S.data.projects || []).find(x => x.id === k); return p ? p.name : 'مشروع محذوف'; }
-function openSt(id) { Object.assign(S.fx, {emp: id, proj: null, rv: false, all: false}); S.view = 'fin'; S.armed = null; S.form = null; renderAdmin(); toTop(); }
+function openSt(id) { Object.assign(S.fx, {emp: id, proj: null, rv: false, all: false, pm: '', cm: false}); S.view = 'fin'; S.armed = null; S.form = null; renderAdmin(); toTop(); }
 function openFinProj(k) { Object.assign(S.fx, {proj: k, emp: '', rv: false, all: false}); S.armed = null; renderFin(); toTop(); }
 function openFinRv() { Object.assign(S.fx, {rv: true, emp: '', proj: null}); S.armed = null; renderFin(); toTop(); }
-function finBack() { Object.assign(S.fx, {emp: '', proj: null, rv: false, all: false}); S.form = null; S.armed = null; renderFin(); toTop(); }
+function finBack() { Object.assign(S.fx, {emp: '', proj: null, rv: false, all: false, pm: '', cm: false}); S.form = null; S.armed = null; renderFin(); toTop(); }
 function finBackBtn() { return `<button class="back" onclick="finBack()">${I('arrow-right', 17)}المالية</button>`; }
 
 function renderFin() {
@@ -2787,12 +2800,12 @@ function renderFin() {
   const exp = okM.reduce((a, x) => a + x.amount, 0);
   const rv = c.items.filter(x => x.kind === 'inv' && x.status === 'review');
   const owe = d.employees.filter(e => ((c.parts[e.id] || {}).o || 0) > 0);
-  const cnt = (n, one, two, many) => n === 1 ? one : n === 2 ? two : n + ' ' + many;
+  const cnt = (n, one, two, many, sing) => n === 1 ? one : n === 2 ? two : n + ' ' + (n > 10 && sing ? sing : many);
   let h = `<div class="fxh"><span>${esc(d.month)}</span></div>
     <div class="fxs${nUn ? '' : ' two'}">
       ${nUn ? `<button class="due tap ${S.fx.due ? 'on' : ''}" onclick="S.fx.due=!S.fx.due;S.armed=null;renderFin()" aria-expanded="${!!S.fx.due}"><b>رواتب ما انصرفت</b>${M(unpaid)}<small>${nUn + ' من ' + d.employees.length + ' موظفين'}</small><span class="chv">${I(S.fx.due ? 'x' : 'chevron-left', 14)}</span></button>` : ''}
       <div><b>عهد عند الموظفين</b>${M(cust)}<small>${withC.length ? esc(withC.map(e => shortName(e.name)).join('، ')) : 'ما عند أحد عهدة'}</small></div>
-      <div><b>مصاريف الشهر</b>${M(exp)}<small>${okM.length ? cnt(okM.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير') : 'ما فيه فواتير'}</small></div>
+      <div><b>مصاريف الشهر</b>${M(exp)}<small>${okM.length ? cnt(okM.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير', 'فاتورة') : 'ما فيه فواتير'}</small></div>
     </div>`;
   if (nUn && S.fx.due) {
     const rows = [];
@@ -2878,7 +2891,7 @@ function renderFinEmp(c, id) {
   let h = finBackBtn() + `<div class="fxh"><h2>${esc(e.name)}</h2><span>${esc(d.month)}</span></div>`;
   if (rv.length) h += `<div class="sech a" style="margin-top:4px">تنتظر اعتمادك<span>${rv.length}</span></div>` + rv.map(x => invRowHtml(x, false)).join('') + '<div style="height:12px"></div>';
   h += salCardHtml(e, true);
-  h += `<div class="card">${salActHtml(e)}${e.unpaid.length ? e.unpaid.map(u => payHtml(e, u)).join('') : `<div class="row"><b>الراتب</b><span class="badge">${I('check', 12, 3)} كل الرواتب منصرفة</span></div>`}
+  h += `<div class="card">${salActHtml(e)}${e.unpaid.length ? (pm => e.unpaid.map(u => u.month === pm ? payHtml(e, u) : payRowHtml(e, u)).join(''))((e.unpaid.find(u => S.fx.pm === e.id + u.month) || e.unpaid.find(u => S.armed === 'pay_' + e.id + u.month) || e.unpaid[0]).month) : `<div class="row"><b>الراتب</b><span class="badge">${I('check', 12, 3)} كل الرواتب منصرفة</span></div>`}
     ${e.loans.length ? `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('hand-coins', 14)}السلف</div>
       ${e.loans.map(l => `<div class="row"><span>سلفة ${sar(l.amount)} <span class="sub">· ${dmy(l.date)}</span></span><span class="sub">باقي ${sar(l.remaining)}</span></div>`).join('')}` : ''}</div>`;
   h += `<div class="card"><div class="fxb">
@@ -2913,7 +2926,7 @@ function renderFinProj(c, k) {
     <div class="fxs"><div><b>هالشهر</b>${M(m)}</div><div><b>الإجمالي</b>${M(all)}</div><div><b>الفواتير</b><span class="mn">${list.length}</span></div></div>`;
   if (!list.length) return $('#view').innerHTML = h + emptyHtml('receipt', 'ما فيه فواتير على هالمشروع للحين');
   const show = S.fx.all ? list : list.slice(0, 15);
-  h += `<div class="sech">الفواتير<span>${list.length}</span></div><div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${show.map(x => invMiniRow(x, true)).join('')}
+  h += `<div class="sech">الفواتير</div><div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${show.map(x => invMiniRow(x, true, true)).join('')}
     ${list.length > 15 ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كل الفواتير (' + list.length + ')'}</button>` : ''}</div>`;
   const ws = list.filter(x => x.warrantyUntil).sort((a, b) => a.warrantyUntil < b.warrantyUntil ? -1 : 1);
   if (ws.length) {
@@ -2929,7 +2942,7 @@ async function invApprove(id) {
 }
 function askInvReturn(id) {
   ovOpen(`<label class="shh" for="ir">وش الغلط في الفاتورة؟</label>
-    <input id="ir" placeholder="مثلاً: الصورة مو واضحة" onkeydown="if(event.key==='Enter')doInvReturn('${id}')">
+    <input id="ir" placeholder="اكتب سبب الإرجاع" onkeydown="if(event.key==='Enter')doInvReturn('${id}')">
     <div class="err" id="irerr"></div>
     <div class="g21"><button class="btn2 arm" onclick="doInvReturn('${id}')">رجّعها له</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
   setTimeout(() => { const i = $('#ir'); if (i) i.focus(); }, 80);
@@ -2946,8 +2959,8 @@ async function invDel(id) {
   try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذفت'); }
   catch (e) { S.armed = null; renderInv(); toastErr(e); }
 }
-function invMiniRow(x, showEmp) {
-  const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', esc(x.pname || 'عام'), x.vendor ? esc(x.vendor) : '', dmyt(x.ts)].filter(Boolean).join(' · ');
+function invMiniRow(x, showEmp, noProj) {
+  const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', noProj ? '' : esc(x.pname || 'عام'), x.vendor ? esc(x.vendor) : '', dmyt(x.ts)].filter(Boolean).join(' · ');
   return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${meta}</div></span><b class="iva">${M(x.amount)} ‹</b></div></button>`;
 }
 function openInvD(id) {
@@ -2983,7 +2996,7 @@ async function delInvD(id) {
 function giveForm(title, x) {
   S.gm = (x && x.method) || S.gm || 'تحويل';
   return `<label class="shh" for="ga">${title}</label>
-    <input id="ga" class="qtt" inputmode="decimal" placeholder="1000" value="${x ? esc(x.amount) : ''}">
+    <input id="ga" class="qtt" inputmode="decimal" placeholder="المبلغ" value="${x ? esc(x.amount) : ''}">
     <div class="segc" id="gmseg" style="margin:10px 0">${['تحويل', 'كاش'].map(m => `<button class="${S.gm === m ? 'on' : ''}" onclick="S.gm='${m}';document.querySelectorAll('#gmseg button').forEach(b=>b.classList.toggle('on',b.textContent==='${m}'))">${m}</button>`).join('')}</div>
     <input id="gn" placeholder="ملاحظة (اختياري)" value="${x && x.desc !== 'عهدة' ? esc(x.desc) : ''}">
     <div class="err" id="gerr"></div>`;
@@ -3020,7 +3033,7 @@ function askInvAdd() {
   f.project = pickProj(f.project, ps);
   ovOpen(`<label class="shh">فاتورة جديدة</label>
     <div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.ai.amount=this.value"><input placeholder="المحل" value="${esc(f.vendor)}" oninput="S.ai.vendor=this.value"></div>
-    <input placeholder="وش انشرى؟" value="${esc(f.desc)}" oninput="S.ai.desc=this.value">
+    <input placeholder="وصف المشتريات" value="${esc(f.desc)}" oninput="S.ai.desc=this.value">
     <select aria-label="المشروع" onchange="S.ai.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
     <div class="sub" style="margin:6px 0 4px">مين دفع؟</div>
     <div class="segc">${[['', 'أنا']].concat(d.employees.map(e => [e.id, 'عهدة ' + shortName(e.name)])).map(o => `<button class="${f.emp === o[0] ? 'on' : ''}" onclick="S.ai.emp='${o[0]}';askInvAdd()">${esc(o[1])}</button>`).join('')}</div>
@@ -3107,6 +3120,11 @@ async function doWarranty(id, clear) {
 
 /* ---------- المالية ---------- */
 
+/* الإصدار 90: نموذج الصرف يفتح لشهر واحد (الأقدم)، وباقي الشهور سطر ينفتح بالضغط */
+function payRowHtml(e, u) {
+  const ds = dueState(u, S.data.today);
+  return `<div class="hair"></div><button class="strb payr" onclick="S.fx.pm='${e.id}${u.month}';S.armed=null;renderFin()"><div class="row"><b>راتب ${esc(u.label)}</b><span>${M(Math.max(0, u.net - (u.credit || 0)))}<span class="badge a">${ds === 'late' ? 'متأخر' : ds === 'today' ? 'مستحق اليوم' : 'ما انصرف'}</span>${I('chevron-left', 16)}</span></div></button>`;
+}
 function payHtml(e, u) {
   const armed = S.armed === 'pay_' + e.id + u.month, today = S.data.today, ds = dueState(u, today), cr = u.credit || 0;
   S.pd = S.pd || {};
@@ -3211,7 +3229,7 @@ function txHtml(t, canDelete) {
   const del = canDelete ? `<button class="del ${S.armed===id?'arm':''}" onclick="armTx('${t.id}')">${S.armed===id?'تأكيد الحذف':I('trash-2', 15)}</button>` : '';
   return `<div class="ent"><div class="ico f">${I(t.kind==='pay' ? 'check' : t.kind==='loan' ? 'hand-coins' : t.kind==='ded' ? 'receipt' : 'banknote', 15, 2.2)}</div>
     <div class="t"><div>${esc(txText(t))}${t.note ? ' — ' + esc(t.note) : ''}</div><div class="d">${dmy(t.date)}</div></div>
-    <div class="p amt">${sar(t.amount)}</div>${del}</div>`;
+    <div class="p amt ${t.kind === 'ded' ? 'neg' : ''}">${t.kind === 'ded' ? sarS(t.amount, '−') : sar(t.amount)}</div>${del}</div>`;
 }
 
 /* الإصدار 83: كشف المستحقات والدفعات. للمدير: تسجيل دفعة وحذف آخر دفعة. للموظف: عرض بس */
@@ -3219,9 +3237,14 @@ function salCardHtml(e, admin) {
   const st = e.sal;
   if (!st || !st.show) return '';
   const n = x => Math.round(x * 100) / 100;
+  /* الإصدار 90: عند المدير سطر يفصل المتأخر عن الشهر اللي ما حان موعده، والشهور المسددة تنطوي */
+  const today = (S.data || {}).today || '', fut = admin ? (e.unpaid || []).filter(u => !(u.due && u.due <= today)).map(u => ({u, v: n(Math.max(0, u.net - (u.credit || 0)))})).filter(x => x.v > 0) : [];
+  const late = n(st.left - fut.reduce((a, x) => a + x.v, 0));
+  const nx = fut.length && st.left > 0 && late >= 0 ? `<div class="sub slnx">${late > 0 ? 'المتأخر الحين <b>' + late.toLocaleString('en-US') + '</b> · و' : 'ما فيه متأخر · '}${fut.map(x => x.v.toLocaleString('en-US') + ' راتب ' + esc(x.u.label) + (x.u.due ? ' يستحق ' + esc(dueL(x.u.due)) : '')).join(' و')}</div>` : '';
+  const isCl = m => m.closed || m.left <= 0, nCl = admin ? st.months.filter(isCl).length : 0, fold = nCl > 1 && !S.fx.cm;
   let h = `<div class="card slc">${ctitle('receipt', 'كشف المستحقات والدفعات')}
-    <div class="slst"><div><b>إجمالي المستحق</b><div class="v">${M(st.due)}</div></div><div><b>المدفوع</b><div class="v pos">${M(st.paid)}</div></div><div><b>المتبقي</b><div class="v ${st.left > 0 ? 'neg' : 'pos'}">${M(st.left)}</div></div></div>
-    <div class="slms">${st.months.map(m => {
+    <div class="slst"><div><b>إجمالي المستحق</b><div class="v">${M(st.due)}</div></div><div><b>المدفوع</b><div class="v pos">${M(st.paid)}</div></div><div><b>المتبقي</b><div class="v ${st.left > 0 ? 'neg' : 'pos'}">${M(st.left)}</div></div></div>${nx}
+    <div class="slms">${nCl > 1 ? `<button class="dtog" style="padding:10px 0 6px" onclick="S.fx.cm=!S.fx.cm;renderFin()" aria-expanded="${!fold}">شهور مسددة (${nCl})${fold ? '' : ' · إخفاء'}</button>` : ''}${st.months.filter(m => !(fold && isCl(m))).map(m => {
       const pc = m.due > 0 ? Math.round(m.paid / m.due * 100) : 100, stc = m.closed || m.left <= 0 ? ['g', m.closed ? 'مسدد' : 'لا شيء'] : m.paid > 0 ? ['a', 'جزئي'] : ['', 'غير مسدد'];
       return `<div class="slm"><div class="h"><b>راتب ${esc(m.label)}</b><span class="sltg ${stc[0]}">${stc[1]}</span></div>
         <div class="s"><span>مستحق ${M(m.due, '', 't')} · مدفوع ${M(m.paid, '', 't')}</span><span>${m.closed ? (m.via ? 'انسدد بالدفعات' : 'انصرف') + (m.date ? ' ' + dmy(m.date) : '') : 'باقي ' + M(m.left, '', 't')}</span></div>
@@ -3346,7 +3369,7 @@ function guidesHtml(d) {
 function gFormHtml(d, on, f) {
   return `<div class="card gform">
     ${ctitle('clipboard-list', 'توجيه جديد')}
-    <div class="field" style="margin-top:12px"><span>العنوان</span><input id="g_title" value="${esc(f.title)}" oninput="S.gform.title=this.value" placeholder="مثلاً: ترتيب الموقع آخر اليوم"></div>
+    <div class="field" style="margin-top:12px"><span>العنوان</span><input id="g_title" value="${esc(f.title)}" oninput="S.gform.title=this.value" placeholder="عنوان التوجيه"></div>
     <div class="field"><span>النقاط (كل نقطة سطر قصير)</span>
       ${f.points.map((p, i) => `<div class="gpi"><i>${i + 1}</i><input value="${esc(p)}" oninput="S.gform.points[${i}]=this.value">${f.points.length > 1 ? `<button onclick="gPt(${i})" aria-label="شيل">${I('x', 15)}</button>` : ''}</div>`).join('')}
       ${f.points.length < 20 ? `<button class="lnk gadd" onclick="gPt(-1)">${I('plus', 14)}نقطة</button>` : ''}</div>
@@ -3561,7 +3584,7 @@ function projectsCard(d) {
       <button class="del" onclick="saveProj('${p.id}')">${I('check', 15)}حفظ</button>
       <button class="del" onclick="askProjLoc('${p.id}')">${I('map-pin', 15)}${p.lat != null ? 'الموقع ✓' : 'الموقع'}</button>
       <button class="del" onclick="archProj('${p.id}', true)">${I('archive', 15)}أرشفة</button></div>
-      ${p.open ? `<div class="sub" style="margin:-4px 0 4px">${p.open} مهام مطلوبة</div>` : ''}`).join('')}
+      ${p.open ? `<div class="sub" style="margin:-4px 0 4px">${p.open === 1 ? 'مهمة وحدة مطلوبة' : p.open === 2 ? 'مهمتين مطلوبة' : p.open + (p.open > 10 ? ' مهمة' : ' مهام') + ' مطلوبة'}</div>` : ''}`).join('')}
     <div class="inrow"><input id="pn_new" placeholder="اسم مشروع جديد" onkeydown="if(event.key==='Enter')addProject('set')"><button class="btn2 cu" onclick="addProject('set')">${I('plus', 16, 2.5)}إضافة</button></div>
     <div class="err" id="perr"></div>
     ${arch.length ? `<details style="margin-top:6px"><summary>المؤرشفة (${arch.length})</summary>
@@ -3651,7 +3674,7 @@ function rulesHtml(st) {
     <div>• كل تقصير ينقص ${M(st.miss, '', 't')}، والتقصير في الأمانة ينقص ${M(st.trust, '', 't')}.</div>
     <div>• نفس التقصير ينحسب مرة وحدة باليوم، واليوم اللي ما فيه تسجيل ينحسب ناجح.</div>
     <div>• كل موقف مميز فوق الواجب يزيد ${M(st.star, '', 't')}، لين ${M(st.starCap, '', 't')} بالشهر.</div>
-    <div>• إذا خلص الشهر بدون ولا تقصير، مكافأة ${M(st.clean, '', 't')}.</div>
+    ${Number(st.clean) > 0 ? `<div>• إذا خلص الشهر بدون ولا تقصير، مكافأة ${M(st.clean, '', 't')}.</div>` : ''}
     <div>• الحافز ينصرف مع راتب نفس الشهر، والسلف والراتب المقدم ينخصمون من الراتب.</div>
     <div class="sub" style="margin-top:8px">الأداء: الحضور والمواعيد، جودة الشغل، إدارة العمال، حل المشاكل، متابعة الأعمال الموكلة، التركيز والانتباه، تأمين المشروع.<br>السلوك: الأمانة والمصداقية، الاحترام وحسن التعامل، الالتزام بالتعليمات، النظافة، الانضباط والمظهر.</div></div>`;
 }
@@ -3721,7 +3744,7 @@ function empPayHtml(d) {
   const next = m.track
     ? (!m.misses ? `<div class="note good">ما عليك ولا تقصير هالشهر، كمّل كذا</div>` : `<div class="note info">عليك ${m.misses} تقصير هالشهر، ركّز عليها.</div>`)
     : !m.misses
-    ? `<div class="note good">ما عليك ولا تقصير هالشهر، كمّل كذا وتاخذ مكافأة ${M(st.clean, '', 't')}</div>`
+    ? `<div class="note good">ما عليك ولا تقصير هالشهر، كمّل كذا${Number(st.clean) > 0 ? ' وتاخذ مكافأة ' + M(st.clean, '', 't') : ''}</div>`
     : `<div class="note info">كل تقصير ينقص ${M(st.miss, '', 't')} (الأمانة ${st.trust})، وكل موقف مميز يزيد ${M(st.star, '', 't')}.</div>`;
   const paidRows = d.history.filter(h => h.month !== m.month);
   return `
@@ -3755,7 +3778,7 @@ function empPayHtml(d) {
       ${paidRows.map(h => `<div>${esc(h.label)} ${h.paid ? '<span class="pos">' + I('check', 14, 3) + '</span>' : ''}</div>${m.track ? '' : `<div class="cu">${num(h.bonus)}</div>`}<div>${num(h.paid ? h.paidAmount : h.net)}</div>`).join('')}
     </div></div>` : ''}
     ${d.tx.length ? `<div class="card">${ctitle('receipt', 'كشف الحساب')}<div style="margin-top:6px">${d.tx.map(t => txHtml(t, false)).join('')}</div></div>` : ''}
-    ${m.track ? '' : `<div class="card"><details><summary>${I('info', 16)}طريقة الحساب</summary>${rulesHtml(d.rules)}</details></div>`}`;
+    ${m.track ? '' : `<div class="card"><details class="rul"><summary>${I('info', 16)}طريقة الحساب</summary>${rulesHtml(d.rules)}</details></div>`}`;
 }
 
 /* ---------- المهام (الموظف) ---------- */
@@ -3788,7 +3811,7 @@ function empCardHtml(t, mode, inGroup) {
   const al = mode === 'emp' && open ? alTaskFor(t.id) : null;
   return `<div class="ecard ${inGroup ? 'in' : ''} ${t.status === 'returned' ? 'rt' : ''} ${S.hlTask === t.id ? 'hl' : ''}" data-tid="${esc(t.id)}">
     <div class="th"><span class="tt">${esc(t.title)}</span>${pillHtml(p)}</div>
-    ${al ? `<button class="albn" onclick="alTap('${al.id}',this)">${I('bell-ring', 15)}<span><b>تذكير من المدير العام</b> · ${esc(rpTickWhen(al.at))}</span><span class="go">تم الاطلاع</span></button>` : ''}
+    ${al ? `<button class="albn" onclick="alTap('${al.id}',this)">${I('bell-ring', 15)}<span><b>تذكير من المدير العام</b> · ${esc(rpTickWhen(al.at))}</span><span class="go">تأكيد المشاهدة</span></button>` : ''}
     ${meta ? `<div class="tm">${meta}</div>` : ''}
     ${t.status === 'returned' && t.reason ? `<div class="note bad"><div><b>المدير العام يقول:</b> ${esc(t.reason)}</div></div>` : ''}
     ${t.status === 'done' && t.apNote ? `<div class="note good"><div><b>تعليق المدير العام:</b> ${esc(t.apNote)}</div></div>` : ''}
@@ -3801,7 +3824,7 @@ function empCardHtml(t, mode, inGroup) {
 function proofFormHtml(t) {
   const pf = t.proof || 'photo', max = pf === 'invoice' ? 3 : 5;
   if (pf === 'note') return `<div class="pform">
-    <textarea placeholder="وش سوّيت؟ (إلزامي)" oninput="S.cm=this.value;const b=document.getElementById('sendb');if(b)b.disabled=this.value.trim().length<3">${esc(S.cm || '')}</textarea>
+    <textarea placeholder="ملاحظة الإنجاز (إلزامية)" oninput="S.cm=this.value;const b=document.getElementById('sendb');if(b)b.disabled=this.value.trim().length<3">${esc(S.cm || '')}</textarea>
     <button class="btn" id="sendb" ${(S.cm || '').trim().length >= 3 && !S.busy ? '' : 'disabled'} onclick="sendDone('${t.id}')">${S.busy ? 'جاري الإرسال…' : I('send', 17) + 'إرسال'}</button>
     <button class="btn2" style="width:100%;border:0" onclick="S.doing=null;S.cm='';rerenderEmp()">إلغاء</button>
     <div class="err" id="uperr"></div></div>`;
@@ -3870,11 +3893,11 @@ function invFormHtml(d) {
   return `<div class="pform ivform" style="margin-top:12px">
     <b>${ed ? 'تصحيح الفاتورة' : 'فاتورة جديدة'}</b>
     ${ed ? '<div class="sub">عدّل ما طلبه المدير العام. تُرسل بنفس الفاتورة وتعود «تنتظر الاعتماد».</div>' : ''}
-    <div class="shots">${keep.map((p, i) => `<div class="shot">${S.ic[p] && S.ic[p] !== 'loading' ? `<img src="${S.ic[p]}" alt="صورة الفاتورة">` : '<div class="pph" style="width:100%;height:100%;font-size:11px">جاري التحميل…</div>'}<button class="x" onclick="S.inv.keep.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}${S.ishots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة الفاتورة"><button class="x" onclick="S.ishots.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}
+    <div class="shots">${keep.map((p, i) => `<div class="shot">${S.ic[p] && S.ic[p] !== 'loading' ? `<img src="${S.ic[p]}" alt="صورة الفاتورة">` : '<div class="pph" style="width:100%;height:100%;font-size:12px">جاري التحميل…</div>'}<button class="x" onclick="S.inv.keep.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}${S.ishots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة الفاتورة"><button class="x" onclick="S.ishots.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}
     ${room > 0 ? `<label class="madd">${I('camera', 20)}صوّر الفاتورة<input type="file" accept="${ACC_IMG}" multiple style="display:none" onchange="pickInv(this)"></label>` : ''}</div>
     ${S.ishotLoading ? '<div class="sub">جاري تجهيز الصورة…</div>' : ''}
     <input class="qtt" inputmode="decimal" placeholder="المبلغ بالريال" value="${esc(f.amount)}" oninput="S.inv.amount=this.value">
-    <input placeholder="وش اشتريت؟ مثلاً: أفياش وأسلاك" value="${esc(f.desc)}" oninput="S.inv.desc=this.value">
+    <input placeholder="وصف المشتريات" value="${esc(f.desc)}" oninput="S.inv.desc=this.value">
     <input placeholder="المحل (اختياري)" value="${esc(f.vendor || '')}" oninput="S.inv.vendor=this.value">
     <select aria-label="المشروع" onchange="S.inv.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
     <div class="sub" style="margin:4px 0 -2px">دفعت من؟</div>
@@ -4384,12 +4407,13 @@ function rpDetailHtml(isAdmin) {
   const tags = cur.map(x => { const nw = rpNowOf(r, x); if (nw && nw.apr && rpSt(rpTk(r, x)) !== 'ret' && Date.now() - nw.apr < 3 * 864e5) return ['معتمد', 'g', `<small class="tkt">اعتُمد نقله للحالية · ${esc(rpTickWhen(nw.apr))}</small>`]; return up.includes(x) ? ['حان وقته', 'g'] : rpSt(rpTk(r, x)) === 'ret' ? ['أُعيد للعمل', 'r'] : null; });
   const notes = rpArr(r.notes);
   let h = `<button class="back" onclick="rpClose()">${I('arrow-right', 17)}${isAdmin ? 'التقارير' : 'تقاريري'}</button><h2>${esc(rpPName(r.proj))}</h2>
-    <div class="rpmeta">${I('file-text', 15)}<span>آخر تحديث: ${esc(rpUpdBy(r))} · ${esc(rpTickWhen(r.upd || r.ts * 1000))}${r.edited ? ' · <span class="edt">عدّله المدير العام</span>' : ''}</span>${isAdmin ? `<button class="edl" onclick="rpOpenEdit('${r.id}')">${I('pencil', 15)}تعديل</button>${RP.pinged === r.id ? `<button class="edl ok">${I('check', 15, 2.5)}أُرسل التنبيه</button>` : `<button class="edl" onclick="rpShareOpen('${r.id}')">${I('bell-ring', 15)}تنبيه</button>`}` : ''}</div>`;
+    <div class="rpmeta">${I('file-text', 15)}<span>آخر تحديث: ${esc(rpUpdBy(r))} · ${esc(rpTickWhen(r.upd || r.ts * 1000))}${r.edited && rpUpdBy(r) !== 'المدير العام' ? ' · <span class="edt">عدّله المدير العام</span>' : ''}</span>${isAdmin ? `<button class="edl" onclick="rpOpenEdit('${r.id}')">${I('pencil', 15)}تعديل</button>${RP.pinged === r.id ? `<button class="edl ok">${I('check', 15, 2.5)}أُرسل التنبيه</button>` : `<button class="edl" onclick="rpShareOpen('${r.id}')">${I('bell-ring', 15)}تنبيه</button>`}` : ''}</div>`;
   h += rpAlertLine(r, null, isAdmin);
+  let decNote = false; /* الإصدار 90: خانة الملاحظة داخل بطاقة القرار لما القرار ينتظر */
   if (dec.length) {
     h += `<div class="rpdec ${r.reply ? 'done' : ''}"><div class="rplab">${I(r.reply ? 'circle-check' : 'triangle-alert', 15)}القرارات والاعتمادات المطلوبة</div>${isAdmin ? rpDecList(r, dec) : rpItems(dec)}`;
     if (r.reply) h += `<div class="rprep">${r.reply === 'ok' ? 'تم الاعتماد' : r.reply === 'no' ? 'لم يُعتمد' : 'تم الرد بملاحظة'}${isAdmin ? ` <button class="lnk" onclick="rpReply('${r.id}','')">تعديل</button>` : ''}</div>`;
-    else if (isAdmin) h += `<div class="grid2"><button class="btn2 cu" onclick="rpReply('${r.id}','ok')">${I('check', 17, 2.5)}اعتماد</button><button class="btn2 rd" onclick="rpReply('${r.id}','no')">رفض</button></div><div class="rhint" style="margin:8px 0 0">يُرسل نص الملاحظة أدناه مع الاعتماد أو الرفض</div>`;
+    else if (isAdmin) { decNote = true; h += `<textarea id="rnote" class="dnote" style="margin:10px 0" placeholder="ملاحظة مع القرار (اختياري)" oninput="RP.draft=this.value;rpGrow(this)">${esc(RP.draft || '')}</textarea><div class="grid2"><button class="btn2 cu" onclick="rpReply('${r.id}','ok')">${I('check', 17, 2.5)}اعتماد</button><button class="btn2 rd" onclick="rpReply('${r.id}','no')">رفض</button></div>`; }
     else h += '<div class="rprep">بانتظار رد المدير العام</div>';
     h += '</div>';
   }
@@ -4397,14 +4421,14 @@ function rpDetailHtml(isAdmin) {
   const canOrd = isAdmin && rpCanTick(r, true) && cur.length > 1, ordm = canOrd && RP.ord && RP.ord.id === r.id;
   if (r.ord && cur.length > 1 && !tags[0]) tags[0] = ['الأهم', 'g'];
   h += rpPendHtml(r, pend, isAdmin, isAdmin ? rpReqL(r) : [], isAdmin ? rpLreqP(r) : []);
-  h += `<div class="rpcard now"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${canOrd ? (ordm ? `<button class="rchb dn" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur')}</div>`;
+  h += `<div class="rpcard now"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${canOrd ? (ordm ? `<button class="rchb dn fl" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur')}</div>`;
   h += `<div class="rpcard lt"><div class="rch"><span class="ci">${I('history', 16)}</span>الأعمال اللاحقة<span class="cn">${lat.length}</span></div>${rpCanTick(r, isAdmin) && lat.length ? rpNowList(r, lat, isAdmin) : lat.length || !rpLreqShow(r).length ? rpLaterHtml(lat) : ''}${rpLreqRows(r)}${rpCanTick(r, isAdmin) && !ordm ? rpLaterAddHtml(r, isAdmin) : ''}</div>`;
   h += `<div class="tbl2 rphr">${tbRow('check-check', 'الأعمال المنجزة', nh === 1 ? 'عمل واحد' : nh === 2 ? 'عملان' : nh + ' منجزة', `rpOpenHist('${r.proj}')`)}</div>`;
   if (rpArr(r.removed).length) h += `<div class="rpgone rm">${I('x', 14, 2.5)}<div><b>حُذفت دون إنجاز:</b> ${esc(r.removed.join('، '))}</div></div>`;
   if (rpArr(r.files).length) h += `<div class="lbl">المرفقات</div>${rpFilesHtml(r.files)}`;
   if (isAdmin) {
     h += `<div class="lbl">ملاحظاتك</div>` + notes.map(n => `<div class="note good">${I('message-circle', 16)}<div><b>المدير العام:</b> ${esc(n.text)}</div></div>`).join('');
-    h += `<textarea id="rnote" class="dnote" placeholder="اكتب ملاحظة على التقرير" oninput="RP.draft=this.value;rpGrow(this)">${esc(RP.draft || '')}</textarea><button class="btn2 cu" style="margin-top:8px;width:100%" onclick="rpReply('${r.id}','note')">${I('send', 16)}إرسال الملاحظة</button>`;
+    h += `${decNote ? '' : `<textarea id="rnote" class="dnote" placeholder="اكتب ملاحظة على التقرير" oninput="RP.draft=this.value;rpGrow(this)">${esc(RP.draft || '')}</textarea>`}<button class="btn2 cu" style="margin-top:8px;width:100%" onclick="rpReply('${r.id}','note')">${I('send', 16)}إرسال الملاحظة</button>`;
   } else {
     h += `<div class="lbl">ملاحظات المدير العام</div>` + (notes.length ? notes.map(n => `<div class="note good">${I('message-circle', 16)}<div><b>المدير العام:</b> ${esc(n.text)}</div></div>`).join('') : '<div class="rpe">لا توجد ملاحظات</div>');
   }
@@ -4492,7 +4516,7 @@ function rpEmpHtml(d, isPreview) {
   h += withR.length ? `<div class="rpl">${withR.map(p => rpCardHtml(rpLast(p.id), {emp: true, d: d, share: rpShareFor(p.id)})).join('')}</div>` : emptyHtml('file-text', 'لا توجد تقارير بعد');
   if (none.length && !isPreview) {
     h += `<button class="rpfold" aria-expanded="${!!RP.noneOpen}" onclick="RP.noneOpen=!RP.noneOpen;rerenderEmp()"><span class="ic">${I('folder', 16)}</span><span class="k">مشاريع بلا تقارير</span><span class="v">${none.length}<span class="cv2 ${RP.noneOpen ? 'on' : ''}">${I('chevron-left', 16)}</span></span></button>`;
-    if (RP.noneOpen) h += `<div class="tbl2" style="margin-top:8px">${none.map(p => tbRow('folder', esc(p.name), '<span class="lv">إعداد تقرير</span>', `rpOpenForm('${p.id}',false)`)).join('')}</div>`;
+    if (RP.noneOpen) h += `<div class="tbl2" style="margin-top:8px">${none.map(p => tbRow('folder', esc(p.name), '<span class="lv">إضافة تقرير</span>', `rpOpenForm('${p.id}',false)`)).join('')}</div>`;
   }
   return h;
 }
@@ -4636,7 +4660,7 @@ function rpDraw() {
   const f = RP.form;
   if (!f) return;
   if (f.sent) {
-    ovOpen(`<div class="rok"><div class="rokc">${I('check', 30, 2.5)}</div><b>تم حفظ التقرير</b><div>${esc(rpPName(f.proj))}</div><div class="sub">${esc(dayLabel(rpToday()))}</div>${f.nDone ? `<div class="rokm">${I('check-check', 14)}${f.nDone <= 2 || f.nDone > 10 ? 'نُقل ' : 'نُقلت '}${rpNDone(f.nDone)} إلى سجل الإنجاز</div>` : ''}${f.moved.length ? `<div class="rokm">${I('clock', 14)}انتقل إلى الأعمال الحالية: ${esc(f.moved.join('، '))}</div>` : ''}${f.lq ? `<div class="rokm">${I('hourglass', 14)}${f.lq === 1 ? 'أُرسل عمل لاحق جديد' : 'أُرسل ' + f.lq + ' أعمال لاحقة جديدة'} للمدير العام، ويُضاف بعد موافقته</div>` : ''}${f.asked ? `<div class="rokm">${I('hourglass', 14)}${f.asked === 1 ? 'أُرسل طلب نقل عمل واحد إلى الأعمال الحالية' : 'أُرسل طلب نقل ' + f.asked + ' أعمال إلى الأعمال الحالية'}، بانتظار اعتماد المدير العام</div>` : ''}${f.dupNote ? `<div class="rokm">${I('info', 14)}وصل التقرير من المحاولة الأولى، ولم تُضَف التعديلات التي أجريتها بعدها</div>` : ''}</div>
+    ovOpen(`<div class="rok"><div class="rokc">${I('check', 30, 2.5)}</div><b>تم حفظ التقرير</b><div>${esc(rpPName(f.proj))}</div><div class="sub">${esc(dayLabel(rpToday()))}</div>${f.nDone ? `<div class="rokm">${I('check-check', 14)}${f.nDone <= 2 || f.nDone > 10 ? 'نُقل ' : 'نُقلت '}${rpNDone(f.nDone)} إلى الأعمال المنجزة</div>` : ''}${f.moved.length ? `<div class="rokm">${I('clock', 14)}انتقل إلى الأعمال الحالية: ${esc(f.moved.join('، '))}</div>` : ''}${f.lq ? `<div class="rokm">${I('hourglass', 14)}${f.lq === 1 ? 'أُرسل عمل لاحق جديد' : 'أُرسل ' + f.lq + ' أعمال لاحقة جديدة'} للمدير العام، ويُضاف بعد موافقته</div>` : ''}${f.asked ? `<div class="rokm">${I('hourglass', 14)}${f.asked === 1 ? 'أُرسل طلب نقل عمل واحد إلى الأعمال الحالية' : 'أُرسل طلب نقل ' + f.asked + ' أعمال إلى الأعمال الحالية'}، بانتظار اعتماد المدير العام</div>` : ''}${f.dupNote ? `<div class="rokm">${I('info', 14)}وصل التقرير من المحاولة الأولى، ولم تُضَف التعديلات التي أجريتها بعدها</div>` : ''}</div>
       <button class="btn2 cu qbig" onclick="ovClose()">حسناً</button>`);
     return;
   }
@@ -4646,7 +4670,7 @@ function rpDraw() {
     ${f.pick ? `<div class="qlab">${I('folder', 14)}المشروع</div><div class="qch">${ap.map(x => `<button class="${f.proj === x.id ? 'on' : ''}" onclick="rpSwitchProj('${x.id}')">${esc(x.name)}</button>`).join('')}</div>` : ''}
     <div class="qlab">${I('list-checks', 14)}الأعمال الحالية</div>
     ${f.draftAt ? `<div class="rhint ok">${I('history', 13)}استُعيدت المسودة المحفوظة ${esc(nfTime(f.draftAt))} <button class="lnk" style="font-size:12px;padding:0 4px" onclick="rpDraftDrop()">تجاهلها</button></div>` : ''}
-    ${f.from ? `<div class="rhint">${I('history', 13)}منقولة من تقرير ${esc(rpDay(f.from))}${f.admin ? '. ضع علامة ✓ على ما أُنجز' : ''}</div>` : ''}
+    ${f.from ? (lr => `<div class="rhint">${I('history', 13)}<span>${lr ? 'آخر تحديث: ' + esc(rpUpdBy(lr)) + ' · ' + esc(rpTickWhen(lr.upd || lr.ts * 1000)) : 'منقولة من تقرير ' + esc(rpDay(f.from))}</span>${f.admin ? '<span>. ضع علامة ✓ على ما أُنجز</span>' : ''}</div>`)(rpArr(RP.reps).find(x => x.id === f.base)) : ''}
     <div id="f_cur">${rpCurHtml()}</div>
     <div class="qlab">${I('history', 14)}الأعمال اللاحقة</div>
     <div class="rhint">أعمال لم يحن وقتها. اربطها بالعمل الذي تبدأ بعده لتنتقل تلقائياً عند إنجازه</div>
@@ -4912,7 +4936,7 @@ function alSeenRep(rid) {
 async function alTap(id, btn) {
   if (btn) { btn.disabled = true; btn.querySelector('.go').textContent = 'جاري…'; }
   const r = await alSeen(id);
-  if (!r) { if (btn) { btn.disabled = false; btn.querySelector('.go').textContent = 'تم الاطلاع'; } return toastErr('ما فيه اتصال، تأكد من النت وجرّب مرة ثانية'); }
+  if (!r) { if (btn) { btn.disabled = false; btn.querySelector('.go').textContent = 'تأكيد المشاهدة'; } return toastErr('ما فيه اتصال، تأكد من النت وجرّب مرة ثانية'); }
   rerenderEmp();
 }
 async function alOpen(id) {
@@ -5026,7 +5050,7 @@ function askApprove(id) {
   ovOpen(`<label class="shh">اعتماد المهمة</label>
     <div class="sub" style="margin:-6px 0 8px">${esc(t.title)} · ${esc(shortName(t.ename || ''))}</div>
     <label class="qlab" for="apc">${I('message-circle', 14)}تعليق للموظف (اختياري)</label>
-    <textarea id="apc" class="rta sm" placeholder="مثال: شغل ممتاز، انتبه للنظافة بعد التركيب" oninput="rpGrow(this)"></textarea>
+    <textarea id="apc" class="rta sm" placeholder="اكتب التعليق" oninput="rpGrow(this)"></textarea>
     <div class="rhint">${I('info', 13)}يصل التعليق إلى الموظف مع إشعار الاعتماد</div>
     <div class="err" id="aperr"></div>
     <button class="btn2 cu qbig" id="apb" onclick="doApprove('${id}')">${I('check', 17, 2.5)}اعتمدها</button>`);
