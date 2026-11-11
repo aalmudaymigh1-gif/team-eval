@@ -1125,9 +1125,9 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=91"></script>
+<script src="api.js?v=92"></script>
 <script>
-const APP_VER = '91';
+const APP_VER = '92';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -2022,7 +2022,7 @@ function teamEmp(d, e) {
   const lv = [m.misses ? m.misses + ' تقصير' : '', m.stars ? m.stars + ' مميز' : ''].filter(Boolean).join(' · ');
   return `<div class="tfr"><div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span>${seenHtml(e.seen)}</div>
       <button class="lnkb" onclick="tsub('${e.id}','link')" aria-label="رابط صفحته">${I('link', 16)}</button><button class="rate" onclick="rateEmp('${e.id}')">${I('clipboard-check', 14)}قيّمه</button></div>
-    <div class="tbl2">${m.track ? tbRow('history', 'المواقف', lv || 'ما فيه', `tsub('${e.id}','log')`) : tbRow('sparkles', 'الحافز', M(m.bonus, '', 'pos') + (lv ? ` <span class="lv">· ${lv}</span>` : ''), `tsub('${e.id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${e.id}')`) : ''}${tbRow('list-checks', 'المهام', tv || 'ما عنده', `tsub('${e.id}','tasks')`)}${e.salary ? tbRow('receipt', 'خصم مخالفة مرورية', '', `fineOpen('${e.id}')`) : ''}</div></div>`;
+    <div class="tbl2">${m.track ? tbRow('history', 'المواقف', lv || 'ما فيه', `tsub('${e.id}','log')`) : tbRow('sparkles', 'الحافز', M(m.bonus, '', 'pos') + (lv ? ` <span class="lv">· ${lv}</span>` : ''), `tsub('${e.id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${e.id}')`) : ''}${tbRow('list-checks', 'المهام', tv || 'ما عنده', `tsub('${e.id}','tasks')`)}</div></div>`;
 }
 /* الإصدار 88: خصم مخالفة مرورية من صفحة الفريق، ينحفظ خصم عادي على أول شهر ما انصرف */
 function fineMonth(e) {
@@ -2030,27 +2030,6 @@ function fineMonth(e) {
   let mk = S.data.today.slice(0, 7);
   while (ms.some(m => m.month === mk && m.closed)) { const y = +mk.slice(0, 4), m = +mk.slice(5, 7); mk = m === 12 ? (y + 1) + '-01' : y + '-' + String(m + 1).padStart(2, '0'); }
   return mk;
-}
-function fineOpen(id) {
-  const e = empById(id);
-  if (!e) return;
-  const t = S.data.today;
-  ovOpen(`<label class="shh">خصم مخالفة مرورية</label><div class="sub" style="margin:-6px 0 8px">${esc(e.name)}</div>
-    <label class="dp"><span>المبلغ</span><input id="fn_a" type="number" inputmode="numeric" placeholder="المبلغ" style="text-align:left"></label>
-    <label class="dp"><span>تاريخ المخالفة</span><input id="fn_d" type="date" value="${t}" max="${t}"></label>
-    <textarea id="fn_n" class="rta sm" maxlength="150" placeholder="ملاحظة (اختياري): رقم المخالفة أو مكانها"></textarea>
-    <div class="rhint">${I('info', 13)}يُخصم من راتب ${monthLbl(fineMonth(e))} (أول شهر لم يُصرف)، ويظهر في حركاته وفي تفاصيل راتبه</div>
-    <div class="err" id="fn_e"></div>
-    <button class="btn2 cu qbig" onclick="fineSave('${id}')">${I('check', 17, 2.5)}حفظ الخصم</button>`);
-}
-async function fineSave(id) {
-  const a = $('#fn_a').value, dt = $('#fn_d').value, n = $('#fn_n').value.trim(), er = $('#fn_e');
-  if (!(Number(a) > 0)) { er.textContent = 'اكتب المبلغ'; return; }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dt) || dt > S.data.today) { er.textContent = 'اختر تاريخ المخالفة'; return; }
-  const note = 'مخالفة مرورية بتاريخ ' + dueL(dt, true) + (n ? ' · ' + n : '');
-  const un = lockBtn();
-  try { S.data = await call('apiFinAdd', BOOT.key, {emp: id, kind: 'ded', amount: a, note: note}); ovClose(); renderAdmin(); toast('تم حفظ الخصم'); }
-  catch (x) { un(); er.textContent = x; }
 }
 /* الإصدار 80: آخر ظهور للموظف في التطبيق */
 function seenHtml(ms) {
@@ -2304,9 +2283,10 @@ async function approveTask(id) {
   catch (e) { toastErr(e); }
 }
 function askReturn(id) {
+  const rt0 = allTasks().find(x => x.id === id), invOk = rt0 && rt0.inv && rt0.inv.status === 'ok';
   ovOpen(`<label class="shh" for="rr">وش الناقص؟</label>
     <input id="rr" placeholder="اكتب سبب الإرجاع" onkeydown="if(event.key==='Enter')doReturn('${id}')">
-    <div class="sub">الموظف يشوف السبب فوق المهمة، وترجع له مطلوبة.</div>
+    <div class="sub">الموظف يشوف السبب فوق المهمة، وترجع له مطلوبة.${invOk ? ' فاتورتها المعتمدة (' + Number(rt0.inv.amount).toLocaleString('en-US') + ') ترجع معها وتطلع من الحساب لين يرسلها من جديد.' : ''}</div>
     <div class="err" id="rrerr"></div>
     <div class="g21"><button class="btn2 arm" onclick="doReturn('${id}')">رجّعها له</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
   setTimeout(() => { const i = $('#rr'); if (i) i.focus(); }, 80);
@@ -2783,10 +2763,10 @@ function finCtx() {
 function pickProj(cur, list) { const ok = id => id && list.some(p => p.id === id); return ok(cur) ? cur : ok(lsGet('tf_proj')) ? lsGet('tf_proj') : ((list[0] || {}).id || ''); }
 function shortName(n) { const w = String(n || '').trim().split(/\s+/); return /^(ابو|أبو|ام|أم|بن)$/.test(w[0]) && w[1] ? w[0] + ' ' + w[1] : w[0]; }
 function projName(k) { if (!k) return 'بدون مشروع'; const p = (S.data.projects || []).find(x => x.id === k); return p ? p.name : 'مشروع محذوف'; }
-function openSt(id) { Object.assign(S.fx, {emp: id, proj: null, rv: false, all: false, pm: '', cm: false}); S.view = 'fin'; S.armed = null; S.form = null; renderAdmin(); toTop(); }
+function openSt(id) { Object.assign(S.fx, {emp: id, proj: null, rv: false, all: false, pm: '', cm: false, rt: false}); S.view = 'fin'; S.armed = null; S.form = null; renderAdmin(); toTop(); }
 function openFinProj(k) { Object.assign(S.fx, {proj: k, emp: '', rv: false, all: false}); S.armed = null; renderFin(); toTop(); }
 function openFinRv() { Object.assign(S.fx, {rv: true, emp: '', proj: null}); S.armed = null; renderFin(); toTop(); }
-function finBack() { Object.assign(S.fx, {emp: '', proj: null, rv: false, all: false, pm: '', cm: false}); S.form = null; S.armed = null; renderFin(); toTop(); }
+function finBack() { Object.assign(S.fx, {emp: '', proj: null, rv: false, all: false, pm: '', cm: false, rt: false}); S.form = null; S.armed = null; renderFin(); toTop(); }
 function finBackBtn() { return `<button class="back" onclick="finBack()">${I('arrow-right', 17)}المالية</button>`; }
 
 function renderFin() {
@@ -2897,6 +2877,9 @@ function renderFinEmp(c, id) {
   const f = S.form && S.form.emp === id && !['part', 'prev', 'move'].includes(S.form.kind) ? S.form : null;
   let h = finBackBtn() + `<div class="fxh"><h2>${esc(e.name)}</h2><span>${esc(d.month)}</span></div>`;
   if (rv.length) h += `<div class="sech a" style="margin-top:4px">تنتظر اعتمادك<span>${rv.length}</span></div>` + rv.map(x => invRowHtml(x, false)).join('') + '<div style="height:12px"></div>';
+  /* الإصدار 92: الفواتير المرجّعة اللي ما صحّحها الموظف تبان هنا وتنحذف */
+  const rt = mine.filter(x => x.kind === 'inv' && x.status === 'returned');
+  if (rt.length) h += `<button class="dtog" style="padding:6px 2px 10px;color:var(--red)" onclick="S.fx.rt=!S.fx.rt;S.armed=null;renderFin()" aria-expanded="${!!S.fx.rt}">فواتير مرجّعة عنده (${rt.length}) · ${rt.reduce((a, x) => a + x.amount, 0).toLocaleString('en-US')}${S.fx.rt ? ' · إخفاء' : ''}</button>` + (S.fx.rt ? `<div class="sub" style="margin:0 2px 8px">رجّعتها له وما صحّحها. ما تنحسب في العهدة ولا المصاريف. الحذف نهائي.</div>` + rt.map(x => invRowHtml(x, false)).join('') + '<div style="height:12px"></div>' : '');
   h += salCardHtml(e, true);
   h += `<div class="card">${salActHtml(e)}${e.unpaid.length ? (pm => e.unpaid.map(u => u.month === pm ? payHtml(e, u) : payRowHtml(e, u)).join(''))((e.unpaid.find(u => S.fx.pm === e.id + u.month) || e.unpaid.find(u => S.armed === 'pay_' + e.id + u.month) || e.unpaid[0]).month) : `<div class="row"><b>الراتب</b><span class="badge">${I('check', 12, 3)} كل الرواتب منصرفة</span></div>`}
     ${e.loans.length ? `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('hand-coins', 14)}السلف</div>
@@ -3163,14 +3146,18 @@ function salaryTable(u) {
 }
 
 function dedFormHtml(f) {
-  const oth = f.reason === 'other';
+  /* الإصدار 92: «مخالفة مرورية» سبب ثالث هنا (كانت سطر في «الفريق») */
+  const oth = f.reason === 'other', fine = f.reason === 'fine', t = S.data.today, fe = empById(f.emp);
   return `<div class="ctitle" style="font-size:15px"><span class="ci dedi">${I('receipt', 16)}</span>خصم من الراتب</div>
     <div class="field" style="margin-top:10px"><span>المبلغ (ريال)</span><input id="f_amount" type="number" inputmode="numeric" value="${esc(f.amount || '')}" oninput="S.form.amount=this.value"></div>
     <div class="field"><span>السبب</span><div class="dedch">
-      <button class="${oth ? '' : 'on'}" onclick="S.form.reason='net';renderFin()">باقة انترنت</button>
+      <button class="${oth || fine ? '' : 'on'}" onclick="S.form.reason='net';renderFin()">باقة انترنت</button>
+      <button class="${fine ? 'on' : ''}" onclick="S.form.reason='fine';renderFin()">مخالفة مرورية</button>
       <button class="${oth ? 'on' : ''}" onclick="S.form.reason='other';renderFin()">سبب ثاني</button></div></div>
     ${oth ? `<div class="field"><span>اكتب السبب</span><input id="f_note" value="${esc(f.note || '')}" oninput="S.form.note=this.value"></div>` : ''}
-    <div class="sub" style="margin-bottom:10px">ينخصم من راتب هالشهر، ويشوفه الموظف في صفحته.</div>
+    ${fine ? `<div class="dprops pdate" style="margin:0 0 10px"><label class="dp"><span>تاريخ المخالفة</span><input id="f_fdate" type="date" value="${esc(f.fdate || t)}" max="${t}" onchange="S.form.fdate=this.value"></label></div>
+      <div class="field"><span>ملاحظة (اختياري): رقم المخالفة أو مكانها</span><input id="f_fnote" maxlength="150" value="${esc(f.fnote || '')}" oninput="S.form.fnote=this.value"></div>` : ''}
+    <div class="sub" style="margin-bottom:10px">${fine && fe ? 'يُخصم من راتب ' + monthLbl(fineMonth(fe)) + ' (أول شهر لم يُصرف)، ويظهر في حركاته وفي تفاصيل راتبه.' : 'ينخصم من راتب هالشهر، ويشوفه الموظف في صفحته.'}</div>
     <div class="grid2"><button class="btn2 cu" onclick="saveFin()">${I('check', 16, 2.5)}حفظ</button><button class="btn2" onclick="S.form=null;renderFin()">إلغاء</button></div>
     <div class="err" id="ferr"></div>`;
 }
@@ -3196,7 +3183,11 @@ function openForm(emp, kind) { S.form = {emp, kind, start:'next', reason:'net'};
 
 async function saveFin() {
   const x = {emp:S.form.emp, kind:S.form.kind, start:S.form.start, amount:$('#f_amount').value, note:$('#f_note') ? $('#f_note').value : ''};
-  if (S.form.kind === 'ded' && S.form.reason !== 'other') x.note = 'باقة انترنت';
+  if (S.form.kind === 'ded' && S.form.reason === 'fine') {
+    const fd = ($('#f_fdate') || {}).value || '', fn = (($('#f_fnote') || {}).value || '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fd) || fd > S.data.today) return $('#ferr').textContent = 'اختر تاريخ المخالفة';
+    x.note = 'مخالفة مرورية بتاريخ ' + dueL(fd, true) + (fn ? ' · ' + fn : '');
+  } else if (S.form.kind === 'ded' && S.form.reason !== 'other') x.note = 'باقة انترنت';
   if (S.form.kind === 'ded' && !x.note.trim()) return $('#ferr').textContent = 'اكتب سبب الخصم';
   if (S.form.kind === 'loan') x.months = $('#f_months').value;
   if (!(Number(x.amount) > 0)) return $('#ferr').textContent = 'اكتب المبلغ';
@@ -3217,11 +3208,35 @@ async function pay(emp, month) {
   const k = 'pay_' + emp + month;
   if (S.armed !== k) { S.armed = k; renderFin(); return; }
   const v = $('#pay_' + emp + month).value, dt = ($('#pd_' + emp + month) || {}).value || '';
+  /* الإصدار 92: المبلغ أقل من الباقي له: الافتراضي يتسجل دفعة والشهر يبقى مفتوح، وإقفال الشهر بالمبلغ الناقص يحتاج اختيار صريح */
+  const pe = empById(emp), pu = pe && (pe.unpaid || []).find(u => u.month === month), need = pu ? Math.max(0, Math.round((pu.net - (pu.credit || 0)) * 100) / 100) : 0;
+  if (!pay.force && pu && Number(v) > 0 && Number(v) < need - 0.005) {
+    const fm = n => (Math.round(n * 100) / 100).toLocaleString('en-US');
+    S.payq = {emp, month, v: Number(v), dt};
+    return ovOpen(`<label class="shh">المبلغ أقل من الباقي له</label>
+      <div class="sub" style="margin:-6px 0 10px">راتب ${esc(pu.label)}: الباقي له ${fm(need)}، وكتبت ${fm(Number(v))}.</div>
+      <button class="btn2 cu qbig" onclick="payPart()">${I('hand-coins', 17)}سجّلها دفعة</button>
+      <div class="sub" style="margin:4px 0 12px">يتسجل ${fm(Number(v))} دفعة من الراتب، ويبقى له ${fm(need - Number(v))} والشهر مفتوح.</div>
+      <button class="btn2 rd qbig" onclick="payClose()">اصرف ${fm(Number(v))} وأقفل الشهر</button>
+      <div class="sub" style="margin:4px 0 12px">الشهر يتقفل «منصرف»، والفرق ${fm(need - Number(v))} ما ينحسب له بعدها.</div>
+      <div class="err" id="pqerr"></div>
+      <button class="btn2" style="width:100%" onclick="S.payq=null;S.armed=null;ovClose();renderFin()">إلغاء</button>`);
+  }
+  pay.force = false;
   lockBtn('جاري تسجيل الصرف…');
   try { S.data = await call('apiPay', BOOT.key, {emp, month, amount: v, date: dt}); S.armed = null; if (S.pd) delete S.pd[emp + month]; renderAdmin(); toast('تسجل الصرف' + (dt && dt !== S.data.today ? ' بتاريخ ' + dmy(dt) : '')); }
   catch (e) { S.armed = null; renderFin(); toastErr(e); }
 }
 
+async function payPart() {
+  const q = S.payq; if (!q) return;
+  const un = lockBtn('جاري الحفظ…');
+  try {
+    S.data = await call('apiSalPart', BOOT.key, {emp: q.emp, amount: q.v, date: q.dt, month: q.month, note: ''}); S.payq = null; S.armed = null; if (S.pd) delete S.pd[q.emp + q.month]; ovClose(); renderAdmin();
+    const e = empById(q.emp); toast('انحفظت الدفعة، الباقي ' + ((e && e.sal ? e.sal.left : 0)).toLocaleString('en-US'));
+  } catch (err) { if (un) un(); const x = $('#pqerr'); if (x) x.textContent = err; else toastErr(err); }
+}
+function payClose() { const q = S.payq; if (!q) return; S.payq = null; ovClose(); S.armed = 'pay_' + q.emp + q.month; pay.force = true; return pay(q.emp, q.month); }
 function txText(t) {
   if (t.kind === 'part') return 'دفعة من الراتب';
   if (t.kind === 'pay' && t.via) return 'انسدد راتب ' + t.label + ' بالدفعات';

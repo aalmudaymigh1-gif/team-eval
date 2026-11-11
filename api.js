@@ -514,7 +514,7 @@
           recent: groups_(mine).slice(0, 15),
           unpaid: sal.open,
           loans: loanBalances_(e, fin),
-          tx: txList_(fin.filter(f => f.emp === e.id)).slice(0, 15),
+          tx: txList_(fin.filter(f => f.emp === e.id)),
           tasks: tasksFor_(e.id, tasks, todayS, pmap)
         };
       })
