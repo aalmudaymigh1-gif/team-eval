@@ -705,6 +705,21 @@ b,strong,th,h2,h3,h4{font-weight:600}
 /* الإصدار 57: كل البطاقات بلون بطاقات التقييم، و«رتّب» المشاريع مثل الفريق، والرواتب من يوم 28، والإعدادات فروع */
 .fseg .ordb{background:none;border:0;font:inherit;font-size:13px;color:var(--acc-dk);display:flex;align-items:center;gap:6px;cursor:pointer;flex:none;padding:0 2px}
 .fxs.two{grid-template-columns:1fr 1fr}
+/* الإصدار 96: ملف الموظف في الفريق */
+.fxs.one{grid-template-columns:1fr}.fxs.tft{margin:12px 0 0}.fxs.tfs{margin:4px 0 0}.fxs .tv{font-size:17px;font-weight:600}
+.fxt.tadd{margin:10px 2px 0}.fxt.tadd button{min-height:44px}.fxdue .fqa .btn2{min-height:44px}.fxdue .fqn{min-height:44px;justify-content:center}
+.tfc{display:block;width:100%;text-align:right;font:inherit;color:inherit;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:0 12px 12px;margin-top:10px}
+.tfc:active{background:var(--fill)}.tfc .tbh{margin:12px 2px 6px}.tfc .cv{color:var(--faint);display:flex;flex:none}
+.tfc .ln{display:flex;gap:4px 14px;flex-wrap:wrap;margin:0 2px;font-size:13px;color:var(--muted)}.tfc .ln b{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}.tfc .ln b.r{color:var(--red)}
+.tfc .chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 2px 0}
+.badge.rd{background:var(--red-soft);color:var(--red)}
+.tfile .tbh{margin-top:14px}.tfile .tbh .lnkb{width:44px;height:44px}.tfile .tbh .rate{height:44px}
+.tfile .fxbt button{min-height:56px;background:var(--surface)}.fxbt.n4{grid-template-columns:repeat(4,1fr)}
+.tfn{margin-top:10px;padding-top:4px;padding-bottom:4px;border-color:var(--red-line)}
+.tfn .row{align-items:center;gap:10px;padding:8px 0}.tfn .row+.row{border-top:1px solid var(--line)}
+.tfn .tx{min-width:0;display:flex;flex-direction:column}.tfn .tx b{font-weight:600;font-size:14px}.tfn .ac{display:flex;align-items:center;gap:10px;flex:none}
+.tfn .btn2{min-height:44px;padding:0 14px;flex:none;font-size:13px}
+.tff{margin-top:10px}.tbr .v .badge{margin-inline-start:4px}
 .fxs div.due b,.fxs div.due small{color:var(--red)}
 .fxs button.due{background:var(--surface);border:1px solid var(--red-line);border-radius:18px;padding:11px 10px;min-width:0;text-align:right;font:inherit;color:inherit;cursor:pointer;position:relative}
 .fxs button.due b{display:block;font-size:12px;color:var(--red);font-weight:400;margin-bottom:6px}
@@ -1135,9 +1150,9 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=95"></script>
+<script src="api.js?v=96"></script>
 <script>
-const APP_VER = '95';
+const APP_VER = '96';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1438,13 +1453,13 @@ function teamBreak(m) {
     <div class="tot"><span>الحافز</span><b>${M(m.bonus, '', 'pos')}</b></div>
   </div>`;
 }
-function openAttLog(id) { S.attLog = id; S.armed = null; renderTeam(); toTop(); }
+function openAttLog(id) { S.attLog = id; S.tfile = id; S.armed = null; S.form = null; renderTeam(); toTop(); }
 function renderAttLog(empId) {
   const d = S.data, e = d.employees.find(x => x.id === empId);
   if (!e) { S.attLog = null; return renderTeam(); }
   const list = (d.attendance || []).filter(x => x.emp === empId), mk = d.today.slice(0, 7), mon = list.filter(x => x.date.slice(0, 7) === mk);
   const lateN = mon.filter(x => x.late > 0).length, tot = mon.reduce((s, x) => s + (x.outMs && x.inMs ? x.outMs - x.inMs : 0), 0);
-  let h = `<button class="back" onclick="S.attLog=null;renderTeam()">${I('arrow-right', 17)}الفريق</button>
+  let h = `<button class="back" onclick="S.attLog=null;S.tfile='${e.id}';renderTeam();toTop()">${I('arrow-right', 17)}${esc(shortName(e.name))}</button>
     <h2 style="margin:10px 0 0;font-size:17px">سجل حضور ${esc(shortName(e.name))}</h2>
     <div class="scards" style="margin-top:12px"><div class="sc n"><b>${mon.length}</b><span>يوم حضور ${esc(d.month)}</span></div>
     <div class="sc ${lateN ? 'a' : 'n'}"><b>${lateN}</b><span>مرات تأخير</span></div></div>
@@ -1893,7 +1908,7 @@ function mountTabs() {
   if (old) old.remove();
   if (t) { t.id = 'tabsDock'; document.body.appendChild(t); }
 }
-function go(v) { S.ed = null; NF.open = false; RP.open = null; RP.hist = null; S.tsub = null; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false, due: false, lf: 'all'}); S.view = v; lsSet('adm_view', v); S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
+function go(v) { S.ed = null; NF.open = false; RP.open = null; RP.hist = null; S.tsub = null; S.tfile = null; S.tdue = false; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false, lf: 'all'}); S.view = v; lsSet('adm_view', v); S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
 function rerender() { renderAdmin(); }
 
 /* ---------- تسجيل ---------- */
@@ -1990,18 +2005,42 @@ async function undoLast() {
 /* الإصدار 54: صفحة الفريق فروع، وكل فرع يفتح صفحته */
 function renderTeam() {
   const d = S.data;
-  if (!d.employees.length) { $('#view').innerHTML = '<div class="card" style="margin-top:16px">' + emptyHtml('users', 'ما فيه موظفين، أضفهم من الإعدادات') + '</div>'; return; }
+  /* الإصدار 96: كل شي يخص الموظف في الفريق: ملفه، وراتبه وعهدته وإعداداته تنفتح من هنا */
+  if (S.ssub) return renderSet();
+  const addB = `<button onclick="ssub('add')">${I('plus', 16)}إضافة موظف</button>`;
+  if (!d.employees.length) { $('#view').innerHTML = '<div class="card" style="margin-top:16px">' + emptyHtml('users', 'ما فيه موظفين') + `</div><div class="fxt tord tadd">${addB}<span></span></div>`; return; }
   if (S.attLog) return renderAttLog(S.attLog);
   if (S.td) return renderTaskDetail();
   const e = S.tsub && empById(S.tsub.id);
+  if (e && (S.tsub.k === 'sal' || S.tsub.k === 'cu')) return renderFinEmp(finCtx(), e.id, S.tsub.k);
   if (e) { $('#view').innerHTML = teamSub(d, e, S.tsub.k); return; }
+  S.tsub = null;
+  const fe = S.tfile && empById(S.tfile);
+  if (fe) return renderEmpFile(fe);
+  S.tfile = null;
   const es = d.employees;
   if (S.tord && es.length > 1) {
     $('#view').innerHTML = `<div class="fxt tord"><span>رتّبهم مثل ما تبي، والترتيب يمشي على التطبيق كله</span><button class="dn" onclick="S.tord=false;renderTeam()">تم</button></div>`
       + '<div class="tbl2 fxl2">' + es.map((x, i) => `<div class="tbr ordr"><span class="ic">${I('user-round', 16)}</span><span class="k">${esc(x.name)}</span><span class="ord"><button ${i === 0 ? 'disabled' : ''} onclick="empMove('${x.id}',-1)" aria-label="فوق">${SV_UP}</button><button ${i === es.length - 1 ? 'disabled' : ''} onclick="empMove('${x.id}',1)" aria-label="تحت">${SV_DN}</button></span></div>`).join('') + '</div>';
     return;
   }
-  $('#view').innerHTML = (es.length > 1 ? `<div class="fxt tord"><span></span><button onclick="S.tord=true;renderTeam()">${I('list-checks', 16)}رتّب</button></div>` : '') + es.map(x => teamEmp(d, x)).join('');
+  const c = finCtx(), dueU = u => !!u.due && u.due <= d.today, lf = u => Math.max(0, u.net - (u.credit || 0));
+  const unpaid = es.reduce((a, x) => a + x.unpaid.filter(dueU).reduce((b, u) => b + lf(u), 0), 0), nUn = es.filter(x => x.unpaid.some(dueU)).length;
+  const withC = es.filter(x => ((c.parts[x.id] || {}).c || 0) > 0), cust = withC.reduce((a, x) => a + c.parts[x.id].c, 0);
+  let h = `<div class="fxs two tft">
+      ${nUn ? `<button class="due tap ${S.tdue ? 'on' : ''}" onclick="S.tdue=!S.tdue;S.armed=null;renderTeam()" aria-expanded="${!!S.tdue}"><b>رواتب مستحقة</b>${M(unpaid)}<small>${nUn + ' من ' + es.length + (es.length > 10 ? ' موظفاً' : ' موظفين')}</small><span class="chv">${I(S.tdue ? 'x' : 'chevron-left', 14)}</span></button>` : `<div><b>رواتب مستحقة</b>${M(0)}<small>ما فيه متأخر</small></div>`}
+      <div><b>عهد عند الموظفين</b>${M(cust)}<small>${withC.length ? esc(withC.map(x => shortName(x.name)).join('، ')) : 'ما عند أحد عهدة'}</small></div>
+    </div>`;
+  if (nUn && S.tdue) {
+    const rows = [];
+    es.forEach(x => x.unpaid.filter(dueU).forEach(u => rows.push({e: x, u})));
+    h += `<div class="card fxdue"><div class="ctitle">${I('banknote', 17)}رواتب مستحقة</div>${rows.map(({e, u}) => {
+      const k = 'payq_' + e.id + u.month, arm = S.armed === k;
+      return `<div class="row fqr"><button class="fqn" onclick="openFile('${e.id}')"><b>${esc(e.name)}</b><span class="sub">${esc(u.label)} · ${u.due < d.today ? 'متأخر من ' : 'مستحق '}${dueL(u.due)}</span></button><span class="fqa">${M(lf(u))}<button class="btn2 ${arm ? 'arm' : 'cu'}" onclick="payQuick('${e.id}','${u.month}')">${arm ? 'تأكيد الصرف' : 'اصرف'}</button></span></div>`;
+    }).join('')}<div class="sub" style="margin-top:6px">يُصرف الصافي المحسوب. لتغيير المبلغ افتح «الراتب» في ملف الموظف.</div></div>`;
+  }
+  h += `<div class="fxt tord tadd">${addB}${es.length > 1 ? `<button onclick="S.tord=true;renderTeam()">${I('list-checks', 16)}رتّب</button>` : '<span></span>'}</div>`;
+  $('#view').innerHTML = h + es.map(x => teamEmp(d, x)).join('');
 }
 async function empMove(id, dir) {
   const es = S.data.employees.slice(), i = es.findIndex(x => x.id === id), j = i + dir;
@@ -2012,7 +2051,13 @@ async function empMove(id, dir) {
   try { S.data = await call('apiEmpOrder', BOOT.key, es.map(x => x.id)); renderTeam(); }
   catch (e) { toastErr(e); refresh(true); }
 }
-function tsub(id, k) { S.tsub = id ? {id: id, k: k} : null; S.armed = null; renderTeam(); toTop(); }
+function tsub(id, k) {
+  S.tsub = id ? {id: id, k: k} : null; S.armed = null; S.form = null;
+  if (id) { S.tfile = id; if (k === 'sal' || k === 'cu') Object.assign(S.fx, {all: false, pm: '', cm: false, rt: false, lf: k === 'sal' ? 's' : 'c'}); }
+  renderTeam(); toTop();
+}
+function openFile(id) { S.view = 'team'; lsSet('adm_view', 'team'); S.tfile = id; S.tsub = null; S.ssub = null; S.attLog = null; S.td = null; S.tord = false; S.armed = null; S.form = null; renderAdmin(); toTop(); }
+function openEmpSet(id) { S.tfile = id; S.armed = null; S.form = null; S.ed = null; S.ssub = 'emp:' + id; renderTeam(); toTop(); }
 function rateEmp(id) { go('rec'); setEmp(id); }
 function tbRow(icon, k, v, on) {
   return `<button class="tbr" onclick="${on}"><span class="ic">${I(icon, 16)}</span><span class="k">${k}</span><span class="v">${v}</span><span class="ch">${I('chevron-left', 16)}</span></button>`;
@@ -2025,14 +2070,60 @@ function teamAttVal(d, e) {
   if (r.in) return '<span class="g">في الشغل</span> · ' + hrs(Date.now() - r.inMs);
   return 'في الطريق';
 }
+/* الإصدار 96: حقائق الموظف في مكان واحد (راتبه، عهدته، واللي ينتظر المدير منه)، تقرأ من نفس بيانات الصفحة */
+function empFacts(e) {
+  const d = S.data, c = finCtx(), p = Object.assign({c: 0, o: 0}, c.parts[e.id] || {});
+  const left = u => Math.max(0, Math.round((u.net - (u.credit || 0)) * 100) / 100), dueU = u => !!u.due && u.due <= d.today;
+  const un = e.unpaid || [], late = un.filter(dueU), cur = un.find(u => !dueU(u)) || null;
+  const ts = e.tasks || [], rv = ts.filter(t => t.status === 'review').length, op = ts.filter(t => t.status === 'open' || t.status === 'returned').length, lt = ts.filter(t => t.late).length;
+  const iv = c.items.filter(x => x.emp === e.id && x.kind === 'inv' && x.status === 'review');
+  const needs = [];
+  if (rv) needs.push({t: rv === 1 ? 'إثبات مهمة ينتظر اعتمادك' : rv === 2 ? 'إثباتين ينتظرون اعتمادك' : rv + ' إثباتات تنتظر اعتمادك', c: rv === 1 ? 'إثبات مهمة' : rv === 2 ? 'إثباتين' : rv + ' إثباتات', s: 'المهام', b: 'افتح', on: `tsub('${e.id}','tasks')`});
+  if (iv.length) needs.push({t: iv.length === 1 ? 'فاتورة تنتظر اعتمادك' : iv.length === 2 ? 'فاتورتين تنتظر اعتمادك' : iv.length + ' فواتير تنتظر اعتمادك', c: iv.length === 1 ? 'فاتورة تنتظر' : iv.length === 2 ? 'فاتورتين تنتظر' : iv.length + ' فواتير تنتظر', s: 'تعتمدها من المالية', a: iv.reduce((a, x) => a + x.amount, 0), b: 'افتح', on: "go('fin');openFinRv()"});
+  late.forEach(u => { const k = 'payq_' + e.id + u.month; needs.push({t: 'راتب ' + u.label, c: 'راتب ' + u.label, s: (u.due < d.today ? 'متأخر من ' : 'مستحق ') + dueL(u.due), a: left(u), b: S.armed === k ? 'تأكيد الصرف' : 'اصرف', arm: S.armed === k, r: 1, on: `payQuick('${e.id}','${u.month}')`}); });
+  if (p.c < 0) needs.push({t: 'عهدته بالسالب', c: 'عهدة بالسالب', s: 'صرف أكثر من اللي معه', a: -p.c, b: 'عطيته', r: 1, on: `askGive('${e.id}')`});
+  if (p.o > 0) needs.push({t: 'له عندك من جيبه', c: 'له من جيبه', s: 'فواتير دفعها من جيبه', a: p.o, b: 'سدّدته', on: `askSdad('${e.id}', ${p.o})`});
+  return {p, un, late, cur, left, rv, op, lt, needs, lateSum: Math.round(late.reduce((a, u) => a + left(u), 0) * 100) / 100, leftAll: Math.round(un.reduce((a, u) => a + left(u), 0) * 100) / 100};
+}
+function fmN(n) { return (Math.round(n * 100) / 100).toLocaleString('en-US'); }
 function teamEmp(d, e) {
-  const m = e.month, ts = e.tasks || [];
-  const rv = ts.filter(t => t.status === 'review').length, op = ts.filter(t => t.status === 'open' || t.status === 'returned').length, lt = ts.filter(t => t.late).length;
-  const tv = [rv ? rv + ' تنتظرك' : '', op ? op + ' مفتوحة' : '', lt ? `<span class="lt">${lt} متأخرة</span>` : ''].filter(Boolean).join(' · ');
+  const m = e.month, f = empFacts(e);
+  const sal = f.cur ? fmN(f.left(f.cur)) + ' · ' + dueL(f.cur.due) : f.late.length ? 'متأخر ' + fmN(f.lateSum) : e.salary ? 'منصرف' : '';
+  const chips = f.needs.map(x => `<span class="badge ${x.r ? 'rd' : 'a'}">${esc(x.c)}${x.a != null ? ' ' + fmN(x.a) : ''}</span>`).join('');
+  return `<button class="tfc" onclick="openFile('${e.id}')"><div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span>${seenHtml(e.seen)}</div><span class="cv">${I('chevron-left', 18)}</span></div>
+    <div class="ln">${sal ? `<span>الراتب <b>${sal}</b></span>` : ''}${f.p.c ? `<span>العهدة <b class="${f.p.c < 0 ? 'r' : ''}">${(f.p.c < 0 ? '−' : '') + fmN(Math.abs(f.p.c))}</b></span>` : ''}${f.op ? `<span>المهام <b>${f.op}</b></span>` : ''}${!sal && !f.p.c && !f.op ? '<span>ما عنده شي مفتوح</span>' : ''}</div>${chips ? `<div class="chips">${chips}</div>` : ''}</button>`;
+}
+/* الإصدار 96: ملف الموظف: ملخص بنظرة، ثم اللي ينتظر المدير، ثم الأزرار السريعة، ثم الفروع وكل فرع قيمته عليه */
+function renderEmpFile(e) {
+  const d = S.data, m = e.month, f = empFacts(e), id = e.id, sal = e.sal || {};
+  const tile = (k, v, s, cls) => `<div class="${cls || ''}"><b>${k}</b>${v}<small>${s}</small></div>`;
+  const tv = t => `<span class="mn tv">${t}</span>`;
+  const st = f.cur ? [M(f.left(f.cur)), 'يستحق ' + dueL(f.cur.due)] : f.late.length ? [M(f.lateSum), 'متأخر'] : e.salary ? [M(0), 'منصرف'] : [tv('—'), 'ما انحط له راتب'];
+  const n = f.needs.length;
+  let h = `<button class="back" onclick="S.tfile=null;S.form=null;S.armed=null;renderTeam();toTop()">${I('arrow-right', 17)}الفريق</button><h2>${esc(e.name)}</h2><div class="tfile">
+    <div class="tbh"><div class="n"><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span>${seenHtml(e.seen)}</div>
+      <button class="lnkb" onclick="tsub('${id}','link')" aria-label="رابط صفحته">${I('link', 16)}</button><button class="rate" onclick="rateEmp('${id}')">${I('clipboard-check', 14)}قيّمه</button></div>
+    <div class="fxs tfs">${tile(f.cur ? 'صافي ' + esc(f.cur.label.split(' ')[0]) : 'الراتب', st[0], st[1], !f.cur && f.late.length ? 'due' : '')}${tile('العهدة معه', f.p.c < 0 ? M(-f.p.c, '−') : M(f.p.c), f.p.c < 0 ? 'بالسالب' : f.p.c > 0 ? 'نقد عنده' : 'ما معه عهدة', f.p.c < 0 ? 'due' : '')}${tile('ينتظرك', tv(String(n)), n ? esc(f.needs[0].c) : 'ما فيه شي', n ? 'due' : '')}</div>`;
+  if (n) h += `<div class="card tfn">${f.needs.map(x => `<div class="row"><span class="tx"><b>${esc(x.t)}</b><span class="sub">${esc(x.s)}</span></span><span class="ac">${x.a != null ? M(x.a, '', x.r ? 'neg' : '') : ''}<button class="btn2 ${x.arm ? 'arm' : x.r ? 'cu' : ''}" onclick="${x.on}">${x.b}</button></span></div>`).join('')}</div>`;
+  const fm = S.form && S.form.emp === id ? S.form : null;
+  if (fm && ['part', 'prev', 'move'].includes(fm.kind)) h += `<div class="card tff">${salActHtml(e).replace(/<div class="hair"><\/div>$/, '')}</div>`;
+  else if (fm) h += `<div class="card tff">${formHtml(e, fm)}</div>`;
+  else h += `<div class="fxbt${(sal.open || []).length ? '' : ' n4'}">
+      <button onclick="askGive('${id}')">${I('hand-coins', 18)}عطيته</button>
+      <button onclick="askRet('${id}', ${Math.max(0, f.p.c)})">${I('rotate-ccw', 18)}رجّع لي</button>
+      ${(sal.open || []).length ? `<button onclick="S.form={emp:'${id}',kind:'part',month:'',date:'',amount:''};S.armed=null;renderTeam()">${I('banknote', 18)}دفعة راتب</button>` : ''}
+      <button onclick="openForm('${id}','adv')">${I('wallet', 18)}راتب مقدم</button>
+      <button class="rd" onclick="openForm('${id}','ded')">${I('circle-dollar-sign', 18)}خصم</button></div>`;
   const lv = [m.misses ? m.misses + ' تقصير' : '', m.stars ? m.stars + ' مميز' : ''].filter(Boolean).join(' · ');
-  return `<div class="tfr"><div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span>${seenHtml(e.seen)}</div>
-      <button class="lnkb" onclick="tsub('${e.id}','link')" aria-label="رابط صفحته">${I('link', 16)}</button><button class="rate" onclick="rateEmp('${e.id}')">${I('clipboard-check', 14)}قيّمه</button></div>
-    <div class="tbl2">${m.track ? tbRow('history', 'المواقف', lv || 'ما فيه', `tsub('${e.id}','log')`) : tbRow('sparkles', 'الحافز', M(m.bonus, '', 'pos') + (lv ? ` <span class="lv">· ${lv}</span>` : ''), `tsub('${e.id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${e.id}')`) : ''}${tbRow('list-checks', 'المهام', tv || 'ما عنده', `tsub('${e.id}','tasks')`)}</div></div>`;
+  const bd = (t, r) => ` <span class="badge ${r ? 'rd' : 'a'}">${t}</span>`;
+  const taskV = (f.op ? f.op + ' مفتوحة' : 'ما عنده') + (f.lt ? ` · <span class="lt">${f.lt} متأخرة</span>` : '') + (f.rv ? bd(f.rv + ' تنتظرك') : '');
+  const salV = f.un.length > 1 ? f.un.length + ' شهور · باقي ' + M(f.leftAll, '', 't') + (f.lateSum ? bd('متأخر ' + fmN(f.lateSum), 1) : '') : f.cur ? M(f.left(f.cur), '', 't') + ' · ' + dueL(f.cur.due) : f.late.length ? M(f.lateSum, '', 't') + bd('متأخر', 1) : e.salary ? 'منصرف' : 'ما انحط له راتب';
+  const cuV = f.p.c < 0 ? M(-f.p.c, '−', 'neg') + bd('بالسالب', 1) : f.p.c > 0 ? 'معه ' + M(f.p.c, '', 't') : 'ما معه عهدة';
+  const setV = (e.salary ? 'راتب ' + fmN(e.salary) : 'بدون راتب') + (m.track ? ' · متابعة فقط' : ' · حافز ' + fmN(e.max || 0));
+  h += `<div class="tbh2">الشغل</div><div class="tbl2">${tbRow('list-checks', 'المهام', taskV, `tsub('${id}','tasks')`)}${m.track ? tbRow('history', 'المواقف', lv || 'ما فيه', `tsub('${id}','log')`) : tbRow('sparkles', 'الحافز والمواقف', M(m.bonus, '', 'pos') + (lv ? ` <span class="lv">· ${lv}</span>` : ''), `tsub('${id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${id}')`) : ''}</div>
+    <div class="tbh2">الفلوس</div><div class="tbl2">${tbRow('wallet', 'الراتب', salV, `tsub('${id}','sal')`)}${tbRow('hand-coins', 'العهدة', cuV, `tsub('${id}','cu')`)}</div>
+    <div class="tbh2">الملف</div><div class="tbl2">${tbRow('settings', 'إعداداته', setV, `openEmpSet('${id}')`)}</div></div>`;
+  $('#view').innerHTML = h;
 }
 /* الإصدار 88: خصم مخالفة مرورية من صفحة الفريق، ينحفظ خصم عادي على أول شهر ما انصرف */
 function fineMonth(e) {
@@ -2063,7 +2154,7 @@ function teamTasksHtml(d, e) {
 }
 function teamSub(d, e, k) {
   const m = e.month, nm = esc(shortName(e.name));
-  let h = `<button class="back" onclick="tsub(null)">${I('arrow-right', 17)}الفريق</button>`;
+  let h = `<button class="back" onclick="tsub(null)">${I('arrow-right', 17)}${nm}</button>`;
   if (k === 'bonus') return h + `<h2>حافز ومواقف ${nm}</h2><div class="tsb">${teamBreak(m)}${impHtml(m)}<div class="tbh2">المواقف</div>${e.recent.length ? '<div class="tents">' + e.recent.map(x => entryHtml(x, true, m.track)).join('') + '</div>' : emptyHtml('history', 'ما فيه مواقف مسجلة')}</div>`;
   if (k === 'tasks') return h + `<h2>مهام ${nm}</h2>` + teamTasksHtml(d, e);
   if (k === 'log') return h + `<h2>مواقف ${nm}</h2><div class="tsb">${impHtml(m)}${e.recent.length ? '<div class="tents">' + e.recent.map(x => entryHtml(x, true, m.track)).join('') + '</div>' : emptyHtml('history', 'ما فيه مواقف مسجلة')}</div>`;
@@ -2390,7 +2481,7 @@ function ovOpen(html) {
 function ovClose() { if (S.rec && S.rec.where === 'tf') recStop(true); vStopIf('tf'); if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); document.documentElement.classList.remove('lock'); S.sheet = false; RP.form = null; RP.edit = null; RP.td = null; }
 function openSheet() {
   const d = S.data, tf = S.tf;
-  if (!d.employees.length) return toast('أضف موظف من الإعدادات أول', null, 'in');
+  if (!d.employees.length) return toast('أضف موظف من الفريق أول', null, 'in');
   const ids = d.employees.map(e => e.id);
   tf.emps = tf.emps.filter(x => ids.includes(x));
   if (!tf.emps.length) { const last = lsGet('tf_emp'); tf.emps = [ids.includes(last) ? last : ids[0]]; }
@@ -2774,61 +2865,33 @@ function finCtx() {
 function pickProj(cur, list) { const ok = id => id && list.some(p => p.id === id); return ok(cur) ? cur : ok(lsGet('tf_proj')) ? lsGet('tf_proj') : ((list[0] || {}).id || ''); }
 function shortName(n) { const w = String(n || '').trim().split(/\s+/); return /^(ابو|أبو|ام|أم|بن)$/.test(w[0]) && w[1] ? w[0] + ' ' + w[1] : w[0]; }
 function projName(k) { if (!k) return 'بدون مشروع'; const p = (S.data.projects || []).find(x => x.id === k); return p ? p.name : 'مشروع محذوف'; }
-function openSt(id) { Object.assign(S.fx, {emp: id, proj: null, rv: false, all: false, pm: '', cm: false, rt: false}); S.view = 'fin'; S.armed = null; S.form = null; renderAdmin(); toTop(); }
 function openFinProj(k) { Object.assign(S.fx, {proj: k, emp: '', rv: false, all: false}); S.armed = null; renderFin(); toTop(); }
 function openFinRv() { Object.assign(S.fx, {rv: true, emp: '', proj: null}); S.armed = null; renderFin(); toTop(); }
 function finBack() { Object.assign(S.fx, {emp: '', proj: null, rv: false, all: false, pm: '', cm: false, rt: false}); S.form = null; S.armed = null; renderFin(); toTop(); }
 function finBackBtn() { return `<button class="back" onclick="finBack()">${I('arrow-right', 17)}المالية</button>`; }
 
 function renderFin() {
+  /* الإصدار 96: صفحات راتب الموظف وعهدته تنعرض داخل «الفريق»، وأزرارها تنادي renderFin */
+  if (S.view === 'team') return renderTeam();
   const c = finCtx(), d = c.d;
   const fb = $('#fab'); fb.innerHTML = I('plus', 26, 2.5); fb.classList.remove('hide'); fb.setAttribute('aria-label', 'أضف فاتورة');
-  fb.classList.toggle('hide', !!(S.fx.rv || S.fx.emp || (S.fx.proj !== null && S.fx.proj !== undefined)));
+  fb.classList.toggle('hide', !!(S.fx.rv || (S.fx.proj !== null && S.fx.proj !== undefined)));
   if (S.fx.rv) return renderFinRv(c);
-  if (S.fx.emp && d.employees.some(e => e.id === S.fx.emp)) return renderFinEmp(c, S.fx.emp);
   if (S.fx.proj !== null && S.fx.proj !== undefined) return renderFinProj(c, S.fx.proj);
   S.fx.emp = '';
-  /* الإصدار 83: الراتب يصير مستحق في موعد صرفه (لكل موظف يومه)، والدفعات السابقة تنخصم من المبلغ */
-  const dueU = u => !!u.due && u.due <= d.today;
-  const unpaid = d.employees.reduce((a, e) => a + e.unpaid.filter(dueU).reduce((b, u) => b + Math.max(0, u.net - (u.credit || 0)), 0), 0);
-  const nUn = d.employees.filter(e => e.unpaid.some(dueU)).length;
-  const withC = d.employees.filter(e => ((c.parts[e.id] || {}).c || 0) > 0);
-  const cust = withC.reduce((a, e) => a + c.parts[e.id].c, 0);
+  /* الإصدار 96: المالية للمشاريع والفواتير. الرواتب والعهد وكل ما يخص الموظف في «الفريق» */
   const okM = c.items.filter(x => x.kind === 'inv' && x.status === 'ok' && x.ts.slice(0, 7) === c.mk);
   const exp = okM.reduce((a, x) => a + x.amount, 0);
   const rv = c.items.filter(x => x.kind === 'inv' && x.status === 'review');
-  const owe = d.employees.filter(e => ((c.parts[e.id] || {}).o || 0) > 0);
   const cnt = (n, one, two, many, sing) => n === 1 ? one : n === 2 ? two : n + ' ' + (n > 10 && sing ? sing : many);
   let h = `<div class="fxh"><span>${esc(d.month)}</span></div>
-    <div class="fxs${nUn ? '' : ' two'}">
-      ${nUn ? `<button class="due tap ${S.fx.due ? 'on' : ''}" onclick="S.fx.due=!S.fx.due;S.armed=null;renderFin()" aria-expanded="${!!S.fx.due}"><b>رواتب ما انصرفت</b>${M(unpaid)}<small>${nUn + ' من ' + d.employees.length + (d.employees.length > 10 ? ' موظفاً' : ' موظفين')}</small><span class="chv">${I(S.fx.due ? 'x' : 'chevron-left', 14)}</span></button>` : ''}
-      <div><b>عهد عند الموظفين</b>${M(cust)}<small>${withC.length ? esc(withC.map(e => shortName(e.name)).join('، ')) : 'ما عند أحد عهدة'}</small></div>
+    <div class="fxs one">
       <div><b>مصاريف الشهر</b>${M(exp)}<small>${okM.length ? cnt(okM.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير', 'فاتورة') : 'ما فيه فواتير'}</small></div>
     </div>`;
-  if (nUn && S.fx.due) {
-    const rows = [];
-    d.employees.forEach(e => e.unpaid.filter(dueU).forEach(u => rows.push({e, u})));
-    h += `<div class="card fxdue"><div class="ctitle">${I('banknote', 17)}رواتب مستحقة</div>${rows.map(({e, u}) => {
-      const k = 'payq_' + e.id + u.month, arm = S.armed === k;
-      return `<div class="row fqr"><button class="fqn" onclick="openSt('${e.id}')"><b>${esc(e.name)}</b><span class="sub">${esc(u.label)} · ${u.due < d.today ? 'متأخر من ' : 'مستحق '}${dueL(u.due)}</span></button><span class="fqa">${M(Math.max(0, u.net - (u.credit || 0)))}<button class="btn2 ${arm ? 'arm' : 'cu'}" onclick="payQuick('${e.id}','${u.month}')">${arm ? 'تأكيد الصرف' : 'اصرف'}</button></span></div>`;
-    }).join('')}<div class="sub" style="margin-top:6px">يُصرف الصافي المحسوب. لتغيير المبلغ افتح الموظف.</div></div>`;
-  }
-  const acts = [];
-  if (rv.length) acts.push(`<button class="r" onclick="openFinRv()"><span class="dt"></span>${cnt(rv.length, 'فاتورة تنتظر', 'فاتورتين تنتظر', 'فواتير تنتظر')} اعتمادك<em>${M(rv.reduce((a, x) => a + x.amount, 0), '', 't')}${I('chevron-left', 15)}</em></button>`);
-  owe.forEach(e => acts.push(`<button class="r" onclick="openSt('${e.id}')"><span class="dt"></span>${esc(shortName(e.name))} له عندك من جيبه<em>${M(c.parts[e.id].o, '', 't')}${I('chevron-left', 15)}</em></button>`));
-  if (acts.length) h += `<div class="fxa">${acts.join('')}</div>`;
-  const seg = S.fx.seg === 'p' ? 'p' : 'e';
+  if (rv.length) h += `<div class="fxa"><button class="r" onclick="openFinRv()"><span class="dt"></span>${cnt(rv.length, 'فاتورة تنتظر', 'فاتورتين تنتظر', 'فواتير تنتظر')} اعتمادك<em>${M(rv.reduce((a, x) => a + x.amount, 0), '', 't')}${I('chevron-left', 15)}</em></button></div>`;
   const nAct = (d.projects || []).filter(p => !p.archived).length;
-  h += `<div class="fseg"><div class="segc"><button class="${seg === 'e' ? 'on' : ''}" onclick="S.fx.seg='e';S.fx.ord=false;renderFin()">الموظفين</button><button class="${seg === 'p' ? 'on' : ''}" onclick="S.fx.seg='p';renderFin()">المشاريع</button></div>${seg === 'p' && nAct > 1 && !S.fx.ord ? `<button class="ordb" onclick="S.fx.ord=true;renderFin()">${I('list-checks', 16)}رتّب</button>` : ''}</div>`;
-  if (seg === 'e') {
-    const ev = e => { const pt = c.parts[e.id] || {}, v = [], du = e.unpaid.filter(dueU)[0], nx = e.unpaid.filter(u => !dueU(u))[0];
-      if (du) v.push(`<span class="badge a">راتب ${esc(du.label)}${du.due < d.today ? ' · متأخر' : ''}</span>`);
-      else if (nx && nx.due) v.push('يستحق ' + dueL(nx.due));
-      if ((pt.c || 0) < 0) v.push(`<span class="lt">عهدة ${M(pt.c, '', 't')}</span>`); else if (pt.c > 0) v.push('عهدة ' + M(pt.c, '', 't'));
-      if (pt.o > 0) v.push(`<span class="lt">له ${M(pt.o, '', 't')}</span>`);
-      return v.join(' · ') || 'ما معه عهدة'; };
-    h += d.employees.length ? '<div class="tbl2 fxl2">' + d.employees.map(e => tbRow('user-round', esc(e.name), ev(e), `openSt('${e.id}')`)).join('') + '</div>' : emptyHtml('users', 'ما فيه موظفين. أضفهم من الإعدادات');
-  } else {
+  h += `<div class="fseg"><div class="sech" style="margin:0">المشاريع</div>${nAct > 1 && !S.fx.ord ? `<button class="ordb" onclick="S.fx.ord=true;renderFin()">${I('list-checks', 16)}رتّب</button>` : ''}</div>`;
+  {
     const act = (d.projects || []).filter(p => !p.archived);
     if (S.fx.ord && act.length > 1) {
       h += `<div class="fxt"><span>رتّبها مثل ما تبي، والترتيب يمشي على المهام بعد</span><button class="dn" onclick="S.fx.ord=false;renderFin()">تم</button></div>`
@@ -2881,29 +2944,22 @@ function finLedger(c, e) {
   return L.sort((a, b) => a.ts < b.ts ? 1 : a.ts > b.ts ? -1 : 0);
 }
 
-function renderFinEmp(c, id) {
+/* الإصدار 96: نفس صفحة الموظف المالية، تنفتح من ملفه في «الفريق»: «الراتب» (الكشف والصرف والسلف) أو «العهدة» (الرصيد والمرتجعة)، وكل وحدة على فلتر حركاتها */
+function renderFinEmp(c, id, mode) {
   const d = c.d, e = d.employees.find(x => x.id === id), p = c.parts[id] || {c: 0, o: 0, g: 0, rt: 0, cash: 0};
   const mine = c.items.filter(x => x.emp === id);
-  const rv = mine.filter(x => x.kind === 'inv' && x.status === 'review');
-  const f = S.form && S.form.emp === id && !['part', 'prev', 'move'].includes(S.form.kind) ? S.form : null;
-  let h = finBackBtn() + `<div class="fxh"><h2>${esc(e.name)}</h2><span>${esc(d.month)}</span></div>`;
-  if (rv.length) h += `<div class="sech a" style="margin-top:4px">تنتظر اعتمادك<span>${rv.length}</span></div>` + rv.map(x => invRowHtml(x, false)).join('') + '<div style="height:12px"></div>';
+  const f = S.form && S.form.emp === id && !['part', 'prev', 'move'].includes(S.form.kind) ? S.form : null, sal = mode !== 'cu';
+  let h = `<button class="back" onclick="tsub(null)">${I('arrow-right', 17)}${esc(shortName(e.name))}</button><div class="fxh"><h2>${sal ? 'راتب' : 'عهدة'} ${esc(shortName(e.name))}</h2><span>${esc(d.month)}</span></div>`;
   /* الإصدار 92: الفواتير المرجّعة اللي ما صحّحها الموظف تبان هنا وتنحذف */
   const rt = mine.filter(x => x.kind === 'inv' && x.status === 'returned');
-  if (rt.length) h += `<button class="dtog" style="padding:6px 2px 10px;color:var(--red)" onclick="S.fx.rt=!S.fx.rt;S.armed=null;renderFin()" aria-expanded="${!!S.fx.rt}">فواتير مرتجعة عنده (${rt.length}) · ${rt.reduce((a, x) => a + x.amount, 0).toLocaleString('en-US')}${S.fx.rt ? ' · إخفاء' : ''}</button>` + (S.fx.rt ? `<div class="sub" style="margin:0 2px 8px">رجّعتها له وما صحّحها. ما تنحسب في العهدة ولا المصاريف. الحذف نهائي.</div>` + rt.map(x => invRowHtml(x, false)).join('') + '<div style="height:12px"></div>' : '');
-  h += salCardHtml(e, true);
-  h += `<div class="card">${salActHtml(e)}${e.unpaid.length ? (pm => e.unpaid.map(u => u.month === pm ? payHtml(e, u) : payRowHtml(e, u)).join(''))((e.unpaid.find(u => S.fx.pm === e.id + u.month) || e.unpaid.find(u => S.armed === 'pay_' + e.id + u.month) || e.unpaid[0]).month) : `<div class="row"><b>الراتب</b><span class="badge">${I('check', 12, 3)} كل الرواتب منصرفة</span></div>`}
+  if (!sal && rt.length) h += `<button class="dtog" style="padding:6px 2px 10px;color:var(--red)" onclick="S.fx.rt=!S.fx.rt;S.armed=null;renderFin()" aria-expanded="${!!S.fx.rt}">فواتير مرتجعة عنده (${rt.length}) · ${rt.reduce((a, x) => a + x.amount, 0).toLocaleString('en-US')}${S.fx.rt ? ' · إخفاء' : ''}</button>` + (S.fx.rt ? `<div class="sub" style="margin:0 2px 8px">رجّعتها له وما صحّحها. ما تنحسب في العهدة ولا المصاريف. الحذف نهائي.</div>` + rt.map(x => invRowHtml(x, false)).join('') + '<div style="height:12px"></div>' : '');
+  if (sal) h += salCardHtml(e, true);
+  if (sal) h += `<div class="card">${f ? formHtml(e, f) + '<div class="hair"></div>' : salActHtml(e)}${e.unpaid.length ? (pm => e.unpaid.map(u => u.month === pm ? payHtml(e, u) : payRowHtml(e, u)).join(''))((e.unpaid.find(u => S.fx.pm === e.id + u.month) || e.unpaid.find(u => S.armed === 'pay_' + e.id + u.month) || e.unpaid[0]).month) : `<div class="row"><b>الراتب</b><span class="badge">${I('check', 12, 3)} كل الرواتب منصرفة</span></div>`}
     ${e.loans.length ? `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('hand-coins', 14)}السلف</div>
       ${e.loans.map(l => `<div class="row"><span>سلفة ${sar(l.amount)} <span class="sub">· ${dmy(l.date)}</span></span><span class="sub">باقي ${sar(l.remaining)}</span></div>`).join('')}` : ''}</div>`;
-  h += `<div class="card"><div class="fxb">
+  if (!sal) h += `<div class="card"><div class="fxb">
       <div><b>${p.c < 0 ? 'صرف أكثر من عهدته' : 'معه عهدة'}</b>${M(Math.abs(p.c), p.c < 0 ? '−' : '', p.c < 0 ? 'neg' : '')}<small>عطيته ${M(p.g || 0, '', 't')}${p.rt ? ' · رجّع ' + M(p.rt, '', 't') : ''} · صرف ${M(p.cash || 0, '', 't')}</small></div>
-      <div><b>له عندك من جيبه</b>${M(p.o || 0, '', p.o > 0 ? 'neg' : '')}${p.o > 0 ? `<button class="lnk" onclick="askSdad('${id}', ${p.o})">${I('check', 14, 2.5)} سدّدته</button>` : ''}</div></div>
-    ${f ? '<div class="hair"></div>' + formHtml(e, f) : `<div class="fxbt">
-      <button onclick="askGive('${id}')">${I('hand-coins', 18)}عطيته</button>
-      <button onclick="askRet('${id}', ${Math.max(0, p.c)})">${I('rotate-ccw', 18)}رجّع لي</button>
-      <button onclick="openForm('${id}','loan')">${I('banknote', 18)}سلفة</button>
-      <button onclick="openForm('${id}','adv')">${I('wallet', 18)}راتب مقدم</button>
-      <button class="rd" onclick="openForm('${id}','ded')">${I('circle-dollar-sign', 18)}خصم</button></div>`}</div>`;
+      <div><b>له عندك من جيبه</b>${M(p.o || 0, '', p.o > 0 ? 'neg' : '')}${p.o > 0 ? `<button class="lnk" onclick="askSdad('${id}', ${p.o})">${I('check', 14, 2.5)} سدّدته</button>` : ''}</div></div></div>`;
   /* الإصدار 80: فلتر الحركات (الكل · العهدة · الراتب)، و«العهدة» فيها الرصيد بعد كل حركة */
   const lf = ['c', 's'].includes(S.fx.lf) ? S.fx.lf : 'all', LA = finLedger(c, e);
   let bal = 0, bOk = true;
@@ -3316,7 +3372,7 @@ function salActHtml(e) {
       <div class="grid2"><button class="btn2 cu" onclick="${mv ? `saveMove('${e.id}')` : `savePrev('${e.id}')`}">${I('check', 16, 2.5)}${mv ? 'حفظ التصحيح' : 'تسجيل الصرف'}</button><button class="btn2" onclick="S.form=null;renderFin()">إلغاء</button></div><div class="err" id="mverr"></div><div class="hair"></div>`;
   }
   const b = [];
-  if ((sal.open || []).length) b.push(`<button onclick="S.form={emp:'${e.id}',kind:'part',month:'',date:'',amount:''};S.armed=null;renderFin()">${I('hand-coins', 15)}دفعة راتب</button>`);
+  if (e.salary) b.push(`<button onclick="openForm('${e.id}','loan')">${I('banknote', 15)}سلفة</button>`);
   if ((e.prevMonths || []).length) b.push(`<button onclick="S.form={emp:'${e.id}',kind:'prev',month:'',date:'',amount:''};S.armed=null;renderFin()">${I('calendar', 15)}راتب شهر سابق</button>`);
   return b.length ? `<div class="salact">${b.join('')}</div>` : '';
 }
@@ -3382,7 +3438,7 @@ function gReadLine(r, hasQ) {
 }
 function guidesHtml(d) {
   const on = d.employees.filter(e => e.guide), gs = d.guides || [];
-  if (!on.length && !gs.length) return '<div class="card" style="margin-top:12px">' + emptyHtml('clipboard-list', 'شغّل «التوجيهات» لموظف من الإعدادات أول') + '</div>';
+  if (!on.length && !gs.length) return '<div class="card" style="margin-top:12px">' + emptyHtml('clipboard-list', 'شغّل «التوجيهات» لموظف من إعداداته في الفريق أول') + '</div>';
   const f = S.gform;
   let h = '<div style="height:10px"></div>';
   if (f) h += gFormHtml(d, on, f);
@@ -3534,7 +3590,9 @@ async function finishGuide(ans) {
 }
 
 function renderSet() {
-  const d = S.data, k = S.ssub || '';
+  const d = S.data, k = S.ssub || '', inT = S.view === 'team';
+  /* الإصدار 96: إعدادات الموظف وإضافة موظف تنفتح من «الفريق» */
+  if (inT && !(k === 'add' || (k.indexOf('emp:') === 0 && empById(k.slice(4))))) { S.ssub = null; return renderTeam(); }
   const form = (e) => `<div class="card">
       <div class="field"><span>الاسم</span><input id="n_${e.id}" value="${esc(edV(e, 'n'))}" oninput="edIn('${e.id}','n',this.value)"></div>
       <div class="grid2">
@@ -3550,7 +3608,7 @@ function renderSet() {
       <div class="grid2"><button class="btn2 ${edDirty(e) ? 'cu' : ''}" id="sv_${e.id}" onclick="saveEmp('${e.id}')">حفظ</button>
       <button class="btn2 ${S.armed==='tok_'+e.id?'arm':''}" onclick="newToken('${e.id}')">${S.armed==='tok_'+e.id?'تأكيد: الرابط القديم يوقف':'رابط جديد له'}</button></div>
       <div class="err" id="e_${e.id}"></div></div>`;
-  const back = `<button class="back" onclick="ssub(null)">${I('arrow-right', 17)}الإعدادات</button>`;
+  const back = `<button class="back" onclick="ssub(null)">${I('arrow-right', 17)}${inT ? (k === 'add' ? 'الفريق' : esc(shortName(empById(k.slice(4)).name))) : 'الإعدادات'}</button>`;
   const page = (title, body) => { $('#view').innerHTML = `${back}<h2>${title}</h2><div class="ssp">${body}</div>`; };
   const st = d.settings, ac = d.attCfg || {start: '07:00', grace: 15};
   if (k === 'calc') return page('حسبة الحافز', `<div class="card">
@@ -3565,7 +3623,7 @@ function renderSet() {
       <div class="err" id="terr"></div></div>`);
   if (k === 'att') return page('الحضور والانصراف', attSetCard(d).replace(/^<div class="card">\s*<div class="ctitle">.*?<\/div>/s, '<div class="card">'));
   if (k === 'proj') return page('المشاريع', projectsCard(d).replace(/^<div class="card"><div class="ctitle">.*?<\/div>/s, '<div class="card">'));
-  if (k === 'add') return page('إضافة موظف', `<div class="card">
+  if (k === 'add' && inT) return page('إضافة موظف', `<div class="card">
       <div class="field"><span>الاسم</span><input id="n_new"></div>
       <div class="grid2">
         <div class="field"><span>الراتب الأساسي (ريال)</span><input id="s_new" type="number" inputmode="numeric"></div>
@@ -3584,11 +3642,10 @@ function renderSet() {
       <div class="err" id="lkerr"></div></div>`);
   if (k === 'files') return page('الملفات غير المستخدمة', filesPageHtml());
   if (k === 'rules') return page('طريقة الحساب', `<div class="card">${rulesHtml(st)}</div>`);
-  const em = k.indexOf('emp:') === 0 && empById(k.slice(4));
-  if (em) return page(esc(em.name), form(em));
+  const em = inT && k.indexOf('emp:') === 0 && empById(k.slice(4));
+  if (em) return page('إعدادات ' + esc(shortName(em.name)), form(em));
   S.ssub = null;
   const ps = (d.projects || []).filter(p => !p.archived).length;
-  const ev = e => e.track ? 'متابعة فقط' : 'حافز شهري';
   $('#view').innerHTML = `<div class="setv">
     <div class="blk"><div class="lab">${I('circle-dollar-sign', 14)}الحسبة</div><div class="tbl2">
       ${tbRow('circle-dollar-sign', 'حسبة الحافز', 'تقصير ' + st.miss + ' · مميز +' + st.star, "ssub('calc')")}
@@ -3596,10 +3653,6 @@ function renderSet() {
     </div></div>
     <div class="blk"><div class="lab">${I('folder', 14)}الشغل</div><div class="tbl2">
       ${tbRow('folder', 'المشاريع', ps === 1 ? 'مشروع واحد' : ps === 2 ? 'مشروعين' : ps + ' مشاريع', "ssub('proj')")}
-    </div></div>
-    <div class="blk"><div class="lab">${I('users', 14)}الموظفين</div><div class="tbl2">
-      ${d.employees.map(e => tbRow('user-round', esc(e.name), ev(e), `ssub('emp:${e.id}')`)).join('')}
-      ${tbRow('plus', 'إضافة موظف', '', "ssub('add')")}
     </div></div>
     <div class="blk"><div class="lab">${I('lock', 14)}الحساب</div><div class="tbl2">
       ${tbRow('lock', 'الدخول والأجهزة', '', "ssub('link')")}
@@ -5517,7 +5570,9 @@ function subHead() {
   top.classList.add('subp');
   h1.parentNode.insertBefore(back, h1);
 }
-['renderTeam', 'renderTasks', 'renderFin', 'renderSet'].forEach(n => { const o = window[n]; window[n] = function () { const r = o.apply(this, arguments); subHead(); return r; }; });
+/* الإصدار 96: الرسم المتداخل (الفريق يعرض صفحات الراتب والإعدادات) يرتب العنوان مرة وحدة في الآخر */
+let SHD = 0;
+['renderTeam', 'renderTasks', 'renderFin', 'renderSet'].forEach(n => { const o = window[n]; window[n] = function () { SHD++; let r; try { r = o.apply(this, arguments); } finally { SHD--; } if (!SHD) subHead(); return r; }; });
 
 if (BOOT.page === 'admin') loadAdmin();
 else if (BOOT.page === 'emp') loadEmp();
