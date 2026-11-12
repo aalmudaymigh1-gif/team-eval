@@ -328,6 +328,10 @@ video.vid{height:auto;max-height:70vh;background:#000}
 .stc .r{display:flex;justify-content:space-between;font-size:13px;opacity:.92}
 .str{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
 .str:last-child{border-bottom:0}.str .tm{margin-top:2px}
+/* الإصدار 95: السطر اللي ينضغط كان ينشال خطه الفاصل بالغلط (هو آخر عنصر داخل زره دائماً) */
+.strb .str{border-bottom:1px solid var(--line)}.strb:last-child .str{border-bottom:0}
+/* الإصدار 95: سطور الحركات والفواتير أخف: العنوان 14 متوسط والمبلغ 14 */
+.str{font-size:14px;padding:9px 0}.str>span>b:first-child{font-size:14px;font-weight:500!important}.str .iva{font-size:14px}
 .str .ed{background:none;border:0;color:var(--muted);padding:4px;cursor:pointer}
 .str .ed,.slp .ed{min-width:40px;min-height:40px;display:inline-flex;align-items:center;justify-content:center}
 .slp .ed{background:none;border:0;color:var(--muted);cursor:pointer;vertical-align:middle}
@@ -337,7 +341,7 @@ details.rul summary{min-height:44px}
 .slnx{margin:8px 2px 0}.slnx b{color:var(--red);font-weight:600}
 .ob{display:inline-block;background:#F8F1E4;color:#85642B;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:600;margin-inline-start:4px;vertical-align:1px}
 .stc.red{background:#B05A52}.stc .bigdo{background:#fff;color:#B05A52;width:100%;justify-content:center;border:0;margin-top:10px;font-family:inherit;cursor:pointer}
-.cb{display:inline-block;background:#F1F0F7;color:#5E578C;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:600;margin-inline-start:4px;vertical-align:1px}
+.cb{display:inline-block;background:var(--amber-soft);color:#85642B;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:600;margin-inline-start:4px;vertical-align:1px}
 .wb{display:inline-block;background:#EDF3F8;color:#4F7493;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:600;margin-inline-start:4px;vertical-align:1px}
 .wl{font-size:13px;font-weight:600;white-space:nowrap}.wl.ok{color:var(--green)}.wl.soon{color:#C2954A}.wl.end{color:var(--faint)}
 .ivd h3{margin:0;font-size:17px}.ivd .amt{font-size:17px;font-weight:600;margin:4px 0 2px}
@@ -1129,9 +1133,9 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=94"></script>
+<script src="api.js?v=95"></script>
 <script>
-const APP_VER = '94';
+const APP_VER = '95';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -2627,7 +2631,7 @@ function wLeft(until, today) {
 function wBadge(x) {
   const me = BOOT.page === 'admin' && !S.preview;
   let b = '';
-  if (x.kind === 'inv' && x.paidBy === 'card') b = '<span class="cb">' + (me ? 'أنا' : 'المدير العام') + '</span>';
+  if (x.kind === 'inv' && x.paidBy === 'card') b = '<span class="cb">' + (me ? 'بطاقتي' : 'المدير العام') + '</span>';
   else if (x.kind === 'inv' && x.paidBy === 'own') b = '<span class="ob">' + (me ? 'من جيبه' : 'من جيبي') + '</span>';
   return b + (x.warrantyUntil ? '<span class="wb">ضمان</span>' : '');
 }
