@@ -339,9 +339,11 @@ video.vid{height:auto;max-height:70vh;background:#000}
 details.rul summary{min-height:44px}
 .payr{min-height:44px;display:block}.payr .row>span{display:flex;align-items:center;gap:8px;color:var(--muted)}
 .slnx{margin:8px 2px 0}.slnx b{color:var(--red);font-weight:600}
-.ob{display:inline-block;background:#F8F1E4;color:#85642B;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:600;margin-inline-start:4px;vertical-align:1px}
+.ob{display:inline-block;background:var(--red-soft);color:var(--red);border-radius:5px;padding:0 5px;font-size:12px;font-weight:500;line-height:18px;margin-inline-start:4px;vertical-align:1px}
+.gb{display:inline-block;background:var(--green-soft);color:#3A6249;border-radius:5px;padding:0 5px;font-size:12px;font-weight:500;line-height:18px;margin-inline-start:4px;vertical-align:1px}
+.empv .ob{background:#F8F1E4;color:#85642B}
 .stc.red{background:#B05A52}.stc .bigdo{background:#fff;color:#B05A52;width:100%;justify-content:center;border:0;margin-top:10px;font-family:inherit;cursor:pointer}
-.cb{display:inline-block;background:var(--amber-soft);color:#85642B;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:600;margin-inline-start:4px;vertical-align:1px}
+.cb{display:inline-block;background:var(--amber-soft);color:#85642B;border-radius:5px;padding:0 5px;font-size:12px;font-weight:500;line-height:18px;margin-inline-start:4px;vertical-align:1px}
 .wb{display:inline-block;background:#EDF3F8;color:#4F7493;border-radius:6px;padding:1px 6px;font-size:12px;font-weight:600;margin-inline-start:4px;vertical-align:1px}
 .wl{font-size:13px;font-weight:600;white-space:nowrap}.wl.ok{color:var(--green)}.wl.soon{color:#C2954A}.wl.end{color:var(--faint)}
 .ivd h3{margin:0;font-size:17px}.ivd .amt{font-size:17px;font-weight:600;margin:4px 0 2px}
@@ -2633,6 +2635,7 @@ function wBadge(x) {
   let b = '';
   if (x.kind === 'inv' && x.paidBy === 'card') b = '<span class="cb">' + (me ? 'بطاقتي' : 'المدير العام') + '</span>';
   else if (x.kind === 'inv' && x.paidBy === 'own') b = '<span class="ob">' + (me ? 'من جيبه' : 'من جيبي') + '</span>';
+  else if (me && x.kind === 'inv' && x.emp && (x.paidBy || 'cash') === 'cash') b = '<span class="gb">من العهدة</span>'; /* الإصدار 95 */
   return b + (x.warrantyUntil ? '<span class="wb">ضمان</span>' : '');
 }
 
@@ -2867,7 +2870,7 @@ function finLedger(c, e) {
       <span style="display:flex;align-items:center;gap:4px"><b class="iva ${x.paidBy === 'ret' ? 'r' : 'g'}">${M(x.amount, x.paidBy === 'ret' ? '−' : '+', x.paidBy === 'ret' ? 'neg' : 'pos')}</b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`}));
   mine.filter(x => x.kind === 'inv' && x.status === 'ok').forEach(x => {
     const fromC = (x.paidBy || 'cash') === 'cash';
-    L.push({ts: x.ts, k: 'c', dc: fromC ? -x.amount : 0, h: `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">فاتورة · ${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmyt(x.ts)} · ${esc(x.pname || 'عام')}${fromC ? ' · من العهدة' : ''}%%B%%</div></span><b class="iva">${M(x.amount, fromC ? '−' : '', fromC ? 'neg' : '')} ‹</b></div></button>`});
+    L.push({ts: x.ts, k: 'c', dc: fromC ? -x.amount : 0, h: `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">فاتورة · ${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmyt(x.ts)} · ${esc(x.pname || 'عام')}%%B%%</div></span><b class="iva">${M(x.amount, fromC ? '−' : '', fromC ? 'neg' : '')} ‹</b></div></button>`});
   });
   (e.tx || []).forEach(t => {
     const armed = S.armed === 'tx_' + t.id;
