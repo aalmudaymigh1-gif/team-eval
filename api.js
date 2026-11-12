@@ -7,7 +7,7 @@
   const FN_URL = SB_URL + '/functions/v1/push';
   const FILES_URL = SB_URL + '/functions/v1/files';
   let CRED = {};
-  const NOTIFY = ['tasks_add', 'task_return', 'task_update', 'inv_approve', 'inv_return'];
+  const NOTIFY = ['tasks_add', 'task_return', 'task_update', 'inv_approve', 'inv_return', 'inv_fix', 'att_bad', 'att_bad_undo'];
   function flush() {
     fetch(FN_URL, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: '{"op":"flush"}', keepalive: true }).catch(() => {});
   }
@@ -441,7 +441,7 @@
     return { id: x.id, ts: x.ts, emp: x.emp, kind: x.kind, amount: x.amount, desc: x.desc, project: x.project,
       pname: x.project ? (pmap[x.project] || '') : '', nph: x.photos.length, photos: x.photos, status: x.status, reason: x.reason,
       method: x.method || '', warrantyUntil: x.warrantyUntil || '', vendor: x.vendor || '', task: x.task || '', taskDeleted: !!x.taskDeleted,
-      paidBy: ['card', 'own', 'ret'].indexOf(x.paidBy) >= 0 ? x.paidBy : 'cash' };
+      paidBy: ['card', 'own', 'ret'].indexOf(x.paidBy) >= 0 ? x.paidBy : 'cash', oldAmount: x.oldAmount == null ? null : Number(x.oldAmount) };
   }
 
   function empPayload_(emp) {
@@ -509,7 +509,7 @@
         const mine = logs.filter(l => l.emp === e.id);
         const sal = salSt_(e, fin, logs, now);
         return {
-          id: e.id, name: e.name, salary: e.salary, max: e.max, token: e.token, track: e.track, attend: e.attend, guide: e.guide, lang: e.lang, payDay: e.payDay, payNext: e.payNext, sal: sal, prevMonths: prevMonths_(e, fin, logs), seen: (RAW.seen || {})[e.id] || 0,
+          id: e.id, name: e.name, salary: e.salary, max: e.max, token: e.token, track: e.track, attend: e.attend, guide: e.guide, lang: e.lang, payDay: e.payDay, payNext: e.payNext, sal: sal, prevMonths: prevMonths_(e, fin, logs), seen: (RAW.seen || {})[e.id] || 0, left: (RAW.left || {})[e.id] || 0,
           month: calcMonth_(e, logs, now),
           recent: groups_(mine).slice(0, 15),
           unpaid: sal.open,
@@ -778,6 +778,7 @@
     /* الإصدار 94 */
     async apiRepLaterPut(id, item, why, aft) { return rpc('rep_later_put', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), why: String(why || ''), aft: String(aft || '') }); },
     async apiRepNoteDel(id, at, txt) { return rpc('rep_note_del', { k: CRED.k || '', id: String(id || ''), at: Number(at) || 0, txt: String(txt || '') }); },
+    async apiRepCurAdd(id, item) { return rpc('rep_cur_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || '') }); },
     async apiRepLaterAdd(id, item, aft) { return rpc('rep_later_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), aft: String(aft || '') }); },
     async apiRepCurOrder(id, items) { return rpc('rep_cur_order', { k: CRED.k || '', id: String(id || ''), items: (items || []).map(String) }); },
 
@@ -843,6 +844,9 @@
     },
 
     oldCount() { return (RAW && RAW.tasksOld) || 0; },
+    /* الإصدار 97: «طلعت» ترسل حتى والصفحة تتقفل، وقائمة آخر ظهور للمدير */
+    seenOff() { if (!CRED.k && !CRED.t) return; try { fetch(SB_URL + '/rest/v1/rpc/app_seen_off', { method: 'POST', keepalive: true, headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ k: CRED.k || '', t: CRED.t || '' }) }).catch(() => {}); } catch (e) {} },
+    async seenList() { const r = await rpc('app_seen_list', { k: CRED.k || '' }); if (RAW && r) { RAW.seen = r.seen || {}; RAW.left = r.left || {}; } return r; },
     seen(ver, label) { rpc('app_seen_mark', { k: CRED.k || '', t: CRED.t || '', ver: String(ver || ''), label: String(label || '').slice(0, 60) }).catch(() => {}); },
     async apiTasksOld(k, q) {
       const old = await rpc('admin_tasks_old', { k: k, q: String(q || ''), lim: 200 });
@@ -1040,6 +1044,10 @@
     async apiAttToggle(k, empId, on) { return adminDo(k, 'att_toggle', { emp: empId, on: !!on }); },
     async apiProjLoc(k, id, lat, lng) { return adminDo(k, 'proj_loc', { id: id, lat: lat == null ? '' : String(lat), lng: lng == null ? '' : String(lng) }); },
     async apiAttDel(k, id) { return adminDo(k, 'att_del', { id: id }); },
+    /* الإصدار 97 */
+    async apiAttBad(k, id, reason) { return adminDo(k, 'att_bad', { id: id, reason: String(reason || '') }); },
+    async apiAttBadUndo(k, id) { return adminDo(k, 'att_bad_undo', { id: id }); },
+    async apiInvFix(k, id, amount) { return adminDo(k, 'inv_fix', { id: id, amount: String(amount) }); },
     async apiAttSettings(k, x) {
       const st = String(x.start || '');
       if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(st)) throw new Error('وقت بداية الدوام غير صحيح');

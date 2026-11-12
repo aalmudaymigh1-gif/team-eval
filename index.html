@@ -705,6 +705,22 @@ b,strong,th,h2,h3,h4{font-weight:600}
 /* الإصدار 57: كل البطاقات بلون بطاقات التقييم، و«رتّب» المشاريع مثل الفريق، والرواتب من يوم 28، والإعدادات فروع */
 .fseg .ordb{background:none;border:0;font:inherit;font-size:13px;color:var(--acc-dk);display:flex;align-items:center;gap:6px;cursor:pointer;flex:none;padding:0 2px}
 .fxs.two{grid-template-columns:1fr 1fr}
+/* الإصدار 97 */
+.atl{padding-top:0;padding-bottom:0}.atd{padding:14px 0;border-top:1px solid var(--line)}.atd:first-child{border-top:0}
+.atd .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.atd .hd b{font-size:15px;font-weight:600}.atd .hd>span{font-size:13px;color:var(--muted);flex:none}
+.atd .badge{font-size:12px;padding:2px 8px}
+.at3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}.at3 .s{min-width:0}
+.at3 .ph img,.at3 .ph .pph,.at3 .ph .nop{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1;height:auto;object-fit:cover;border-radius:12px;background:var(--fill);color:var(--faint);border:1px solid var(--line);cursor:pointer;font-size:12px}
+.at3 .ph .nop{cursor:default}
+.at3 b{display:block;font-size:13px;font-weight:600;margin-top:6px}.at3 .tm{font-size:13px;font-variant-numeric:tabular-nums}
+.at3 .lk{display:flex;align-items:center;gap:4px;min-height:44px;font-size:12px;color:var(--acc-dk);text-decoration:none}.at3 .lk span{text-decoration:underline}.at3 .lk.no{color:var(--amber);text-decoration:none}
+.atbad{margin-top:4px;border:1px solid var(--red-line);background:var(--red-soft);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--red)}.atbad b{font-weight:600}
+.atf{display:flex;align-items:center;gap:12px;margin-top:8px}.atf .btn2{min-height:44px;font-size:13px;padding:0 14px}.atf .lnk{min-height:44px}
+.rca{border-top:1px dashed var(--line2);padding-top:10px}.rca .btn2{min-height:44px}
+.fvf{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:10px 0 6px}
+.fvf select{min-height:44px;font:inherit;font-size:13px;min-width:0;width:100%;border:1px solid var(--line2);border-radius:12px;background:var(--surface);padding:0 8px;color:var(--text)}
+.fvn{margin:0 2px 6px;min-height:18px}.fseg .segc button{min-height:44px}.fvl{padding-top:2px;padding-bottom:2px}
+.ivfx{margin:2px 0 6px}.ivr .ivfx{margin:4px 0 0}.ivfx .badge{font-size:12px;padding:2px 8px}
 /* الإصدار 96: ملف الموظف في الفريق */
 .fxs.one{grid-template-columns:1fr}.fxs.tft{margin:12px 0 0}.fxs.tfs{margin:4px 0 0}.fxs .tv{font-size:17px;font-weight:600}
 .fxt.tadd{margin:10px 2px 0}.fxt.tadd button{min-height:44px}.fxdue .fqa .btn2{min-height:44px}.fxdue .fqn{min-height:44px;justify-content:center}
@@ -1150,9 +1166,9 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=96"></script>
+<script src="api.js?v=97"></script>
 <script>
-const APP_VER = '96';
+const APP_VER = '97';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1307,7 +1323,12 @@ function attStepsHtml(r, me) {
   const row = (done, cur, t, tm) => `<div class="ast ${done ? 'ok' : cur ? 'cur' : ''}"><span class="dot">${done ? I('check', 12, 3) : ''}</span><span>${t}${tm ? ' ' + tm : ''}</span></div>`;
   return `<div class="asts">${row(!!(r && r.home), !r, me ? 'طلعت من البيت' : 'طلع من البيت', r && r.home ? t12(r.home) : '')}${row(!!(r && r.in), r && r.home && !r.in, me ? 'وصلت المشروع' : 'وصل المشروع', r && r.in ? t12(r.in) : '')}${row(!!(r && r.out), r && r.in && !r.out, me ? 'طلعت من المشروع' : 'طلع من المشروع', r && r.out ? t12(r.out) : '')}</div>`;
 }
-function attCardHtml(d, isPreview) {
+function attBadHtml(d) {
+  const lim = addDays(d.today, -30), b = (d.att || []).filter(x => x.bad && x.date >= lim);
+  return b.map(x => `<div class="note bad" style="margin-top:8px"><div><b>تسجيل غير صحيح</b> · <span>${esc(dayLabel(x.date))}</span><div><b>المدير العام يقول:</b> ${esc(x.badReason)}</div></div></div>`).join('');
+}
+function attCardHtml(d, isPreview) { return attCardHtml0(d, isPreview) + (d.attend ? attBadHtml(d) : ''); }
+function attCardHtml0(d, isPreview) {
   if (!d.attend) return '';
   const r = (d.att || []).find(x => x.date === d.today);
   const p = r ? projOf(d.projects, r.project) : null, pn = p ? p.name : '';
@@ -1454,27 +1475,58 @@ function teamBreak(m) {
   </div>`;
 }
 function openAttLog(id) { S.attLog = id; S.tfile = id; S.armed = null; S.form = null; renderTeam(); toTop(); }
+/* الإصدار 97: كل خطوة صورتها فوق وتحتها وقتها وموقعها ودقته، و«تسجيل غير صحيح» على اليوم */
+function attStepCol(lab, at, photo, lat, lng, acc) {
+  return `<div class="s"><div class="ph">${photo ? attPhotoHtml(photo) : `<div class="nop">${I('camera', 20)}</div>`}</div><b>${lab}</b><div class="tm">${at ? t12(at) : '—'}</div>${!at ? '' : lat != null ? `<a class="lk" href="${mapUrl(lat, lng)}" target="_blank" rel="noopener">${I('map-pin', 13)}<span>الموقع${acc != null && acc !== '' ? ' · دقة ' + Math.round(acc) + ' م' : ''}</span></a>` : '<span class="lk no">بدون موقع</span>'}</div>`;
+}
 function renderAttLog(empId) {
   const d = S.data, e = d.employees.find(x => x.id === empId);
   if (!e) { S.attLog = null; return renderTeam(); }
   const list = (d.attendance || []).filter(x => x.emp === empId), mk = d.today.slice(0, 7), mon = list.filter(x => x.date.slice(0, 7) === mk);
-  const lateN = mon.filter(x => x.late > 0).length, tot = mon.reduce((s, x) => s + (x.outMs && x.inMs ? x.outMs - x.inMs : 0), 0);
+  const lateN = mon.filter(x => x.late > 0).length, tot = mon.reduce((s, x) => s + (!x.bad && x.outMs && x.inMs ? x.outMs - x.inMs : 0), 0), badN = mon.filter(x => x.bad).length;
   let h = `<button class="back" onclick="S.attLog=null;S.tfile='${e.id}';renderTeam();toTop()">${I('arrow-right', 17)}${esc(shortName(e.name))}</button>
     <h2 style="margin:10px 0 0;font-size:17px">سجل حضور ${esc(shortName(e.name))}</h2>
     <div class="scards" style="margin-top:12px"><div class="sc n"><b>${mon.length}</b><span>يوم حضور ${esc(d.month)}</span></div>
     <div class="sc ${lateN ? 'a' : 'n'}"><b>${lateN}</b><span>مرات تأخير</span></div></div>
-    <div class="sub" style="margin:8px 2px">مجموع الساعات هالشهر: <b>${hrs(tot)}</b></div>`;
+    <div class="sub" style="margin:8px 2px">مجموع الساعات هالشهر: <b>${hrs(tot)}</b>${badN ? ` · <span class="lt">${badN === 1 ? 'يوم واحد' : badN === 2 ? 'يومين' : badN + ' أيام'} غير صحيح، ما تنحسب</span>` : ''}</div>`;
   if (!list.length) return $('#view').innerHTML = h + emptyHtml('map-pin', 'ما سجّل حضور للحين');
-  h += '<div class="card" style="padding-top:2px;padding-bottom:2px">' + list.map(r => {
-    const arm = S.armed === 'att_' + r.id;
-    return `<div class="atr"><div style="flex:1"><b>${esc(dayLabel(r.date))}</b> ${r.late ? `<span class="badge late">متأخر ${r.late} د</span>` : ''} ${r.in ? attFlag(r, d.projects) : '<span class="badge a">ما وصل المشروع</span>'}${r.in && !r.out && r.date < d.today ? ' <span class="badge a">بدون طلوع</span>' : ''}
-      <div class="sub" style="line-height:1.8">${attRowLines(r, d.projects, d.today)}</div>
-      <div class="atph">${attPhotoHtml(r.homePhoto)}${attPhotoHtml(r.inPhoto)}${attPhotoHtml(r.outPhoto)}</div>
-      <div class="ilinks" style="margin-top:6px;flex-wrap:wrap">${attLinks(r)}
-      <button class="lnk dl ${arm ? 'arm' : ''}" onclick="delAtt('${r.id}')">${arm ? 'تأكيد الحذف' : 'حذف'}</button></div></div></div>`;
+  h += '<div class="card atl">' + list.map(r => {
+    const arm = S.armed === 'att_' + r.id, armU = S.armed === 'attu_' + r.id, p = projOf(d.projects, r.project);
+    return `<div class="atd ${r.bad ? 'bad' : ''}"><div class="hd"><b>${esc(dayLabel(r.date))}</b><span>${r.bad ? '<span class="badge rd">غير صحيح</span>' : r.out ? 'اشتغل ' + hrs(r.outMs - r.inMs) : r.in ? (r.date < d.today ? '<span class="badge a">بدون طلوع</span>' : 'في الشغل') : '<span class="badge a">ما وصل المشروع</span>'}</span></div>
+      <div class="sub">${[p ? esc(p.name) : '', r.in ? 'الطريق ' + hrs(r.inMs - r.homeMs) : '', r.bad ? 'ساعاته ما تنحسب' : ''].filter(Boolean).join(' · ')}${r.late ? ` <span class="badge late">متأخر ${r.late} د</span>` : ''}${r.in && r.inLat != null ? ' ' + attFlag(r, d.projects) : ''}</div>
+      <div class="at3">${attStepCol('طلع من البيت', r.home, r.homePhoto, r.homeLat, r.homeLng, r.homeAcc)}${attStepCol('وصل المشروع', r.in, r.inPhoto, r.inLat, r.inLng, r.inAcc)}${attStepCol('طلع من المشروع', r.out, r.outPhoto, r.outLat, r.outLng, r.outAcc)}</div>
+      ${r.bad ? `<div class="atbad"><b>تسجيل غير صحيح</b>${r.badLog ? ' · الأمانة والمصداقية' : ' · بدون تقصير'}<div>السبب: ${esc(r.badReason)}</div></div>` : ''}
+      <div class="atf">${r.bad ? `<button class="btn2 ${armU ? 'arm' : ''}" onclick="attBadUndo('${r.id}')">${armU ? 'تأكيد التراجع' : 'تراجع'}</button>` : `<button class="btn2 rd" onclick="askAttBad('${r.id}')">تسجيل غير صحيح</button>`}<button class="lnk dl ${arm ? 'arm' : ''}" onclick="delAtt('${r.id}')">${arm ? 'تأكيد الحذف' : 'حذف'}</button></div></div>`;
   }).join('') + '</div>';
   $('#view').innerHTML = h;
   loadAttPhotos();
+}
+function askAttBad(id) {
+  const d = S.data, r = (d.attendance || []).find(x => x.id === id); if (!r) return;
+  const e = empById(r.emp), paid = !!e && ((e.sal || {}).months || []).some(m => m.month === r.date.slice(0, 7) && m.closed);
+  S.armed = null;
+  ovOpen(`<label class="shh" for="abr">تسجيل غير صحيح</label>
+    <div class="sub" style="margin:-6px 0 10px">${esc(dayLabel(r.date))}. اليوم يطلع عليه «غير صحيح» وساعاته ما تنحسب، ويوصل الموظف إشعار بالسبب.</div>
+    <input id="abr" placeholder="السبب" maxlength="300" onkeydown="if(event.key==='Enter')doAttBad('${id}')">
+    <div class="sub" style="margin:8px 0 0">${paid ? 'راتب هذا الشهر مصروف ومقفل: تنحط العلامة والسبب بدون تقصير.' : 'ينسجل عليه تقصير «الأمانة والمصداقية». لو مسجل له نفس التقصير بهذا اليوم ما يتكرر.'}</div>
+    <div class="err" id="aberr"></div>
+    <div class="g21"><button class="btn2 arm" onclick="doAttBad('${id}')">سجّله غير صحيح</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
+  setTimeout(() => { const i = $('#abr'); if (i) i.focus(); }, 80);
+}
+async function doAttBad(id) {
+  const v = ($('#abr').value || '').trim();
+  if (!v) return $('#aberr').textContent = 'اكتب السبب';
+  const un = lockBtn('جاري الحفظ…');
+  try {
+    S.data = await call('apiAttBad', BOOT.key, id, v); ovClose(); renderAdmin();
+    const r = (S.data.attendance || []).find(x => x.id === id);
+    toast(r && r.badLog ? 'انسجل غير صحيح، ومعه تقصير الأمانة' : 'انحطت العلامة بدون تقصير (الشهر مصروف أو متسجل له بنفس اليوم)');
+  } catch (e) { if (un) un(); const x = $('#aberr'); if (x) x.textContent = e; else toastErr(e); }
+}
+async function attBadUndo(id) {
+  if (S.armed !== 'attu_' + id) { S.armed = 'attu_' + id; return renderAttLog(S.attLog); }
+  try { S.data = await call('apiAttBadUndo', BOOT.key, id); S.armed = null; renderAdmin(); toast('انشالت العلامة والتقصير'); }
+  catch (e) { S.armed = null; renderAttLog(S.attLog); toastErr(e); }
 }
 async function delAtt(id) {
   if (S.armed !== 'att_' + id) { S.armed = 'att_' + id; return renderAttLog(S.attLog); }
@@ -2066,6 +2118,7 @@ function impHtml(m) { return m.improve ? `<div class="imp">${I('triangle-alert',
 function teamAttVal(d, e) {
   const r = (d.attendance || []).find(x => x.emp === e.id && x.date === d.today);
   if (!r) return isOff(d.today) ? 'إجازة' : nowHM() >= addMin((d.attCfg || {}).start || '07:00', 30) ? '<span class="lt">ما طلع من البيت</span>' : 'ما طلع للحين';
+  if (r.bad) return '<span class="lt">غير صحيح</span>';
   if (r.out) return 'خلّص · ' + hrs(r.outMs - r.inMs);
   if (r.in) return '<span class="g">في الشغل</span> · ' + hrs(Date.now() - r.inMs);
   return 'في الطريق';
@@ -2090,7 +2143,7 @@ function teamEmp(d, e) {
   const m = e.month, f = empFacts(e);
   const sal = f.cur ? fmN(f.left(f.cur)) + ' · ' + dueL(f.cur.due) : f.late.length ? 'متأخر ' + fmN(f.lateSum) : e.salary ? 'منصرف' : '';
   const chips = f.needs.map(x => `<span class="badge ${x.r ? 'rd' : 'a'}">${esc(x.c)}${x.a != null ? ' ' + fmN(x.a) : ''}</span>`).join('');
-  return `<button class="tfc" onclick="openFile('${e.id}')"><div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span>${seenHtml(e.seen)}</div><span class="cv">${I('chevron-left', 18)}</span></div>
+  return `<button class="tfc" onclick="openFile('${e.id}')"><div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span><span data-seen="${e.id}">${seenHtml(e.seen, e.left)}</span></div><span class="cv">${I('chevron-left', 18)}</span></div>
     <div class="ln">${sal ? `<span>الراتب <b>${sal}</b></span>` : ''}${f.p.c ? `<span>العهدة <b class="${f.p.c < 0 ? 'r' : ''}">${(f.p.c < 0 ? '−' : '') + fmN(Math.abs(f.p.c))}</b></span>` : ''}${f.op ? `<span>المهام <b>${f.op}</b></span>` : ''}${!sal && !f.p.c && !f.op ? '<span>ما عنده شي مفتوح</span>' : ''}</div>${chips ? `<div class="chips">${chips}</div>` : ''}</button>`;
 }
 /* الإصدار 96: ملف الموظف: ملخص بنظرة، ثم اللي ينتظر المدير، ثم الأزرار السريعة، ثم الفروع وكل فرع قيمته عليه */
@@ -2101,7 +2154,7 @@ function renderEmpFile(e) {
   const st = f.cur ? [M(f.left(f.cur)), 'يستحق ' + dueL(f.cur.due)] : f.late.length ? [M(f.lateSum), 'متأخر'] : e.salary ? [M(0), 'منصرف'] : [tv('—'), 'ما انحط له راتب'];
   const n = f.needs.length;
   let h = `<button class="back" onclick="S.tfile=null;S.form=null;S.armed=null;renderTeam();toTop()">${I('arrow-right', 17)}الفريق</button><h2>${esc(e.name)}</h2><div class="tfile">
-    <div class="tbh"><div class="n"><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span>${seenHtml(e.seen)}</div>
+    <div class="tbh"><div class="n"><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span><span data-seen="${e.id}">${seenHtml(e.seen, e.left)}</span></div>
       <button class="lnkb" onclick="tsub('${id}','link')" aria-label="رابط صفحته">${I('link', 16)}</button><button class="rate" onclick="rateEmp('${id}')">${I('clipboard-check', 14)}قيّمه</button></div>
     <div class="fxs tfs">${tile(f.cur ? 'صافي ' + esc(f.cur.label.split(' ')[0]) : 'الراتب', st[0], st[1], !f.cur && f.late.length ? 'due' : '')}${tile('العهدة معه', f.p.c < 0 ? M(-f.p.c, '−') : M(f.p.c), f.p.c < 0 ? 'بالسالب' : f.p.c > 0 ? 'نقد عنده' : 'ما معه عهدة', f.p.c < 0 ? 'due' : '')}${tile('ينتظرك', tv(String(n)), n ? esc(f.needs[0].c) : 'ما فيه شي', n ? 'due' : '')}</div>`;
   if (n) h += `<div class="card tfn">${f.needs.map(x => `<div class="row"><span class="tx"><b>${esc(x.t)}</b><span class="sub">${esc(x.s)}</span></span><span class="ac">${x.a != null ? M(x.a, '', x.r ? 'neg' : '') : ''}<button class="btn2 ${x.arm ? 'arm' : x.r ? 'cu' : ''}" onclick="${x.on}">${x.b}</button></span></div>`).join('')}</div>`;
@@ -2133,12 +2186,30 @@ function fineMonth(e) {
   return mk;
 }
 /* الإصدار 80: آخر ظهور للموظف في التطبيق */
-function seenHtml(ms) {
-  if (!ms) return '<span class="ls">ما فتح التطبيق بعد</span>';
-  const now = Date.now(), d = nfDay(ms), t = (S.data || {}).today || nfDay(now), y = nfDay(now - 864e5);
-  if (now - ms < 10 * 60e3) return '<span class="ls on">متصل الآن</span>';
-  return `<span class="ls">آخر ظهور ${d === t ? 'اليوم' : d === y ? 'أمس' : dmy(d).slice(0, 5)} ${nfTime(ms)}</span>`;
+/* الإصدار 97: «متصل الآن» بس لو آخر نبضة قبل أقل من دقيقة ونص وما سجّل طلوعه، وغيرها «آخر ظهور قبل كذا» */
+function seenAgo(ms) {
+  const m = Math.floor(ms / 60000), h = Math.floor(m / 60);
+  if (m < 1) return 'قبل لحظات';
+  if (m < 60) return 'قبل ' + (m === 1 ? 'دقيقة' : m === 2 ? 'دقيقتين' : m <= 10 ? m + ' دقايق' : m + ' دقيقة');
+  return 'قبل ' + (h === 1 ? 'ساعة' : h === 2 ? 'ساعتين' : h <= 10 ? h + ' ساعات' : h + ' ساعة');
 }
+function seenHtml(ms, left) {
+  if (!ms) return '<span class="ls">ما فتح التطبيق بعد</span>';
+  const now = Date.now() + (S.seenSkew || 0), off = !!left && left >= ms, last = off ? left : ms;
+  if (!off && now - ms < 90e3) return '<span class="ls on">متصل الآن</span>';
+  if (now - last < 6 * 3600e3) return `<span class="ls">آخر ظهور ${seenAgo(Math.max(0, now - last))}</span>`;
+  const dd = nfDay(last), t = (S.data || {}).today || nfDay(now), y = nfDay(now - 864e5);
+  return `<span class="ls">آخر ظهور ${dd === t ? 'اليوم' : dd === y ? 'أمس' : dmy(dd).slice(0, 5)} ${nfTime(last)}</span>`;
+}
+function seenPaint() { document.querySelectorAll('[data-seen]').forEach(el => { const e = empById(el.dataset.seen); if (e) el.innerHTML = seenHtml(e.seen, e.left); }); }
+async function seenPoll() {
+  if (BOOT.page !== 'admin' || !S.data || S.view !== 'team' || document.visibilityState !== 'visible' || !document.querySelector('[data-seen]')) return;
+  try {
+    if (API.seenList && !/^preview/.test(BOOT.key || '')) { const r = await API.seenList(); if (r) { if (r.now) S.seenSkew = r.now - Date.now(); S.data.employees.forEach(e => { e.seen = (r.seen || {})[e.id] || 0; e.left = (r.left || {})[e.id] || 0; }); } }
+  } catch (e) {}
+  seenPaint();
+}
+setInterval(seenPoll, 60000);
 function teamTasksHtml(d, e) {
   const list = allTasks().filter(t => t.emp === e.id);
   list.forEach(t => { t.b = tBucket(t, d.today); });
@@ -2845,7 +2916,7 @@ function invRowHtml(x, showEmp) {
   const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', give ? '' : esc(x.pname || 'عام'), x.vendor ? esc(x.vendor) : '', dmyt(x.ts)].filter(Boolean).join(' · ');
   return `<div class="ivr ${x.status === 'review' ? 'rv' : ''}">
     <div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}">${M(x.amount, give ? '+' : '')}</b></div>
-    <div class="tm">${meta}${x.status !== 'ok' || give ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}${x.taskDeleted ? ' · <span class="tdel">مهمتها انحذفت</span>' : ''}</div>
+    <div class="tm">${meta}${x.status !== 'ok' || give ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}${x.taskDeleted ? ' · <span class="tdel">مهمتها انحذفت</span>' : ''}</div>${invFixTag(x)}
     ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px">${esc(x.reason)}</div>` : ''}
     ${invPhotosHtml(x, true)}
     ${x.status === 'review' ? `<div class="grid2" style="margin-top:8px"><button class="btn2 cu" onclick="invApprove('${x.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askInvReturn('${x.id}')">رجّعها</button></div>` : ''}
@@ -2890,8 +2961,22 @@ function renderFin() {
     </div>`;
   if (rv.length) h += `<div class="fxa"><button class="r" onclick="openFinRv()"><span class="dt"></span>${cnt(rv.length, 'فاتورة تنتظر', 'فاتورتين تنتظر', 'فواتير تنتظر')} اعتمادك<em>${M(rv.reduce((a, x) => a + x.amount, 0), '', 't')}${I('chevron-left', 15)}</em></button></div>`;
   const nAct = (d.projects || []).filter(p => !p.archived).length;
-  h += `<div class="fseg"><div class="sech" style="margin:0">المشاريع</div>${nAct > 1 && !S.fx.ord ? `<button class="ordb" onclick="S.fx.ord=true;renderFin()">${I('list-checks', 16)}رتّب</button>` : ''}</div>`;
-  {
+  /* الإصدار 97: «الفواتير | المشاريع». الفواتير أول، من الأحدث، بفلتر المشروع والموظف والحالة */
+  const seg = S.fx.seg === 'p' ? 'p' : 'i';
+  h += `<div class="fseg"><div class="segc"><button class="${seg === 'i' ? 'on' : ''}" onclick="S.fx.seg='i';S.fx.ord=false;S.fx.all=false;S.armed=null;renderFin()">الفواتير</button><button class="${seg === 'p' ? 'on' : ''}" onclick="S.fx.seg='p';S.armed=null;renderFin()">المشاريع</button></div>${seg === 'p' && nAct > 1 && !S.fx.ord ? `<button class="ordb" onclick="S.fx.ord=true;renderFin()">${I('list-checks', 16)}رتّب</button>` : ''}</div>`;
+  if (seg === 'i') {
+    const fp = S.fx.fp || '', fe = S.fx.fe || '', fs = S.fx.fs || '';
+    const all = c.items.filter(x => x.kind === 'inv');
+    const L = all.filter(x => (fs ? x.status === fs : x.status !== 'returned') && (!fp || (fp === '-' ? !x.project : x.project === fp)) && (!fe || (fe === '-' ? !x.emp : x.emp === fe)));
+    const opt = (v, t, cur) => `<option value="${v}" ${cur === v ? 'selected' : ''}>${t}</option>`;
+    const usedP = new Set(all.map(x => x.project || '')), nRt = all.filter(x => x.status === 'returned').length;
+    h += `<div class="fvf"><select aria-label="المشروع" onchange="S.fx.fp=this.value;S.fx.all=false;renderFin()">${opt('', 'كل المشاريع', fp)}${(d.projects || []).filter(p => !p.archived || usedP.has(p.id)).map(p => opt(p.id, esc(p.name), fp)).join('')}${usedP.has('') ? opt('-', 'بدون مشروع', fp) : ''}</select>
+      <select aria-label="الموظف" onchange="S.fx.fe=this.value;S.fx.all=false;renderFin()">${opt('', 'كل الموظفين', fe)}${d.employees.map(e => opt(e.id, esc(shortName(e.name)), fe)).join('')}${all.some(x => !x.emp) ? opt('-', 'أنا', fe) : ''}</select>
+      <select aria-label="الحالة" onchange="S.fx.fs=this.value;S.fx.all=false;renderFin()">${opt('', 'كل الحالات', fs)}${opt('review', 'تنتظر اعتمادك', fs)}${opt('ok', 'معتمدة', fs)}${opt('returned', 'مرتجعة' + (nRt ? ' (' + nRt + ')' : ''), fs)}</select></div>`;
+    const show = S.fx.all ? L : L.slice(0, 12);
+    h += `<div class="sub fvn">${L.length ? cnt(L.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير', 'فاتورة') + ' · ' + M(Math.round(L.reduce((a, x) => a + x.amount, 0) * 100) / 100, '', 't') : ''}${!fs && nRt ? (L.length ? ' · ' : '') + 'المرتجعة ما تنعرض هنا، اخترها من الحالة' : ''}</div>`;
+    h += L.length ? `<div class="card fxl fvl">${show.map(x => invRowHtml(x, true)).join('')}${L.length > 12 ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كلها (' + L.length + ')'}</button>` : ''}</div>` : emptyHtml('receipt', fp || fe || fs ? 'ما فيه فواتير بهذا الفلتر' : 'ما فيه فواتير للحين');
+  } else {
     const act = (d.projects || []).filter(p => !p.archived);
     if (S.fx.ord && act.length > 1) {
       h += `<div class="fxt"><span>رتّبها مثل ما تبي، والترتيب يمشي على المهام بعد</span><button class="dn" onclick="S.fx.ord=false;renderFin()">تم</button></div>`
@@ -2997,6 +3082,25 @@ async function invApprove(id) {
   try { S.data = await call('apiInvApprove', BOOT.key, id); renderAdmin(); toast('تم الاعتماد'); }
   catch (e) { toastErr(e); }
 }
+/* الإصدار 97: تصحيح مبلغ فاتورة معتمدة من المدير، ويبقى عليها «عدّله المدير العام» مع المبلغ القديم */
+function invFixTag(x) { return x.oldAmount != null && x.oldAmount !== x.amount ? `<div class="sub ivfx"><span class="badge a">عدّله المدير العام</span> <span>كان</span> ${M(x.oldAmount, '', 't')}</div>` : ''; }
+function askInvFix(id) {
+  const x = ((S.data.inv || {}).items || []).find(v => v.id === id); if (!x) return;
+  ovOpen(`<label class="shh" for="ifx">تصحيح مبلغ الفاتورة</label>
+    <div class="sub" style="margin:-6px 0 10px">${esc(x.desc)} · المبلغ الحالي ${M(x.amount, '', 't')}</div>
+    <input id="ifx" type="number" inputmode="decimal" step="0.01" value="${x.amount}" onkeydown="if(event.key==='Enter')doInvFix('${id}')">
+    <div class="sub" style="margin:8px 0 0">يطلع عليها «عدّله المدير العام» مع المبلغ القديم${x.emp ? '، ويوصل الموظف إشعار' : ''}. العهدة والمصاريف تتغير بالفرق بس.</div>
+    <div class="err" id="ifxerr"></div>
+    <div class="g21"><button class="btn2 cu" onclick="doInvFix('${id}')">${I('check', 16, 2.5)}حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
+  setTimeout(() => { const i = $('#ifx'); if (i) { i.focus(); i.select && i.select(); } }, 80);
+}
+async function doInvFix(id) {
+  const v = Number($('#ifx').value);
+  if (!(v > 0)) return $('#ifxerr').textContent = 'اكتب المبلغ';
+  const un = lockBtn('جاري الحفظ…');
+  try { S.data = await call('apiInvFix', BOOT.key, id, Math.round(v * 100) / 100); ovClose(); renderAdmin(); toast('تصحّح المبلغ'); }
+  catch (e) { if (un) un(); const x = $('#ifxerr'); if (x) x.textContent = e; else toastErr(e); }
+}
 function askInvReturn(id) {
   ovOpen(`<label class="shh" for="ir">وش الغلط في الفاتورة؟</label>
     <input id="ir" placeholder="اكتب سبب الإرجاع" onkeydown="if(event.key==='Enter')doInvReturn('${id}')">
@@ -3025,13 +3129,14 @@ function openInvD(id) {
   if (!x) return toastErr('الفاتورة غير موجودة، حدّث الصفحة');
   const e = d.employees.find(v => v.id === x.emp);
   S.armed = null;
-  ovOpen(`<div class="ivd"><h3>${esc(x.desc)}</h3><div class="amt">${M(x.amount, '', 'big')}</div>
+  ovOpen(`<div class="ivd"><h3>${esc(x.desc)}</h3><div class="amt">${M(x.amount, '', 'big')}</div>${invFixTag(x)}
     <div class="sub">${esc(e ? e.name : 'أنت')} · ${esc(x.pname || 'عام')}${x.vendor ? ' · ' + esc(x.vendor) : ''} · ${dmyt(x.ts)}</div>
     ${x.warrantyUntil ? `<div class="sub" style="margin-top:4px">ضمان لين ${dmy(x.warrantyUntil)} · ${wLeft(x.warrantyUntil, d.today)[1]}</div>` : ''}
     ${x.taskDeleted ? `<div class="note info" style="margin-top:8px">${I('info', 16)}<div>كانت فاتورة مهمة «${esc(x.desc)}»، والمهمة حُذفت. الفاتورة وسجلّها باقيان.</div></div>` : ''}
     ${x.status === 'review' && x.kind === 'inv' ? `<div class="grid2" style="margin-top:10px"><button class="btn2 cu" onclick="ovClose();invApprove('${id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="ovClose();askInvReturn('${id}')">رجّعها</button></div>` : ''}
     <div class="pgrid" id="ivdph">${x.photos.map(f => `<div class="pph" data-f="${esc(f)}">جاري التحميل…</div>`).join('')}</div>
     ${x.emp ? `<div class="sub" style="margin:6px 0 4px">دفعها من</div><div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبه'], ['card', 'أنا']].map(o => `<button class="${(x.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="${(x.paidBy || 'cash') === o[0] ? '' : `setPaidBy('${id}','${o[0]}',true)`}">${o[1]}</button>`).join('')}</div>` : '<div class="sub" style="margin:6px 0">دفعتها أنت</div>'}
+    ${x.status === 'ok' && x.kind === 'inv' ? `<button class="btn2" onclick="askInvFix('${id}')">${I('pencil', 15)}تصحيح المبلغ</button>` : ''}
     <button class="btn2" onclick="askWarranty('${id}')">${x.warrantyUntil ? 'عدّل الضمان' : 'أضف ضمان'}</button>
     <button class="btn2 rd" id="ivddel" onclick="delInvD('${id}')">حذف الفاتورة</button>
     <button class="btn2" style="border:0" onclick="ovClose()">إغلاق</button></div>`);
@@ -3958,7 +4063,7 @@ function empInvHtml(d, isPreview) {
   return h + '<div class="card" style="margin-top:14px;padding-top:4px;padding-bottom:4px">' + items.map(x => {
     const st = invSt(x, true), give = x.kind === 'give';
     return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? (x.paidBy === 'ret' ? 'r' : 'g') : ''}">${M(x.amount, give ? (x.paidBy === 'ret' ? '−' : '+') : '')}</b></div>
-      <div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · '}${dmyt(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>
+      <div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · '}${dmyt(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>${invFixTag(x)}
       ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px"><div><b>المدير العام يقول:</b> ${esc(x.reason)}</div></div>` : ''}
       ${!isPreview && x.kind === 'inv' && x.status === 'returned' && !x.task && !(S.invForm && S.inv.edit === x.id) ? `<button class="bigdo" style="border:0;font-family:inherit;cursor:pointer" onclick="invEdit('${x.id}')">${I('pencil', 15, 2.2)}صحّح وأعد الإرسال</button>` : ''}
       ${invPhotosHtml(x, BOOT.page === 'admin')}</div>`;
@@ -4104,7 +4209,11 @@ async function rfRetry(btn) {
   await refresh();
   if (btn && btn.isConnected) { btn.disabled = false; btn.textContent = 'إعادة المحاولة'; }
 }
-function seenPing() { if (Date.now() - seenAt < 300000 || /^preview/.test(BOOT.key || BOOT.token || '')) return; seenAt = Date.now(); API.seen(APP_VER, BOOT.page === 'admin' ? devLabel() : ''); }
+/* الإصدار 97: نبضة كل دقيقة والتطبيق ظاهر على الشاشة، و«طلعت» أول ما ينخفي أو يتقفل */
+function seenPing(force) { if (document.visibilityState !== 'visible' || (!force && Date.now() - seenAt < 50000) || /^preview/.test(BOOT.key || BOOT.token || '')) return; seenAt = Date.now(); API.seen(APP_VER, BOOT.page === 'admin' ? devLabel() : ''); }
+function seenBye() { if (/^preview/.test(BOOT.key || BOOT.token || '') || !API.seenOff) return; seenAt = 0; API.seenOff(); }
+setInterval(() => seenPing(), 60000);
+window.addEventListener('pagehide', seenBye);
 async function refresh(silent) {
   if (refreshing && Date.now() - refreshing < 45000) return;
   /* الإصدار 87: وقت الإرسال السحب للتحديث كان ما يسوي شي بصمت. الحين رسالة، ويتحدّث لحاله أول ما يخلص */
@@ -4239,7 +4348,8 @@ async function refresh(silent) {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') healSoon(300);
     if (document.visibilityState === 'hidden' && S.rec) recStop();
-    if (document.visibilityState === 'visible') { if (Date.now() - lastLoad > 60000) refresh(true); else checkUpdate(); seenPing(); }
+    if (document.visibilityState === 'visible') { if (Date.now() - lastLoad > 60000) refresh(true); else checkUpdate(); seenPing(true); seenPoll(); }
+    if (document.visibilityState === 'hidden') seenBye();
   });
   window.addEventListener('error', () => toastErr('صار خطأ، اسحب الصفحة لتحت عشان تحدّث'));
 })();
@@ -4521,7 +4631,7 @@ function rpDetailHtml(isAdmin) {
   const canOrd = isAdmin && rpCanTick(r, true) && cur.length > 1, ordm = canOrd && RP.ord && RP.ord.id === r.id;
   if (r.ord && cur.length > 1 && !tags[0]) tags[0] = ['الأهم', 'g'];
   h += rpPendHtml(r, pend, isAdmin, isAdmin ? rpReqL(r) : [], isAdmin ? rpLreqP(r) : []);
-  h += `<div class="rpcard now"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${canOrd ? (ordm ? `<button class="rchb dn fl" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur')}</div>`;
+  h += `<div class="rpcard now"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${canOrd ? (ordm ? `<button class="rchb dn fl" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur')}${rpCanTick(r, isAdmin) && !ordm ? rpCurAddHtml(r) : ''}</div>`;
   /* الإصدار 94: بطاقة الأعمال اللاحقة مطوية، تنفتح بالضغط على عنوانها */
   const ltOpen = RP.ltOpen === r.id;
   h += `<div class="rpcard lt ${ltOpen ? '' : 'cl'}"><div class="rch rchx" role="button" tabindex="0" aria-expanded="${ltOpen}" onclick="RP.ltOpen=RP.ltOpen==='${r.id}'?null:'${r.id}';rpRerender()"><span class="ci">${I('history', 16)}</span>الأعمال اللاحقة<span class="cn">${lat.length}</span><span class="rchv">${I(ltOpen ? 'chevron-up' : 'chevron-down', 16)}</span></div>${!ltOpen ? '' : `${rpCanTick(r, isAdmin) && lat.length ? rpNowList(r, lat, isAdmin) : lat.length || !rpLreqShow(r).length ? rpLaterHtml(lat) : ''}${rpLreqRows(r)}${rpCanTick(r, isAdmin) && !ordm ? rpLaterAddHtml(r, isAdmin) : ''}`}</div>`;
@@ -5296,6 +5406,19 @@ async function rpLqRev(id, rid, ok, btn) {
     RP.busy = false; rpRerender();
     toast(!ok ? 'تم رفض الطلب، ووصل الموظف إشعار' : res.to === 'cur' ? 'انضاف للأعمال الحالية لأن العمل الذي يبدأ بعده أُنجز' : 'انضاف للأعمال اللاحقة، ووصل الموظف إشعار');
   } catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
+/* الإصدار 97: إضافة عمل حالي من صفحة التقرير، للمدير وللموظف مباشرة مثل النموذج */
+function rpCurAddHtml(r) {
+  const st = RP.ca && RP.ca.id === r.id ? RP.ca : {t: ''};
+  return `<div class="ladd one rca"><input id="rca_t" placeholder="عمل حالي جديد" maxlength="300" value="${esc(st.t)}" oninput="RP.ca={id:'${r.id}',t:this.value}" onkeydown="if(event.key==='Enter')rpCurAdd('${r.id}')"><button class="btn2 cu" onclick="rpCurAdd('${r.id}')">${I('plus', 16)}إضافة</button></div>`;
+}
+async function rpCurAdd(id) {
+  if (RP.busy) return;
+  const t = String((RP.ca && RP.ca.id === id ? RP.ca.t : (document.getElementById('rca_t') || {}).value) || '').trim();
+  if (!t) return toast('اكتب العمل أولاً', null, 'er');
+  RP.busy = true;
+  try { await call('apiRepCurAdd', id, t); RP.ca = null; await rpTickReload(); RP.busy = false; rpRerender(); toast('انضاف للأعمال الحالية'); }
+  catch (e) { RP.busy = false; toastErr(e); }
 }
 function rpLaterAddHtml(r, isAdmin) {
   const cur = rpArr(r.cur), st = RP.la && RP.la.id === r.id ? RP.la : {t: '', a: ''};
