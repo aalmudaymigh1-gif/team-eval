@@ -705,6 +705,14 @@ b,strong,th,h2,h3,h4{font-weight:600}
 /* الإصدار 57: كل البطاقات بلون بطاقات التقييم، و«رتّب» المشاريع مثل الفريق، والرواتب من يوم 28، والإعدادات فروع */
 .fseg .ordb{background:none;border:0;font:inherit;font-size:13px;color:var(--acc-dk);display:flex;align-items:center;gap:6px;cursor:pointer;flex:none;padding:0 2px}
 .fxs.two{grid-template-columns:1fr 1fr}
+/* الإصدار 98 */
+.dyh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:16px 4px 6px}.dyh b{font-size:14px;font-weight:600;color:var(--text)}.dyh span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.fvl{padding:0}.fvl .dyh:first-child{margin-top:8px}.dyc{padding-top:2px;padding-bottom:2px;margin-top:0}.dyc .strb{min-height:44px}
+.dyc .tm .ic{display:inline-flex;vertical-align:-2px;color:var(--faint);margin-inline-start:4px}.dyc .tm.rsn{color:var(--red)}
+.dyc .rvb{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}.dyc .rvb .btn2{min-height:44px}
+.dtog.dya{margin:6px 0 8px;min-height:44px}
+.emp.wr{flex-wrap:wrap;overflow:visible}
+.top.subp .back{position:relative}.top.subp .back::after{content:"";position:absolute;inset:-8px -12px}
 /* الإصدار 97 */
 .atl{padding-top:0;padding-bottom:0}.atd{padding:14px 0;border-top:1px solid var(--line)}.atd:first-child{border-top:0}
 .atd .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.atd .hd b{font-size:15px;font-weight:600}.atd .hd>span{font-size:13px;color:var(--muted);flex:none}
@@ -1166,9 +1174,9 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=97"></script>
+<script src="api.js?v=98"></script>
 <script>
-const APP_VER = '97';
+const APP_VER = '98';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1985,7 +1993,7 @@ function renderRec() {
   const empSub = e => e.track ? 'متابعة فقط' : 'حافز الشهر ' + M(e.month.bonus, '', 't pos');
   $('#view').innerHTML = `
     <div class="blk"><div class="lab">${I('user', 14)}الموظف</div>
-      <div class="emp">${d.employees.map(e => `<button class="empc ${S.emp===e.id?'on':''}" onclick="setEmp('${e.id}')">${esc(e.name)}</button>`).join('')}</div>
+      <div class="emp wr">${d.employees.map(e => `<button class="empc ${S.emp===e.id?'on':''}" onclick="setEmp('${e.id}')">${esc(e.name)}</button>`).join('')}</div>
       ${emp.id ? `<div class="empi">${esc(emp.name)} · ${empSub(emp)}</div>` : ''}</div>
     <div class="blk"><div class="lab">${I('calendar', 14)}اليوم</div>
       ${segc([['today','اليوم'],['yest','أمس'],['other','تاريخ ثاني']], S.dateMode, 'setDate')}
@@ -2973,9 +2981,8 @@ function renderFin() {
     h += `<div class="fvf"><select aria-label="المشروع" onchange="S.fx.fp=this.value;S.fx.all=false;renderFin()">${opt('', 'كل المشاريع', fp)}${(d.projects || []).filter(p => !p.archived || usedP.has(p.id)).map(p => opt(p.id, esc(p.name), fp)).join('')}${usedP.has('') ? opt('-', 'بدون مشروع', fp) : ''}</select>
       <select aria-label="الموظف" onchange="S.fx.fe=this.value;S.fx.all=false;renderFin()">${opt('', 'كل الموظفين', fe)}${d.employees.map(e => opt(e.id, esc(shortName(e.name)), fe)).join('')}${all.some(x => !x.emp) ? opt('-', 'أنا', fe) : ''}</select>
       <select aria-label="الحالة" onchange="S.fx.fs=this.value;S.fx.all=false;renderFin()">${opt('', 'كل الحالات', fs)}${opt('review', 'تنتظر اعتمادك', fs)}${opt('ok', 'معتمدة', fs)}${opt('returned', 'مرتجعة' + (nRt ? ' (' + nRt + ')' : ''), fs)}</select></div>`;
-    const show = S.fx.all ? L : L.slice(0, 12);
-    h += `<div class="sub fvn">${L.length ? cnt(L.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير', 'فاتورة') + ' · ' + M(Math.round(L.reduce((a, x) => a + x.amount, 0) * 100) / 100, '', 't') : ''}${!fs && nRt ? (L.length ? ' · ' : '') + 'المرتجعة ما تنعرض هنا، اخترها من الحالة' : ''}</div>`;
-    h += L.length ? `<div class="card fxl fvl">${show.map(x => invRowHtml(x, true)).join('')}${L.length > 12 ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كلها (' + L.length + ')'}</button>` : ''}</div>` : emptyHtml('receipt', fp || fe || fs ? 'ما فيه فواتير بهذا الفلتر' : 'ما فيه فواتير للحين');
+    h += `<div class="sub fvn">${L.length ? cnt(L.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير', 'فاتورة') + ' · ' + M(Math.round(L.reduce((a, x) => a + x.amount, 0) * 100) / 100, '', 't') : ''}</div>`;
+    h += L.length ? `<div class="fvl">${invDaysHtml(L, true, false, 12, 'كلها')}</div>` : emptyHtml('receipt', fp || fe || fs ? 'ما فيه فواتير بهذا الفلتر' : 'ما فيه فواتير للحين');
   } else {
     const act = (d.projects || []).filter(p => !p.archived);
     if (S.fx.ord && act.length > 1) {
@@ -3055,7 +3062,7 @@ function renderFinEmp(c, id, mode) {
   const show = S.fx.all ? L : L.slice(0, 12);
   h += `<div class="sech">${lf === 'c' ? 'حركات العهدة' : lf === 's' ? 'حركات الراتب' : 'كل حركاته'}<span>${L.length}</span></div>`;
   h += `<div class="segc fxlf">${[['all', 'الكل'], ['c', 'العهدة'], ['s', 'الراتب']].map(o => `<button class="${lf === o[0] ? 'on' : ''}" onclick="S.fx.lf='${o[0]}';S.fx.all=false;renderFin()">${o[1]}</button>`).join('')}</div>`
-    + (lf === 'c' && LA.some(x => x.k === 'c' && !x.dc) ? '<div class="sub fxln">فواتير «أنا» و«من جيبه» ما تغيّر العهدة، تطلع في «الكل»</div>' : '');
+    + (lf === 'c' && LA.some(x => x.k === 'c' && !x.dc) ? '<div class="sub fxln">فواتير «بطاقتي» و«من جيبه» ما تغيّر العهدة، تطلع في «الكل»</div>' : '');
   h += L.length ? `<div class="card fxl" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${show.map(x => x.h).join('')}
       ${L.length > 12 ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كلها (' + L.length + ')'}</button>` : ''}</div>` : emptyHtml('wallet', 'ما فيه حركات للحين');
   $('#view').innerHTML = h;
@@ -3067,9 +3074,7 @@ function renderFinProj(c, k) {
   let h = finBackBtn() + `<div class="fxh"><h2>${esc(projName(k))}</h2><span>${esc(d.month)}</span></div>
     <div class="fxs"><div><b>هالشهر</b>${M(m)}</div><div><b>الإجمالي</b>${M(all)}</div><div><b>الفواتير</b><span class="mn">${list.length}</span></div></div>`;
   if (!list.length) return $('#view').innerHTML = h + emptyHtml('receipt', 'ما فيه فواتير على هالمشروع للحين');
-  const show = S.fx.all ? list : list.slice(0, 15);
-  h += `<div class="sech">الفواتير</div><div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${show.map(x => invMiniRow(x, true, true)).join('')}
-    ${list.length > 15 ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كل الفواتير (' + list.length + ')'}</button>` : ''}</div>`;
+  h += `<div class="sech">الفواتير</div><div class="fvl">${invDaysHtml(list, true, true, 15, 'كل الفواتير')}</div>`;
   const ws = list.filter(x => x.warrantyUntil).sort((a, b) => a.warrantyUntil < b.warrantyUntil ? -1 : 1);
   if (ws.length) {
     const wrow = x => { const w = wLeft(x.warrantyUntil, d.today); return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b><div class="tm">${esc(x.ename || 'أنت')} · ${dmyt(x.ts)} · لين ${dmy(x.warrantyUntil)}</div></span><span class="wl ${w[0]}">${w[1]}</span></div></button>`; };
@@ -3120,9 +3125,25 @@ async function invDel(id) {
   try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذفت'); }
   catch (e) { S.armed = null; renderInv(); toastErr(e); }
 }
-function invMiniRow(x, showEmp, noProj) {
-  const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', noProj ? '' : esc(x.pname || 'عام'), x.vendor ? esc(x.vendor) : '', dmyt(x.ts)].filter(Boolean).join(' · ');
-  return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${meta}</div></span><b class="iva">${M(x.amount)} ‹</b></div></button>`;
+/* الإصدار 98: الفواتير مجمّعة حسب اليوم: عنوان اليوم مرة وحدة بعدده ومجموعه، وتحته فواتيره بسطر مختصر فيه الوقت بس. الضغط يفتح التفاصيل */
+function invDayLabel(dt, today) {
+  const l = dayLabel(dt).replace(new RegExp(' ' + today.slice(0, 4) + '$'), '');
+  return dt === today ? 'اليوم · ' + l : dt === addDays(today, -1) ? 'أمس · ' + l : l;
+}
+function invDayRow(x, showEmp, noProj) {
+  const st = invSt(x, false), meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', noProj ? '' : esc(x.pname || 'عام'), x.vendor ? esc(x.vendor) : '', t12(x.ts)].filter(Boolean).join(' · ');
+  return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${meta}${x.status !== 'ok' ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}${x.taskDeleted ? ' · <span class="tdel">مهمتها انحذفت</span>' : ''}${(x.photos || []).length ? `<span class="ic" aria-label="فيها صورة">${I('image', 13)}</span>` : ''}</div>${invFixTag(x)}${x.status === 'returned' && x.reason ? `<div class="tm rsn">${esc(x.reason)}</div>` : ''}</span><b class="iva">${M(x.amount)} ‹</b></div></button>${x.status === 'review' ? `<div class="rvb"><button class="btn2 cu" onclick="invApprove('${x.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askInvReturn('${x.id}')">رجّعها</button></div>` : ''}`;
+}
+function invDaysHtml(list, showEmp, noProj, lim, allLabel) {
+  const d = S.data, L = list.slice().sort((a, b) => a.ts < b.ts ? 1 : a.ts > b.ts ? -1 : 0), days = [], by = {};
+  L.forEach(x => { const k = x.ts.slice(0, 10); if (!by[k]) { by[k] = []; days.push(k); } by[k].push(x); });
+  let n = 0, h = '', more = false;
+  for (const k of days) {
+    if (!S.fx.all && n >= lim) { more = true; break; }
+    const D = by[k]; n += D.length;
+    h += `<div class="dyh"><b>${esc(invDayLabel(k, d.today))}</b><span>${D.length === 1 ? 'فاتورة وحدة' : D.length === 2 ? 'فاتورتين' : D.length + (D.length > 10 ? ' فاتورة' : ' فواتير')} · ${M(Math.round(D.reduce((a, x) => a + x.amount, 0) * 100) / 100, '', 't')}</span></div><div class="card fxl dyc">${D.map(x => invDayRow(x, showEmp, noProj)).join('')}</div>`;
+  }
+  return h + (more || (S.fx.all && L.length > lim && days.length > 1) ? `<button class="dtog dya" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : allLabel + ' (' + L.length + ')'}</button>` : '');
 }
 function openInvD(id) {
   const d = S.data, x = ((d.inv || {}).items || []).find(v => v.id === id);
