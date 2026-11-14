@@ -1174,9 +1174,9 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=98"></script>
+<script src="api.js?v=99"></script>
 <script>
-const APP_VER = '98';
+const APP_VER = '99';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -3019,18 +3019,19 @@ function renderFinRv(c) {
     + (rv.length ? rv.map(x => invRowHtml(x, true)).join('') : emptyHtml('check-check', 'ما فيه فواتير تنتظرك'));
 }
 
+/* الإصدار 99: الحركات مجمّعة حسب اليوم، فالسطر فيه الوقت بس والتاريخ في عنوان المجموعة */
 function finLedger(c, e) {
   const L = [], mine = c.items.filter(x => x.emp === e.id);
-  mine.filter(x => x.kind === 'give').forEach(x => L.push({ts: x.ts, k: 'c', dc: x.paidBy === 'own' ? 0 : x.paidBy === 'ret' ? -x.amount : x.amount, h: `<div class="str"><span><b style="font-weight:600">${x.paidBy === 'own' ? 'سدّدت له' : x.paidBy === 'ret' ? 'رجّع من العهدة' : 'عطيته عهدة'}</b>${x.desc && !['عهدة', 'سداد', 'رجّع الباقي'].includes(x.desc) ? ' · ' + esc(x.desc) : ''}<div class="tm">${dmyt(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}%%B%%</div></span>
+  mine.filter(x => x.kind === 'give').forEach(x => L.push({ts: x.ts, k: 'c', dc: x.paidBy === 'own' ? 0 : x.paidBy === 'ret' ? -x.amount : x.amount, h: `<div class="str"><span><b style="font-weight:600">${x.paidBy === 'own' ? 'سدّدت له' : x.paidBy === 'ret' ? 'رجّع من العهدة' : 'عطيته عهدة'}</b>${x.desc && !['عهدة', 'سداد', 'رجّع الباقي'].includes(x.desc) ? ' · ' + esc(x.desc) : ''}<div class="tm">${t12(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}%%B%%</div></span>
       <span style="display:flex;align-items:center;gap:4px"><b class="iva ${x.paidBy === 'ret' ? 'r' : 'g'}">${M(x.amount, x.paidBy === 'ret' ? '−' : '+', x.paidBy === 'ret' ? 'neg' : 'pos')}</b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`}));
   mine.filter(x => x.kind === 'inv' && x.status === 'ok').forEach(x => {
     const fromC = (x.paidBy || 'cash') === 'cash';
-    L.push({ts: x.ts, k: 'c', dc: fromC ? -x.amount : 0, h: `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">فاتورة · ${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${dmyt(x.ts)} · ${esc(x.pname || 'عام')}%%B%%</div></span><b class="iva">${M(x.amount, fromC ? '−' : '', fromC ? 'neg' : '')} ‹</b></div></button>`});
+    L.push({ts: x.ts, k: 'c', dc: fromC ? -x.amount : 0, h: `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">فاتورة · ${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${t12(x.ts)} · ${esc(x.pname || 'عام')}%%B%%</div></span><b class="iva">${M(x.amount, fromC ? '−' : '', fromC ? 'neg' : '')} ‹</b></div></button>`});
   });
   (e.tx || []).forEach(t => {
     const armed = S.armed === 'tx_' + t.id;
     const canMv = t.kind === 'pay' && !t.via && !t.fromParts;
-    L.push({ts: t.date || (t.ts || '').slice(0, 10), k: 's', h: `<div class="str"><span><b style="font-weight:600">${esc(txText(t))}</b>${t.note ? ' · ' + esc(t.note) : ''}<div class="tm">${t.date ? dmy(t.date) : 'تاريخ غير محدد'}</div></span>
+    L.push({ts: t.date || (t.ts || '').slice(0, 10), k: 's', h: `<div class="str"><span><b style="font-weight:600">${esc(txText(t))}</b>${t.note ? ' · ' + esc(t.note) : ''}</span>
       <span style="display:flex;align-items:center;gap:4px"><b class="iva">${M(t.amount, t.kind === 'ded' ? '−' : '', t.kind === 'ded' ? 'neg' : '')}</b>${canMv ? `<button class="ed" onclick="openMove('${e.id}','${t.id}')" aria-label="تصحيح الشهر">${I('pencil', 15)}</button>` : ''}<button class="ed ${armed ? 'arm' : ''}" style="${armed ? 'color:var(--red);font-size:13px' : ''}" onclick="armTx('${t.id}')" aria-label="حذف">${armed ? 'احذف؟' : I('trash-2', 15)}</button></span></div>`});
   });
   return L.sort((a, b) => a.ts < b.ts ? 1 : a.ts > b.ts ? -1 : 0);
@@ -3059,12 +3060,20 @@ function renderFinEmp(c, id, mode) {
   if (Math.abs(bal - (p.c || 0)) > 0.01) bOk = false;
   /* الإصدار 82: «العهدة» فيها بس اللي يغيّر العهدة (عطيته، رجّع، فواتير العهدة). فواتير «أنا» و«من جيبه» والسداد تطلع في «الكل» */
   const L = LA.filter(x => lf === 'all' || (x.k === lf && (lf !== 'c' || x.dc))).map(x => ({ts: x.ts, h: x.h.replace('%%B%%', lf === 'c' && bOk && x.bal !== undefined ? `<span class="rb">معه بعدها ${M(x.bal, x.bal < 0 ? '−' : '', 't')}</span>` : '')}));
-  const show = S.fx.all ? L : L.slice(0, 12);
   h += `<div class="sech">${lf === 'c' ? 'حركات العهدة' : lf === 's' ? 'حركات الراتب' : 'كل حركاته'}<span>${L.length}</span></div>`;
   h += `<div class="segc fxlf">${[['all', 'الكل'], ['c', 'العهدة'], ['s', 'الراتب']].map(o => `<button class="${lf === o[0] ? 'on' : ''}" onclick="S.fx.lf='${o[0]}';S.fx.all=false;renderFin()">${o[1]}</button>`).join('')}</div>`
     + (lf === 'c' && LA.some(x => x.k === 'c' && !x.dc) ? '<div class="sub fxln">فواتير «بطاقتي» و«من جيبه» ما تغيّر العهدة، تطلع في «الكل»</div>' : '');
-  h += L.length ? `<div class="card fxl" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${show.map(x => x.h).join('')}
-      ${L.length > 12 ? `<button class="dtog" style="margin:4px 0 8px" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كلها (' + L.length + ')'}</button>` : ''}</div>` : emptyHtml('wallet', 'ما فيه حركات للحين');
+  if (L.length) {
+    const days = [], by = {};
+    L.forEach(x => { const k = (x.ts || '').slice(0, 10); if (!by[k]) { by[k] = []; days.push(k); } by[k].push(x); });
+    let n = 0, more = false, g = '';
+    for (const k of days) {
+      if (!S.fx.all && n >= 12) { more = true; break; }
+      const D = by[k]; n += D.length;
+      g += `<div class="dyh"><b>${k ? esc(invDayLabel(k, d.today)) : 'تاريخ غير محدد'}</b><span>${D.length === 1 ? 'حركة وحدة' : D.length === 2 ? 'حركتين' : D.length + (D.length > 10 ? ' حركة' : ' حركات')}</span></div><div class="card fxl dyc">${D.map(x => x.h).join('')}</div>`;
+    }
+    h += `<div class="fvl">${g}${more || (S.fx.all && L.length > 12 && days.length > 1) ? `<button class="dtog dya" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كلها (' + L.length + ')'}</button>` : ''}</div>`;
+  } else h += emptyHtml('wallet', 'ما فيه حركات للحين');
   $('#view').innerHTML = h;
 }
 
