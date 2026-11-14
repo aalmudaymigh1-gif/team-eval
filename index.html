@@ -729,6 +729,21 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .atbad{margin-top:4px;border:1px solid var(--red-line);background:var(--red-soft);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--red)}.atbad b{font-weight:600}
 .atf{display:flex;align-items:center;gap:12px;margin-top:8px}.atf .btn2{min-height:44px;font-size:13px;padding:0 14px}.atf .lnk{min-height:44px}
 .rca{border-top:1px dashed var(--line2);padding-top:10px}.rca .btn2{min-height:44px}
+.tkl li.hq{border-bottom:0;padding-bottom:2px}.tkl li.qli{display:block;padding:0 0 8px}
+.qsub{margin-inline-start:40px;border-inline-start:2px solid var(--line2);padding-inline-start:10px}.rpi li .qsub{margin-inline-start:0;margin-top:6px}
+.qo{display:flex;align-items:center;gap:8px;min-height:44px;padding:4px 0;border-top:1px solid var(--line)}.qo:first-child{border-top:0}
+.qo .qb{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;text-align:start;font:inherit;color:inherit;min-height:44px}button.qb{cursor:pointer}
+.qo .rd{width:22px;height:22px;border-radius:50%;border:1.8px solid var(--line2);flex:none;display:flex;align-items:center;justify-content:center}
+.qo.on .rd{border-color:var(--acc)}.qo.on .rd i{width:10px;height:10px;border-radius:50%;background:var(--acc)}
+.qo.okq .rd{border:0;background:var(--green-soft);color:var(--green)}
+.qo .n{flex:1;min-width:0;font-size:14px;line-height:1.5;overflow-wrap:anywhere}.qo .n small{display:block;font-size:12px;color:var(--muted)}
+.qo .p{flex:none}.qo .p .mn{font-size:14px;font-weight:600}
+.qimg{width:44px;height:44px;border-radius:10px;object-fit:cover;background:var(--fill);cursor:zoom-in;flex:none}
+.qdx{flex:none;min-width:44px;height:44px;border:0;background:none;color:var(--muted);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;padding:0}
+.qdx.arm{color:var(--red);background:var(--red-soft);padding:0 8px}
+.qact{display:flex;gap:8px;margin:6px 0 2px;flex-wrap:wrap;align-items:center}.qact .btn2{min-height:44px;font-size:13px;width:auto;padding-inline:12px}
+.qlnk{background:none;border:0;color:var(--acc-dk);font-size:13px;min-height:44px;padding:0 4px;cursor:pointer}
+.rqa{width:100%;min-height:44px;margin-top:8px;font-size:13px}.rqf .grid2{align-items:start}
 .fvf{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:10px 0 6px}
 .fvf select{min-height:44px;font:inherit;font-size:13px;min-width:0;width:100%;border:1px solid var(--line2);border-radius:12px;background:var(--surface);padding:0 8px;color:var(--text)}
 .fvn{margin:0 2px 6px;min-height:18px}.fseg .segc button{min-height:44px}.fvl{padding-top:2px;padding-bottom:2px}
@@ -1178,9 +1193,9 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=100"></script>
+<script src="api.js?v=101"></script>
 <script>
-const APP_VER = '100';
+const APP_VER = '101';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -4426,7 +4441,7 @@ function rpReqL(r) { return rpArr(r && r.later).filter(x => x && x.req); }
 function rpLreqP(r) { return rpArr(r && r.lreq).filter(x => x && x.st === 'pend'); }
 function rpLreqShow(r) { const n = Date.now(); return rpArr(r && r.lreq).filter(x => x && (x.st === 'pend' || (x.st === 'no' && n - (x.rat || 0) < 3 * 864e5))); }
 function rpNowOf(r, t) { const a = rpArr(r && r.nows); for (let i = a.length - 1; i >= 0; i--) if (a[i].t === t) return a[i]; return null; }
-function rpNPend() { return rpProjs().filter(p => { const r = rpLast(p.id); return rpPend(r) || rpPendL(r).length || rpReqL(r).length || rpLreqP(r).length; }).length; }
+function rpNPend() { return rpProjs().filter(p => { const r = rpLast(p.id); return rpPend(r) || rpPendL(r).length || rpReqL(r).length || rpLreqP(r).length || rqPendN(r); }).length; }
 function rpUpdBy(r) { return r.updBy ? (r.updBy === 'المدير العام' ? r.updBy : shortName(r.updBy)) : rpBy(r); }
 function rpBy(r) { return r.by === 'admin' ? 'المدير العام' : shortName(r.byName || ''); }
 function rpDay(s) { const d = new Date(s + 'T12:00:00'); return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_AR[d.getMonth()]; }
@@ -4530,7 +4545,7 @@ function rpCardHtml(r, o) {
   const dec = rpArr(r.decide), up = rpArr(r.up), cur = rpArr(r.cur), ord = up.filter(x => cur.includes(x)).concat(cur.filter(x => !up.includes(x)));
   const nc = cur.length, nl = rpArr(r.later).length, nd = rpArr(r.done).length, age = rpAgeDays(r), me = (o.d || {}).id;
   const notes = rpArr(r.notes), last = notes[notes.length - 1];
-  const npd = rpPendL(r).length + rpReqL(r).length + rpLreqP(r).length, nret = o.emp ? rpArr(r.cur).filter(x => { const k = rpTk(r, x); return rpSt(k) === 'ret' && k.by === me; }).length : 0;
+  const npd = rpPendL(r).length + rpReqL(r).length + rpLreqP(r).length + rqPendN(r), nret = o.emp ? rpArr(r.cur).filter(x => { const k = rpTk(r, x); return rpSt(k) === 'ret' && k.by === me; }).length : 0;
   const chip = o.share ? '<span class="rchip new">تنبيه</span>' : !o.emp && npd ? `<span class="rchip dec">بانتظار اعتمادك (${npd})</span>` : nret ? '<span class="rchip old">أُعيد إليك عمل</span>' : rpPend(r) ? `<span class="rchip dec">${o.emp ? 'بانتظار المدير العام' : 'بانتظار قرارك'}</span>` : rpIsNew(r, me) ? '<span class="rchip new">تحديث جديد</span>' : age > 3 ? `<span class="rchip old">بدون تحديث من ${age} ${age <= 10 ? 'أيام' : 'يوماً'}</span>` : '';
   const st = [nc ? `<span><i></i>${nc === 1 ? 'عمل حالي واحد' : nc === 2 ? 'عملان حاليان' : nc + ' حالية'}</span>` : '',
     nl ? `<span><i class="l"></i>${nl === 1 ? 'عمل لاحق واحد' : nl === 2 ? 'عملان لاحقان' : nl + ' لاحقة'}</span>` : '',
@@ -4553,9 +4568,9 @@ function rpClose() { RP.open = null; RP.draft = ''; rpRerender(); toTop(); }
 function rpOpenHist(p) { RP.hist = p; RP.unArm = null; rpRerender(); toTop(); }
 function rpCloseHist() { RP.hist = null; rpRerender(); toTop(); }
 
-function rpItems(arr, tags, cls) {
+function rpItems(arr, tags, cls, r, isAdmin) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
-  return '<ul class="rpi ' + (cls || '') + '">' + arr.map((x, i) => `<li>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}</li>`).join('') + '</ul>';
+  return '<ul class="rpi ' + (cls || '') + '">' + arr.map((x, i) => { const qb = r ? rqBlock(r, x, rpArr(r.cur).indexOf(x), isAdmin) : ''; return `<li>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${r ? rqTag(r, x, isAdmin) : ''}${qb ? `<div class="qsub">${qb}</div>` : ''}</li>`; }).join('') + '</ul>';
 }
 function rpLaterHtml(arr) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
@@ -4672,7 +4687,7 @@ function rpDetailHtml(isAdmin) {
   const canOrd = isAdmin && rpCanTick(r, true) && cur.length > 1, ordm = canOrd && RP.ord && RP.ord.id === r.id;
   if (r.ord && cur.length > 1 && !tags[0]) tags[0] = ['الأهم', 'g'];
   h += rpPendHtml(r, pend, isAdmin, isAdmin ? rpReqL(r) : [], isAdmin ? rpLreqP(r) : []);
-  h += `<div class="rpcard now"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${canOrd ? (ordm ? `<button class="rchb dn fl" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur')}${rpCanTick(r, isAdmin) && !ordm ? rpCurAddHtml(r) : ''}</div>`;
+  h += `<div class="rpcard now"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${canOrd ? (ordm ? `<button class="rchb dn fl" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur', (rpLast(r.proj) || {}).id === r.id ? r : null, isAdmin)}${rpCanTick(r, isAdmin) && !ordm ? rpCurAddHtml(r) + (cur.length ? rqAddBtn(r) : '') : ''}</div>`;
   /* الإصدار 94: بطاقة الأعمال اللاحقة مطوية، تنفتح بالضغط على عنوانها */
   const ltOpen = RP.ltOpen === r.id;
   h += `<div class="rpcard lt ${ltOpen ? '' : 'cl'}"><div class="rch rchx" role="button" tabindex="0" aria-expanded="${ltOpen}" onclick="RP.ltOpen=RP.ltOpen==='${r.id}'?null:'${r.id}';rpRerender()"><span class="ci">${I('history', 16)}</span>الأعمال اللاحقة<span class="cn">${lat.length}</span><span class="rchv">${I(ltOpen ? 'chevron-up' : 'chevron-down', 16)}</span></div>${!ltOpen ? '' : `${rpCanTick(r, isAdmin) && lat.length ? rpNowList(r, lat, isAdmin) : lat.length || !rpLreqShow(r).length ? rpLaterHtml(lat) : ''}${rpLreqRows(r)}${rpCanTick(r, isAdmin) && !ordm ? rpLaterAddHtml(r, isAdmin) : ''}`}</div>`;
@@ -5416,8 +5431,8 @@ function rpCanTick(r, isAdmin) {
 function rpTickList(r, cur, tags, isAdmin) {
   const all = rpArr(r.cur);
   return '<ul class="tkl">' + cur.map((x, i) => {
-    const j = all.indexOf(x), k = rpTk(r, x), ret = rpSt(k) === 'ret';
-    return `<li><button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button><span>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}` : ''}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell" onclick="rpDefOpen('${r.id}',${j})" aria-label="تأجيل إلى الأعمال اللاحقة">${I('clock', 15)}</button><button class="ibell" onclick="rpShareOpen('${r.id}',${j})" aria-label="تنبيه على هذا العمل">${I('bell', 15)}</button>` : ''}</li>`;
+    const j = all.indexOf(x), k = rpTk(r, x), ret = rpSt(k) === 'ret', qb = rqBlock(r, x, j, isAdmin);
+    return `<li${qb ? ' class="hq"' : ''}><button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button><span>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${rqTag(r, x, isAdmin)}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}` : ''}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell" onclick="rpDefOpen('${r.id}',${j})" aria-label="تأجيل إلى الأعمال اللاحقة">${I('clock', 15)}</button><button class="ibell" onclick="rpShareOpen('${r.id}',${j})" aria-label="تنبيه على هذا العمل">${I('bell', 15)}</button>` : ''}</li>${qb ? `<li class="qli"><div class="qsub">${qb}</div></li>` : ''}`;
   }).join('') + `</ul><div class="rhint" style="margin-top:6px">${I('info', 13)}${isAdmin ? 'اضغط الدائرة إذا أُنجز العمل، والجرس لتنبيه الموظف على عمل محدد' : 'اضغط الدائرة إذا أنجزت العمل، ويُرسل للمدير العام للاعتماد'}</div>`;
 }
 function rpLreqRows(r) {
@@ -5447,6 +5462,122 @@ async function rpLqRev(id, rid, ok, btn) {
     RP.busy = false; rpRerender();
     toast(!ok ? 'تم رفض الطلب، ووصل الموظف إشعار' : res.to === 'cur' ? 'انضاف للأعمال الحالية لأن العمل الذي يبدأ بعده أُنجز' : 'انضاف للأعمال اللاحقة، ووصل الموظف إشعار');
   } catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
+/* الإصدار 101: أسعار الموردين والفنيين تحت العمل الحالي. العامل يضيف السعر، والمدير العام يختار واحداً ويعتمده */
+const RQ_UNITS = ['للمتر', 'للمتر مع التركيب', 'للقطعة', 'لليوم', 'مقطوعية'];
+function rqOf(r, item) { return rpArr(r && r.quotes).filter(q => q && q.item === item); }
+function rqPendN(r) { return rpArr(r && r.cur).filter(x => { const a = rqOf(r, x); return a.length && !a.some(q => q.st === 'ok'); }).length; }
+function rqCount(n) { return n === 1 ? 'سعر واحد' : n === 2 ? 'سعران' : n + ' أسعار'; }
+function rqTag(r, item, isAdmin) {
+  const a = rqOf(r, item);
+  if (!a.length) return '';
+  if (a.some(q => q.st === 'ok')) return '<span class="tg2 g">السعر معتمد</span>';
+  return `<span class="tg2 a">${rqCount(a.length)} ${isAdmin ? 'بانتظار قرارك' : 'بانتظار الاعتماد'}</span>`;
+}
+function rqSub(q) { const me = BOOT.page === 'emp' && S.empData ? S.empData.id : ''; return '<span>' + esc(q.unit) + '</span> · ' + esc(q.dur) + (q.by !== 'admin' && q.by !== me && q.name ? ' · ' + esc(shortName(q.name)) : ''); }
+function rqImg(q) { return q.file ? `<img class="qimg" alt="صورة العرض" data-rp="${esc(q.file)}" ${RP.uc[q.file] ? `src="${esc(RP.uc[q.file])}"` : ''} onclick="rpZoom(this)">` : ''; }
+function rqBlock(r, item, j, isAdmin) {
+  const a = rqOf(r, item);
+  if (!a.length) return '';
+  const can = rpCanTick(r, isAdmin), okq = a.find(q => q.st === 'ok'), key = r.id + '|' + item, me = BOOT.page === 'emp' && S.empData ? S.empData.id : '';
+  const pick = isAdmin && can && !okq, same = a.every(q => q.unit === a[0].unit), min = Math.min(...a.map(q => Number(q.price) || 0));
+  const sel = pick ? (RP.qs && RP.qs.k === key && a.some(q => q.id === RP.qs.id) ? RP.qs.id : a.length === 1 ? a[0].id : '') : '';
+  const del = q => can && (isAdmin || (q.by === me && q.st !== 'ok')) ? `<button class="qdx ${RP.qarm === q.id ? 'arm' : ''}" onclick="rqDel('${q.id}')" aria-label="حذف السعر">${RP.qarm === q.id ? 'تأكيد الحذف' : I('x', 14, 2.5)}</button>` : '';
+  const body = q => `<span class="n">${esc(q.sup)}${same && a.length > 1 && Number(q.price) === min ? '<span class="tg2 g">الأقل</span>' : ''}<small>${rqSub(q)}</small></span><span class="p">${M(q.price)}</span>`;
+  const row = q => pick
+    ? `<div class="qo ${sel === q.id ? 'on' : ''}"><button class="qb" role="radio" aria-checked="${sel === q.id}" onclick="rqSel('${r.id}',${j},'${q.id}')"><span class="rd"><i></i></span>${body(q)}</button>${rqImg(q)}${del(q)}</div>`
+    : `<div class="qo"><span class="qb">${body(q)}</span>${rqImg(q)}${del(q)}</div>`;
+  if (okq) {
+    const rest = a.filter(q => q !== okq), open = RP.qx === key;
+    return `<div class="qo okq"><span class="qb"><span class="rd">${I('check', 14, 2.5)}</span><span class="n">${esc(okq.sup)}<small>${rqSub(okq)}</small></span><span class="p">${M(okq.price)}</span></span>${rqImg(okq)}</div>`
+      + (open ? rest.map(row).join('') : '')
+      + (rest.length || (isAdmin && can) ? `<div class="qact">${rest.length ? `<button class="qlnk" onclick="rqTog('${r.id}',${j})">${open ? 'إخفاء العروض الأخرى' : 'عروض أخرى (' + rest.length + ')'}</button>` : ''}${isAdmin && can ? `<button class="qlnk" onclick="rqUndo('${okq.id}')">تراجع عن الاعتماد</button>` : ''}</div>` : '');
+  }
+  return a.map(row).join('')
+    + (pick ? `<div class="qact"><button class="btn2 cu" onclick="rqOk('${r.id}',${j},this)">${I('check', 16, 2.5)}${a.length === 1 ? 'اعتمد السعر' : 'اعتمد المختار'}</button><button class="btn2" onclick="rqOpen('${r.id}',${j})">${I('plus', 15)}سعر آخر</button></div>`
+      : `${can ? `<div class="qact"><button class="btn2" onclick="rqOpen('${r.id}',${j})">${I('plus', 15)}سعر آخر</button></div>` : ''}`);
+}
+function rqAddBtn(r) { return `<button class="btn2 rqa" onclick="rqOpen('${r.id}',-1)">${I('receipt', 16)}إضافة سعر لعمل حالي</button>`; }
+function rqItem(id, j) { const r = (RP.reps || []).find(x => x.id === id); return r ? rpArr(r.cur)[j] || '' : ''; }
+function rqSel(id, j, qid) { RP.qs = {k: id + '|' + rqItem(id, j), id: qid}; rpRerender(); }
+function rqTog(id, j) { const k = id + '|' + rqItem(id, j); RP.qx = RP.qx === k ? null : k; rpRerender(); }
+function rqOpen(id, j) {
+  const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
+  RP.qf = {id: id, item: j >= 0 ? rpArr(r.cur)[j] || '' : '', sup: '', price: '', unit: '', dur: '', file: null, err: '', busy: false, prog: ''};
+  rqDraw();
+}
+function rqDraw() {
+  const d = RP.qf; if (!d) return;
+  const r = (RP.reps || []).find(x => x.id === d.id), cur = rpArr(r && r.cur), cut = s => s.length > 40 ? s.slice(0, 40) + '…' : s, dis = d.busy ? 'disabled' : '';
+  ovOpen(`<div class="tdx rqf">
+    <h3>إضافة سعر</h3>
+    <div class="field"><span>العمل</span><select id="rq_item" ${dis} onchange="RP.qf.item=this.value===''?'':rqItem(RP.qf.id,Number(this.value))"><option value="">اختر العمل</option>${cur.map((x, n) => `<option value="${n}" ${x === d.item ? 'selected' : ''}>${esc(cut(x))}</option>`).join('')}</select></div>
+    <div class="field"><span>المورد أو الفني</span><input id="rq_sup" maxlength="80" ${dis} value="${esc(d.sup)}" oninput="RP.qf.sup=this.value"></div>
+    <div class="grid2"><div class="field"><span>السعر (ريال)</span><input id="rq_price" inputmode="decimal" maxlength="12" ${dis} value="${esc(d.price)}" oninput="RP.qf.price=this.value"></div>
+    <div class="field"><span>الوحدة</span><select id="rq_unit" ${dis} onchange="RP.qf.unit=this.value"><option value="">اختر الوحدة</option>${RQ_UNITS.map(u => `<option ${u === d.unit ? 'selected' : ''}>${u}</option>`).join('')}</select></div></div>
+    <div class="field"><span>المدة</span><input id="rq_dur" maxlength="80" ${dis} value="${esc(d.dur)}" oninput="RP.qf.dur=this.value"></div>
+    <div><div class="shh">صورة العرض (اختياري)</div>
+    <div class="mst">${d.file ? `<div class="mi"><img alt="" src="${d.file.d}">${d.busy ? '' : '<button class="x" onclick="RP.qf.file=null;rqDraw()" aria-label="حذف">×</button>'}</div>` : d.busy ? '' : `<label class="madd">${I('camera', 20)}إضافة<input type="file" accept="image/*" style="display:none" onchange="rqPick(this)"></label>`}</div></div>
+    <div class="err">${esc(d.err)}</div>
+    <button class="btn" id="rq_go" ${dis} onclick="rqSave()">${d.busy ? esc(d.prog || 'جاري الحفظ…') : I('check', 17, 2.5) + 'حفظ السعر'}</button></div>`);
+}
+async function rqPick(inp) {
+  const d = RP.qf, file = (inp.files || [])[0];
+  inp.value = '';
+  if (!d || !file) return;
+  const ty = String(file.type || ''), ext = ((String(file.name || '').match(/\.(\w{2,5})$/) || [])[1] || '').toLowerCase();
+  if (!(ty.indexOf('image') === 0 || /^(jpe?g|png|heic|heif|webp)$/.test(ext))) return toast('أرفق صورة فقط', null, 'er');
+  try { d.file = {t: 'i', d: await resizeImg(file, 1600, 0.78), n: file.name || 'صورة'}; d.err = ''; } catch (e) { toastErr(e); }
+  if (RP.qf === d) rqDraw();
+}
+function rqNum(s) { return Number(toEn(s).replace(/[٫,،]/g, '.').replace(/[^\d.]/g, '')); }
+async function rqSave() {
+  const d = RP.qf;
+  if (!d || d.busy) return;
+  const sup = String(d.sup || '').trim(), dur = String(d.dur || '').trim(), price = rqNum(d.price);
+  const bad = !d.item ? 'اختر العمل' : !sup ? 'اكتب اسم المورد أو الفني' : !(price > 0) ? 'اكتب السعر بالأرقام' : !d.unit ? 'اختر وحدة السعر' : !dur ? 'اكتب المدة' : '';
+  if (bad) { d.err = bad; return rqDraw(); }
+  d.busy = true; d.err = ''; d.prog = d.file ? 'جاري رفع الصورة…' : 'جاري الحفظ…'; rqDraw();
+  if (d.file) S.upN++;
+  try {
+    let p = '';
+    if (d.file) { p = await callT(180000, 'apiRepUpload', d.file); S.upN = Math.max(0, S.upN - 1); d.file.up = true; }
+    await call('apiRepQuoteAdd', d.id, d.item, {sup: sup, price: price, unit: d.unit, dur: dur, file: p});
+  } catch (e) {
+    if (d.file && !d.file.up) S.upN = Math.max(0, S.upN - 1);
+    if (d.file) d.file.up = false;
+    d.busy = false; d.err = String(e);
+    if (RP.qf === d) rqDraw(); else toastErr(e);
+    return;
+  }
+  if (RP.qf === d) { RP.qf = null; ovClose(); }
+  try { await rpTickReload(); } catch (e) { RP.need = true; }
+  rpRerender();
+  toast(BOOT.page === 'emp' ? 'انرسل السعر للمدير العام' : 'انضاف السعر');
+}
+async function rqOk(id, j, btn) {
+  if (RP.busy) return;
+  const r = (RP.reps || []).find(x => x.id === id), item = rqItem(id, j), a = rqOf(r, item), k = id + '|' + item;
+  const qid = RP.qs && RP.qs.k === k && a.some(q => q.id === RP.qs.id) ? RP.qs.id : a.length === 1 ? a[0].id : '';
+  if (!qid) return toast('اختر سعراً أولاً', null, 'er');
+  RP.busy = true;
+  if (btn) { btn.disabled = true; btn.textContent = 'جاري الاعتماد…'; }
+  try { await call('apiRepQuoteOk', qid, false); RP.qs = null; RP.qx = null; await rpTickReload(); RP.busy = false; rpRerender(); toast('تم اعتماد السعر', () => rqUndo(qid)); }
+  catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
+async function rqUndo(qid) {
+  if (RP.busy) return;
+  RP.busy = true;
+  try { await call('apiRepQuoteOk', qid, true); await rpTickReload(); RP.busy = false; rpRerender(); toast('رجع السعر بانتظار قرارك'); }
+  catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
+let rqArmT;
+async function rqDel(qid) {
+  if (RP.qarm !== qid) { RP.qarm = qid; rpRerender(); clearTimeout(rqArmT); rqArmT = setTimeout(() => { if (RP.qarm === qid) { RP.qarm = null; rpRerender(); } }, 4000); return; }
+  if (RP.busy) return;
+  RP.busy = true; RP.qarm = null;
+  try { await call('apiRepQuoteDel', qid); await rpTickReload(); RP.busy = false; rpRerender(); toast('انحذف السعر'); }
+  catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
 }
 /* الإصدار 97: إضافة عمل حالي من صفحة التقرير، للمدير وللموظف مباشرة مثل النموذج */
 function rpCurAddHtml(r) {
