@@ -1354,6 +1354,11 @@ html:root .gpi i{color:var(--acc-dk)}
 /* ألوان ثابتة في كود التطبيق تتطفى مع الباقي */
 html:root .mk.ok{color:var(--green)}html:root .mk.no{color:var(--red)}html:root .ast.ok .dot{background:var(--green);border-color:var(--green)}html:root .ast.cur .dot{border-color:var(--green)}
 
+/* الإصدار 103: الفرع الرئيسي (عنوان المجموعة أو المشروع) بالأزرق المطفي وتحته خط أزرق فاتح، بنفس مقاس الخط */
+html:root .pgrp.ep .pgh2,html:root .pgrp .pgh2{color:var(--acc-dk)!important;padding:14px 16px 12px!important;border-bottom:2px solid var(--acc-ring)!important}
+html:root .pgrp.ep.cl .pgh2,html:root .pgrp.cl .pgh2{border-bottom:0!important;padding-bottom:14px!important}
+html:root .rpc .rph{padding-bottom:10px;margin-bottom:8px;border-bottom:2px solid var(--acc-ring)}
+html:root .rpc .rph b{color:var(--acc-dk)}
 </style>
 </head>
 <body>
@@ -1363,9 +1368,9 @@ html:root .mk.ok{color:var(--green)}html:root .mk.no{color:var(--red)}html:root 
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=102"></script>
+<script src="api.js?v=103"></script>
 <script>
-const APP_VER = '102';
+const APP_VER = '103';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
