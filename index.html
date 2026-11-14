@@ -274,6 +274,7 @@ select:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-ring)}
 .tg.on.u{background:var(--red)}
 .dhead{display:flex;align-items:flex-start;gap:10px;margin-top:10px}
 .dtitle{flex:1;font-size:17px;font-weight:600;background:transparent;padding:6px 8px;margin:0 -8px}
+textarea.dtitle{font-family:inherit;color:inherit;border:0;resize:none;overflow:hidden;line-height:1.5;min-height:38px;display:block;min-width:0}
 .dhead .badge{margin-top:10px;flex:none}
 .dprops{border:1px solid var(--line);border-radius:var(--r2);margin-top:12px;overflow:hidden}
 .dp{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:4px 14px;border-bottom:1px solid var(--line);min-height:52px}
@@ -705,6 +706,9 @@ b,strong,th,h2,h3,h4{font-weight:600}
 /* الإصدار 57: كل البطاقات بلون بطاقات التقييم، و«رتّب» المشاريع مثل الفريق، والرواتب من يوم 28، والإعدادات فروع */
 .fseg .ordb{background:none;border:0;font:inherit;font-size:13px;color:var(--acc-dk);display:flex;align-items:center;gap:6px;cursor:pointer;flex:none;padding:0 2px}
 .fxs.two{grid-template-columns:1fr 1fr}
+/* الإصدار 100 */
+.eday .dyh b span{font-size:inherit;color:inherit;flex:initial}.eday .dyh{margin:14px 4px 6px}.eday .dyh:first-child{margin-top:14px}.edc{margin-top:0;padding-top:4px;padding-bottom:4px}
+.rpcard .ibell{position:relative}.rpcard .ibell::after{content:"";position:absolute;inset:-5px}
 /* الإصدار 98 */
 .dyh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:16px 4px 6px}.dyh b{font-size:14px;font-weight:600;color:var(--text)}.dyh span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
 .fvl{padding:0}.fvl .dyh:first-child{margin-top:8px}.dyc{padding-top:2px;padding-bottom:2px;margin-top:0}.dyc .strb{min-height:44px}
@@ -1174,9 +1178,9 @@ html[dir=ltr] .crow.nock{padding-left:4px;padding-right:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=99"></script>
+<script src="api.js?v=100"></script>
 <script>
-const APP_VER = '99';
+const APP_VER = '100';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1968,7 +1972,7 @@ function mountTabs() {
   if (old) old.remove();
   if (t) { t.id = 'tabsDock'; document.body.appendChild(t); }
 }
-function go(v) { S.ed = null; NF.open = false; RP.open = null; RP.hist = null; S.tsub = null; S.tfile = null; S.tdue = false; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false, lf: 'all'}); S.view = v; lsSet('adm_view', v); S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
+function go(v) { S.ed = null; NF.open = false; RP.open = null; RP.hist = null; S.tsub = null; S.tfile = null; S.tdue = false; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, ord: false, all: false, lf: 'all', fp: '', fe: '', fs: ''}); S.view = v; lsSet('adm_view', v); S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
 function rerender() { renderAdmin(); }
 
 /* ---------- تسجيل ---------- */
@@ -2116,7 +2120,7 @@ function tsub(id, k) {
   if (id) { S.tfile = id; if (k === 'sal' || k === 'cu') Object.assign(S.fx, {all: false, pm: '', cm: false, rt: false, lf: k === 'sal' ? 's' : 'c'}); }
   renderTeam(); toTop();
 }
-function openFile(id) { S.view = 'team'; lsSet('adm_view', 'team'); S.tfile = id; S.tsub = null; S.ssub = null; S.attLog = null; S.td = null; S.tord = false; S.armed = null; S.form = null; renderAdmin(); toTop(); }
+function openFile(id) { if (S.view !== 'team') Object.assign(S.fx, {fp: '', fe: '', fs: '', all: false}); S.view = 'team'; lsSet('adm_view', 'team'); S.tfile = id; S.tsub = null; S.ssub = null; S.attLog = null; S.td = null; S.tord = false; S.armed = null; S.form = null; renderAdmin(); toTop(); }
 function openEmpSet(id) { S.tfile = id; S.armed = null; S.form = null; S.ed = null; S.ssub = 'emp:' + id; renderTeam(); toTop(); }
 function rateEmp(id) { go('rec'); setEmp(id); }
 function tbRow(icon, k, v, on) {
@@ -2500,7 +2504,7 @@ function renderTaskDetail() {
   const pfH = `${np ? `<div class="lbl">إثبات الإنجاز${t.doneAt ? ' · ' + dmy(t.doneAt) : ''}</div>${proofHtml(t)}` : ''}
     ${t.comment && t.status !== 'open' ? `<div class="note good">${I('message-circle', 16)}<div><b>${esc(t.ename)}:</b> ${esc(t.comment)}${t.cmtEdited ? ' <span class="edt">عدّله المدير العام</span>' : ''}</div></div><div class="ecm"><button class="edl" onclick="openCmtEdit('${id}')">${I('pencil', 15)}تعديل ملاحظة الموظف</button></div>` : ''}`;
   $('#view').innerHTML = `<button class="back" onclick="closeTask()">${I('arrow-right', 17)}${S.view === 'team' && S.tsub ? 'مهام ' + esc(shortName((empById(S.tsub.id) || {}).name || '')) : 'المهام'}</button>
-    <div class="dhead"><input class="dtitle" value="${esc(t.title)}" aria-label="عنوان المهمة" onchange="updTask('${id}',{title:this.value})"><button class="pen" aria-label="تعديل العنوان" onclick="const i=this.previousElementSibling;i.focus();i.setSelectionRange(i.value.length,i.value.length)">${I('pencil', 15)}</button>${pillHtml(p)}</div>
+    <div class="dhead"><textarea class="dtitle" rows="1" aria-label="عنوان المهمة" oninput="dtGrow(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}" onchange="updTask('${id}',{title:this.value.split(String.fromCharCode(10)).join(' ').trim()})">${esc(t.title)}</textarea><button class="pen" aria-label="تعديل العنوان" onclick="const i=this.previousElementSibling;i.focus();i.setSelectionRange(i.value.length,i.value.length)">${I('pencil', 15)}</button>${pillHtml(p)}</div>
     ${rvTop ? pfH : ''}
     <div class="dprops">
       <label class="dp"><span>الموظف</span><select onchange="updTask('${id}',{emp:this.value})">${d.employees.map(e => `<option value="${e.id}" ${t.emp === e.id ? 'selected' : ''}>${esc(e.name)}</option>`).join('')}</select></label>
@@ -2521,6 +2525,7 @@ function renderTaskDetail() {
     <div id="alst">${taskAlertsHtml(id)}</div>
     <button class="del ${armDel ? 'arm' : ''}" style="margin:16px auto 0;display:flex" onclick="delTask('${id}')">${I('trash-2', 15)}${armDel ? 'تأكيد حذف المهمة' : 'حذف المهمة'}</button>`;
   if (vOf(t)) vFetch([vOf(t).id]);
+  dtGrow($('#view .dtitle'));
 }
 function detailActions(t) {
   const id = t.id;
@@ -2979,7 +2984,7 @@ function renderFin() {
     const opt = (v, t, cur) => `<option value="${v}" ${cur === v ? 'selected' : ''}>${t}</option>`;
     const usedP = new Set(all.map(x => x.project || '')), nRt = all.filter(x => x.status === 'returned').length;
     h += `<div class="fvf"><select aria-label="المشروع" onchange="S.fx.fp=this.value;S.fx.all=false;renderFin()">${opt('', 'كل المشاريع', fp)}${(d.projects || []).filter(p => !p.archived || usedP.has(p.id)).map(p => opt(p.id, esc(p.name), fp)).join('')}${usedP.has('') ? opt('-', 'بدون مشروع', fp) : ''}</select>
-      <select aria-label="الموظف" onchange="S.fx.fe=this.value;S.fx.all=false;renderFin()">${opt('', 'كل الموظفين', fe)}${d.employees.map(e => opt(e.id, esc(shortName(e.name)), fe)).join('')}${all.some(x => !x.emp) ? opt('-', 'أنا', fe) : ''}</select>
+      <select aria-label="الموظف" onchange="S.fx.fe=this.value;S.fx.all=false;renderFin()">${opt('', 'كل الموظفين', fe)}${d.employees.map(e => opt(e.id, esc(shortName(e.name)), fe)).join('')}${all.some(x => !x.emp) ? opt('-', 'أنت', fe) : ''}</select>
       <select aria-label="الحالة" onchange="S.fx.fs=this.value;S.fx.all=false;renderFin()">${opt('', 'كل الحالات', fs)}${opt('review', 'تنتظر اعتمادك', fs)}${opt('ok', 'معتمدة', fs)}${opt('returned', 'مرتجعة' + (nRt ? ' (' + nRt + ')' : ''), fs)}</select></div>`;
     h += `<div class="sub fvn">${L.length ? cnt(L.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير', 'فاتورة') + ' · ' + M(Math.round(L.reduce((a, x) => a + x.amount, 0) * 100) / 100, '', 't') : ''}</div>`;
     h += L.length ? `<div class="fvl">${invDaysHtml(L, true, false, 12, 'كلها')}</div>` : emptyHtml('receipt', fp || fe || fs ? 'ما فيه فواتير بهذا الفلتر' : 'ما فيه فواتير للحين');
@@ -3135,6 +3140,8 @@ async function invDel(id) {
   catch (e) { S.armed = null; renderInv(); toastErr(e); }
 }
 /* الإصدار 98: الفواتير مجمّعة حسب اليوم: عنوان اليوم مرة وحدة بعدده ومجموعه، وتحته فواتيره بسطر مختصر فيه الوقت بس. الضغط يفتح التفاصيل */
+/* الإصدار 100: عنوان المهمة الطويل ينكسر على سطور بدل ما ينقص */
+function dtGrow(el) { if (!el) return; el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
 function invDayLabel(dt, today) {
   const l = dayLabel(dt).replace(new RegExp(' ' + today.slice(0, 4) + '$'), '');
   return dt === today ? 'اليوم · ' + l : dt === addDays(today, -1) ? 'أمس · ' + l : l;
@@ -4090,14 +4097,18 @@ function empInvHtml(d, isPreview) {
   if (!isPreview) h += S.invForm ? invFormHtml(d) : `<button class="btn2 cu ivsend" onclick="S.invForm=true;S.ishots=[];if(S.inv.edit)S.inv={amount:'',desc:'',project:''};rerenderEmp()">${I('receipt', 17)}أرسل فاتورة</button>`;
   const items = iv.items || [];
   if (!items.length) return h + emptyHtml('receipt', 'ما أرسلت فواتير للحين');
-  return h + '<div class="card" style="margin-top:14px;padding-top:4px;padding-bottom:4px">' + items.map(x => {
+  /* الإصدار 100: مجمّعة حسب اليوم: عنوان اليوم مرة وحدة، وداخل السطر الوقت بس */
+  const row = x => {
     const st = invSt(x, true), give = x.kind === 'give';
     return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? (x.paidBy === 'ret' ? 'r' : 'g') : ''}">${M(x.amount, give ? (x.paidBy === 'ret' ? '−' : '+') : '')}</b></div>
-      <div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · '}${dmyt(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>${invFixTag(x)}
+      <div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · '}${t12(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>${invFixTag(x)}
       ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px"><div><b>المدير العام يقول:</b> ${esc(x.reason)}</div></div>` : ''}
       ${!isPreview && x.kind === 'inv' && x.status === 'returned' && !x.task && !(S.invForm && S.inv.edit === x.id) ? `<button class="bigdo" style="border:0;font-family:inherit;cursor:pointer" onclick="invEdit('${x.id}')">${I('pencil', 15, 2.2)}صحّح وأعد الإرسال</button>` : ''}
       ${invPhotosHtml(x, BOOT.page === 'admin')}</div>`;
-  }).join('') + '</div>';
+  };
+  const L = items.slice().sort((a, b) => a.ts < b.ts ? 1 : a.ts > b.ts ? -1 : 0), days = [], by = {}, yd = addDays(d.today, -1);
+  L.forEach(x => { const k = x.ts.slice(0, 10); if (!by[k]) { by[k] = []; days.push(k); } by[k].push(x); });
+  return h + '<div class="eday">' + days.map(k => `<div class="dyh"><b>${k === d.today ? '<span>اليوم</span> · ' : k === yd ? '<span>أمس</span> · ' : ''}<span>${esc(dayLabel(k))}</span></b></div><div class="card edc">${by[k].map(row).join('')}</div>`).join('') + '</div>';
 }
 
 /* الإصدار 74: تصحيح الفاتورة المرجّعة. نفس النموذج، بنفس بيانات الفاتورة وصورها */
