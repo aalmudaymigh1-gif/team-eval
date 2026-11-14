@@ -1359,6 +1359,20 @@ html:root .pgrp.ep .pgh2,html:root .pgrp .pgh2{color:var(--acc-dk)!important;pad
 html:root .pgrp.ep.cl .pgh2,html:root .pgrp.cl .pgh2{border-bottom:0!important;padding-bottom:14px!important}
 html:root .rpc .rph{padding-bottom:10px;margin-bottom:8px;border-bottom:2px solid var(--acc-ring)}
 html:root .rpc .rph b{color:var(--acc-dk)}
+/* الإصدار 104: نص المهمة بوزن نص العمل، خط رفيع بين الأعمال في التقارير، وزر «أنجزتها» صغير على نفس سطر المهمة */
+html:root .ecard .tt,html:root .trow2 .tt{font-weight:400!important}
+html:root .rpc .rpv li{padding-top:8px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+html:root .rpc .rpv li:last-child{border-bottom:0}
+html:root .rpc .rpv li:before{top:17px}
+html:root .rpcard .rpi li{padding-top:9px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+html:root .rpcard .rpi li:last-child{border-bottom:0}
+html:root .rpcard .rpi li:before{margin-top:4px}
+html:root .rpcard .rpi.dn li svg{margin-top:4px}
+html:root .ecard{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:center}
+html:root .ecard>*{grid-column:1/-1}
+html:root .ecard>.th,html:root .ecard>.tm{grid-column:1}
+html:root .ecard>.bigdo{grid-column:2;grid-row:1/span 2;align-self:center;position:relative;margin:0!important;width:auto!important;max-width:132px;min-height:36px;padding:6px 12px!important;border-radius:18px!important;white-space:normal;text-align:center;line-height:1.35;background:var(--acc-soft)!important;color:var(--acc-dk)!important;box-shadow:none!important;font-size:13px;font-weight:600!important}
+html:root .ecard>.bigdo::after{content:"";position:absolute;inset:-6px -4px}
 </style>
 </head>
 <body>
@@ -1368,9 +1382,9 @@ html:root .rpc .rph b{color:var(--acc-dk)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=103"></script>
+<script src="api.js?v=104"></script>
 <script>
-const APP_VER = '103';
+const APP_VER = '104';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
