@@ -440,7 +440,7 @@
   function invOut_(x, pmap) {
     return { id: x.id, ts: x.ts, emp: x.emp, kind: x.kind, amount: x.amount, desc: x.desc, project: x.project,
       pname: x.project ? (pmap[x.project] || '') : '', nph: x.photos.length, photos: x.photos, status: x.status, reason: x.reason,
-      method: x.method || '', warrantyUntil: x.warrantyUntil || '', vendor: x.vendor || '', task: x.task || '', taskDeleted: !!x.taskDeleted,
+      method: x.method || '', warrantyUntil: x.warrantyUntil || '', vendor: x.vendor || '', cat: x.cat || '', task: x.task || '', taskDeleted: !!x.taskDeleted,
       paidBy: ['card', 'own', 'ret'].indexOf(x.paidBy) >= 0 ? x.paidBy : 'cash', oldAmount: x.oldAmount == null ? null : Number(x.oldAmount) };
   }
 
@@ -892,7 +892,7 @@
     async apiTaskDone(token, id, comment, dataUrls, extra, onProg) {
       const paths = await empUpload(token, dataUrls || [], 5, onProg);
       const x = extra || {}, a = { id: id, comment: String(comment || ''), proofs: paths };
-      if (x.amount !== undefined) { a.amount = cleanAmount_(x.amount); a.vendor = String(x.vendor || '').trim(); a.paidBy = x.paidBy || 'cash'; }
+      if (x.amount !== undefined) { a.amount = cleanAmount_(x.amount); a.vendor = String(x.vendor || '').trim(); a.cat = String(x.cat || ''); a.paidBy = x.paidBy || 'cash'; }
       return empDo(token, 'task_done', a);
     },
 
@@ -954,7 +954,7 @@
       const paths = await empUpload(token, dataUrls, 3);
       if (!paths.length) throw new Error('صوّر الفاتورة');
       const w = Math.round(Number(x.warranty) || 0);
-      return empDo(token, 'inv_add', { cid: String(x.cid || ''), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
+      return empDo(token, 'inv_add', { cid: String(x.cid || ''), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
     },
     /* الإصدار 74: تصحيح فاتورة رجّعها المدير العام وإعادة إرسالها بنفس السجل */
     async apiInvResend(token, id, x, dataUrls, keep) {
@@ -966,7 +966,7 @@
       const old = (keep || []).filter(Boolean).slice(0, 3);
       const paths = old.concat(await empUpload(token, dataUrls || [], Math.max(0, 3 - old.length)));
       if (!paths.length) throw new Error('صوّر الفاتورة');
-      return empDo(token, 'inv_resend', { id: String(id), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: String(x.project || ''), photos: paths, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
+      return empDo(token, 'inv_resend', { id: String(id), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), project: String(x.project || ''), photos: paths, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
     },
 
     async apiInvApprove(k, id) { return adminDo(k, 'inv_approve', { id: id }); },
@@ -987,13 +987,14 @@
       if (!String(x.project || '')) throw new Error('اختر المشروع');
       const list = (dataUrls || []).slice(0, 3), paths = [];
       for (const d of list) paths.push(await API.apiUploadImg(k, d));
-      return adminDo(k, 'inv_add', { emp: x.emp || '', amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), project: x.project || '',
+      return adminDo(k, 'inv_add', { emp: x.emp || '', amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), project: x.project || '',
         photos: paths, paidBy: x.emp ? 'cash' : 'card' });
     },
     async apiInvEdit(k, id, x) {
       const n = cleanAmount_(x.amount);
       return adminDo(k, 'inv_edit', { id: id, amount: n, note: String(x.note || '').trim().slice(0, 200), method: String(x.method || '') });
     },
+    async apiInvCat(k, id, cat) { return adminDo(k, 'inv_cat', { id: id, cat: String(cat || '') }); },
     async apiInvPaidBy(k, id, by) { return adminDo(k, 'inv_paidby', { id: id, by: by === 'card' || by === 'own' ? by : 'cash' }); },
     async apiInvWarranty(k, id, until) {
       if (until && !/^\d{4}-\d{2}-\d{2}$/.test(until)) throw new Error('التاريخ غير صحيح');
