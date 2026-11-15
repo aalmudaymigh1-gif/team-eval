@@ -492,13 +492,13 @@
     const parts = {};
     emps.forEach(e => { parts[e.id] = invParts_(RAW.invoices, e.id); bal[e.id] = parts[e.id].c; });
     return {
-      inv: { bal: bal, parts: parts, items: RAW.invoices.slice().reverse().map(x => invOut_(x, pmap)) },
+      inv: { bal: bal, parts: parts, items: (ms => RAW.invoices.slice().reverse().map(x => Object.assign(invOut_(x, pmap), { matched: ms.has(x.id) })))(new Set(RAW.matched || [])) },
       attendance: RAW.attendance,
       attCfg: attCfg_(),
       alerts: RAW.alerts || [],
       guides: RAW.guides.map(g => ({ id: g.id, ts: g.ts, title: g.title, points: g.points, q: g.q,
         reads: RAW.greads.filter(x => x.guide === g.id).map(x => Object.assign({ name: (empById(x.emp) || {}).name || '' }, x)) })),
-      projects: projects.map(p => ({ id: p.id, name: p.name, archived: p.archived, lat: p.lat, lng: p.lng,
+      projects: projects.map(p => ({ id: p.id, name: p.name, archived: p.archived, lat: p.lat, lng: p.lng, budget: Number((RAW.budgets || {})[p.id]) || 0,
         open: tasks.filter(t => t.project === p.id && t.status !== 'done' && empIds.indexOf(t.emp) >= 0).length })),
       criteria: CRITERIA.map(c => ({ n: c.n, s: c.s, short: c.short })),
       today: todayS,
@@ -994,6 +994,8 @@
       const n = cleanAmount_(x.amount);
       return adminDo(k, 'inv_edit', { id: id, amount: n, note: String(x.note || '').trim().slice(0, 200), method: String(x.method || '') });
     },
+    async apiInvMatch(k, id, on) { return adminDo(k, 'inv_match', { id: id, on: !!on }); },
+    async apiProjBudget(k, id, budget) { return adminDo(k, 'proj_budget', { id: id, budget: String(budget == null ? '' : budget) }); },
     async apiInvCat(k, id, cat) { return adminDo(k, 'inv_cat', { id: id, cat: String(cat || '') }); },
     async apiInvPaidBy(k, id, by) { return adminDo(k, 'inv_paidby', { id: id, by: by === 'card' || by === 'own' ? by : 'cash' }); },
     async apiInvWarranty(k, id, until) {
