@@ -579,11 +579,30 @@
     return empDo(token, op, { photo: paths[0], lat: p.lat == null ? '' : String(p.lat), lng: p.lng == null ? '' : String(p.lng),
       acc: p.acc == null ? '' : String(Math.round(p.acc)), project: project || '' });
   }
+  async function pdfUp_(k, t, file, onProgress) {
+    if (UPD.has(file)) return UPD.get(file);
+    if (file.size > 20 * 1024 * 1024) throw new Error('حجم الملف أكبر من 20 ميغابايت');
+    const r = await rpc('rep_ticket', { k: k || '', t: t || '', kind: 'doc', ext: 'pdf' });
+    const p = await put(r.path, file, 'application/pdf', onProgress);
+    UPD.set(file, p);
+    return p;
+  }
+  function addMonths_(ymd, n) {
+    const y = Number(ymd.slice(0, 4)), m = Number(ymd.slice(5, 7)) - 1 + n, dd = Number(ymd.slice(8, 10));
+    const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+    return new Date(Date.UTC(y, m, Math.min(dd, last))).toISOString().slice(0, 10);
+  }
   async function empUpload(token, dataUrls, max, onProg) {
     const list = (Array.isArray(dataUrls) ? dataUrls : [dataUrls]).filter(Boolean).slice(0, max);
     const pr = list.map(d => UPD.has(d) ? 1 : 0), tell = () => { if (onProg) onProg(pr.filter(v => v >= 1).length, list.length, Math.round(pr.reduce((a, v) => a + v, 0) / (list.length || 1) * 100)); };
     tell();
     return Promise.all(list.map(async (d, i) => {
+      if (d && d.pdf) { /* الإصدار 107: مرفق PDF بتذكرة الملفات */
+        if (UPD.has(d.pdf)) { pr[i] = 1; tell(); return UPD.get(d.pdf); }
+        const pp = await pdfUp_('', token, d.pdf, v => { pr[i] = Math.min(v, 0.99); tell(); });
+        pr[i] = 1; tell();
+        return pp;
+      }
       if (UPD.has(d)) return UPD.get(d);
       const blob = dataUrlBlob(d);
       if (blob.size > 5 * 1024 * 1024) throw new Error('الصورة كبيرة، جرّب وحدة ثانية');
@@ -986,9 +1005,10 @@
       if (!desc) throw new Error('اكتب وش انشرى');
       if (!String(x.project || '')) throw new Error('اختر المشروع');
       const list = (dataUrls || []).slice(0, 3), paths = [];
-      for (const d of list) paths.push(await API.apiUploadImg(k, d));
+      for (const d of list) paths.push(d && d.pdf ? await pdfUp_(k, '', d.pdf) : await API.apiUploadImg(k, d));
+      const w = Math.round(Number(x.warranty) || 0);
       return adminDo(k, 'inv_add', { emp: x.emp || '', amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), project: x.project || '',
-        photos: paths, paidBy: x.emp ? 'cash' : 'card' });
+        photos: paths, paidBy: x.emp ? 'cash' : 'card', warranty: w >= 1 && w <= 120 ? addMonths_(RAW.today, w) : '' });
     },
     async apiInvEdit(k, id, x) {
       const n = cleanAmount_(x.amount);

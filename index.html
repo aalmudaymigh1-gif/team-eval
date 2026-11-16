@@ -1418,6 +1418,12 @@ html:root .dsum b{display:block;font-size:15px;font-weight:600;color:var(--text)
 html:root .dsum>div>span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
 html:root .dsum .r b{color:var(--red)}
 html:root .btn2.rd{color:var(--red)}
+/* الإصدار 107: مرفق PDF للفاتورة */
+html:root .pdft{width:100%;height:100%;border-radius:12px;background:var(--acc-soft);display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:3px;padding:8px;color:var(--acc-dk);text-align:start}
+html:root .pdft span{font-size:12px;line-height:1.3;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+html:root .pdoc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:96px;border-radius:16px;background:var(--acc-soft);color:var(--acc-dk);text-decoration:none;padding:8px;text-align:center}
+html:root .pdoc b{font-size:14px;font-weight:600}
+html:root .pdoc small{font-size:12px;color:var(--acc-dk)}
 </style>
 </head>
 <body>
@@ -1427,9 +1433,9 @@ html:root .btn2.rd{color:var(--red)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=106"></script>
+<script src="api.js?v=107"></script>
 <script>
-const APP_VER = '106';
+const APP_VER = '107';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1504,6 +1510,19 @@ function emptyHtml(icon, text) { return '<div class="empty"><div class="ei">' + 
 function ctitle(icon, text, extra) { return '<div class="ctitle"><span class="ci">' + I(icon, 17) + '</span>' + text + (extra ? '<span class="sp">' + extra + '</span>' : '') + '</div>'; }
 function segc(items, cur, fn) { return '<div class="segc">' + items.map(x => '<button class="' + (cur === x[0] ? 'on' : '') + '" onclick="' + fn + '(\'' + x[0] + '\')">' + x[1] + '</button>').join('') + '</div>'; }
 const ACC_IMG = 'image/' + '*', ACC_MEDIA = ACC_IMG + ',video/' + '*';
+/* الإصدار 107: مرفق الفاتورة صورة أو PDF. الصورة نص (dataURL) والـPDF كائن {pdf: File, name} */
+const ACC_INV = ACC_IMG + ',application/pdf,.pdf';
+function isPdfPath(p) { return /\.pdf$/i.test(String(p || '')); }
+function isPdfFile(f) { return !!f && (f.type === 'application/pdf' || /\.pdf$/i.test(String(f.name || ''))); }
+async function shotFrom(f, w, q) {
+  if (!isPdfFile(f)) return w ? resizeImg(f, w, q) : resizeImg(f);
+  if (f.size > 20 * 1024 * 1024) throw new Error('حجم الملف أكبر من 20 ميغابايت');
+  if (!f.size) throw new Error('الملف فاضي');
+  return {pdf: f, name: String(f.name || 'ملف PDF').slice(0, 80)};
+}
+function pdfTile(name) { return `<div class="pdft">${I('file-text', 22)}<span>${esc(name || 'ملف PDF')}</span></div>`; }
+function shotTile(s, del, alt) { return `<div class="shot${s && s.pdf ? ' pdf' : ''}">${s && s.pdf ? pdfTile(s.name) : `<img src="${s}" alt="${alt || 'صورة الفاتورة'}">`}<button class="x" onclick="${del}" aria-label="حذف">×</button></div>`; }
+function pdfLink(u) { return `<a class="pdoc" href="${esc(u)}" target="_blank" rel="noopener">${I('file-text', 22)}<b>ملف PDF</b><small>فتح الملف</small></a>`; }
 const SL2 = '/' + '/', DRV_URL = 'https:' + SL2 + 'drive.google.com/file/d/', WA_URL = 'https:' + SL2 + 'wa.me/?text=';
 const PUSH = {
   ok: 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window,
@@ -3045,7 +3064,7 @@ async function delTask(id) {
 function proofHtml(t) {
   const ids = t.proofs || [];
   if (!S.popen[t.id]) return `<button class="mbtn" onclick="openProofs('${t.id}')">${I('image', 15)}عرض صور الإثبات (${ids.length})</button>`;
-  return `<div class="pgrid">${ids.map(f => S.pc[f] && S.pc[f] !== 'loading' ? `<img src="${S.pc[f]}" alt="صورة إثبات" onclick="viewImg('${f}')">` : '<div class="pph">جاري التحميل…</div>').join('')}</div>`;
+  return `<div class="pgrid">${ids.map(f => S.pc[f] && S.pc[f] !== 'loading' ? (isPdfPath(f) ? pdfLink(S.pc[f]) : `<img src="${S.pc[f]}" alt="صورة إثبات" onclick="viewImg('${f}')">`) : '<div class="pph">جاري التحميل…</div>').join('')}</div>`;
 }
 function redrawAny() { if (BOOT.page === 'admin' && !S.preview) renderAdmin(); else rerenderEmp(); }
 async function openProofs(id) {
@@ -3098,7 +3117,7 @@ function invSt(x, emp) {
 function invPhotosHtml(x, admin) {
   if (!x.nph) return '';
   if (!S.iopen[x.id]) return `<button class="mbtn" onclick="openInvPh('${x.id}', ${admin})">${I('image', 15)}صورة الفاتورة${x.nph > 1 ? ' (' + x.nph + ')' : ''}</button>`;
-  return `<div class="pgrid">${x.photos.map(f => S.ic[f] && S.ic[f] !== 'loading' ? `<img src="${S.ic[f]}" alt="صورة الفاتورة" onclick="viewInvImg('${f}')">` : '<div class="pph">جاري التحميل…</div>').join('')}</div>`;
+  return `<div class="pgrid">${x.photos.map(f => S.ic[f] && S.ic[f] !== 'loading' ? (isPdfPath(f) ? pdfLink(S.ic[f]) : `<img src="${S.ic[f]}" alt="صورة الفاتورة" onclick="viewInvImg('${f}')">`) : '<div class="pph">جاري التحميل…</div>').join('')}</div>`;
 }
 function invList() { return BOOT.page === 'admin' && !S.preview ? ((S.data.inv || {}).items || []) : ((S.empData && S.empData.inv) ? S.empData.inv.items : []); }
 async function openInvPh(id, admin) {
@@ -3566,7 +3585,7 @@ function openInvD(id) {
       const u = S.ic[f] && S.ic[f] !== 'loading' ? S.ic[f] : await call('apiInvImgAdmin', BOOT.key, id, f);
       S.ic[f] = u;
       const el = document.querySelector('#ivdph [data-f="' + f + '"]');
-      if (el) el.outerHTML = `<img src="${u}" alt="صورة الفاتورة" onclick="showFull('${u}','${f}','صورة الفاتورة')">`;
+      if (el) el.outerHTML = isPdfPath(f) ? pdfLink(u) : `<img src="${u}" alt="صورة الفاتورة" onclick="showFull('${u}','${f}','صورة الفاتورة')">`;
     } catch (err) {}
   });
 }
@@ -3611,7 +3630,7 @@ async function doRet(empId) {
 }
 function askInvAdd() {
   const d = S.data, ps = (d.projects || []).filter(p => !p.archived);
-  if (!S.ai) S.ai = {amount: '', vendor: '', cat: '', desc: '', project: S.view === 'fin' && S.fx.proj ? S.fx.proj : '', emp: S.view === 'fin' ? (S.fx.emp || '') : '', shots: []};
+  if (!S.ai) S.ai = {amount: '', vendor: '', cat: '', desc: '', project: S.view === 'fin' && S.fx.proj ? S.fx.proj : '', emp: S.view === 'fin' ? (S.fx.emp || '') : '', shots: [], wOn: false, w: 0, wc: false};
   const f = S.ai;
   f.project = pickProj(f.project, ps);
   ovOpen(`<label class="shh">فاتورة جديدة</label>
@@ -3621,24 +3640,28 @@ function askInvAdd() {
     ${catPick(f.cat || '', v => `S.ai.cat='${v}';askInvAdd()`)}
     <div class="sub" style="margin:6px 0 4px">مين دفع؟</div>
     <div class="segc wr">${[['', 'أنا']].concat(d.employees.map(e => [e.id, 'عهدة ' + shortName(e.name)])).map(o => `<button class="${f.emp === o[0] ? 'on' : ''}" onclick="S.ai.emp='${o[0]}';askInvAdd()">${esc(o[1])}</button>`).join('')}</div>
-    <div class="shots">${f.shots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة الفاتورة"><button class="x" onclick="S.ai.shots.splice(${i},1);askInvAdd()" aria-label="حذف الصورة">×</button></div>`).join('')}
-    ${f.shots.length < 3 ? `<label class="madd">${I('camera', 20)}صورة (اختياري)<input type="file" accept="${ACC_IMG}" multiple style="display:none" onchange="pickAi(this)"></label>` : ''}</div>
+    <label class="tgl"><span>عليها ضمان؟</span><input type="checkbox" ${f.wOn ? 'checked' : ''} onchange="S.ai.wOn=this.checked;if(this.checked&&!S.ai.w)S.ai.w=12;askInvAdd()"></label>
+    ${f.wOn ? `<div class="wchips">${[[6, '6 أشهر'], [12, 'سنة'], [24, 'سنتين']].map(c => `<button class="${!f.wc && f.w === c[0] ? 'on' : ''}" onclick="S.ai.w=${c[0]};S.ai.wc=false;askInvAdd()">${c[1]}</button>`).join('')}<button class="${f.wc ? 'on' : ''}" onclick="S.ai.wc=true;askInvAdd()">غيره</button></div>
+      ${f.wc ? `<input inputmode="numeric" placeholder="كم شهر؟" value="${f.w || ''}" oninput="S.ai.w=Number(String(this.value).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)))||0">` : ''}` : ''}
+    <div class="shots">${f.shots.map((s, i) => shotTile(s, `S.ai.shots.splice(${i},1);askInvAdd()`)).join('')}
+    ${f.shots.length < 3 ? `<label class="madd">${I('paperclip', 20)}إرفاق فاتورة (اختياري)<input type="file" accept="${ACC_INV}" multiple style="display:none" onchange="pickAi(this)"></label>` : ''}</div>
     <div class="sub">تنحفظ معتمدة على طول${f.emp ? '، وتنخصم من عهدته' : ''}.</div>
     <div class="err" id="aierr"></div>
     <div class="g21"><button class="btn2 cu" id="aibtn" onclick="doInvAdd()">حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
 }
 async function pickAi(input) {
   const files = Array.from(input.files || []); input.value = '';
-  for (const f of files.slice(0, 3 - S.ai.shots.length)) { try { S.ai.shots.push(await resizeImg(f)); } catch (e) { toastErr(e); } }
+  for (const f of files.slice(0, 3 - S.ai.shots.length)) { try { S.ai.shots.push(await shotFrom(f)); } catch (e) { toastErr(e); } }
   askInvAdd();
 }
 async function doInvAdd() {
   const f = S.ai, b = $('#aibtn');
   if (!f.project) { $('#aierr').textContent = 'اختر المشروع'; return; }
+  if (f.wOn && !(f.w >= 1 && f.w <= 120)) { $('#aierr').textContent = 'مدة الضمان من شهر إلى 120 شهر'; return; }
   if (b && b.disabled) return;
   if (b) { b.disabled = true; b.textContent = 'جاري الحفظ…'; }
   try {
-    S.data = await callT(120000, 'apiInvAddAdmin', BOOT.key, {amount: f.amount, vendor: f.vendor, cat: f.cat || '', desc: f.desc, project: f.project, emp: f.emp}, f.shots);
+    S.data = await callT(120000, 'apiInvAddAdmin', BOOT.key, {amount: f.amount, vendor: f.vendor, cat: f.cat || '', desc: f.desc, project: f.project, emp: f.emp, warranty: f.wOn ? f.w : 0}, f.shots);
     S.ai = null; ovClose(); renderAdmin(); toast('انحفظت الفاتورة');
   } catch (e) { $('#aierr').textContent = e; if (b) { b.disabled = false; b.textContent = 'حفظ'; } }
 }
@@ -4520,8 +4543,8 @@ function invFormHtml(d) {
   return `<div class="pform ivform" style="margin-top:12px">
     <b>${ed ? 'تصحيح الفاتورة' : 'فاتورة جديدة'}</b>
     ${ed ? '<div class="sub">عدّل ما طلبه المدير العام. تُرسل بنفس الفاتورة وتعود «تنتظر الاعتماد».</div>' : ''}
-    <div class="shots">${keep.map((p, i) => `<div class="shot">${S.ic[p] && S.ic[p] !== 'loading' ? `<img src="${S.ic[p]}" alt="صورة الفاتورة">` : '<div class="pph" style="width:100%;height:100%;font-size:12px">جاري التحميل…</div>'}<button class="x" onclick="S.inv.keep.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}${S.ishots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة الفاتورة"><button class="x" onclick="S.ishots.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}
-    ${room > 0 ? `<label class="madd">${I('camera', 20)}صوّر الفاتورة<input type="file" accept="${ACC_IMG}" multiple style="display:none" onchange="pickInv(this)"></label>` : ''}</div>
+    <div class="shots">${keep.map((p, i) => `<div class="shot${isPdfPath(p) ? ' pdf' : ''}">${isPdfPath(p) ? pdfTile('ملف PDF') : S.ic[p] && S.ic[p] !== 'loading' ? `<img src="${S.ic[p]}" alt="صورة الفاتورة">` : '<div class="pph" style="width:100%;height:100%;font-size:12px">جاري التحميل…</div>'}<button class="x" onclick="S.inv.keep.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}${S.ishots.map((s, i) => shotTile(s, `S.ishots.splice(${i},1);rerenderEmp()`)).join('')}
+    ${room > 0 ? `<label class="madd">${I('paperclip', 20)}إرفاق فاتورة<input type="file" accept="${ACC_INV}" multiple style="display:none" onchange="pickInv(this)"></label>` : ''}</div>
     ${S.ishotLoading ? '<div class="sub">جاري تجهيز الصورة…</div>' : ''}
     <input class="qtt" inputmode="decimal" placeholder="المبلغ بالريال" value="${esc(f.amount)}" oninput="S.inv.amount=this.value">
     <input placeholder="وصف المشتريات" value="${esc(f.desc)}" oninput="S.inv.desc=this.value">
@@ -4544,7 +4567,7 @@ async function pickInv(input) {
   if (!files.length) return;
   S.ishotLoading = true; rerenderEmp();
   for (const f of files.slice(0, Math.max(0, 3 - S.ishots.length - (S.inv.edit ? (S.inv.keep || []).length : 0)))) {
-    try { S.ishots.push(await resizeImg(f, 1600, 0.8)); } catch (e) { toastErr(e); }
+    try { S.ishots.push(await shotFrom(f, 1600, 0.8)); } catch (e) { toastErr(e); }
   }
   S.ishotLoading = false; rerenderEmp();
 }
