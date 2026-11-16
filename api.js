@@ -504,7 +504,9 @@
       attendance: RAW.attendance,
       deleted: (RAW.deleted || []).map(z => { const r = z.row || {}, e = empById(r.emp);
         return { id: z.id, tbl: z.tbl, rid: z.rid, at: z.at || '', back: z.back || '', emp: e ? e.name : '', amount: Math.round((Number(r.amount) || 0) * 100) / 100,
-          kind: r.kind || '', status: r.status || '', desc: z.tbl === 'invoices' ? (r.descr || '') : (r.note || ''), month: r.month || r.start || '', project: pmap[r.project] || '' }; }),
+          kind: r.kind || '', status: r.status || '', desc: z.tbl === 'invoices' ? (r.descr || '') : z.tbl === 'proj_ideas' ? (r.text || '') : (r.note || ''), month: r.month || r.start || '', project: pmap[r.project] || '' }; }),
+      /* الإصدار 110: الكراسة. أفكار المدير لكل مشروع، ترجع له بس */
+      ideas: (RAW.ideas || []).map(x => ({ id: x.id, proj: x.proj, text: x.text || '', status: x.status, out: x.out || '', ts: Number(x.ts) || 0, archAt: Number(x.archAt) || 0 })),
       attCfg: attCfg_(),
       alerts: RAW.alerts || [],
       guides: RAW.guides.map(g => ({ id: g.id, ts: g.ts, title: g.title, points: g.points, q: g.q,
@@ -1010,6 +1012,12 @@
     },
     async apiInvDelete(k, id) { return adminDo(k, 'inv_del', { id: id }); },
     async apiDelRestore(k, a) { return adminDo(k, 'del_restore', a); },
+    async apiIdeaAdd(k, p, t) { return adminDo(k, 'idea_add', { project: p, text: t }); },
+    async apiIdeaUpd(k, id, t) { return adminDo(k, 'idea_upd', { id: id, text: t }); },
+    async apiIdeaOut(k, id, o) { return adminDo(k, 'idea_out', { id: id, out: o }); },
+    async apiIdeaOpen(k, id) { return adminDo(k, 'idea_open', { id: id }); },
+    async apiIdeaDel(k, id) { return adminDo(k, 'idea_del', { id: id }); },
+    async apiIdeaUndel(k, id) { return adminDo(k, 'idea_undel', { id: id }); },
     async apiInvGive(k, empId, amount, note, method, sdad, ret) {
       const n = cleanAmount_(amount);
       return adminDo(k, 'inv_give', { emp: empId, amount: n, note: String(note || '').trim().slice(0, 200), method: String(method || ''), sdad: !!sdad, ret: !!ret });
