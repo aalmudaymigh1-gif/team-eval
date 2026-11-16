@@ -7,7 +7,8 @@
   const FN_URL = SB_URL + '/functions/v1/push';
   const FILES_URL = SB_URL + '/functions/v1/files';
   let CRED = {};
-  const NOTIFY = ['tasks_add', 'task_return', 'task_update', 'inv_approve', 'inv_return', 'inv_fix', 'att_bad', 'att_bad_undo'];
+  /* الإصدار 109: تعديل الفاتورة وإضافة فاتورة المدير والميزانية واعتماد المهمة يكتبون إشعار (للموظف أو تنبيه ميزانية)، فينرسل فورًا */
+  const NOTIFY = ['tasks_add', 'task_return', 'task_update', 'task_approve', 'inv_approve', 'inv_return', 'inv_fix', 'inv_upd', 'inv_edit', 'inv_add', 'proj_budget', 'att_bad', 'att_bad_undo'];
   function flush() {
     fetch(FN_URL, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: '{"op":"flush"}', keepalive: true }).catch(() => {});
   }
@@ -190,6 +191,8 @@
     }
     saveUC();
   }
+  /* الإصدار 109: رابط الملف من الذاكرة لو ما قرب ينتهي، وإلا فاضي */
+  const cachedUrl = p => (p && fresh(p) && UC[p].u) || '';
   async function fileUrl(path) {
     if (!path) throw new Error('ما فيه صورة');
     await signMany([path]);
@@ -234,8 +237,10 @@
     const x = new Date(d + 'T12:00:00Z'); x.setUTCDate(x.getUTCDate() + n);
     return x.toISOString().slice(0, 10);
   }
-  function settings_() {
-    const s = RAW.settings || {};
+  /* الإصدار 109: الشهر اللي خلص وما انصرف وتغيّر بعده الراتب أو الحسبة، ينحسب بقيمه المحفوظة */
+  function snap_(empId, mk) { return (RAW.snaps || []).filter(s => s.emp === empId && s.month === mk)[0] || null; }
+  function settings_(src) {
+    const s = src || RAW.settings || {};
     const g = (k, d) => { const v = s[k]; return v == null || v === '' || !isFinite(Number(v)) ? d : Number(v); };
     return { miss: g('MISS_SAR', DEF.miss), trust: g('TRUST_SAR', DEF.trust), star: g('STAR_SAR', DEF.star),
       starCap: g('STAR_CAP', DEF.starCap), clean: g('CLEAN_SAR', DEF.clean) };
@@ -321,7 +326,9 @@
 
   /* ---------- الحساب (نفس منطق Code.gs) ---------- */
   function calcMonth_(emp, logs, mk) {
-    const st = settings_();
+    const sn = snap_(emp.id, mk);
+    if (sn) emp = Object.assign({}, emp, { max: Number(sn.max) || 0, track: !!sn.track });
+    const st = sn ? settings_(sn.st || {}) : settings_();
     const seen = {}, mMap = {};
     let misses = 0, trust = 0, stars = 0;
     logs.forEach(l => {
@@ -369,15 +376,16 @@
         advance: d.advance, inst: d.inst, deds: d.deds || [], loanParts: d.loanParts || {}, net: d.net, warn10: false, track: !!emp.track };
     }
     const c = calcMonth_(emp, logs, mk);
+    const sn = snap_(emp.id, mk), sal = sn ? Number(sn.salary) || 0 : emp.salary;
     const advance = fin.filter(f => f.kind === 'adv' && f.emp === emp.id && f.month === mk).reduce((s, f) => s + f.amount, 0);
     const due = loanDue_(emp, fin, mk);
     const deds = fin.filter(f => f.kind === 'ded' && f.emp === emp.id && f.month === mk).map(f => ({ note: f.note, amount: f.amount }));
     const dedT = deds.reduce((s, f) => s + f.amount, 0);
     return { month: mk, label: monthLabel_(mk), paid: false, due: dueDate_(emp, mk),
-      base: emp.salary, bonus: c.bonus, points: c.points, target: 20, max: c.max,
+      base: sal, bonus: c.bonus, points: c.points, target: 20, max: c.max,
       advance: advance, inst: due.total, deds: deds, loanParts: due.parts,
-      net: emp.salary + c.bonus - advance - due.total - dedT,
-      warn10: due.total + dedT > emp.salary * 0.1, track: !!emp.track };
+      net: sal + c.bonus - advance - due.total - dedT,
+      warn10: due.total + dedT > sal * 0.1, track: sn ? !!sn.track : !!emp.track, snap: !!sn };
   }
   function loanBalances_(emp, fin) {
     const pays = fin.filter(f => f.kind === 'pay' && f.emp === emp.id);
@@ -494,6 +502,9 @@
     return {
       inv: { bal: bal, parts: parts, items: (ms => RAW.invoices.slice().reverse().map(x => Object.assign(invOut_(x, pmap), { matched: ms.has(x.id) })))(new Set(RAW.matched || [])) },
       attendance: RAW.attendance,
+      deleted: (RAW.deleted || []).map(z => { const r = z.row || {}, e = empById(r.emp);
+        return { id: z.id, tbl: z.tbl, rid: z.rid, at: z.at || '', back: z.back || '', emp: e ? e.name : '', amount: Math.round((Number(r.amount) || 0) * 100) / 100,
+          kind: r.kind || '', status: r.status || '', desc: z.tbl === 'invoices' ? (r.descr || '') : (r.note || ''), month: r.month || r.start || '', project: pmap[r.project] || '' }; }),
       attCfg: attCfg_(),
       alerts: RAW.alerts || [],
       guides: RAW.guides.map(g => ({ id: g.id, ts: g.ts, title: g.title, points: g.points, q: g.q,
@@ -922,6 +933,9 @@
     async apiInvImgAdmin(k, id, fid) { return imgUrl(fid); },
     async apiInvImgEmp(t, id, fid) { return imgUrl(fid); },
     prefetch: prefetch,
+    cachedUrl: cachedUrl,
+    fileUrl: fileUrl,
+    fileUrls: async ps => { await signMany(ps); const o = {}; ps.forEach(p => { if (UC[p] && UC[p].u) o[p] = UC[p].u; }); return o; },
 
     async apiUploadImg(k, dataUrl) {
       if (UPD.has(dataUrl)) return UPD.get(dataUrl);
@@ -995,6 +1009,7 @@
       return adminDo(k, 'inv_return', { id: id, reason: r });
     },
     async apiInvDelete(k, id) { return adminDo(k, 'inv_del', { id: id }); },
+    async apiDelRestore(k, a) { return adminDo(k, 'del_restore', a); },
     async apiInvGive(k, empId, amount, note, method, sdad, ret) {
       const n = cleanAmount_(amount);
       return adminDo(k, 'inv_give', { emp: empId, amount: n, note: String(note || '').trim().slice(0, 200), method: String(method || ''), sdad: !!sdad, ret: !!ret });

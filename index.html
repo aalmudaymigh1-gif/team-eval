@@ -1435,6 +1435,14 @@ html:root .iewr{display:flex;gap:8px;align-items:center}
 html:root .iewr input{flex:1;min-width:0}
 html:root .iewr .btn2{flex:none;width:auto;margin:0;white-space:nowrap}
 html:root .pform .grid2 input{min-width:0}
+/* الإصدار 109: المحذوفات */
+html:root .delr{padding:10px 0;align-items:center}
+html:root .delr+.delr{border-top:1px solid var(--line);margin-top:0}
+html:root .delr .tx{flex:1;min-width:0}
+html:root .delr .tx b{display:block;font-size:14px;font-weight:600}
+html:root .delr .tx small{display:block;color:var(--muted);font-size:12px;margin-top:2px;line-height:1.5}
+html:root .delr .rb{flex:none;border:0;border-radius:999px;background:var(--acc-soft);color:var(--acc-dk);font:inherit;font-size:13px;font-weight:600;padding:0 14px;min-height:36px;cursor:pointer}
+html:root .delr .gone{flex:none;font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -1444,9 +1452,9 @@ html:root .pform .grid2 input{min-width:0}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=108"></script>
+<script src="api.js?v=109"></script>
 <script>
-const APP_VER = '108';
+const APP_VER = '109';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1533,7 +1541,29 @@ async function shotFrom(f, w, q) {
 }
 function pdfTile(name) { return `<div class="pdft">${I('file-text', 22)}<span>${esc(name || 'ملف PDF')}</span></div>`; }
 function shotTile(s, del, alt) { return `<div class="shot${s && s.pdf ? ' pdf' : ''}">${s && s.pdf ? pdfTile(s.name) : `<img src="${s}" alt="${alt || 'صورة الفاتورة'}">`}<button class="x" onclick="${del}" aria-label="حذف">×</button></div>`; }
-function pdfLink(u) { return `<a class="pdoc" href="${esc(u)}" target="_blank" rel="noopener">${I('file-text', 22)}<b>ملف PDF</b><small>فتح الملف</small></a>`; }
+/* الإصدار 109: رابط الـPDF صالح ساعة. يتجدد لما يرجع التطبيق من الخلفية وكل 40 دقيقة، ولو انضغط وهو منتهي يتجدد ثم ينفتح */
+function pdfSet_(f, u) {
+  if (S.ic && S.ic[f] && S.ic[f] !== 'loading') S.ic[f] = u;
+  if (S.pc && S.pc[f] && S.pc[f] !== 'loading') S.pc[f] = u;
+  document.querySelectorAll('a.pdoc[data-f]').forEach(a => { if (a.dataset.f === f) a.href = u; });
+}
+function pdfGo(ev, a) {
+  const f = a.dataset.f, u = API.cachedUrl(f);
+  if (u) { if (a.href !== u) pdfSet_(f, u); return true; }
+  ev.preventDefault();
+  const w = window.open('', '_blank');
+  API.fileUrl(f).then(nu => { pdfSet_(f, nu); if (w && !w.closed) w.location.href = nu; else location.href = nu; })
+    .catch(e => { if (w) w.close(); toastErr(e); });
+  return false;
+}
+function pdfRefresh() {
+  const fs = [...new Set([...document.querySelectorAll('a.pdoc[data-f]')].map(a => a.dataset.f))].filter(f => !API.cachedUrl(f));
+  if (!fs.length) return;
+  API.fileUrls(fs).then(m => fs.forEach(f => { if (m[f]) pdfSet_(f, m[f]); })).catch(() => {});
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pdfRefresh(); });
+setInterval(pdfRefresh, 40 * 60000);
+function pdfLink(u, f) { return `<a class="pdoc" href="${esc(u)}"${f ? ` data-f="${esc(f)}" onclick="return pdfGo(event,this)"` : ''} target="_blank" rel="noopener">${I('file-text', 22)}<b>ملف PDF</b><small>فتح الملف</small></a>`; }
 const SL2 = '/' + '/', DRV_URL = 'https:' + SL2 + 'drive.google.com/file/d/', WA_URL = 'https:' + SL2 + 'wa.me/?text=';
 const PUSH = {
   ok: 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window,
@@ -3075,7 +3105,7 @@ async function delTask(id) {
 function proofHtml(t) {
   const ids = t.proofs || [];
   if (!S.popen[t.id]) return `<button class="mbtn" onclick="openProofs('${t.id}')">${I('image', 15)}عرض صور الإثبات (${ids.length})</button>`;
-  return `<div class="pgrid">${ids.map(f => S.pc[f] && S.pc[f] !== 'loading' ? (isPdfPath(f) ? pdfLink(S.pc[f]) : `<img src="${S.pc[f]}" alt="صورة إثبات" onclick="viewImg('${f}')">`) : '<div class="pph">جاري التحميل…</div>').join('')}</div>`;
+  return `<div class="pgrid">${ids.map(f => S.pc[f] && S.pc[f] !== 'loading' ? (isPdfPath(f) ? pdfLink(S.pc[f], f) : `<img src="${S.pc[f]}" alt="صورة إثبات" onclick="viewImg('${f}')">`) : '<div class="pph">جاري التحميل…</div>').join('')}</div>`;
 }
 function redrawAny() { if (BOOT.page === 'admin' && !S.preview) renderAdmin(); else rerenderEmp(); }
 async function openProofs(id) {
@@ -3128,7 +3158,7 @@ function invSt(x, emp) {
 function invPhotosHtml(x, admin) {
   if (!x.nph) return '';
   if (!S.iopen[x.id]) return `<button class="mbtn" onclick="openInvPh('${x.id}', ${admin})">${I('image', 15)}صورة الفاتورة${x.nph > 1 ? ' (' + x.nph + ')' : ''}</button>`;
-  return `<div class="pgrid">${x.photos.map(f => S.ic[f] && S.ic[f] !== 'loading' ? (isPdfPath(f) ? pdfLink(S.ic[f]) : `<img src="${S.ic[f]}" alt="صورة الفاتورة" onclick="viewInvImg('${f}')">`) : '<div class="pph">جاري التحميل…</div>').join('')}</div>`;
+  return `<div class="pgrid">${x.photos.map(f => S.ic[f] && S.ic[f] !== 'loading' ? (isPdfPath(f) ? pdfLink(S.ic[f], f) : `<img src="${S.ic[f]}" alt="صورة الفاتورة" onclick="viewInvImg('${f}')">`) : '<div class="pph">جاري التحميل…</div>').join('')}</div>`;
 }
 function invList() { return BOOT.page === 'admin' && !S.preview ? ((S.data.inv || {}).items || []) : ((S.empData && S.empData.inv) ? S.empData.inv.items : []); }
 async function openInvPh(id, admin) {
@@ -3532,7 +3562,7 @@ async function doInvReturn(id) {
 }
 async function invDel(id) {
   if (S.armed !== 'inv_' + id) { S.armed = 'inv_' + id; renderInv(); return; }
-  try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذفت'); }
+  try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذفت', () => delRestore(0, id)); }
   catch (e) { S.armed = null; renderInv(); toastErr(e); }
 }
 /* الإصدار 98: الفواتير مجمّعة حسب اليوم: عنوان اليوم مرة وحدة بعدده ومجموعه، وتحته فواتيره بسطر مختصر فيه الوقت بس. الضغط يفتح التفاصيل */
@@ -3636,14 +3666,34 @@ function openInvD(id) {
       const u = S.ic[f] && S.ic[f] !== 'loading' ? S.ic[f] : await call('apiInvImgAdmin', BOOT.key, id, f);
       S.ic[f] = u;
       const el = document.querySelector('#ivdph [data-f="' + f + '"]');
-      if (el) el.outerHTML = isPdfPath(f) ? pdfLink(u) : `<img src="${u}" alt="صورة الفاتورة" onclick="showFull('${u}','${f}','صورة الفاتورة')">`;
+      if (el) el.outerHTML = isPdfPath(f) ? pdfLink(u, f) : `<img src="${u}" alt="صورة الفاتورة" onclick="showFull('${u}','${f}','صورة الفاتورة')">`;
     } catch (err) {}
   });
+}
+/* الإصدار 109: المحذوفات. الفاتورة تنحفظ نسختها قبل الحذف وترجع بنفس حالتها وصورها، وحركات الراتب للسجل بس */
+const DEL_FIN = {pay: 'صرف راتب', part: 'دفعة راتب', adv: 'سلفة', ded: 'خصم', loan: 'سلفة بالأقساط'};
+function delAt(s) { s = String(s || ''); return s ? s.slice(8, 10) + '/' + s.slice(5, 7) + ' ' + s.slice(11, 16) : ''; }
+function delRow(z) {
+  const inv = z.tbl === 'invoices';
+  const t = inv ? (z.kind === 'give' ? 'عهدة' + (z.desc ? ' · ' + z.desc : '') : (z.desc || 'فاتورة')) : (DEL_FIN[z.kind] || 'حركة راتب') + (z.month ? ' ' + monthLbl(z.month).split(' ')[0] : '');
+  const st = inv && z.kind !== 'give' ? (z.status === 'ok' ? 'كانت معتمدة' : z.status === 'review' ? 'كانت تنتظر' : 'كانت مرتجعة') : '';
+  const meta = [z.emp || (inv ? 'فاتورتك' : ''), z.project, 'انحذفت ' + delAt(z.at), st].filter(Boolean).join(' · ');
+  const act = !inv ? '<span class="gone">للسجل</span>' : z.back ? '<span class="gone">رجّعتها</span>' : `<button class="rb" onclick="delRestore(${Number(z.id)})">استرجاع</button>`;
+  return `<div class="row delr"><div class="tx"><b>${esc(t)} · ${fmN(z.amount)} ر.س</b><small>${esc(meta)}</small></div>${act}</div>`;
+}
+function delPageHtml() {
+  const ds = S.data.deleted || [];
+  return `<div class="card"><div class="sub" style="margin:0 0 8px">أي فاتورة أو عهدة أو حركة راتب تنحذف، تنحفظ هنا. الفاتورة والعهدة ترجعها بنفس حالتها وصورها، وحركات الراتب للسجل بس.</div>
+    ${ds.length ? ds.map(delRow).join('') : '<div class="sub">ما فيه شي محذوف.</div>'}</div>`;
+}
+async function delRestore(id, inv) {
+  try { S.data = await call('apiDelRestore', BOOT.key, id ? {id: id} : {inv: inv}); renderAdmin(); toast('رجعت'); }
+  catch (e) { toastErr(e); }
 }
 async function delInvD(id) {
   const b = $('#ivddel');
   if (S.armed !== 'ivd_' + id) { S.armed = 'ivd_' + id; if (b) { b.textContent = 'متأكد؟ اضغط مرة ثانية للحذف'; b.classList.add('arm'); } return; }
-  try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; ovClose(); renderAdmin(); toast('انحذفت'); }
+  try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; ovClose(); renderAdmin(); toast('انحذفت', () => delRestore(0, id)); }
   catch (e) { S.armed = null; toastErr(e); }
 }
 function giveForm(title, x) {
@@ -3745,7 +3795,7 @@ async function doGiveEdit(id) {
 async function delGive(id) {
   const b = $('#gdel');
   if (S.armed !== 'give_' + id) { S.armed = 'give_' + id; if (b) { b.textContent = 'متأكد؟ اضغط مرة ثانية للحذف'; b.classList.add('arm'); } return; }
-  try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; ovClose(); renderAdmin(); toast('انحذف'); }
+  try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; ovClose(); renderAdmin(); toast('انحذف', () => delRestore(0, id)); }
   catch (e) { S.armed = null; $('#gerr').textContent = e; }
 }
 function askWarranty(id) {
@@ -4200,6 +4250,7 @@ function renderSet() {
         <div class="field"><span>الراتب الأساسي (ريال)</span><input id="s_${e.id}" type="number" inputmode="numeric" value="${esc(edV(e, 's'))}" oninput="edIn('${e.id}','s',this.value)"></div>
         <div class="field"><span>الحافز الأساسي (ريال)</span><input id="m_${e.id}" type="number" inputmode="numeric" value="${esc(edV(e, 'm'))}" oninput="edIn('${e.id}','m',this.value)"></div>
       </div>
+      <div class="note info" id="eh_${e.id}"${lateHint(e) ? '' : ' style="display:none"'}>${I('info', 16)}<div>${lateHint(e)}</div></div>
       <div class="trow"><div class="n"><b>متابعة فقط</b><small>يتابع تقييمه بدون حافز</small></div><button class="tg ${e.track?'on':''}" onclick="toggleTrack('${e.id}')" aria-label="متابعة فقط"></button></div>
       <div class="trow"><div class="n"><b>حضور وانصراف</b><small>يصوّر لما يطلع من البيت ولما يوصل المشروع ولما يطلع منه</small></div><button class="tg ${e.attend?'on':''}" onclick="toggleAtt('${e.id}')" aria-label="حضور وانصراف"></button></div>
       <div class="trow"><div class="n"><b>التوجيهات</b><small>يوصله توجيهاتك ويقراها نقطة نقطة</small></div><button class="tg ${e.guide?'on':''}" onclick="toggleGuide('${e.id}')" aria-label="التوجيهات"></button></div>
@@ -4220,6 +4271,7 @@ function renderSet() {
         <div class="field"><span>أعلى مكافأة مواقف بالشهر</span><input id="st_starCap" type="number" inputmode="numeric" value="${st.starCap}"></div>
         <div class="field"><span>شهر بدون تقصير</span><input id="st_clean" type="number" inputmode="numeric" value="${st.clean}"></div>
       </div>
+      ${(d.employees || []).some(e => lateMonths(e).length) ? `<div class="note info" style="margin:0 0 10px">${I('info', 16)}<div>فيه شهور متأخرة ما انصرفت. تبقى على المبالغ القديمة، والجديدة تبدأ من ${esc(monthLbl((d.today || '').slice(0, 7)).split(' ')[0])}.</div></div>` : ''}
       <button class="btn2 cu" style="width:100%" onclick="saveTarget()">${I('check', 16, 2.5)}حفظ</button>
       <div class="err" id="terr"></div></div>`);
   if (k === 'att') return page('الحضور والانصراف', attSetCard(d).replace(/^<div class="card">\s*<div class="ctitle">.*?<\/div>/s, '<div class="card">'));
@@ -4242,6 +4294,7 @@ function renderSet() {
       <button class="btn2 ${S.armed==='out'?'arm':''}" style="width:100%;margin-top:8px" onclick="logoutHere()">${S.armed==='out'?'تأكيد: اطلع من هالجهاز':'اطلع من هالجهاز'}</button>
       <div class="err" id="lkerr"></div></div>`);
   if (k === 'files') return page('الملفات غير المستخدمة', filesPageHtml());
+  if (k === 'del') return page('المحذوفات', delPageHtml());
   if (k === 'rules') return page('طريقة الحساب', `<div class="card">${rulesHtml(st)}</div>`);
   const em = inT && k.indexOf('emp:') === 0 && empById(k.slice(4));
   if (em) return page('إعدادات ' + esc(shortName(em.name)), form(em));
@@ -4258,6 +4311,7 @@ function renderSet() {
     <div class="blk"><div class="lab">${I('lock', 14)}الحساب</div><div class="tbl2">
       ${tbRow('lock', 'الدخول والأجهزة', '', "ssub('link')")}
       ${tbRow('folder-x', 'الملفات غير المستخدمة', S.clean ? (S.clean.count + ' ملف') : '', "ssub('files');loadClean()")}
+      ${tbRow('trash-2', 'المحذوفات', (d.deleted || []).length ? String((d.deleted || []).length) : '', "ssub('del')")}
       ${tbRow('info', 'طريقة الحساب', '', "ssub('rules')")}
     </div></div></div>`;
 }
@@ -4301,17 +4355,31 @@ async function saveTarget() {
 function edSaved(e) { return {n: e.name || '', s: String(e.salary || ''), m: String(e.max || '')}; }
 function edV(e, k) { const dr = (S.ed || {})[e.id]; return dr && dr[k] != null ? dr[k] : edSaved(e)[k]; }
 function edDirty(e) { const dr = (S.ed || {})[e.id], sv = edSaved(e); return !!dr && ['n', 's', 'm'].some(k => dr[k] != null && String(dr[k]).trim() !== sv[k]); }
-function edIn(id, k, v) { S.ed = S.ed || {}; (S.ed[id] = S.ed[id] || {})[k] = v; const e = empById(id), b = $('#sv_' + id); if (e && b) b.classList.toggle('cu', edDirty(e)); }
+function edIn(id, k, v) { S.ed = S.ed || {}; (S.ed[id] = S.ed[id] || {})[k] = v; const e = empById(id), b = $('#sv_' + id); if (e && b) b.classList.toggle('cu', edDirty(e));
+  const h = $('#eh_' + id); if (e && h) { const t = lateHint(e); h.style.display = t ? '' : 'none'; h.lastElementChild.textContent = t; } }
+/* الإصدار 109: الشهر اللي خلص وما انصرف يبقى على راتبه وحافزه وقتها، والجديد يبدأ من الشهر الحالي */
+function lateMonths(e) { const cur = (S.data.today || '').slice(0, 7); return (e.unpaid || []).filter(u => u.month < cur); }
+function lateHint(e, track) {
+  const late = lateMonths(e), sv = edSaved(e), cur = monthLbl((S.data.today || '').slice(0, 7)).split(' ')[0];
+  if (!late.length) return '';
+  const sCh = String(edV(e, 's')).trim() !== sv.s, mCh = String(edV(e, 'm')).trim() !== sv.m;
+  if (!sCh && !mCh && !track) return '';
+  const nm = late.map(u => monthLbl(u.month).split(' ')[0]), one = late.length === 1;
+  const what = sCh && !mCh && !track ? (one ? 'راتبه القديم ' + fmN(late[0].base) : 'رواتبها وقتها') : (one ? 'راتبه وحافزه وقتها' : 'رواتبها وحوافزها وقتها');
+  return (one ? nm[0] + ' متأخر ويبقى على ' : nm.join(' و') + ' متأخرة وتبقى على ') + what + '. الجديد يبدأ من ' + cur + '.';
+}
 async function saveEmp(id) {
   const k = id || 'new';
   const x = {id, name: $('#n_'+k).value, salary: $('#s_'+k).value, max: $('#m_'+k).value};
-  try { S.data = await call('apiSaveEmp', BOOT.key, x); if (id && S.ed) delete S.ed[id]; if (!id) S.ssub = null; renderAdmin(); toast(id ? 'انحفظ' : 'انضاف الموظف'); }
+  const hint = id && empById(id) ? lateHint(empById(id)) : '';
+  try { S.data = await call('apiSaveEmp', BOOT.key, x); if (id && S.ed) delete S.ed[id]; if (!id) S.ssub = null; renderAdmin(); toast(id ? 'انحفظ' : 'انضاف الموظف', null, 'ok', hint); }
   catch (e) { $('#e_'+k).textContent = e; }
 }
 
 async function toggleTrack(id) {
   const e = empById(id);
-  try { S.data = await call('apiSaveEmp', BOOT.key, {id, name:e.name, salary:e.salary, max:e.max, track: !e.track}); renderAdmin(); toast(!e.track ? 'صار متابعة فقط' : 'رجع له الحافز'); }
+  const hint = lateHint(e, true);
+  try { S.data = await call('apiSaveEmp', BOOT.key, {id, name:e.name, salary:e.salary, max:e.max, track: !e.track}); renderAdmin(); toast(!e.track ? 'صار متابعة فقط' : 'رجع له الحافز', null, 'ok', hint); }
   catch (err) { $('#e_'+id).textContent = err; }
 }
 
