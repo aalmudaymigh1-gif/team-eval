@@ -1424,6 +1424,17 @@ html:root .pdft span{font-size:12px;line-height:1.3;max-width:100%;overflow:hidd
 html:root .pdoc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:96px;border-radius:16px;background:var(--acc-soft);color:var(--acc-dk);text-decoration:none;padding:8px;text-align:center}
 html:root .pdoc b{font-size:14px;font-weight:600}
 html:root .pdoc small{font-size:12px;color:var(--acc-dk)}
+/* الإصدار 108: قلم تعديل الفاتورة */
+html:root .ivde{flex:none;width:36px;height:36px;border:0;border-radius:999px;background:var(--acc-soft);color:var(--acc-dk);display:inline-grid;place-items:center;cursor:pointer;position:relative;padding:0}
+html:root .ivde::after{content:"";position:absolute;inset:-4px}
+html:root .ivr .th .ivde{margin-inline-start:8px}
+html:root .ivd.wed{position:relative}
+html:root .ivd.wed>.ivde{position:absolute;top:-2px;inset-inline-end:0}
+html:root .ivd.wed>h3{padding-inline-end:46px}
+html:root .iewr{display:flex;gap:8px;align-items:center}
+html:root .iewr input{flex:1;min-width:0}
+html:root .iewr .btn2{flex:none;width:auto;margin:0;white-space:nowrap}
+html:root .pform .grid2 input{min-width:0}
 </style>
 </head>
 <body>
@@ -1433,9 +1444,9 @@ html:root .pdoc small{font-size:12px;color:var(--acc-dk)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=107"></script>
+<script src="api.js?v=108"></script>
 <script>
-const APP_VER = '107';
+const APP_VER = '108';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -3222,7 +3233,7 @@ function invRowHtml(x, showEmp) {
   const st = invSt(x, false), armDel = S.armed === 'inv_' + x.id, give = x.kind === 'give';
   const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', give ? '' : esc(x.pname || 'عام'), catName(x.cat), x.vendor ? esc(x.vendor) : '', dmyt(x.ts)].filter(Boolean).join(' · ');
   return `<div class="ivr ${x.status === 'review' ? 'rv' : ''}">
-    <div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}">${M(x.amount, give ? '+' : '')}</b></div>
+    <div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}">${M(x.amount, give ? '+' : '')}</b>${invEditBtn(x, 'r')}</div>
     <div class="tm">${meta}${x.status !== 'ok' || give ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}${x.taskDeleted ? ' · <span class="tdel">مهمتها انحذفت</span>' : ''}</div>${invFixTag(x)}
     ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px">${esc(x.reason)}</div>` : ''}
     ${invPhotosHtml(x, true)}
@@ -3563,12 +3574,52 @@ function catBreak(list) {
   const rows = INV_CATS.concat([['', 'بدون بند']]).filter(o => by[o[0]]).sort((a, b) => by[b[0]] - by[a[0]]);
   return `<div class="sech">حسب البند</div><div class="card catb">${rows.map(o => { const p = Math.round(by[o[0]] / tot * 100); return `<div class="cbr"><div class="cbl"><span>${o[1]}</span><span>${M(by[o[0]], '', 't')} · <bdi dir="ltr">${p}%</bdi></span></div><div class="cbt"><i class="${o[0] ? '' : 'n'}" style="width:${Math.max(p, 1)}%"></i></div></div>`; }).join('')}</div>`;
 }
+/* الإصدار 108: تعديل الفاتورة كاملة من المدير. القلم في زاوية بطاقة الفاتورة وتفاصيلها، والموظف يوصله إشعار بأي تعديل */
+function invCanEdit(x) { return BOOT.page === 'admin' && !S.preview && x && x.kind === 'inv' && (x.status === 'review' || x.status === 'ok'); }
+function invEditBtn(x, from) { return invCanEdit(x) ? `<button class="ivde" aria-label="تعديل الفاتورة" onclick="askInvEdit('${x.id}','${from}')">${I('pencil', 17)}</button>` : ''; }
+function askInvEdit(id, from) {
+  const d = S.data, x = ((d.inv || {}).items || []).find(v => v.id === id);
+  if (!invCanEdit(x)) return toastErr('الفاتورة غير موجودة، حدّث الصفحة');
+  if (!S.ie || S.ie.id !== id) S.ie = {id: id, from: from || 'd', amount: String(x.amount), desc: x.desc || '', project: x.project || '', vendor: x.vendor || '', cat: x.cat || '', paidBy: x.paidBy || 'cash', warranty: x.warrantyUntil || ''};
+  const f = S.ie, ps = (d.projects || []).filter(p => !p.archived || p.id === x.project), e = d.employees.find(v => v.id === x.emp);
+  ovOpen(`<label class="shh">تعديل الفاتورة</label>
+    <div class="grid2"><input class="qtt" inputmode="decimal" aria-label="المبلغ" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.ie.amount=this.value"><input aria-label="المحل" placeholder="المحل" value="${esc(f.vendor)}" oninput="S.ie.vendor=this.value"></div>
+    <input aria-label="وصف المشتريات" placeholder="وصف المشتريات" value="${esc(f.desc)}" oninput="S.ie.desc=this.value">
+    <select aria-label="المشروع" ${x.task ? 'disabled' : ''} onchange="S.ie.project=this.value">${x.project ? '' : '<option value="">بدون مشروع</option>'}${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
+    ${x.task ? '<div class="sub" style="margin-top:-4px">فاتورة مهمة، مشروعها يتغير من المهمة.</div>' : ''}
+    ${catPick(f.cat || '', v => `S.ie.cat='${v}';askInvEdit('${id}')`)}
+    ${x.emp ? `<div class="sub" style="margin:6px 0 4px">دفعها من</div><div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبه'], ['card', 'أنا']].map(o => `<button class="${f.paidBy === o[0] ? 'on' : ''}" onclick="S.ie.paidBy='${o[0]}';askInvEdit('${id}')">${o[1]}</button>`).join('')}</div>` : ''}
+    <div class="sub" style="margin:6px 0 4px">الضمان لين (اختياري)</div>
+    <div class="iewr"><input type="date" aria-label="الضمان لين" value="${esc(f.warranty)}" onchange="S.ie.warranty=this.value">${f.warranty ? `<button class="btn2" onclick="S.ie.warranty='';askInvEdit('${id}')">بدون ضمان</button>` : ''}</div>
+    ${e ? `<div class="sub" style="margin-top:8px">يوصل ${esc(shortName(e.name))} إشعار باللي تغيّر.</div>` : ''}
+    <div class="err" id="ieerr"></div>
+    <div class="g21"><button class="btn2 cu" id="iebtn" onclick="doInvEdit()">حفظ التعديل</button><button class="btn2" onclick="invEditBack()">إلغاء</button></div>`);
+}
+function invEditBack() { const f = S.ie; S.ie = null; if (f && f.from === 'd') openInvD(f.id); else ovClose(); }
+async function doInvEdit() {
+  const f = S.ie, b = $('#iebtn'), err = m => { $('#ieerr').textContent = m; };
+  if (!f) return;
+  const x = S.data.inv.items.find(v => v.id === f.id) || {};
+  const amt = Number(String(f.amount || '').replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/[^\d.]/g, ''));
+  if (!(amt > 0)) return err('اكتب المبلغ');
+  if (!String(f.desc || '').trim()) return err('اكتب وش انشرى');
+  if (x.project && !f.project) return err('اختر المشروع');
+  if (amt === x.amount && f.desc.trim() === (x.desc || '') && f.project === (x.project || '') && f.vendor.trim() === (x.vendor || '') && f.cat === (x.cat || '') && (!x.emp || f.paidBy === (x.paidBy || 'cash')) && f.warranty === (x.warrantyUntil || '')) return err('ما تغيّر شي');
+  if (b && b.disabled) return;
+  if (b) { b.disabled = true; b.textContent = 'جاري الحفظ…'; }
+  try {
+    S.data = await call('apiInvUpd', BOOT.key, f.id, {amount: f.amount, desc: f.desc, project: f.project, vendor: f.vendor, cat: f.cat, paidBy: f.paidBy, warranty: f.warranty});
+    S.ie = null; ovClose(); renderAdmin();
+    if (f.from === 'd') openInvD(f.id);
+    toast('انحفظ التعديل');
+  } catch (e) { err(e && e.message || e); if (b) { b.disabled = false; b.textContent = 'حفظ التعديل'; } }
+}
 function openInvD(id) {
   const d = S.data, x = ((d.inv || {}).items || []).find(v => v.id === id);
   if (!x) return toastErr('الفاتورة غير موجودة، حدّث الصفحة');
   const e = d.employees.find(v => v.id === x.emp);
   S.armed = null;
-  ovOpen(`<div class="ivd"><h3>${esc(x.desc)}</h3><div class="amt">${M(x.amount, '', 'big')}</div>${invFixTag(x)}
+  ovOpen(`<div class="ivd${invCanEdit(x) ? ' wed' : ''}">${invEditBtn(x, 'd')}<h3>${esc(x.desc)}</h3><div class="amt">${M(x.amount, '', 'big')}</div>${invFixTag(x)}
     <div class="sub">${esc(e ? e.name : 'أنت')} · ${esc(x.pname || 'عام')}${x.vendor ? ' · ' + esc(x.vendor) : ''} · ${dmyt(x.ts)}</div>
     ${x.warrantyUntil ? `<div class="sub" style="margin-top:4px">ضمان لين ${dmy(x.warrantyUntil)} · ${wLeft(x.warrantyUntil, d.today)[1]}</div>` : ''}
     ${x.taskDeleted ? `<div class="note info" style="margin-top:8px">${I('info', 16)}<div>كانت فاتورة مهمة «${esc(x.desc)}»، والمهمة حُذفت. الفاتورة وسجلّها باقيان.</div></div>` : ''}
@@ -4546,7 +4597,7 @@ function invFormHtml(d) {
     <div class="shots">${keep.map((p, i) => `<div class="shot${isPdfPath(p) ? ' pdf' : ''}">${isPdfPath(p) ? pdfTile('ملف PDF') : S.ic[p] && S.ic[p] !== 'loading' ? `<img src="${S.ic[p]}" alt="صورة الفاتورة">` : '<div class="pph" style="width:100%;height:100%;font-size:12px">جاري التحميل…</div>'}<button class="x" onclick="S.inv.keep.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}${S.ishots.map((s, i) => shotTile(s, `S.ishots.splice(${i},1);rerenderEmp()`)).join('')}
     ${room > 0 ? `<label class="madd">${I('paperclip', 20)}إرفاق فاتورة<input type="file" accept="${ACC_INV}" multiple style="display:none" onchange="pickInv(this)"></label>` : ''}</div>
     ${S.ishotLoading ? '<div class="sub">جاري تجهيز الصورة…</div>' : ''}
-    <input class="qtt" inputmode="decimal" placeholder="المبلغ بالريال" value="${esc(f.amount)}" oninput="S.inv.amount=this.value">
+    <div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ بالريال" value="${esc(f.amount)}" oninput="S.inv.amount=this.value"><input placeholder="المحل (اختياري)" value="${esc(f.vendor || '')}" oninput="S.inv.vendor=this.value"></div>
     <input placeholder="وصف المشتريات" value="${esc(f.desc)}" oninput="S.inv.desc=this.value">
     ${catPick(f.cat || '', v => `S.inv.cat='${v}';rerenderEmp()`)}
     <select aria-label="المشروع" onchange="S.inv.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>

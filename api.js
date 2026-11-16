@@ -1014,6 +1014,13 @@
       const n = cleanAmount_(x.amount);
       return adminDo(k, 'inv_edit', { id: id, amount: n, note: String(x.note || '').trim().slice(0, 200), method: String(x.method || '') });
     },
+    async apiInvUpd(k, id, x) {
+      x = x || {};
+      const desc = String(x.desc || '').trim().slice(0, 200);
+      if (!desc) throw new Error('اكتب وش انشرى');
+      return adminDo(k, 'inv_upd', { id: String(id), amount: String(cleanAmount_(x.amount)), desc: desc, project: String(x.project || ''), vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''),
+        paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash', warranty: /^\d{4}-\d{2}-\d{2}$/.test(String(x.warranty || '')) ? x.warranty : '' });
+    },
     async apiInvMatch(k, id, on) { return adminDo(k, 'inv_match', { id: id, on: !!on }); },
     async apiProjBudget(k, id, budget) { return adminDo(k, 'proj_budget', { id: id, budget: String(budget == null ? '' : budget) }); },
     async apiInvCat(k, id, cat) { return adminDo(k, 'inv_cat', { id: id, cat: String(cat || '') }); },
