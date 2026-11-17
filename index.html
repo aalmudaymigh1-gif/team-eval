@@ -1459,6 +1459,8 @@ html:root .ko.n{background:var(--surface);border:1px solid var(--line);color:var
 html:root .ked textarea{width:100%}
 html:root .kempty{font-size:14px;color:var(--muted);padding:10px 0 4px}
 html:root .kfold{margin-top:14px}
+/* الإصدار 111: سطر «ينحفظ» تحت خانة المبلغ */
+html:root .amtpv{font-size:13px;font-weight:500;color:var(--acc-dk);margin-top:6px}
 </style>
 </head>
 <body>
@@ -1468,9 +1470,9 @@ html:root .kfold{margin-top:14px}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=110"></script>
+<script src="api.js?v=111"></script>
 <script>
-const APP_VER = '110';
+const APP_VER = '111';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1510,6 +1512,10 @@ const S = {view:'rec', data:null, emp:null, type:null, crits:[], misses:[], star
 const $ = s => document.querySelector(s);
 const toEn = s => String(s == null ? '' : s).replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x660)).replace(/[\u06F0-\u06F9]/g, d => String(d.charCodeAt(0) - 0x6F0));
 const esc = s => toEn(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* الإصدار 111: سطر «ينحفظ: … ريال» تحت خانة المبلغ، بنفس القراءة اللي بينحفظ فيها (API.parseAmt) */
+function amtPvTxt(v) { const n = API.parseAmt(v); return String(v == null ? '' : v).trim() !== '' && n > 0 ? 'ينحفظ: ' + n.toLocaleString('en-US', {maximumFractionDigits: 2}) + ' ريال' : ''; }
+function amtPvHtml(v, id) { const t = amtPvTxt(v); return `<div class="amtpv" id="${id}"${t ? '' : ' hidden'}>${t}</div>`; }
+function amtPv(v, id) { const el = document.getElementById(id); if (!el) return; const t = amtPvTxt(v); el.hidden = !t; el.textContent = t; }
 document.addEventListener('input', e => {
   const el = e.target;
   if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA') || el.type === 'file') return;
@@ -3422,8 +3428,8 @@ function askProjBudget(id) {
     <button class="btn2" style="margin-top:8px" onclick="ovClose()">إلغاء</button>`);
 }
 async function saveProjBudget(id, clear) {
-  const v = clear ? '' : String($('#pbv').value || '').trim().replace(/,/g, '');
-  if (!clear && !/^[0-9]{1,9}(\.[0-9]{1,2})?$/.test(v) || (!clear && Number(v) <= 0)) return $('#pberr').textContent = 'اكتب مبلغ الميزانية بالأرقام';
+  const n = clear ? 0 : API.parseAmt($('#pbv').value), v = clear ? '' : String(n);
+  if (!clear && !(n > 0 && n < 1e9)) return $('#pberr').textContent = 'اكتب مبلغ الميزانية بالأرقام';
   try { S.data = await call('apiProjBudget', BOOT.key, id, v); ovClose(); renderAdmin(); toast(clear ? 'انشالت الميزانية' : 'انحفظت الميزانية'); }
   catch (e) { $('#pberr').textContent = e && e.message || e; }
 }
@@ -3549,14 +3555,14 @@ function askInvFix(id) {
   const x = ((S.data.inv || {}).items || []).find(v => v.id === id); if (!x) return;
   ovOpen(`<label class="shh" for="ifx">تصحيح مبلغ الفاتورة</label>
     <div class="sub" style="margin:-6px 0 10px">${esc(x.desc)} · المبلغ الحالي ${M(x.amount, '', 't')}</div>
-    <input id="ifx" type="number" inputmode="decimal" step="0.01" value="${x.amount}" onkeydown="if(event.key==='Enter')doInvFix('${id}')">
+    <input id="ifx" class="qtt" inputmode="decimal" value="${x.amount}" oninput="amtPv(this.value,'apv_ifx')" onkeydown="if(event.key==='Enter')doInvFix('${id}')">${amtPvHtml(x.amount, 'apv_ifx')}
     <div class="sub" style="margin:8px 0 0">يطلع عليها «عدّله المدير العام» مع المبلغ القديم${x.emp ? '، ويوصل الموظف إشعار' : ''}. العهدة والمصاريف تتغير بالفرق بس.</div>
     <div class="err" id="ifxerr"></div>
     <div class="g21"><button class="btn2 cu" onclick="doInvFix('${id}')">${I('check', 16, 2.5)}حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
   setTimeout(() => { const i = $('#ifx'); if (i) { i.focus(); i.select && i.select(); } }, 80);
 }
 async function doInvFix(id) {
-  const v = Number($('#ifx').value);
+  const v = API.parseAmt($('#ifx').value);
   if (!(v > 0)) return $('#ifxerr').textContent = 'اكتب المبلغ';
   const un = lockBtn('جاري الحفظ…');
   try { S.data = await call('apiInvFix', BOOT.key, id, Math.round(v * 100) / 100); ovClose(); renderAdmin(); toast('تصحّح المبلغ'); }
@@ -3629,7 +3635,7 @@ function askInvEdit(id, from) {
   if (!S.ie || S.ie.id !== id) S.ie = {id: id, from: from || 'd', amount: String(x.amount), desc: x.desc || '', project: x.project || '', vendor: x.vendor || '', cat: x.cat || '', paidBy: x.paidBy || 'cash', warranty: x.warrantyUntil || ''};
   const f = S.ie, ps = (d.projects || []).filter(p => !p.archived || p.id === x.project), e = d.employees.find(v => v.id === x.emp);
   ovOpen(`<label class="shh">تعديل الفاتورة</label>
-    <div class="grid2"><input class="qtt" inputmode="decimal" aria-label="المبلغ" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.ie.amount=this.value"><input aria-label="المحل" placeholder="المحل" value="${esc(f.vendor)}" oninput="S.ie.vendor=this.value"></div>
+    <div class="grid2"><input class="qtt" inputmode="decimal" aria-label="المبلغ" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.ie.amount=this.value;amtPv(this.value,'apv_ie')"><input aria-label="المحل" placeholder="المحل" value="${esc(f.vendor)}" oninput="S.ie.vendor=this.value"></div>${amtPvHtml(f.amount, 'apv_ie')}
     <input aria-label="وصف المشتريات" placeholder="وصف المشتريات" value="${esc(f.desc)}" oninput="S.ie.desc=this.value">
     <select aria-label="المشروع" ${x.task ? 'disabled' : ''} onchange="S.ie.project=this.value">${x.project ? '' : '<option value="">بدون مشروع</option>'}${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
     ${x.task ? '<div class="sub" style="margin-top:-4px">فاتورة مهمة، مشروعها يتغير من المهمة.</div>' : ''}
@@ -3646,7 +3652,7 @@ async function doInvEdit() {
   const f = S.ie, b = $('#iebtn'), err = m => { $('#ieerr').textContent = m; };
   if (!f) return;
   const x = S.data.inv.items.find(v => v.id === f.id) || {};
-  const amt = Number(String(f.amount || '').replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/[^\d.]/g, ''));
+  const amt = API.parseAmt(f.amount);
   if (!(amt > 0)) return err('اكتب المبلغ');
   if (!String(f.desc || '').trim()) return err('اكتب وش انشرى');
   if (x.project && !f.project) return err('اختر المشروع');
@@ -3719,7 +3725,7 @@ async function delInvD(id) {
 function giveForm(title, x) {
   S.gm = (x && x.method) || S.gm || 'تحويل';
   return `<label class="shh" for="ga">${title}</label>
-    <input id="ga" class="qtt" inputmode="decimal" placeholder="المبلغ" value="${x ? esc(x.amount) : ''}">
+    <input id="ga" class="qtt" inputmode="decimal" placeholder="المبلغ" value="${x ? esc(x.amount) : ''}" oninput="amtPv(this.value,'apv_ga')">${amtPvHtml(x ? x.amount : '', 'apv_ga')}
     <div class="segc" id="gmseg" style="margin:10px 0">${['تحويل', 'كاش'].map(m => `<button class="${S.gm === m ? 'on' : ''}" onclick="S.gm='${m}';document.querySelectorAll('#gmseg button').forEach(b=>b.classList.toggle('on',b.textContent==='${m}'))">${m}</button>`).join('')}</div>
     <input id="gn" placeholder="ملاحظة (اختياري)" value="${x && x.desc !== 'عهدة' ? esc(x.desc) : ''}">
     <div class="err" id="gerr"></div>`;
@@ -3738,7 +3744,7 @@ function askRet(empId, amt) {
   const e = S.data.employees.find(x => x.id === empId);
   S.gm = S.gm || 'تحويل';
   ovOpen(`<label class="shh" for="ga">كم رجّع لك ${esc(e ? e.name : '')} من العهدة؟</label>
-    <input id="ga" class="qtt" inputmode="decimal" value="${amt > 0 ? esc(amt) : ''}" placeholder="المبلغ">
+    <input id="ga" class="qtt" inputmode="decimal" value="${amt > 0 ? esc(amt) : ''}" placeholder="المبلغ" oninput="amtPv(this.value,'apv_ga')">${amtPvHtml(amt > 0 ? amt : '', 'apv_ga')}
     <div class="segc" id="gmseg" style="margin:10px 0">${['تحويل', 'كاش'].map(m => `<button class="${S.gm === m ? 'on' : ''}" onclick="S.gm='${m}';document.querySelectorAll('#gmseg button').forEach(b=>b.classList.toggle('on',b.textContent==='${m}'))">${m}</button>`).join('')}</div>
     <input id="gn" placeholder="ملاحظة (اختياري)">
     <div class="err" id="gerr"></div>
@@ -3755,7 +3761,7 @@ function askInvAdd() {
   const f = S.ai;
   f.project = pickProj(f.project, ps);
   ovOpen(`<label class="shh">فاتورة جديدة</label>
-    <div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.ai.amount=this.value"><input placeholder="المحل" value="${esc(f.vendor)}" oninput="S.ai.vendor=this.value"></div>
+    <div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.ai.amount=this.value;amtPv(this.value,'apv_ai')"><input placeholder="المحل" value="${esc(f.vendor)}" oninput="S.ai.vendor=this.value"></div>${amtPvHtml(f.amount, 'apv_ai')}
     <input placeholder="وصف المشتريات" value="${esc(f.desc)}" oninput="S.ai.desc=this.value">
     <select aria-label="المشروع" onchange="S.ai.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
     ${catPick(f.cat || '', v => `S.ai.cat='${v}';askInvAdd()`)}
@@ -3790,7 +3796,7 @@ function askSdad(empId, amt) {
   const e = S.data.employees.find(x => x.id === empId);
   S.gm = S.gm || 'تحويل';
   ovOpen(`<label class="shh" for="ga">كم رجّعت لـ ${esc(e ? e.name : '')}؟</label>
-    <input id="ga" class="qtt" inputmode="decimal" value="${esc(amt)}">
+    <input id="ga" class="qtt" inputmode="decimal" value="${esc(amt)}" oninput="amtPv(this.value,'apv_ga')">${amtPvHtml(amt, 'apv_ga')}
     <div class="segc" id="gmseg" style="margin:10px 0">${['تحويل', 'كاش'].map(m => `<button class="${S.gm === m ? 'on' : ''}" onclick="S.gm='${m}';document.querySelectorAll('#gmseg button').forEach(b=>b.classList.toggle('on',b.textContent==='${m}'))">${m}</button>`).join('')}</div>
     <input id="gn" placeholder="ملاحظة (اختياري)">
     <div class="err" id="gerr"></div>
@@ -4615,7 +4621,7 @@ function proofFormHtml(t) {
     <div class="shots">${S.shots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة"><button class="x" onclick="S.shots.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}
     ${S.shots.length < max ? `<label class="madd">${I('camera', 20)}${inv ? 'الفاتورة' : 'صورة'}<input type="file" accept="${ACC_IMG}" multiple style="display:none" onchange="startDone('${t.id}', this)"></label>` : ''}</div>
     ${S.shotLoading ? '<div class="sub">جاري تجهيز الصورة…</div>' : ''}
-    ${inv ? `<div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.dinv.amount=this.value"><input placeholder="المحل" value="${esc(f.vendor)}" oninput="S.dinv.vendor=this.value"></div>
+    ${inv ? `<div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.dinv.amount=this.value;amtPv(this.value,'apv_dinv')"><input placeholder="المحل" value="${esc(f.vendor)}" oninput="S.dinv.vendor=this.value"></div>${amtPvHtml(f.amount, 'apv_dinv')}
       ${catPick(f.cat || '', v => `S.dinv.cat='${v}';rerenderEmp()`)}
       <div class="sub" style="margin:4px 0 -2px">دفعت من؟</div>
       <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'المدير العام']].map(o => `<button class="${f.paidBy === o[0] ? 'on' : ''}" onclick="S.dinv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>` : ''}
@@ -4685,7 +4691,7 @@ function invFormHtml(d) {
     <div class="shots">${keep.map((p, i) => `<div class="shot${isPdfPath(p) ? ' pdf' : ''}">${isPdfPath(p) ? pdfTile('ملف PDF') : S.ic[p] && S.ic[p] !== 'loading' ? `<img src="${S.ic[p]}" alt="صورة الفاتورة">` : '<div class="pph" style="width:100%;height:100%;font-size:12px">جاري التحميل…</div>'}<button class="x" onclick="S.inv.keep.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}${S.ishots.map((s, i) => shotTile(s, `S.ishots.splice(${i},1);rerenderEmp()`)).join('')}
     ${room > 0 ? `<label class="madd">${I('paperclip', 20)}إرفاق فاتورة<input type="file" accept="${ACC_INV}" multiple style="display:none" onchange="pickInv(this)"></label>` : ''}</div>
     ${S.ishotLoading ? '<div class="sub">جاري تجهيز الصورة…</div>' : ''}
-    <div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ بالريال" value="${esc(f.amount)}" oninput="S.inv.amount=this.value"><input placeholder="المحل (اختياري)" value="${esc(f.vendor || '')}" oninput="S.inv.vendor=this.value"></div>
+    <div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ بالريال" value="${esc(f.amount)}" oninput="S.inv.amount=this.value;amtPv(this.value,'apv_inv')"><input placeholder="المحل (اختياري)" value="${esc(f.vendor || '')}" oninput="S.inv.vendor=this.value"></div>${amtPvHtml(f.amount, 'apv_inv')}
     <input placeholder="وصف المشتريات" value="${esc(f.desc)}" oninput="S.inv.desc=this.value">
     ${catPick(f.cat || '', v => `S.inv.cat='${v}';rerenderEmp()`)}
     <select aria-label="المشروع" onchange="S.inv.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
@@ -4714,7 +4720,7 @@ async function pickInv(input) {
 async function sendInv() {
   const f = S.inv, err = () => $('#ierr');
   if (!S.ishots.length && !(f.edit && (f.keep || []).length)) { err().textContent = 'صوّر الفاتورة'; return; }
-  if (!(Number(String(f.amount).replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/[^\d.]/g, '')) > 0)) { err().textContent = 'اكتب المبلغ'; return; }
+  if (!(API.parseAmt(f.amount) > 0)) { err().textContent = 'اكتب المبلغ'; return; }
   if (!f.desc.trim()) { err().textContent = 'اكتب وش اشتريت'; return; }
   if (!f.edit && f.wOn && !(f.w >= 1 && f.w <= 120)) { err().textContent = 'اكتب مدة الضمان بالأشهر'; return; }
   if (S.busy) return;
@@ -4765,7 +4771,7 @@ async function sendDone(id) {
   let extra = null;
   if (pf === 'invoice') {
     const f = S.dinv || {};
-    if (!(Number(String(f.amount || '').replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c)).replace(/[^\d.]/g, '')) > 0)) return err('اكتب المبلغ');
+    if (!(API.parseAmt(f.amount) > 0)) return err('اكتب المبلغ');
     if (!String(f.vendor || '').trim()) return err('اكتب اسم المحل');
     extra = {amount: f.amount, vendor: f.vendor, cat: f.cat || '', paidBy: f.paidBy || 'cash'};
   }
@@ -6122,7 +6128,7 @@ async function rqPick(inp) {
   try { d.file = {t: 'i', d: await resizeImg(file, 1600, 0.78), n: file.name || 'صورة'}; d.err = ''; } catch (e) { toastErr(e); }
   if (RP.qf === d) rqDraw();
 }
-function rqNum(s) { return Number(toEn(s).replace(/[٫,،]/g, '.').replace(/[^\d.]/g, '')); }
+function rqNum(s) { return API.parseAmt(s); } /* الإصدار 111: نفس قراءة المبلغ (كانت 1,200 تصير 1.2) */
 async function rqSave() {
   const d = RP.qf;
   if (!d || d.busy) return;

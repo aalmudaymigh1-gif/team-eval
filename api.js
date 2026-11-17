@@ -313,8 +313,18 @@
     fin.forEach(f => { if (f.emp === emp.id && f.month && f.month < s) s = f.month; });
     return s;
   }
+  /* الإصدار 111: قراءة المبلغ. لوحة الأرقام العربية في الآيفون تكتب «٫»، فتنقرا فاصلة عشرية مثل «.» و«،».
+     «,» فاصلة عشرية إلا إذا بعدها 3 أرقام بالضبط (1,200 = ألف ومئتين)، و«٬» فاصل آلاف. كانت كلها تنحذف فالرقم يكبر (560٫58 تصير 56058) */
+  function parseAmt_(v) {
+    let s = String(v == null ? '' : v).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[\s٬]/g, '');
+    s = s.replace(/[٫،]/g, '.').replace(/,(?=\d{3}(?!\d))/g, '').replace(/,/g, '.').replace(/[^\d.]/g, '');
+    const i = s.indexOf('.');
+    if (i >= 0) s = s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, '');
+    if (!/\d/.test(s)) return NaN;
+    return Math.round(Number(s) * 100) / 100;
+  }
   function cleanAmount_(v) {
-    const n = Math.round(Number(String(v == null ? '' : v).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[^\d.]/g, '')) * 100) / 100;
+    const n = parseAmt_(v);
     if (!(n > 0) || n > 1000000) throw new Error('اكتب المبلغ');
     return n;
   }
@@ -936,6 +946,7 @@
     async apiInvImgEmp(t, id, fid) { return imgUrl(fid); },
     prefetch: prefetch,
     cachedUrl: cachedUrl,
+    parseAmt: parseAmt_,
     fileUrl: fileUrl,
     fileUrls: async ps => { await signMany(ps); const o = {}; ps.forEach(p => { if (UC[p] && UC[p].u) o[p] = UC[p].u; }); return o; },
 
