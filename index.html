@@ -1513,6 +1513,13 @@ html:root .ivsum{background:var(--acc-soft);color:var(--acc-dk);border-radius:16
 html:root .ivsum.bad{background:#F6ECEA;color:var(--red)}
 .etabs.e4.e3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 html:root .note.bad .attok{display:flex;width:100%;min-height:44px;margin-top:10px;justify-content:center;background:rgba(255,255,255,.7)!important;color:var(--red)!important;border:0!important}
+/* الإصدار 116: أزرار العهدة في الملف، وأزرار الراتب في صفحته شبكة */
+html:root .fxbt.n2{grid-template-columns:1fr 1fr}
+html:root .salact{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+html:root .salact button{justify-content:center;min-height:44px}
+html:root .salact button.rd{color:var(--red)}
+html:root .flrn{display:flex;align-items:flex-start;gap:6px;margin-top:6px}
+html:root .flrn svg{flex:none;margin-top:3px}
 /* الإصدار 114: خطوات العمل */
 html:root .tkl li.stp{align-items:flex-start}
 html:root .spc{flex:none;width:30px;height:30px;border-radius:999px;border:0;background:var(--acc-soft);color:var(--acc-dk);font:inherit;font-size:12px;font-weight:600;display:grid;place-items:center;direction:ltr;padding:0;cursor:pointer;position:relative}
@@ -1556,9 +1563,9 @@ html:root .spn .rhint{margin-top:6px}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=115"></script>
+<script src="api.js?v=116"></script>
 <script>
-const APP_VER = '115';
+const APP_VER = '116';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1907,7 +1914,7 @@ function teamBreak(m) {
     ${m.reward ? `<div><span>مواقف مميزة (${m.stars})</span><b class="pos">${sarS(m.reward,'+')}</b></div>` : ''}
     ${m.clean ? `<div><span>شهر بدون تقصير</span><b class="pos">${sarS(m.clean,'+')}</b></div>` : ''}
     <div class="tot"><span>الحافز</span><b>${M(m.bonus, '', 'pos')}</b></div>
-  </div>`;
+  </div>${floorNote(m)}`;
 }
 function openAttLog(id) { S.attLog = id; S.tfile = id; S.armed = null; S.form = null; renderTeam(); toTop(); }
 /* الإصدار 97: كل خطوة صورتها فوق وتحتها وقتها وموقعها ودقته، و«تسجيل غير صحيح» على اليوم */
@@ -2621,12 +2628,10 @@ function renderEmpFile(e) {
   const fm = S.form && S.form.emp === id ? S.form : null;
   if (fm && ['part', 'prev', 'move'].includes(fm.kind)) h += `<div class="card tff">${salActHtml(e).replace(/<div class="hair"><\/div>$/, '')}</div>`;
   else if (fm) h += `<div class="card tff">${formHtml(e, fm)}</div>`;
-  else h += `<div class="fxbt${(sal.open || []).length ? '' : ' n4'}">
+  /* الإصدار 116: الملف فيه أزرار العهدة بس، وكل ما يخص الراتب (دفعة، خصم، سلفة، شهر سابق) في صفحة الراتب. «راتب مقدم» انشال لأن «دفعة» تغني عنه */
+  else h += `<div class="fxbt n2">
       <button onclick="askGive('${id}')">${I('hand-coins', 18)}عطيته</button>
-      <button onclick="askRet('${id}', ${Math.max(0, f.p.c)})">${I('rotate-ccw', 18)}رجّع لي</button>
-      ${(sal.open || []).length ? `<button onclick="S.form={emp:'${id}',kind:'part',month:'',date:'',amount:''};S.armed=null;renderTeam()">${I('banknote', 18)}دفعة راتب</button>` : ''}
-      <button onclick="openForm('${id}','adv')">${I('wallet', 18)}راتب مقدم</button>
-      <button class="rd" onclick="openForm('${id}','ded')">${I('circle-dollar-sign', 18)}خصم</button></div>`;
+      <button onclick="askRet('${id}', ${Math.max(0, f.p.c)})">${I('rotate-ccw', 18)}رجّع لي</button></div>`;
   const lv = [m.misses ? m.misses + ' تقصير' : '', m.stars ? m.stars + ' مميز' : ''].filter(Boolean).join(' · ');
   const bd = (t, r) => ` <span class="badge ${r ? 'rd' : 'a'}">${t}</span>`;
   const taskV = (f.op ? f.op + ' مفتوحة' : 'ما عنده') + (f.lt ? ` · <span class="lt">${f.lt} متأخرة</span>` : '') + (f.rv ? bd(f.rv + ' تنتظرك') : '');
@@ -2699,8 +2704,10 @@ function bonusTable(m) {
     ${m.reward ? `<tr><td class="sub">مواقف مميزة (${m.stars})</td><td class="pos">${sarS(m.reward,'+')}</td></tr>` : ''}
     ${m.clean ? `<tr><td class="sub">شهر بدون تقصير</td><td class="pos">${sarS(m.clean,'+')}</td></tr>` : ''}
     <tr class="tot"><td>الحافز</td><td>${M(m.bonus, '', 'pos')}</td></tr>
-  </table>`;
+  </table>${floorNote(m)}`;
 }
+/* الإصدار 116: لما التقصير يزيد عن الحافز، الحافز يوقف عند صفر والراتب ما ينخصم منه */
+function floorNote(m) { return !m.track && m.base - m.deduct + m.reward + m.clean < 0 ? `<div class="sub flrn">${I('info', 13)}التقصير أكثر من الحافز، فصار الحافز صفر. الراتب نفسه ما ينخصم منه.</div>` : ''; }
 
 function entryHtml(x, canDelete, noAmt) {
   const del = canDelete ? `<button class="del ${S.armed===x.id?'arm':''}" onclick="armLog('${x.id}')">${S.armed===x.id?'تأكيد الحذف':I('trash-2', 15)}</button>` : '';
@@ -3375,7 +3382,7 @@ function prefetchImgs() {
 
 function invRowHtml(x, showEmp) {
   const st = invSt(x, false), armDel = S.armed === 'inv_' + x.id, give = x.kind === 'give';
-  const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', give ? '' : esc(x.pname || 'عام'), catName(x.cat), x.vendor ? esc(x.vendor) : '', dmyt(x.ts)].filter(Boolean).join(' · ');
+  const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', give ? '' : esc(x.pname || 'عام'), esc(invCatL(x)), x.vendor ? esc(x.vendor) : '', dmyt(x.ts)].filter(Boolean).join(' · ');
   return `<div class="ivr ${x.status === 'review' ? 'rv' : ''}">
     <div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}">${M(x.amount, give ? '+' : '')}</b>${invEditBtn(x, 'r')}</div>
     <div class="tm">${meta}${x.status !== 'ok' || give ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}${x.taskDeleted ? ' · <span class="tdel">مهمتها انحذفت</span>' : ''}</div>${invFixTag(x)}
@@ -3636,8 +3643,14 @@ function renderFinProj(c, k) {
   $('#view').innerHTML = h;
 }
 
+/* الإصدار 116: فاتورة «راتب موظف» في التفاصيل: لمين، وكم باقي له، وهل انحسبت */
+function salInvNote(x) {
+  const e = empById(x.salEmp), nm = salName(x.salEmp) || 'موظف محذوف', left = e && e.sal ? e.sal.left : null;
+  return `<div class="note info" style="margin-top:10px">${I('wallet', 16)}<div><b>راتب ${esc(nm)}</b><br>${x.status === 'ok' ? 'انحسبت دفعة من راتبه، وتشوفها في صفحة راتبه.' : 'لما تعتمدها تنحسب دفعة من راتبه' + (left != null ? '، والباقي له الحين ' + M(left, '', 't') : '') + '.'}</div></div>`;
+}
 async function invApprove(id) {
-  try { S.data = await call('apiInvApprove', BOOT.key, id); renderAdmin(); toast('تم الاعتماد'); }
+  const x = (((S.data || {}).inv || {}).items || []).find(v => v.id === id), sal = x && x.cat === 'sal' && x.salEmp ? salName(x.salEmp) : '';
+  try { S.data = await call('apiInvApprove', BOOT.key, id); renderAdmin(); toast(sal ? 'تم الاعتماد وانحسبت دفعة من راتب ' + sal : 'تم الاعتماد'); }
   catch (e) { toastErr(e); }
 }
 /* الإصدار 97: تصحيح مبلغ فاتورة معتمدة من المدير، ويبقى عليها «عدّله المدير العام» مع المبلغ القديم */
@@ -3686,7 +3699,7 @@ function invDayLabel(dt, today) {
   return dt === today ? 'اليوم · ' + l : dt === addDays(today, -1) ? 'أمس · ' + l : l;
 }
 function invDayRow(x, showEmp, noProj) {
-  const st = invSt(x, false), meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', noProj ? '' : esc(x.pname || 'عام'), catName(x.cat), x.vendor ? esc(x.vendor) : '', t12(x.ts)].filter(Boolean).join(' · ');
+  const st = invSt(x, false), meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', noProj ? '' : esc(x.pname || 'عام'), esc(invCatL(x)), x.vendor ? esc(x.vendor) : '', t12(x.ts)].filter(Boolean).join(' · ');
   return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${meta}${x.status !== 'ok' ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}${x.taskDeleted ? ' · <span class="tdel">مهمتها انحذفت</span>' : ''}${(x.photos || []).length ? `<span class="ic" aria-label="فيها صورة">${I('image', 13)}</span>` : ''}</div>${invFixTag(x)}${x.status === 'returned' && x.reason ? `<div class="tm rsn">${esc(x.reason)}</div>` : ''}</span><b class="iva">${M(x.amount)} ‹</b></div></button>${x.status === 'review' ? `<div class="rvb"><button class="btn2 cu" onclick="invApprove('${x.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askInvReturn('${x.id}')">رجّعها</button></div>` : ''}`;
 }
 function invDaysHtml(list, showEmp, noProj, lim, allLabel) {
@@ -3702,7 +3715,11 @@ function invDaysHtml(list, showEmp, noProj, lim, allLabel) {
 }
 /* الإصدار 105: بند الفاتورة. اختياري، والضغط على المختار يشيله */
 const INV_CATS = [['mat', 'مواد'], ['tool', 'عدة'], ['food', 'أكل وشرب'], ['move', 'نقل'], ['wage', 'أجور'], ['other', 'أخرى']];
-function catName(c) { const o = INV_CATS.find(v => v[0] === c); return o ? o[1] : ''; }
+/* الإصدار 116: «راتب موظف» بند في فاتورة الموظف بس (يختار مين)، ولما تنعتمد تنحسب دفعة من راتب الشخص */
+const SAL_CAT = ['sal', 'راتب موظف'];
+function catName(c) { const o = INV_CATS.concat([SAL_CAT]).find(v => v[0] === c); return o ? o[1] : ''; }
+function salName(id) { const L = ((S.data || {}).employees || []).concat(((S.empData || {}).team) || []), e = L.find(v => v.id === id); return e ? shortName(e.name) : ''; }
+function invCatL(x) { return x.cat === 'sal' && x.salEmp && salName(x.salEmp) ? 'راتب ' + salName(x.salEmp) : catName(x.cat); }
 /* الإصدار 112: المشروع شرائح في نماذج الفاتورة (مثل المهمة والتقرير). الضغط يغيّر الحالة بمكانها بدون إعادة رسم */
 function projPick(ps, cur, st) {
   return `<div class="sub" style="margin:4px 0 -2px">المشروع</div><div class="segc wr ipj" role="group" aria-label="المشروع">${ps.map(p => `<button class="${cur === p.id ? 'on' : ''}" aria-pressed="${cur === p.id}" onclick="${st}.project='${p.id}';chipOn(this);ivSum()">${esc(p.name)}</button>`).join('')}</div>`;
@@ -3712,11 +3729,16 @@ function chipOn(b) { [].forEach.call(b.parentNode.children, x => { const on = x 
 function ivSumHtml() {
   const f = S.inv || {}, n = API.parseAmt(f.amount), ps = ((S.empData || {}).projects) || [], p = ps.find(x => x.id === f.project);
   if (!(n > 0)) return '<span>اكتب المبلغ عشان تقدر ترسل</span>';
-  return `<span>بترسل ${n.toLocaleString('en-US', {maximumFractionDigits: 2})} ريال</span> · <span>${esc(p ? p.name : 'بدون مشروع')}</span> · <span>${{own: 'من جيبك', card: 'دفعها المدير العام'}[f.paidBy] || 'من العهدة'}</span>`;
+  return `<span>بترسل ${n.toLocaleString('en-US', {maximumFractionDigits: 2})} ريال</span>${f.cat === 'sal' && f.salEmp && salName(f.salEmp) ? ` · <span>راتب ${esc(salName(f.salEmp))}</span>` : ''} · <span>${esc(p ? p.name : 'بدون مشروع')}</span> · <span>${{own: 'من جيبك', card: 'دفعها المدير العام'}[f.paidBy] || 'من العهدة'}</span>`;
+}
+function salPickHtml(f) {
+  const tm = ((S.empData || {}).team) || [];
+  return `<div class="sub" style="margin:4px 0 -2px">راتب مين؟</div><div class="segc wr isal" role="group" aria-label="راتب مين؟">${tm.map(t => `<button class="${f.salEmp === t.id ? 'on' : ''}" aria-pressed="${f.salEmp === t.id}" onclick="S.inv.salEmp='${t.id}';chipOn(this);ivSum()">${esc(shortName(t.name))}</button>`).join('')}</div>
+    <div class="note info" style="margin:6px 0 0">${I('info', 16)}<div>بعد ما يعتمدها المدير العام تنحسب دفعة من راتبه</div></div>`;
 }
 function ivSum() { const el = document.getElementById('ivsum'); if (!el) return; el.innerHTML = ivSumHtml(); el.classList.toggle('bad', !(API.parseAmt((S.inv || {}).amount) > 0)); }
-function catPick(cur, on, lab) {
-  return `<div class="sub" style="margin:4px 0 -2px">${lab || 'البند (اختياري)'}</div><div class="segc wr icat">${INV_CATS.map(o => `<button class="${cur === o[0] ? 'on' : ''}" aria-pressed="${cur === o[0]}" onclick="${on(cur === o[0] ? '' : o[0])}">${o[1]}</button>`).join('')}</div>`;
+function catPick(cur, on, lab, sal) {
+  return `<div class="sub" style="margin:4px 0 -2px">${lab || 'البند (اختياري)'}</div><div class="segc wr icat">${(sal ? INV_CATS.concat([SAL_CAT]) : INV_CATS).map(o => `<button class="${cur === o[0] ? 'on' : ''}" aria-pressed="${cur === o[0]}" onclick="${on(cur === o[0] ? '' : o[0])}">${o[1]}</button>`).join('')}</div>`;
 }
 async function setInvCat(id, c) {
   try { S.data = await call('apiInvCat', BOOT.key, id, c); renderAdmin(); openInvD(id); toast(c ? 'البند: ' + catName(c) : 'انشال البند'); }
@@ -3781,7 +3803,7 @@ function openInvD(id) {
     ${x.status === 'review' && x.kind === 'inv' ? `<div class="grid2" style="margin-top:10px"><button class="btn2 cu" onclick="ovClose();invApprove('${id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="ovClose();askInvReturn('${id}')">رجّعها</button></div>` : ''}
     <div class="pgrid" id="ivdph">${x.photos.map(f => `<div class="pph" data-f="${esc(f)}">جاري التحميل…</div>`).join('')}</div>
     ${x.emp ? `<div class="sub" style="margin:6px 0 4px">دفعها من</div><div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبه'], ['card', 'أنا']].map(o => `<button class="${(x.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="${(x.paidBy || 'cash') === o[0] ? '' : `setPaidBy('${id}','${o[0]}',true)`}">${o[1]}</button>`).join('')}</div>` : '<div class="sub" style="margin:6px 0">دفعتها أنت</div>'}
-    ${x.kind === 'inv' ? catPick(x.cat || '', v => `setInvCat('${id}','${v}')`, 'البند') : ''}
+    ${x.kind === 'inv' && x.cat === 'sal' && x.salEmp ? salInvNote(x) : x.kind === 'inv' ? catPick(x.cat || '', v => `setInvCat('${id}','${v}')`, 'البند') : ''}
     ${x.status === 'ok' && x.kind === 'inv' ? '<div class="g2b">' : ''}${x.status === 'ok' && x.kind === 'inv' ? `<button class="btn2" onclick="askInvFix('${id}')">${I('pencil', 15)}تصحيح المبلغ</button>` : ''}
     <button class="btn2" onclick="askWarranty('${id}')">${x.warrantyUntil ? 'عدّل الضمان' : 'أضف ضمان'}</button>${x.status === 'ok' && x.kind === 'inv' ? '</div>' : ''}
     <button class="btn2 rd" id="ivddel" onclick="delInvD('${id}')">حذف الفاتورة</button>
@@ -3974,9 +3996,10 @@ function payHtml(e, u) {
     ${u.warn10 ? `<div class="note bad">${I('triangle-alert', 16)}قسط السلفة والخصم أكثر من 10% من الراتب. نظام العمل يطلب موافقة مكتوبة من الموظف على الخصم.</div>` : ''}
     ${u.net < 0 ? `<div class="note bad">الخصومات أكبر من الراتب.</div>` : ''}
     <div class="grid2" style="margin-top:10px;align-items:center">
-      <input id="pay_${e.id}${u.month}" type="number" inputmode="numeric" value="${Math.max(0, Math.round((u.net - cr) * 100) / 100)}" aria-label="المبلغ">
+      <input id="pay_${e.id}${u.month}" class="qtt" inputmode="decimal" value="${esc(S.pv && S.pv[pdk] != null ? S.pv[pdk] : Math.max(0, Math.round((u.net - cr) * 100) / 100))}" aria-label="المبلغ" oninput="S.pv=S.pv||{};S.pv['${pdk}']=this.value;amtPv(this.value,'apv_pay')">
       <button class="btn2 ${armed?'arm':'cu'}" onclick="pay('${e.id}','${u.month}')">${armed?'تأكيد الصرف':I('check', 16, 2.5) + 'تم الصرف'}</button>
     </div>
+    ${amtPvHtml(S.pv && S.pv[pdk] != null ? S.pv[pdk] : '', 'apv_pay')}
     <div class="dprops pdate"><label class="dp"><span>تاريخ التسليم</span><input type="date" id="pd_${pdk}" value="${pdv}" max="${today}" onchange="S.pd['${pdk}']=this.value"></label></div>
     <div class="err" id="perr_${e.id}${u.month}"></div>`;
 }
@@ -3996,7 +4019,7 @@ function dedFormHtml(f) {
   /* الإصدار 92: «مخالفة مرورية» سبب ثالث هنا (كانت سطر في «الفريق») */
   const oth = f.reason === 'other', fine = f.reason === 'fine', t = S.data.today, fe = empById(f.emp);
   return `<div class="ctitle" style="font-size:15px"><span class="ci dedi">${I('receipt', 16)}</span>خصم من الراتب</div>
-    <div class="field" style="margin-top:10px"><span>المبلغ (ريال)</span><input id="f_amount" type="number" inputmode="numeric" value="${esc(f.amount || '')}" oninput="S.form.amount=this.value"></div>
+    <div class="field" style="margin-top:10px"><span>المبلغ (ريال)</span><input id="f_amount" class="qtt" inputmode="decimal" value="${esc(f.amount || '')}" oninput="S.form.amount=this.value;amtPv(this.value,'apv_f')">${amtPvHtml(f.amount || '', 'apv_f')}</div>
     <div class="field"><span>السبب</span><div class="dedch">
       <button class="${oth || fine ? '' : 'on'}" onclick="S.form.reason='net';renderFin()">باقة انترنت</button>
       <button class="${fine ? 'on' : ''}" onclick="S.form.reason='fine';renderFin()">مخالفة مرورية</button>
@@ -4014,7 +4037,7 @@ function formHtml(e, f) {
   const loan = f.kind === 'loan';
   return `<div class="ctitle" style="font-size:15px"><span class="ci">${I(loan ? 'hand-coins' : 'banknote', 16)}</span>${loan ? 'سلفة جديدة' : 'راتب مقدم'}</div>
     <div class="grid2" style="margin-top:10px">
-      <div class="field"><span>المبلغ (ريال)</span><input id="f_amount" type="number" inputmode="numeric"></div>
+      <div class="field"><span>المبلغ (ريال)</span><input id="f_amount" class="qtt" inputmode="decimal" oninput="amtPv(this.value,'apv_f')">${amtPvHtml('', 'apv_f')}</div>
       ${loan ? `<div class="field"><span>عدد الأقساط (شهور)</span><input id="f_months" type="number" inputmode="numeric" value="3"></div>` : '<div></div>'}
     </div>
     ${loan ? `<div class="field"><span>يبدأ الخصم من</span><div class="segc">
@@ -4037,7 +4060,7 @@ async function saveFin() {
   } else if (S.form.kind === 'ded' && S.form.reason !== 'other') x.note = 'باقة انترنت';
   if (S.form.kind === 'ded' && !x.note.trim()) return $('#ferr').textContent = 'اكتب سبب الخصم';
   if (S.form.kind === 'loan') x.months = $('#f_months').value;
-  if (!(Number(x.amount) > 0)) return $('#ferr').textContent = 'اكتب المبلغ';
+  if (!(API.parseAmt(x.amount) > 0)) return $('#ferr').textContent = 'اكتب المبلغ';
   const un = lockBtn();
   try { S.data = await call('apiFinAdd', BOOT.key, x); S.form = null; renderAdmin(); toast('انحفظ'); }
   catch (e) { un(); $('#ferr').textContent = e; }
@@ -4056,22 +4079,22 @@ async function pay(emp, month) {
   if (S.armed !== k) { S.armed = k; renderFin(); return; }
   const v = $('#pay_' + emp + month).value, dt = ($('#pd_' + emp + month) || {}).value || '';
   /* الإصدار 92: المبلغ أقل من الباقي له: الافتراضي يتسجل دفعة والشهر يبقى مفتوح، وإقفال الشهر بالمبلغ الناقص يحتاج اختيار صريح */
-  const pe = empById(emp), pu = pe && (pe.unpaid || []).find(u => u.month === month), need = pu ? Math.max(0, Math.round((pu.net - (pu.credit || 0)) * 100) / 100) : 0;
-  if (!pay.force && pu && Number(v) > 0 && Number(v) < need - 0.005) {
+  const pe = empById(emp), pu = pe && (pe.unpaid || []).find(u => u.month === month), need = pu ? Math.max(0, Math.round((pu.net - (pu.credit || 0)) * 100) / 100) : 0, nv = API.parseAmt(v);
+  if (!pay.force && pu && nv > 0 && nv < need - 0.005) {
     const fm = n => (Math.round(n * 100) / 100).toLocaleString('en-US');
-    S.payq = {emp, month, v: Number(v), dt};
+    S.payq = {emp, month, v: nv, dt};
     return ovOpen(`<label class="shh">المبلغ أقل من الباقي له</label>
-      <div class="sub" style="margin:-6px 0 10px">راتب ${esc(pu.label)}: الباقي له ${fm(need)}، وكتبت ${fm(Number(v))}.</div>
+      <div class="sub" style="margin:-6px 0 10px">راتب ${esc(pu.label)}: الباقي له ${fm(need)}، وكتبت ${fm(nv)}.</div>
       <button class="btn2 cu qbig" onclick="payPart()">${I('hand-coins', 17)}سجّلها دفعة</button>
-      <div class="sub" style="margin:4px 0 12px">يتسجل ${fm(Number(v))} دفعة من الراتب، ويبقى له ${fm(need - Number(v))} والشهر مفتوح.</div>
-      <button class="btn2 rd qbig" onclick="payClose()">اصرف ${fm(Number(v))} وأقفل الشهر</button>
-      <div class="sub" style="margin:4px 0 12px">الشهر يتقفل «منصرف»، والفرق ${fm(need - Number(v))} ما ينحسب له بعدها.</div>
+      <div class="sub" style="margin:4px 0 12px">يتسجل ${fm(nv)} دفعة من الراتب، ويبقى له ${fm(need - nv)} والشهر مفتوح.</div>
+      <button class="btn2 rd qbig" onclick="payClose()">اصرف ${fm(nv)} وأقفل الشهر</button>
+      <div class="sub" style="margin:4px 0 12px">الشهر يتقفل «منصرف»، والفرق ${fm(need - nv)} ما ينحسب له بعدها.</div>
       <div class="err" id="pqerr"></div>
       <button class="btn2" style="width:100%" onclick="S.payq=null;S.armed=null;ovClose();renderFin()">إلغاء</button>`);
   }
   pay.force = false;
   lockBtn('جاري تسجيل الصرف…');
-  try { S.data = await call('apiPay', BOOT.key, {emp, month, amount: v, date: dt}); S.armed = null; if (S.pd) delete S.pd[emp + month]; renderAdmin(); toast('تسجل الصرف' + (dt && dt !== S.data.today ? ' بتاريخ ' + dmy(dt) : '')); }
+  try { S.data = await call('apiPay', BOOT.key, {emp, month, amount: v, date: dt}); S.armed = null; if (S.pd) delete S.pd[emp + month]; if (S.pv) delete S.pv[emp + month]; renderAdmin(); toast('تسجل الصرف' + (dt && dt !== S.data.today ? ' بتاريخ ' + dmy(dt) : '')); }
   catch (e) { S.armed = null; renderFin(); toastErr(e); }
 }
 
@@ -4079,7 +4102,7 @@ async function payPart() {
   const q = S.payq; if (!q) return;
   const un = lockBtn('جاري الحفظ…');
   try {
-    S.data = await call('apiSalPart', BOOT.key, {emp: q.emp, amount: q.v, date: q.dt, month: q.month, note: ''}); S.payq = null; S.armed = null; if (S.pd) delete S.pd[q.emp + q.month]; ovClose(); renderAdmin();
+    S.data = await call('apiSalPart', BOOT.key, {emp: q.emp, amount: q.v, date: q.dt, month: q.month, note: ''}); S.payq = null; S.armed = null; if (S.pd) delete S.pd[q.emp + q.month]; if (S.pv) delete S.pv[q.emp + q.month]; ovClose(); renderAdmin();
     const e = empById(q.emp); toast('انحفظت الدفعة، الباقي ' + ((e && e.sal ? e.sal.left : 0)).toLocaleString('en-US'));
   } catch (err) { if (un) un(); const x = $('#pqerr'); if (x) x.textContent = err; else toastErr(err); }
 }
@@ -4133,7 +4156,7 @@ function salActHtml(e) {
   if (f && f.kind === 'part') {
     const opts = (sal.open || []).map(m => `<option value="${m.month}" ${f.month === m.month ? 'selected' : ''}>${esc(m.label)}</option>`).join('');
     return `<div class="ctitle" style="font-size:15px">${I('hand-coins', 16)}دفعة راتب</div>
-      <div class="field" style="margin-top:10px"><span>المبلغ</span><input id="sp_amt" type="number" inputmode="decimal" value="${esc(f.amount || '')}" oninput="S.form.amount=this.value;partPrev('${e.id}')"></div>
+      <div class="field" style="margin-top:10px"><span>المبلغ</span><input id="sp_amt" class="qtt" inputmode="decimal" value="${esc(f.amount || '')}" oninput="S.form.amount=this.value;partPrev('${e.id}');amtPv(this.value,'apv_sp')">${amtPvHtml(f.amount || '', 'apv_sp')}</div>
       <div class="dprops pdate" style="margin:0 0 10px"><label class="dp"><span>تخص شهر</span><select id="sp_mon" onchange="S.form.month=this.value;partPrev('${e.id}')"><option value="">الأقدم أولاً</option>${opts}</select></label>
         <label class="dp"><span>تاريخ التسليم</span>${f.nodate ? `<button class="lnk" style="padding:0" onclick="S.form.nodate=false;renderFin()">غير محدد · حدّده</button>` : `<input id="sp_date" type="date" value="${esc(f.date || today)}" max="${today}" onchange="S.form.date=this.value">`}</label></div>
       ${f.nodate ? '' : `<button class="lnk" style="padding:0 2px 8px" onclick="S.form.nodate=true;renderFin()">ما أعرف التاريخ</button>`}
@@ -4148,12 +4171,14 @@ function salActHtml(e) {
       ${mv ? '<div class="sub" style="margin-top:4px">نفس الحركة تنتقل للشهر اللي تختاره، بدون حركة ثانية</div>' : ''}
       <div class="dprops pdate" style="margin:10px 0"><label class="dp"><span>شهر الراتب</span><select id="mv_mon" onchange="S.form.month=this.value;if(S.form.kind==='prev')S.form.amount='';renderFin()">${ms.map(m => `<option value="${m.month}" ${sel === m.month ? 'selected' : ''}>${esc(m.label)}</option>`).join('')}</select></label>
         <label class="dp"><span>تاريخ التسليم</span><input id="mv_date" type="date" value="${esc(f.date || today)}" max="${today}" onchange="S.form.date=this.value"></label></div>
-      <div class="field"><span>المبلغ</span><input id="mv_amt" type="number" inputmode="decimal" value="${esc(f.amount !== '' && f.amount != null ? f.amount : net != null ? Math.max(0, net) : '')}" oninput="S.form.amount=this.value"></div>
+      <div class="field"><span>المبلغ</span><input id="mv_amt" class="qtt" inputmode="decimal" value="${esc(f.amount !== '' && f.amount != null ? f.amount : net != null ? Math.max(0, net) : '')}" oninput="S.form.amount=this.value;amtPv(this.value,'apv_mv')">${amtPvHtml('', 'apv_mv')}</div>
       <div class="grid2"><button class="btn2 cu" onclick="${mv ? `saveMove('${e.id}')` : `savePrev('${e.id}')`}">${I('check', 16, 2.5)}${mv ? 'حفظ التصحيح' : 'تسجيل الصرف'}</button><button class="btn2" onclick="S.form=null;renderFin()">إلغاء</button></div><div class="err" id="mverr"></div><div class="hair"></div>`;
   }
   const b = [];
+  if ((sal.open || []).length) b.push(`<button onclick="S.form={emp:'${e.id}',kind:'part',month:'',date:'',amount:''};S.armed=null;renderFin()">${I('hand-coins', 15)}دفعة</button>`);
+  b.push(`<button class="rd" onclick="openForm('${e.id}','ded')">${I('circle-dollar-sign', 15)}خصم</button>`);
   if (e.salary) b.push(`<button onclick="openForm('${e.id}','loan')">${I('banknote', 15)}سلفة</button>`);
-  if ((e.prevMonths || []).length) b.push(`<button onclick="S.form={emp:'${e.id}',kind:'prev',month:'',date:'',amount:''};S.armed=null;renderFin()">${I('calendar', 15)}راتب شهر سابق</button>`);
+  if ((e.prevMonths || []).length) b.push(`<button onclick="S.form={emp:'${e.id}',kind:'prev',month:'',date:'',amount:''};S.armed=null;renderFin()">${I('calendar', 15)}شهر سابق</button>`);
   return b.length ? `<div class="salact">${b.join('')}</div>` : '';
 }
 function monthLbl(mk) { return mk ? MONTHS_AR[+mk.slice(5, 7) - 1] + ' ' + mk.slice(0, 4) : ''; }
@@ -4185,7 +4210,7 @@ async function savePart(id) {
   const f = S.form;
   if (!f) return;
   const amt = $('#sp_amt').value, dt = f.nodate ? '' : ($('#sp_date') || {}).value || '', nt = $('#sp_note').value;
-  if (!(Number(amt) > 0)) return $('#sperr').textContent = 'اكتب المبلغ';
+  if (!(API.parseAmt(amt) > 0)) return $('#sperr').textContent = 'اكتب المبلغ';
   lockBtn('جاري الحفظ…');
   try {
     S.data = await call('apiSalPart', BOOT.key, {emp: id, amount: amt, date: dt, month: f.month || '', note: nt}); S.form = null; renderAdmin();
@@ -4759,7 +4784,7 @@ function empInvHtml(d, isPreview) {
   const row = x => {
     const st = invSt(x, true), give = x.kind === 'give', ph = invPhotosHtml(x, BOOT.page === 'admin');
     return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? (x.paidBy === 'ret' ? 'r' : 'g') : ''}">${M(x.amount, give ? (x.paidBy === 'ret' ? '−' : '+') : '')}</b></div>
-      <div class="ivrw"><div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · ' + (catName(x.cat) ? catName(x.cat) + ' · ' : '')}${t12(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>${ph.startsWith('<button class="mbtn"') ? ph : ''}</div>${invFixTag(x)}
+      <div class="ivrw"><div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · ' + (invCatL(x) ? esc(invCatL(x)) + ' · ' : '')}${t12(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>${ph.startsWith('<button class="mbtn"') ? ph : ''}</div>${invFixTag(x)}
       ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px"><div><b>المدير العام يقول:</b> ${esc(x.reason)}</div></div>` : ''}
       ${!isPreview && x.kind === 'inv' && x.status === 'returned' && !x.task && !(S.invForm && S.inv.edit === x.id) ? `<button class="bigdo" style="border:0;font-family:inherit;cursor:pointer" onclick="invEdit('${x.id}')">${I('pencil', 15, 2.2)}صحّح وأعد الإرسال</button>` : ''}
       ${ph.startsWith('<button class="mbtn"') ? '' : ph}</div>`;
@@ -4796,7 +4821,8 @@ function invFormHtml(d) {
     ${S.ishotLoading ? '<div class="sub">جاري تجهيز الصورة…</div>' : ''}
     <div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ بالريال" value="${esc(f.amount)}" oninput="S.inv.amount=this.value;amtPv(this.value,'apv_inv');ivSum()"><input placeholder="المحل (اختياري)" value="${esc(f.vendor || '')}" oninput="S.inv.vendor=this.value"></div>${amtPvHtml(f.amount, 'apv_inv')}
     <input placeholder="وصف المشتريات" value="${esc(f.desc)}" oninput="S.inv.desc=this.value">
-    ${catPick(f.cat || '', v => `S.inv.cat='${v}';rerenderEmp()`)}
+    ${catPick(f.cat || '', v => `S.inv.cat='${v}';rerenderEmp()`, '', true)}
+    ${f.cat === 'sal' ? salPickHtml(f) : ''}
     ${projPick(ps, f.project, 'S.inv')}
     <div class="sub" style="margin:4px 0 -2px">دفعت من؟</div>
     <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'المدير العام']].map(o => `<button class="${(f.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="S.inv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>
@@ -4827,11 +4853,12 @@ async function sendInv() {
   if (!(API.parseAmt(f.amount) > 0)) { err().textContent = 'اكتب المبلغ'; return; }
   if (!f.desc.trim()) { err().textContent = 'اكتب وش اشتريت'; return; }
   if (!f.edit && f.wOn && !(f.w >= 1 && f.w <= 120)) { err().textContent = 'اكتب مدة الضمان بالأشهر'; return; }
+  if (f.cat === 'sal' && !f.salEmp) { err().textContent = 'اختر الموظف اللي سلّمته الراتب'; return; }
   if (S.busy) return;
   S.busy = true; rerenderEmp();
   if (f.edit) {
     try {
-      const d = await callT(120000, 'apiInvResend', BOOT.token, f.edit, {amount: f.amount, desc: f.desc, project: f.project, vendor: f.vendor || '', cat: f.cat || '', paidBy: f.paidBy || 'cash'}, S.ishots, f.keep || []);
+      const d = await callT(120000, 'apiInvResend', BOOT.token, f.edit, {amount: f.amount, desc: f.desc, project: f.project, vendor: f.vendor || '', cat: f.cat || '', salEmp: f.salEmp || '', paidBy: f.paidBy || 'cash'}, S.ishots, f.keep || []);
       S.busy = false; S.invForm = false; S.ishots = []; S.inv = {amount: '', desc: '', project: f.project};
       renderEmp(d, false); toast('أُعيد إرسال الفاتورة');
     } catch (e) {
@@ -4840,7 +4867,7 @@ async function sendInv() {
     return;
   }
   try {
-    const d = await callT(120000, 'apiInvAdd', BOOT.token, {cid: f.cid || '', amount: f.amount, desc: f.desc, project: f.project, vendor: f.vendor || '', cat: f.cat || '', warranty: f.wOn ? f.w : 0, paidBy: f.paidBy || 'cash'}, S.ishots);
+    const d = await callT(120000, 'apiInvAdd', BOOT.token, {cid: f.cid || '', amount: f.amount, desc: f.desc, project: f.project, vendor: f.vendor || '', cat: f.cat || '', salEmp: f.salEmp || '', warranty: f.wOn ? f.w : 0, paidBy: f.paidBy || 'cash'}, S.ishots);
     S.busy = false; S.invForm = false; S.ishots = []; S.inv = {amount: '', desc: '', project: f.project};
     renderEmp(d, false); toast('انرسلت الفاتورة');
   } catch (e) {

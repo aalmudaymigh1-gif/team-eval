@@ -299,6 +299,14 @@
       lastPart: real.length ? real[real.length - 1].id : '', preview: extra ? hist[hist.length - 1] : null,
       close: extra ? months.filter(m => !m.closed && m.full).map(m => m.month) : [] };
   }
+  /* الشهور اللي تنقفل بالدفعة (نفس الحساب في «دفعة راتب» واعتماد فاتورة «راتب موظف») */
+  function closeParts_(st) {
+    return st.close.map(mk => {
+      const f = st.open.filter(m => m.month === mk)[0], det = payDetails_(f);
+      det.fromParts = Math.max(0, f.net);
+      return { month: mk, amount: Math.max(0, f.net), details: det };
+    });
+  }
   function prevMonth_(mk) { let y = Number(mk.slice(0, 4)), m = Number(mk.slice(5, 7)) - 1; if (m < 1) { m = 12; y--; } return y + '-' + String(m).padStart(2, '0'); }
   /* الإصدار 85: الشهور اللي قبل بداية الحساب (12 شهر) وما لها صرف، عشان يقدر يسجّل راتب قديم على شهره */
   function prevMonths_(emp, fin, logs) {
@@ -366,14 +374,20 @@
       improve: w ? { crit: w.n, text: w.bad } : null
     };
   }
+  /* الإصدار 116: القسط ينحسب شهر شهر من بداية السلفة: الشهر المنصرف ياخذ اللي انخصم فعلاً، والشهر اللي ما انصرف ياخذ قسطه من الباقي.
+     كانت كل الشهور المفتوحة تاخذ القسط كامل، فسلفة 1000 على شهرين تنخصم 1500 لو فيه ثلاث شهور مفتوحة */
   function loanDue_(emp, fin, mk) {
-    const pays = fin.filter(f => f.kind === 'pay' && f.emp === emp.id && f.month !== mk);
+    const pays = {}; fin.forEach(f => { if (f.kind === 'pay' && f.emp === emp.id) pays[f.month] = f; });
     const parts = {}; let total = 0;
     fin.filter(f => f.kind === 'loan' && f.emp === emp.id && f.start <= mk).forEach(l => {
-      const paidSoFar = pays.reduce((s, p) => s + ((p.details && p.details.loanParts && p.details.loanParts[l.id]) || 0), 0);
-      const per = Math.ceil(l.amount / l.months);
-      const due = Math.max(0, Math.min(per, l.amount - paidSoFar));
-      if (due > 0) { parts[l.id] = due; total += due; }
+      const per = Math.ceil(l.amount / l.months); let rem = l.amount, due = 0;
+      monthsRange_(l.start, mk).forEach(m => {
+        const p = m !== mk ? pays[m] : null;
+        const take = p ? Number((p.details && p.details.loanParts && p.details.loanParts[l.id]) || 0) : Math.max(0, Math.min(per, rem));
+        if (m === mk) due = take;
+        rem = rr2(rem - take);
+      });
+      if (due > 0) { parts[l.id] = due; total = rr2(total + due); }
     });
     return { total: total, parts: parts };
   }
@@ -459,7 +473,7 @@
   function invOut_(x, pmap) {
     return { id: x.id, ts: x.ts, emp: x.emp, kind: x.kind, amount: x.amount, desc: x.desc, project: x.project,
       pname: x.project ? (pmap[x.project] || '') : '', nph: x.photos.length, photos: x.photos, status: x.status, reason: x.reason,
-      method: x.method || '', warrantyUntil: x.warrantyUntil || '', vendor: x.vendor || '', cat: x.cat || '', task: x.task || '', taskDeleted: !!x.taskDeleted,
+      method: x.method || '', warrantyUntil: x.warrantyUntil || '', vendor: x.vendor || '', cat: x.cat || '', salEmp: x.cat === 'sal' ? (x.salEmp || '') : '', task: x.task || '', taskDeleted: !!x.taskDeleted,
       paidBy: ['card', 'own', 'ret'].indexOf(x.paidBy) >= 0 ? x.paidBy : 'cash', oldAmount: x.oldAmount == null ? null : Number(x.oldAmount) };
   }
 
@@ -485,6 +499,7 @@
       loans: loanBalances_(emp, fin),
       tx: txList_(fin.filter(f => f.emp === emp.id)).slice(0, 30),
       rules: settings_(),
+      team: (RAW.team || []).filter(t => t.id !== emp.id).map(t => ({ id: t.id, name: t.name })),
       projects: RAW.projects.filter(p => !p.archived).map(p => ({ id: p.id, name: p.name, lat: p.lat, lng: p.lng })),
       attend: !!emp.attend,
       alerts: (RAW.alerts || []).filter(a => a.kind === 'task'),
@@ -712,8 +727,7 @@
       if (!RAW || CRED.k !== k) await loadAdmin(k);
       const emp = empById(x.emp);
       if (!emp) throw new Error('اختر الموظف');
-      const amount = Math.round(Number(x.amount) || 0);
-      if (amount <= 0) throw new Error('اكتب المبلغ');
+      const amount = cleanAmount_(x.amount);
       const fin = RAW.fin, now = nowMonth();
       const note = String(x.note || '').slice(0, 200);
       let a;
@@ -746,7 +760,7 @@
       const st = salSt_(emp, RAW.fin, RAW.logs, nowMonth());
       const f = st.open.filter(m => m.month === mk)[0] || finMonth_(emp, RAW.fin, RAW.logs, mk);
       const cr = f.credit || 0;
-      const cashv = x.amount === '' || x.amount == null ? Math.max(0, f.net) - cr : rr2(Number(x.amount));
+      const cashv = x.amount === '' || x.amount == null ? Math.max(0, f.net) - cr : parseAmt_(x.amount);
       if (!(cashv >= 0)) throw new Error('المبلغ غير صحيح');
       const date = /^\d{4}-\d{2}-\d{2}$/.test(x.date || '') ? x.date : RAW.today;
       if (date > RAW.today) throw new Error('تاريخ التسليم بعد اليوم');
@@ -782,16 +796,12 @@
       const month = /^\d{4}-\d{2}$/.test(x.month || '') ? x.month : '';
       const st = salSt_(emp, RAW.fin, RAW.logs, nowMonth(), { amount: amount, month: month, date: date });
       if (st.preview.extra > 0.001) throw new Error('المبلغ أكثر من المتبقي (' + rr2(amount - st.preview.extra).toLocaleString('en-US') + ')');
-      const close = st.close.map(mk => {
-        const f = st.open.filter(m => m.month === mk)[0], det = payDetails_(f);
-        det.fromParts = Math.max(0, f.net);
-        return { month: mk, amount: Math.max(0, f.net), details: det };
-      });
+      const close = closeParts_(st);
       return adminDo(k, 'sal_part', { emp: emp.id, amount: amount, date: date, month: month, note: String(x.note || '').trim().slice(0, 200), close: close });
     },
     /* الإصدار 85: معاينة توزيع الدفعة قبل الحفظ (من البيانات المحمّلة) */
     salPreview(empId, amount, month) {
-      const emp = RAW && empById(empId), a = rr2(Number(amount) || 0);
+      const emp = RAW && empById(empId), a = parseAmt_(amount) || 0;
       if (!emp || !(a > 0)) return null;
       const st = salSt_(emp, RAW.fin, RAW.logs, nowMonth(), { amount: a, month: month || '' });
       return { al: st.preview.al, extra: st.preview.extra, after: st.preview.after, close: st.close };
@@ -813,7 +823,7 @@
       if (date < mk + '-01') throw new Error('تاريخ التسليم قبل شهر الراتب');
       const others = RAW.fin.filter(f => f.id !== id);
       const f = finMonth_(emp, others, RAW.logs, mk);
-      const amount = x.amount === '' || x.amount == null ? r.amount : rr2(Number(x.amount));
+      const amount = x.amount === '' || x.amount == null ? r.amount : parseAmt_(x.amount);
       if (!(amount >= 0)) throw new Error('المبلغ غير صحيح');
       return adminDo(k, 'fin_move', { id: id, month: mk, date: date, amount: amount, details: payDetails_(f) });
     },
@@ -1002,10 +1012,11 @@
       const desc = String(x.desc || '').trim().slice(0, 200);
       if (!desc) throw new Error('اكتب وش اشتريت');
       if (!String(x.project || '')) throw new Error('اختر المشروع');
+      if (x.cat === 'sal' && !x.salEmp) throw new Error('اختر الموظف اللي سلّمته الراتب');
       const paths = await empUpload(token, dataUrls, 3);
       if (!paths.length) throw new Error('صوّر الفاتورة');
       const w = Math.round(Number(x.warranty) || 0);
-      return empDo(token, 'inv_add', { cid: String(x.cid || ''), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
+      return empDo(token, 'inv_add', { cid: String(x.cid || ''), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), salEmp: x.cat === 'sal' ? String(x.salEmp || '') : '', project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
     },
     /* الإصدار 74: تصحيح فاتورة رجّعها المدير العام وإعادة إرسالها بنفس السجل */
     async apiInvResend(token, id, x, dataUrls, keep) {
@@ -1017,10 +1028,24 @@
       const old = (keep || []).filter(Boolean).slice(0, 3);
       const paths = old.concat(await empUpload(token, dataUrls || [], Math.max(0, 3 - old.length)));
       if (!paths.length) throw new Error('صوّر الفاتورة');
-      return empDo(token, 'inv_resend', { id: String(id), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), project: String(x.project || ''), photos: paths, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
+      if (x.cat === 'sal' && !x.salEmp) throw new Error('اختر الموظف اللي سلّمته الراتب');
+      return empDo(token, 'inv_resend', { id: String(id), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), salEmp: x.cat === 'sal' ? String(x.salEmp || '') : '', project: String(x.project || ''), photos: paths, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
     },
 
-    async apiInvApprove(k, id) { return adminDo(k, 'inv_approve', { id: id }); },
+    /* الإصدار 116: فاتورة «راتب موظف» لما تنعتمد تنسجل دفعة من راتب الشخص (نفس توزيع «دفعة راتب»). المبلغ الزايد عن اللي له يوقف الاعتماد */
+    async apiInvApprove(k, id) {
+      if (!RAW || CRED.k !== k) await loadAdmin(k);
+      const x = RAW.invoices.filter(v => v.id === id)[0], a = { id: id };
+      if (x && x.cat === 'sal' && x.salEmp) {
+        const emp = empById(x.salEmp);
+        if (!emp) throw new Error('الموظف اللي انصرف له الراتب غير موجود');
+        const amount = rr2(Number(x.amount) || 0);
+        const st = salSt_(emp, RAW.fin, RAW.logs, nowMonth(), { amount: amount, month: '', date: String(x.ts || '').slice(0, 10) });
+        if (st.preview.extra > 0.001) throw new Error('المبلغ أكثر من الباقي لـ' + emp.name + ' (' + rr2(amount - st.preview.extra).toLocaleString('en-US') + ')، صحّح المبلغ أو رجّعها');
+        a.sal = { close: closeParts_(st) };
+      }
+      return adminDo(k, 'inv_approve', a);
+    },
     async apiInvReturn(k, id, reason) {
       const r = String(reason || '').trim().slice(0, 300);
       if (!r) throw new Error('اكتب السبب');
