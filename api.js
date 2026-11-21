@@ -420,7 +420,8 @@
       if (l.type === '+') map[g].pts += st.star;
       else { map[g].crits.push(l.crit); map[g].pts -= heavy(l.crit) ? st.trust : st.miss; }
     });
-    return order.map(g => map[g]).sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
+    /* الإصدار 115: الصفوف جاية بالأقدم أول (التاريخ ثم وقت التسجيل)، فنقلبها قبل الترتيب عشان داخل اليوم الواحد يطلع الأحدث فوق */
+    return order.map(g => map[g]).reverse().sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
   }
   function taskInv_(id) {
     const x = RAW.invoices.filter(v => v.task === id).slice(-1)[0];
