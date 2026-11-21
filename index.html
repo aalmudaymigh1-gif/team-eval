@@ -1487,7 +1487,7 @@ html:root .blk.dline>.lab{margin:0!important}
 html:root .blk.dline>.segc{flex:0 1 250px;margin:0!important}
 html:root .blk.dline>.segc button{min-height:44px!important;padding-block:6px!important}
 html:root .blk.dline>input{flex:1 1 100%}
-html:root .dsum{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0!important;background:var(--fill);border-radius:16px;overflow:hidden}
+html:root .dsum{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:0!important;background:var(--fill);border-radius:16px;overflow:hidden}
 html:root .dsum>div{background:transparent!important;border-radius:0!important;padding:8px 10px!important}
 html:root .dsum>div:not(.at)+div:not(.at){border-inline-start:1px solid var(--line)}
 html:root .dsum>.at{grid-column:1/-1;display:flex;align-items:baseline;gap:8px;border-bottom:1px solid var(--line);padding:9px 12px!important}
@@ -1511,6 +1511,8 @@ html:root .ipj{margin-top:8px}
 html:root .pform .ipj button:not(.on){background:var(--surface)!important}
 html:root .ivsum{background:var(--acc-soft);color:var(--acc-dk);border-radius:16px;padding:10px 14px;font-size:14px;line-height:1.6;margin:4px 0 2px}
 html:root .ivsum.bad{background:#F6ECEA;color:var(--red)}
+.etabs.e4.e3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+html:root .note.bad .attok{display:flex;width:100%;min-height:44px;margin-top:10px;justify-content:center;background:rgba(255,255,255,.7)!important;color:var(--red)!important;border:0!important}
 </style>
 </head>
 <body>
@@ -1520,9 +1522,9 @@ html:root .ivsum.bad{background:#F6ECEA;color:var(--red)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=111"></script>
+<script src="api.js?v=113"></script>
 <script>
-const APP_VER = '112';
+const APP_VER = '113';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1648,7 +1650,7 @@ function pushSnoozed() { try { return Date.now() - Number(localStorage.getItem('
 function pushHtml() {
   if (PUSH.ok) {
     if (Notification.permission !== 'default') return '';
-    return `<div class="pushb"><div class="ph1">${I('bell', 20)}<div><b>فعّل الإشعارات</b><p>${BOOT.page === 'admin' ? 'عشان يوصلك الإثبات والفواتير أول بأول' : 'عشان توصلك المهام الجديدة أول بأول'}</p></div></div>
+    return `<div class="pushb"><div class="ph1">${I('bell', 20)}<div><b>فعّل الإشعارات</b><p>${BOOT.page === 'admin' ? 'عشان توصلك التقارير والفواتير أول بأول' : 'عشان توصلك التقارير والتنبيهات أول بأول'}</p></div></div>
       <button class="bigdo" onclick="enablePush()">${PUSH.busy ? 'لحظة…' : 'فعّلها'}</button></div>`;
   }
   if (!PUSH.ios || PUSH.standalone || pushSnoozed()) return '';
@@ -1717,8 +1719,14 @@ function attStepsHtml(r, me) {
   return `<div class="asts">${row(!!(r && r.home), !r, me ? 'طلعت من البيت' : 'طلع من البيت', r && r.home ? t12(r.home) : '')}${row(!!(r && r.in), r && r.home && !r.in, me ? 'وصلت المشروع' : 'وصل المشروع', r && r.in ? t12(r.in) : '')}${row(!!(r && r.out), r && r.in && !r.out, me ? 'طلعت من المشروع' : 'طلع من المشروع', r && r.out ? t12(r.out) : '')}</div>`;
 }
 function attBadHtml(d) {
-  const lim = addDays(d.today, -30), b = (d.att || []).filter(x => x.bad && x.date >= lim);
-  return b.map(x => `<div class="note bad" style="margin-top:8px"><div><b>تسجيل غير صحيح</b> · <span>${esc(dayLabel(x.date))}</span><div><b>المدير العام يقول:</b> ${esc(x.badReason)}</div></div></div>`).join('');
+  const lim = addDays(d.today, -30), b = (d.att || []).filter(x => x.bad && !x.badSeen && x.date >= lim), me = BOOT.page === 'emp' && !S.empPreview;
+  return b.map(x => `<div class="note bad" style="margin-top:8px"><div style="flex:1"><b>تسجيل غير صحيح</b> · <span>${esc(dayLabel(x.date))}</span><div><b>المدير العام يقول:</b> ${esc(x.badReason)}</div>${me ? `<button class="btn2 attok" onclick="attSeen('${x.id}',this)">فهمت</button>` : ''}</div></div>`).join('');
+}
+/* الإصدار 113: الموظف يضغط «فهمت» فيختفي التنبيه، واليوم يبقى «غير صحيح» في السجل */
+async function attSeen(id, btn) {
+  if (btn) btn.disabled = true;
+  try { const r = await call('apiAttSeen', BOOT.token, id); renderEmp(r, false); }
+  catch (e) { if (btn) btn.disabled = false; toastErr(String(e && e.message || e)); }
 }
 function attCardHtml(d, isPreview) { return attCardHtml0(d, isPreview) + (d.attend ? attBadHtml(d) : ''); }
 function attCardHtml0(d, isPreview) {
@@ -2334,8 +2342,8 @@ function renderAdmin() {
       <button class="btn2" onclick="copyAdmin()">نسخ الرابط</button></div></div>`;
   }
   const tab = (v, ic, t) => `<button class="${S.view===v?'on':''}" onclick="go('${v}')">${I(ic, 16)}${t}</button>`;
-  h = `<div class="top"><div><h1>${({rec:'التقييم',team:'الفريق',task:'المهام',fin:'المالية',set:'الإعدادات'})[S.view] || 'إدارة الشغل'}</h1><div class="sub">${esc(dayLabel(d.today))}</div></div><div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div></div>${pushHtml()}
-    <div class="tabs">${tab('rec','clipboard-check','تقييم')}${tab('team','users','الفريق')}${tab('task','list-checks','المهام')}${tab('fin','wallet','المالية')}${tab('set','settings','الإعدادات')}</div>` + h + `
+  h = `<div class="top"><div><h1>${({rec:'التقييم',team:'الفريق',task:'الأعمال',fin:'المالية',set:'الإعدادات'})[S.view] || 'إدارة الشغل'}</h1><div class="sub">${esc(dayLabel(d.today))}</div></div><div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div></div>${pushHtml()}
+    <div class="tabs">${tab('rec','clipboard-check','تقييم')}${tab('team','users','الفريق')}${tab('task','list-checks','الأعمال')}${tab('fin','wallet','المالية')}${tab('set','settings','الإعدادات')}</div>` + h + `
     <div id="view"></div>`;
   $('#app').innerHTML = h;
   mountTabs();
@@ -2422,7 +2430,6 @@ function daySumHtml(emp, date) {
   const o = daySum(emp, date), cell = (v, l, c, s) => `<div class="${c || ''}"><b>${v}</b><span>${l}${s ? ' · ' + s : ''}</span></div>`;
   return `<div class="blk"><div class="lab">${I('clipboard-list', 14)}ملخص اليوم</div><div class="dsum${o.att ? '' : ' n3'}">
     ${o.att ? cell(esc(o.att.v), 'الحضور', 'at ' + o.att.c, o.att.s) : ''}
-    ${cell(o.tasks, o.tasks === 1 ? 'مهمة أنجزها' : 'مهام أنجزها')}
     ${cell(o.ticks === null ? (RP.failed ? '—' : '…') : o.ticks, o.ticks === 1 ? 'عمل أشّره' : 'أعمال أشّرها')}
     ${cell(o.inv, o.inv === 1 ? 'فاتورة' : 'فواتير', '', o.inv ? M(o.invSum, '', 't') : '')}</div></div>`;
 }
@@ -2547,7 +2554,7 @@ function empFacts(e) {
   const d = S.data, c = finCtx(), p = Object.assign({c: 0, o: 0}, c.parts[e.id] || {});
   const left = u => Math.max(0, Math.round((u.net - (u.credit || 0)) * 100) / 100), dueU = u => !!u.due && u.due <= d.today;
   const un = e.unpaid || [], late = un.filter(dueU), cur = un.find(u => !dueU(u)) || null;
-  const ts = e.tasks || [], rv = ts.filter(t => t.status === 'review').length, op = ts.filter(t => t.status === 'open' || t.status === 'returned').length, lt = ts.filter(t => t.late).length;
+  const ts = [] /* v113 */, rv = ts.filter(t => t.status === 'review').length, op = ts.filter(t => t.status === 'open' || t.status === 'returned').length, lt = ts.filter(t => t.late).length;
   const iv = c.items.filter(x => x.emp === e.id && x.kind === 'inv' && x.status === 'review');
   const needs = [];
   if (rv) needs.push({t: rv === 1 ? 'إثبات مهمة ينتظر اعتمادك' : rv === 2 ? 'إثباتين ينتظرون اعتمادك' : rv + ' إثباتات تنتظر اعتمادك', c: rv === 1 ? 'إثبات مهمة' : rv === 2 ? 'إثباتين' : rv + ' إثباتات', s: 'المهام', b: 'افتح', on: `tsub('${e.id}','tasks')`});
@@ -2592,7 +2599,7 @@ function renderEmpFile(e) {
   const salV = f.un.length > 1 ? f.un.length + ' شهور · باقي ' + M(f.leftAll, '', 't') + (f.lateSum ? bd('متأخر ' + fmN(f.lateSum), 1) : '') : f.cur ? M(f.left(f.cur), '', 't') + ' · ' + dueL(f.cur.due) : f.late.length ? M(f.lateSum, '', 't') + bd('متأخر', 1) : e.salary ? 'منصرف' : 'ما انحط له راتب';
   const cuV = f.p.c < 0 ? M(-f.p.c, '−', 'neg') + bd('بالسالب', 1) : f.p.c > 0 ? 'معه ' + M(f.p.c, '', 't') : 'ما معه عهدة';
   const setV = (e.salary ? 'راتب ' + fmN(e.salary) : 'بدون راتب') + (m.track ? ' · متابعة فقط' : ' · حافز ' + fmN(e.max || 0));
-  h += `<div class="tbh2">الشغل</div><div class="tbl2">${tbRow('list-checks', 'المهام', taskV, `tsub('${id}','tasks')`)}${m.track ? tbRow('history', 'المواقف', lv || 'ما فيه', `tsub('${id}','log')`) : tbRow('sparkles', 'الحافز والمواقف', M(m.bonus, '', 'pos') + (lv ? ` <span class="lv">· ${lv}</span>` : ''), `tsub('${id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${id}')`) : ''}</div>
+  h += `<div class="tbh2">الشغل</div><div class="tbl2">${m.track ? tbRow('history', 'المواقف', lv || 'ما فيه', `tsub('${id}','log')`) : tbRow('sparkles', 'الحافز والمواقف', M(m.bonus, '', 'pos') + (lv ? ` <span class="lv">· ${lv}</span>` : ''), `tsub('${id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${id}')`) : ''}</div>
     <div class="tbh2">الفلوس</div><div class="tbl2">${tbRow('wallet', 'الراتب', salV, `tsub('${id}','sal')`)}${tbRow('hand-coins', 'العهدة', cuV, `tsub('${id}','cu')`)}</div>
     <div class="tbh2">الملف</div><div class="tbl2">${tbRow('settings', 'إعداداته', setV, `openEmpSet('${id}')`)}</div></div>`;
   $('#view').innerHTML = h;
@@ -2757,10 +2764,11 @@ function tqMatch(t) {
 
 function tvSeg(d) {
   const n = (d.guides || []).filter(g => g.reads.some(r => !r.done)).length, nr = RP.reps ? rpNPend() : 0;
-  return `<div class="segc tvseg"><button class="${S.tview !== 'g' && S.tview !== 'r' ? 'on' : ''}" onclick="S.tview='t';S.gform=null;renderTasks()">المهام</button><button data-r="1" class="${S.tview === 'r' ? 'on' : ''}" onclick="S.tview='r';S.gform=null;RP.open=null;RP.hist=null;renderTasks();toTop()">التقارير${nr ? ' (' + nr + ')' : ''}</button><button class="${S.tview === 'g' ? 'on' : ''}" onclick="S.tview='g';renderTasks()">التوجيهات${n ? ' (' + n + ')' : ''}</button></div>`;
+  return `<div class="segc tvseg"><button data-r="1" class="${S.tview === 'r' ? 'on' : ''}" onclick="S.tview='r';S.gform=null;RP.open=null;RP.hist=null;renderTasks();toTop()">التقارير${nr ? ' (' + nr + ')' : ''}</button><button class="${S.tview === 'g' ? 'on' : ''}" onclick="S.tview='g';renderTasks()">التوجيهات${n ? ' (' + n + ')' : ''}</button></div>`;
 }
 function renderTasks() {
-  if (S.td) return renderTaskDetail();
+  /* الإصدار 113: المهام انتقلت لتقارير مشاريعها. الصفحة «الأعمال»: التقارير والتوجيهات بس */
+  S.td = null; if (S.tview !== 'g') S.tview = 'r';
   rpEnsure();
   if (S.tview === 'r') return rpAdminView();
   if (S.tview === 'g') {
@@ -3345,7 +3353,7 @@ function invRowHtml(x, showEmp) {
 }
 
 function renderInv() { return renderFin(); }
-function fabTap() { if (S.view === 'fin') return askInvAdd(true); if (S.view === 'task' && S.tview === 'r') return rpOpenForm(null, true); if (S.tview === 'g') return openGForm(); openSheet(); }
+function fabTap() { if (S.view === 'fin') return askInvAdd(true); if (S.view === 'task') return S.tview === 'g' ? openGForm() : rpOpenForm(null, true); }
 const SV_UP = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>';
 const SV_DN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
 function finCtx() {
@@ -4570,8 +4578,8 @@ function renderEmp(d, isPreview) {
   S.empData = d; S.empPreview = isPreview;
   const nOpen = (d.tasks || []).filter(t => t.status === 'open' || t.status === 'returned').length;
   const nRetInv = ((d.inv || {}).items || []).filter(x => x.kind === 'inv' && x.status === 'returned' && !x.task).length;
-  if (!['tasks', 'rep', 'inv', 'pay'].includes(S.etab)) S.etab = 'tasks';
-  const tasksTab = S.etab === 'tasks';
+  if (!['rep', 'inv', 'pay'].includes(S.etab)) S.etab = 'rep';
+  const tasksTab = false, mainTab = S.etab === 'rep';
   $('#app').classList.add('empv');
   if (NF.open && !isPreview) { $('#app').innerHTML = `<div class="top"><div><h1></h1></div><div class="topr">${nfBell()}</div></div><div id="view"></div>`; nfRender(); return; }
   if (!isPreview) nfEnsure();
@@ -4579,9 +4587,9 @@ function renderEmp(d, isPreview) {
   if (rsub) { $('#app').innerHTML = `<div class="top"><div><h1></h1></div></div><div id="view">${rsub}</div>`; rpHead(); rpAfterDetail(); return; }
   $('#app').innerHTML = `
     ${isPreview ? `<button class="back" onclick="closePreview()">${I('arrow-right', 17)}رجوع للفريق</button><div class="note info">${I('eye', 16)}هذي معاينة، والموظف يشوف نفس الصفحة.</div>` : ''}
-    <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>`}</div>${isPreview ? '' : pushHtml()}${tasksTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) : ''}
-    <div class="segc etabs e4"><button class="${S.etab === 'tasks' ? 'on' : ''}" onclick="S.etab='tasks';rerenderEmp()">مهامي${nOpen ? '<span class="nb">' + nOpen + '</span>' : ''}</button><button class="${S.etab === 'rep' ? 'on' : ''}" onclick="S.etab='rep';RP.sent=null;RP.open=null;RP.hist=null;rerenderEmp()">تقاريري</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري${nRetInv ? '<span class="nb">' + nRetInv + '</span>' : ''}</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">حافزي</button></div>
-    ${S.etab === 'inv' ? empInvHtml(d, isPreview) : S.etab === 'rep' ? rpEmpHtml(d, isPreview) : tasksTab ? empTasksHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
+    <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>`}</div>${isPreview ? '' : pushHtml()}${mainTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) : ''}
+    <div class="segc etabs e4 e3"><button class="${S.etab === 'rep' ? 'on' : ''}" onclick="S.etab='rep';RP.sent=null;RP.open=null;RP.hist=null;rerenderEmp()">تقاريري</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري${nRetInv ? '<span class="nb">' + nRetInv + '</span>' : ''}</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">حافزي</button></div>
+    ${S.etab === 'inv' ? empInvHtml(d, isPreview) : S.etab === 'rep' ? rpEmpHtml(d, isPreview) + guideDoneHtml(d) : tasksTab ? empTasksHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
   if (!isPreview) prefetchImgs();
   if (tasksTab) vFetch((d.tasks || []).filter(t => t.status === 'open' || t.status === 'returned').map(t => (vOf(t) || {}).id));
 }
@@ -5840,14 +5848,15 @@ function goLink(u) {
   NF.open = false;
   if (BOOT.page === 'admin') {
     if (S.preview) S.preview = null;
-    if (k === 't') { go('task'); S.tview = 't'; if (allTasks().some(t => t.id === id)) openTask(id); return; }
+    if (k === 't') { S.tview = 'r'; go('task'); return; }
     if (k === 'f') { go('fin'); if (id.slice(0, 2) === 'p:') openFinProj(id.slice(2)); else openFinRv(); return; }
     if (k === 'r') { go('task'); S.tview = 'r'; if (!rpArr(RP.reps).some(r => r.id === rpResolve(id))) RP.need = true; rpOpen(id); return; }
     return renderAdmin();
   }
   if (k === 'a') return alOpen(id);
   if (k === 'r') { S.etab = 'rep'; RP.sent = null; RP.hist = null; RP.open = rpResolve(id); if (!rpArr(RP.reps).some(r => r.id === RP.open)) rpLoad(); rerenderEmp(); toTop(); return; }
-  S.etab = id === 'inv' ? 'inv' : 'tasks'; rerenderEmp(); toTop();
+  if (k === 'p') { S.etab = 'pay'; rerenderEmp(); toTop(); return; }
+  S.etab = id === 'inv' ? 'inv' : 'rep'; rerenderEmp(); toTop();
 }
 /* الإصدار 86: فتح التنبيه نفسه (من الإشعار أو من داخل التطبيق) يسجّل المشاهدة مرة وحدة، ويوصل المدير العام إشعار */
 function alAll() { return rpArr((S.empData || {}).alerts).concat(rpArr(RP.alerts)); }
@@ -5872,9 +5881,9 @@ async function alOpen(id) {
   let a = alAll().find(x => x.id === id) || null;
   const r = await alSeen(id);
   if (r) a = r;
-  if (!a) { S.etab = 'tasks'; rerenderEmp(); toTop(); return; }
+  if (!a) { S.etab = 'rep'; rerenderEmp(); toTop(); return; }
   if (a.kind === 'task') {
-    S.etab = 'tasks'; S.hlTask = a.ref; rerenderEmp();
+    S.etab = 'rep'; S.hlTask = a.ref; rerenderEmp();
     setTimeout(() => { const el = document.querySelector('[data-tid="' + a.ref + '"]'); if (el) el.scrollIntoView({block: 'center'}); }, 80);
     setTimeout(() => { if (S.hlTask === a.ref) { S.hlTask = null; const el = document.querySelector('[data-tid="' + a.ref + '"]'); if (el) el.classList.remove('hl'); } }, 4000);
     return;
@@ -5898,7 +5907,6 @@ function nfPendingGo() {
 }
 /* الإصدار 75: المدير يفتح على «المهام» إذا فيه إثبات ينتظر، وعلى «المالية» إذا فيه فاتورة تنتظر، وإلا على آخر تبويب */
 function startView(d) {
-  if (d.employees.some(e => (e.tasks || []).some(t => t.status === 'review'))) return 'task';
   if (((d.inv || {}).items || []).some(x => x.kind === 'inv' && x.status === 'review')) return 'fin';
   const v = lsGet('adm_view');
   return ['rec', 'team', 'task', 'fin', 'set'].includes(v) ? v : 'rec';
@@ -5908,7 +5916,7 @@ function nfRender() {
   const today = (rpData() || {}).today || nfDay(Date.now());
   const y = new Date(today + 'T12:00:00Z'); y.setUTCDate(y.getUTCDate() - 1); const yd = y.toISOString().slice(0, 10);
   const all = NF.items || [], a = all.filter(x => nfDay(x.at) === today), b = all.filter(x => nfDay(x.at) === yd), c = all.filter(x => nfDay(x.at) < yd);
-  const back = BOOT.page === 'admin' ? (({rec:'التقييم', team:'الفريق', task:'المهام', fin:'المالية', set:'الإعدادات'})[S.view] || 'رجوع') : 'رجوع';
+  const back = BOOT.page === 'admin' ? (({rec:'التقييم', team:'الفريق', task:'الأعمال', fin:'المالية', set:'الإعدادات'})[S.view] || 'رجوع') : 'رجوع';
   let h = `<button class="back" onclick="nfClose()">${I('arrow-right', 17)}${back}</button><h2>الإشعارات</h2>`;
   if (NF.items === null) h += emptyHtml('bell', 'جاري التحميل…');
   else if (!all.length) h += emptyHtml('bell', 'لا توجد إشعارات خلال الأيام السبعة الماضية');
@@ -6513,7 +6521,7 @@ function subHead() {
   const h1 = top.querySelector('h1');
   top.querySelectorAll('.back').forEach(b => b.remove());
   top.classList.remove('subp');
-  h1.textContent = ({rec:'التقييم', team:'الفريق', task:'المهام', fin:'المالية', set:'الإعدادات'})[S.view] || 'إدارة الشغل';
+  h1.textContent = ({rec:'التقييم', team:'الفريق', task:'الأعمال', fin:'المالية', set:'الإعدادات'})[S.view] || 'إدارة الشغل';
   const back = v.querySelector(':scope > .back');
   if (!back) return;
   const h2 = v.querySelector(':scope > .fxh h2, :scope > h2');

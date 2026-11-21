@@ -1078,6 +1078,7 @@
     async apiAttHome(token, dataUrl, pos) { return attDo(token, 'att_home', dataUrl, pos, ''); },
     async apiAttIn(token, dataUrl, pos, project) { return attDo(token, 'att_in', dataUrl, pos, project); },
     async apiAttOut(token, dataUrl, pos) { return attDo(token, 'att_out', dataUrl, pos, ''); },
+    async apiAttSeen(token, id) { return empDo(token, 'att_seen', { id: String(id || '') }); },
     async apiGuideAdd(k, x) {
       const title = String(x.title || '').trim().slice(0, 120);
       if (!title) throw new Error('اكتب عنوان التوجيه');
