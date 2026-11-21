@@ -1461,6 +1461,56 @@ html:root .kempty{font-size:14px;color:var(--muted);padding:10px 0 4px}
 html:root .kfold{margin-top:14px}
 /* الإصدار 111: سطر «ينحفظ» تحت خانة المبلغ */
 html:root .amtpv{font-size:13px;font-weight:500;color:var(--acc-dk);margin-top:6px}
+
+/* ===== الإصدار 112: تحسين ترتيب الصفحات (نفس ألوان وأشكال 102) ===== */
+/* زر + جنب شريط التبويبات بنفس ارتفاعه، بدل ما يغطي المحتوى */
+html:root body:has(#fab:not(.hide)) .tabs{left:88px!important}
+html:root .fab{left:12px!important;right:auto!important;bottom:max(10px,env(safe-area-inset-bottom))!important;width:66px!important;height:66px!important;z-index:16!important}
+/* «عليها ضمان؟» مفتاح مثل باقي التطبيق */
+html:root .tgl{min-height:48px;padding:0!important;cursor:pointer}
+html:root .tgl input[type=checkbox]{-webkit-appearance:none;appearance:none;width:50px!important;height:30px!important;margin:0;padding:0!important;flex:none;border:0!important;border-radius:999px!important;cursor:pointer;box-shadow:none!important;
+  background:radial-gradient(circle at calc(100% - 15px) 50%,#fff 0 11px,transparent 12px),var(--fill2)!important}
+html:root .tgl input[type=checkbox]:checked{background:radial-gradient(circle at 15px 50%,#fff 0 11px,transparent 12px),var(--acc)!important}
+html:root .tgl input[type=checkbox]:focus-visible{box-shadow:0 0 0 3px var(--acc-ring)!important}
+/* صفحة التقرير: «تعديل» و«تنبيه» أزرار صغيرة بسطر لحالها، وأيقونات الأعمال بدون خلفية */
+html:root .rpmeta{flex-wrap:wrap;row-gap:8px}
+html:root .rpmeta>span{flex:1 1 calc(100% - 30px)}
+html:root .rpmeta>svg{flex:none}
+html:root .rpmeta .edl,html:root .rpmeta .edl+.edl{margin-inline-start:0!important;background:var(--acc-soft)!important;color:var(--acc-dk)!important;border:0!important;border-radius:999px!important;padding:6px 12px!important;font-size:13px!important;font-weight:500!important;min-height:32px;display:inline-flex;align-items:center;gap:4px}
+html:root .rpmeta .edl.ok{background:var(--fill)!important;color:var(--green)!important}
+html:root .tkl .ibell{background:transparent!important}
+/* التقييم: الموظفين بسطر، واليوم جنب عنوانه، وملخص اليوم بطاقة وحدة */
+html:root .emp.wr{gap:6px!important}
+html:root .emp.wr .empc{padding-inline:10px!important;font-size:14px!important;min-width:44px}
+html:root .blk.dline{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 10px}
+html:root .blk.dline>.lab{margin:0!important}
+html:root .blk.dline>.segc{flex:0 1 250px;margin:0!important}
+html:root .blk.dline>.segc button{min-height:44px!important;padding-block:6px!important}
+html:root .blk.dline>input{flex:1 1 100%}
+html:root .dsum{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:0!important;background:var(--fill);border-radius:16px;overflow:hidden}
+html:root .dsum>div{background:transparent!important;border-radius:0!important;padding:8px 10px!important}
+html:root .dsum>div:not(.at)+div:not(.at){border-inline-start:1px solid var(--line)}
+html:root .dsum>.at{grid-column:1/-1;display:flex;align-items:baseline;gap:8px;border-bottom:1px solid var(--line);padding:9px 12px!important}
+html:root .dsum>.at>span{order:-1;margin:0!important;font-size:13px!important}
+html:root .dsum>.at>b{font-size:15px}
+/* المالية: الشهر ومصاريفه بسطر */
+html:root .fxs.one.mrow>div{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:10px;padding:12px 16px!important}
+html:root .fxs.one.mrow>div>b{grid-column:1;grid-row:1}
+html:root .fxs.one.mrow>div>small{grid-column:1;grid-row:2;margin:0!important}
+html:root .fxs.one.mrow>div>:not(b):not(small){grid-column:2;grid-row:1/3}
+/* تفاصيل الفاتورة: التصحيح والضمان جنب بعض */
+html:root .g2b{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+html:root .g2b>.btn2{margin:0!important;width:100%}
+/* فواتيري: زر الصورة على سطر الحالة (قاعدة 104) */
+html:root .ivrw{display:flex;align-items:center;gap:8px}
+html:root .ivrw>.tm{flex:1;min-width:0}
+html:root .ivrw>.mbtn{flex:none;margin:0!important;min-height:32px;padding:4px 10px!important;font-size:13px!important;width:auto!important;position:relative}
+html:root .ivrw>.mbtn::after{content:"";position:absolute;inset:-6px -4px}
+/* فاتورة الموظف: سطر «بترسل» */
+html:root .ipj{margin-top:8px}
+html:root .pform .ipj button:not(.on){background:var(--surface)!important}
+html:root .ivsum{background:var(--acc-soft);color:var(--acc-dk);border-radius:16px;padding:10px 14px;font-size:14px;line-height:1.6;margin:4px 0 2px}
+html:root .ivsum.bad{background:#F6ECEA;color:var(--red)}
 </style>
 </head>
 <body>
@@ -1472,7 +1522,7 @@ html:root .amtpv{font-size:13px;font-weight:500;color:var(--acc-dk);margin-top:6
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="api.js?v=111"></script>
 <script>
-const APP_VER = '111';
+const APP_VER = '112';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -2330,7 +2380,7 @@ function renderRec() {
     <div class="blk"><div class="lab">${I('user', 14)}الموظف</div>
       <div class="emp wr">${d.employees.map(e => `<button class="empc ${S.emp===e.id?'on':''}" onclick="setEmp('${e.id}')">${esc(e.name)}</button>`).join('')}</div>
       ${emp.id ? `<div class="empi">${esc(emp.name)} · ${empSub(emp)}</div>` : ''}</div>
-    <div class="blk"><div class="lab">${I('calendar', 14)}اليوم</div>
+    <div class="blk dline"><div class="lab">${I('calendar', 14)}اليوم</div>
       ${segc([['today','اليوم'],['yest','أمس'],['other','تاريخ ثاني']], S.dateMode, 'setDate')}
       ${S.dateMode==='other' ? `<input type="date" value="${S.date}" max="${d.today}" onchange="S.date=this.value;renderRec()">` : ''}</div>
     ${emp.id && !trk ? daySumHtml(emp, S.date) : ''}
@@ -2525,7 +2575,7 @@ function renderEmpFile(e) {
   let h = `<button class="back" onclick="S.tfile=null;S.form=null;S.armed=null;renderTeam();toTop()">${I('arrow-right', 17)}الفريق</button><h2>${esc(e.name)}</h2><div class="tfile">
     <div class="tbh"><div class="n"><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span><span data-seen="${e.id}">${seenHtml(e.seen, e.left)}</span></div>
       <button class="lnkb" onclick="tsub('${id}','link')" aria-label="رابط صفحته">${I('link', 16)}</button><button class="rate" onclick="rateEmp('${id}')">${I('clipboard-check', 14)}قيّمه</button></div>
-    <div class="fxs tfs">${tile(f.cur ? 'صافي ' + esc(f.cur.label.split(' ')[0]) : 'الراتب', st[0], st[1], !f.cur && f.late.length ? 'due' : '')}${tile('العهدة معه', f.p.c < 0 ? M(-f.p.c, '−') : M(f.p.c), f.p.c < 0 ? 'بالسالب' : f.p.c > 0 ? 'نقد عنده' : 'ما معه عهدة', f.p.c < 0 ? 'due' : '')}${tile('ينتظرك', tv(String(n)), n ? esc(f.needs[0].c) : 'ما فيه شي', n ? 'due' : '')}</div>`;
+`;
   if (n) h += `<div class="card tfn">${f.needs.map(x => `<div class="row"><span class="tx"><b>${esc(x.t)}</b><span class="sub">${esc(x.s)}</span></span><span class="ac">${x.a != null ? M(x.a, '', x.r ? 'neg' : '') : ''}<button class="btn2 ${x.arm ? 'arm' : x.r ? 'cu' : ''}" onclick="${x.on}">${x.b}</button></span></div>`).join('')}</div>`;
   const fm = S.form && S.form.emp === id ? S.form : null;
   if (fm && ['part', 'prev', 'move'].includes(fm.kind)) h += `<div class="card tff">${salActHtml(e).replace(/<div class="hair"><\/div>$/, '')}</div>`;
@@ -3327,9 +3377,8 @@ function renderFin() {
   const exp = okM.reduce((a, x) => a + x.amount, 0);
   const rv = c.items.filter(x => x.kind === 'inv' && x.status === 'review');
   const cnt = (n, one, two, many, sing) => n === 1 ? one : n === 2 ? two : n + ' ' + (n > 10 && sing ? sing : many);
-  let h = `<div class="fxh"><span>${esc(d.month)}</span></div>
-    <div class="fxs one">
-      <div><b>مصاريف الشهر</b>${M(exp)}<small>${okM.length ? cnt(okM.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير', 'فاتورة') : 'ما فيه فواتير'}</small></div>
+  let h = `<div class="fxs one mrow">
+      <div><b>مصاريف ${esc(d.month)}</b>${M(exp)}<small>${okM.length ? cnt(okM.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير', 'فاتورة') : 'ما فيه فواتير'}</small></div>
     </div>`;
   if (rv.length) h += `<div class="fxa"><button class="r" onclick="openFinRv()"><span class="dt"></span>${cnt(rv.length, 'فاتورة تنتظر', 'فاتورتين تنتظر', 'فواتير تنتظر')} اعتمادك<em>${M(rv.reduce((a, x) => a + x.amount, 0), '', 't')}${I('chevron-left', 15)}</em></button></div>`;
   /* الإصدار 106: مشتريات بطاقتي، للمطابقة مع كشف البنك */
@@ -3612,6 +3661,18 @@ function invDaysHtml(list, showEmp, noProj, lim, allLabel) {
 /* الإصدار 105: بند الفاتورة. اختياري، والضغط على المختار يشيله */
 const INV_CATS = [['mat', 'مواد'], ['tool', 'عدة'], ['food', 'أكل وشرب'], ['move', 'نقل'], ['wage', 'أجور'], ['other', 'أخرى']];
 function catName(c) { const o = INV_CATS.find(v => v[0] === c); return o ? o[1] : ''; }
+/* الإصدار 112: المشروع شرائح في نماذج الفاتورة (مثل المهمة والتقرير). الضغط يغيّر الحالة بمكانها بدون إعادة رسم */
+function projPick(ps, cur, st) {
+  return `<div class="sub" style="margin:4px 0 -2px">المشروع</div><div class="segc wr ipj" role="group" aria-label="المشروع">${ps.map(p => `<button class="${cur === p.id ? 'on' : ''}" aria-pressed="${cur === p.id}" onclick="${st}.project='${p.id}';chipOn(this);ivSum()">${esc(p.name)}</button>`).join('')}</div>`;
+}
+function chipOn(b) { [].forEach.call(b.parentNode.children, x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); }); }
+/* الإصدار 112: سطر «بترسل» فوق زر الإرسال في فاتورة الموظف */
+function ivSumHtml() {
+  const f = S.inv || {}, n = API.parseAmt(f.amount), ps = ((S.empData || {}).projects) || [], p = ps.find(x => x.id === f.project);
+  if (!(n > 0)) return '<span>اكتب المبلغ عشان تقدر ترسل</span>';
+  return `<span>بترسل ${n.toLocaleString('en-US', {maximumFractionDigits: 2})} ريال</span> · <span>${esc(p ? p.name : 'بدون مشروع')}</span> · <span>${{own: 'من جيبك', card: 'دفعها المدير العام'}[f.paidBy] || 'من العهدة'}</span>`;
+}
+function ivSum() { const el = document.getElementById('ivsum'); if (!el) return; el.innerHTML = ivSumHtml(); el.classList.toggle('bad', !(API.parseAmt((S.inv || {}).amount) > 0)); }
 function catPick(cur, on, lab) {
   return `<div class="sub" style="margin:4px 0 -2px">${lab || 'البند (اختياري)'}</div><div class="segc wr icat">${INV_CATS.map(o => `<button class="${cur === o[0] ? 'on' : ''}" aria-pressed="${cur === o[0]}" onclick="${on(cur === o[0] ? '' : o[0])}">${o[1]}</button>`).join('')}</div>`;
 }
@@ -3637,7 +3698,7 @@ function askInvEdit(id, from) {
   ovOpen(`<label class="shh">تعديل الفاتورة</label>
     <div class="grid2"><input class="qtt" inputmode="decimal" aria-label="المبلغ" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.ie.amount=this.value;amtPv(this.value,'apv_ie')"><input aria-label="المحل" placeholder="المحل" value="${esc(f.vendor)}" oninput="S.ie.vendor=this.value"></div>${amtPvHtml(f.amount, 'apv_ie')}
     <input aria-label="وصف المشتريات" placeholder="وصف المشتريات" value="${esc(f.desc)}" oninput="S.ie.desc=this.value">
-    <select aria-label="المشروع" ${x.task ? 'disabled' : ''} onchange="S.ie.project=this.value">${x.project ? '' : '<option value="">بدون مشروع</option>'}${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
+    ${x.task ? `<select aria-label="المشروع" disabled>${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>` : projPick((x.project ? [] : [{id: '', name: 'بدون مشروع'}]).concat(ps), f.project, 'S.ie')}
     ${x.task ? '<div class="sub" style="margin-top:-4px">فاتورة مهمة، مشروعها يتغير من المهمة.</div>' : ''}
     ${catPick(f.cat || '', v => `S.ie.cat='${v}';askInvEdit('${id}')`)}
     ${x.emp ? `<div class="sub" style="margin:6px 0 4px">دفعها من</div><div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبه'], ['card', 'أنا']].map(o => `<button class="${f.paidBy === o[0] ? 'on' : ''}" onclick="S.ie.paidBy='${o[0]}';askInvEdit('${id}')">${o[1]}</button>`).join('')}</div>` : ''}
@@ -3679,8 +3740,8 @@ function openInvD(id) {
     <div class="pgrid" id="ivdph">${x.photos.map(f => `<div class="pph" data-f="${esc(f)}">جاري التحميل…</div>`).join('')}</div>
     ${x.emp ? `<div class="sub" style="margin:6px 0 4px">دفعها من</div><div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبه'], ['card', 'أنا']].map(o => `<button class="${(x.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="${(x.paidBy || 'cash') === o[0] ? '' : `setPaidBy('${id}','${o[0]}',true)`}">${o[1]}</button>`).join('')}</div>` : '<div class="sub" style="margin:6px 0">دفعتها أنت</div>'}
     ${x.kind === 'inv' ? catPick(x.cat || '', v => `setInvCat('${id}','${v}')`, 'البند') : ''}
-    ${x.status === 'ok' && x.kind === 'inv' ? `<button class="btn2" onclick="askInvFix('${id}')">${I('pencil', 15)}تصحيح المبلغ</button>` : ''}
-    <button class="btn2" onclick="askWarranty('${id}')">${x.warrantyUntil ? 'عدّل الضمان' : 'أضف ضمان'}</button>
+    ${x.status === 'ok' && x.kind === 'inv' ? '<div class="g2b">' : ''}${x.status === 'ok' && x.kind === 'inv' ? `<button class="btn2" onclick="askInvFix('${id}')">${I('pencil', 15)}تصحيح المبلغ</button>` : ''}
+    <button class="btn2" onclick="askWarranty('${id}')">${x.warrantyUntil ? 'عدّل الضمان' : 'أضف ضمان'}</button>${x.status === 'ok' && x.kind === 'inv' ? '</div>' : ''}
     <button class="btn2 rd" id="ivddel" onclick="delInvD('${id}')">حذف الفاتورة</button>
     <button class="btn2" style="border:0" onclick="ovClose()">إغلاق</button></div>`);
   x.photos.forEach(async f => {
@@ -3763,7 +3824,7 @@ function askInvAdd() {
   ovOpen(`<label class="shh">فاتورة جديدة</label>
     <div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.ai.amount=this.value;amtPv(this.value,'apv_ai')"><input placeholder="المحل" value="${esc(f.vendor)}" oninput="S.ai.vendor=this.value"></div>${amtPvHtml(f.amount, 'apv_ai')}
     <input placeholder="وصف المشتريات" value="${esc(f.desc)}" oninput="S.ai.desc=this.value">
-    <select aria-label="المشروع" onchange="S.ai.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
+    ${projPick(ps, f.project, 'S.ai')}
     ${catPick(f.cat || '', v => `S.ai.cat='${v}';askInvAdd()`)}
     <div class="sub" style="margin:6px 0 4px">مين دفع؟</div>
     <div class="segc wr">${[['', 'أنا']].concat(d.employees.map(e => [e.id, 'عهدة ' + shortName(e.name)])).map(o => `<button class="${f.emp === o[0] ? 'on' : ''}" onclick="S.ai.emp='${o[0]}';askInvAdd()">${esc(o[1])}</button>`).join('')}</div>
@@ -4654,12 +4715,12 @@ function empInvHtml(d, isPreview) {
   if (!items.length) return h + emptyHtml('receipt', 'ما أرسلت فواتير للحين');
   /* الإصدار 100: مجمّعة حسب اليوم: عنوان اليوم مرة وحدة، وداخل السطر الوقت بس */
   const row = x => {
-    const st = invSt(x, true), give = x.kind === 'give';
+    const st = invSt(x, true), give = x.kind === 'give', ph = invPhotosHtml(x, BOOT.page === 'admin');
     return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? (x.paidBy === 'ret' ? 'r' : 'g') : ''}">${M(x.amount, give ? (x.paidBy === 'ret' ? '−' : '+') : '')}</b></div>
-      <div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · ' + (catName(x.cat) ? catName(x.cat) + ' · ' : '')}${t12(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>${invFixTag(x)}
+      <div class="ivrw"><div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · ' + (catName(x.cat) ? catName(x.cat) + ' · ' : '')}${t12(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>${ph.startsWith('<button class="mbtn"') ? ph : ''}</div>${invFixTag(x)}
       ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px"><div><b>المدير العام يقول:</b> ${esc(x.reason)}</div></div>` : ''}
       ${!isPreview && x.kind === 'inv' && x.status === 'returned' && !x.task && !(S.invForm && S.inv.edit === x.id) ? `<button class="bigdo" style="border:0;font-family:inherit;cursor:pointer" onclick="invEdit('${x.id}')">${I('pencil', 15, 2.2)}صحّح وأعد الإرسال</button>` : ''}
-      ${invPhotosHtml(x, BOOT.page === 'admin')}</div>`;
+      ${ph.startsWith('<button class="mbtn"') ? '' : ph}</div>`;
   };
   const L = items.slice().sort((a, b) => a.ts < b.ts ? 1 : a.ts > b.ts ? -1 : 0), days = [], by = {}, yd = addDays(d.today, -1);
   L.forEach(x => { const k = x.ts.slice(0, 10); if (!by[k]) { by[k] = []; days.push(k); } by[k].push(x); });
@@ -4691,16 +4752,17 @@ function invFormHtml(d) {
     <div class="shots">${keep.map((p, i) => `<div class="shot${isPdfPath(p) ? ' pdf' : ''}">${isPdfPath(p) ? pdfTile('ملف PDF') : S.ic[p] && S.ic[p] !== 'loading' ? `<img src="${S.ic[p]}" alt="صورة الفاتورة">` : '<div class="pph" style="width:100%;height:100%;font-size:12px">جاري التحميل…</div>'}<button class="x" onclick="S.inv.keep.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}${S.ishots.map((s, i) => shotTile(s, `S.ishots.splice(${i},1);rerenderEmp()`)).join('')}
     ${room > 0 ? `<label class="madd">${I('paperclip', 20)}إرفاق فاتورة<input type="file" accept="${ACC_INV}" multiple style="display:none" onchange="pickInv(this)"></label>` : ''}</div>
     ${S.ishotLoading ? '<div class="sub">جاري تجهيز الصورة…</div>' : ''}
-    <div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ بالريال" value="${esc(f.amount)}" oninput="S.inv.amount=this.value;amtPv(this.value,'apv_inv')"><input placeholder="المحل (اختياري)" value="${esc(f.vendor || '')}" oninput="S.inv.vendor=this.value"></div>${amtPvHtml(f.amount, 'apv_inv')}
+    <div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ بالريال" value="${esc(f.amount)}" oninput="S.inv.amount=this.value;amtPv(this.value,'apv_inv');ivSum()"><input placeholder="المحل (اختياري)" value="${esc(f.vendor || '')}" oninput="S.inv.vendor=this.value"></div>${amtPvHtml(f.amount, 'apv_inv')}
     <input placeholder="وصف المشتريات" value="${esc(f.desc)}" oninput="S.inv.desc=this.value">
     ${catPick(f.cat || '', v => `S.inv.cat='${v}';rerenderEmp()`)}
-    <select aria-label="المشروع" onchange="S.inv.project=this.value">${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>
+    ${projPick(ps, f.project, 'S.inv')}
     <div class="sub" style="margin:4px 0 -2px">دفعت من؟</div>
     <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'المدير العام']].map(o => `<button class="${(f.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="S.inv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>
     <div class="sub" style="margin-top:-4px">${f.paidBy === 'card' ? 'ما تنخصم من عهدتك' : f.paidBy === 'own' ? 'ترجع لك بعد ما يعتمدها المدير العام' : 'تنخصم من العهدة اللي معك'}</div>
     ${ed ? '' : `<label class="tgl"><span>عليها ضمان؟</span><input type="checkbox" ${f.wOn ? 'checked' : ''} onchange="S.inv.wOn=this.checked;if(this.checked&&!S.inv.w)S.inv.w=12;rerenderEmp()"></label>`}
     ${!ed && f.wOn ? `<div class="wchips">${[[6, '6 أشهر'], [12, 'سنة'], [24, 'سنتين']].map(c => `<button class="${!f.wc && f.w === c[0] ? 'on' : ''}" onclick="S.inv.w=${c[0]};S.inv.wc=false;rerenderEmp()">${c[1]}</button>`).join('')}<button class="${f.wc ? 'on' : ''}" onclick="S.inv.wc=true;rerenderEmp()">غيره</button></div>
       ${f.wc ? `<input inputmode="numeric" placeholder="كم شهر؟" value="${f.w || ''}" oninput="S.inv.w=Number(String(this.value).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)))||0">` : ''}` : ''}
+    <div class="ivsum${API.parseAmt(f.amount) > 0 ? '' : ' bad'}" id="ivsum" aria-live="polite">${ivSumHtml()}</div>
     <button class="btn" ${S.busy || S.ishotLoading ? 'disabled' : ''} onclick="sendInv()">${S.busy ? 'جاري الإرسال…' : I('send', 17) + (ed ? 'إعادة الإرسال' : 'إرسال')}</button>
     <button class="btn2" style="width:100%;border:0" onclick="S.invForm=false;S.ishots=[];if(S.inv.edit)S.inv={amount:'',desc:'',project:S.inv.project};rerenderEmp()">إلغاء</button>
     <div class="err" id="ierr"></div></div>`;
