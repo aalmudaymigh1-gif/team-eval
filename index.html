@@ -1513,6 +1513,40 @@ html:root .ivsum{background:var(--acc-soft);color:var(--acc-dk);border-radius:16
 html:root .ivsum.bad{background:#F6ECEA;color:var(--red)}
 .etabs.e4.e3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 html:root .note.bad .attok{display:flex;width:100%;min-height:44px;margin-top:10px;justify-content:center;background:rgba(255,255,255,.7)!important;color:var(--red)!important;border:0!important}
+/* الإصدار 114: خطوات العمل */
+html:root .tkl li.stp{align-items:flex-start}
+html:root .spc{flex:none;width:30px;height:30px;border-radius:999px;border:0;background:var(--acc-soft);color:var(--acc-dk);font:inherit;font-size:12px;font-weight:600;display:grid;place-items:center;direction:ltr;padding:0;cursor:pointer;position:relative}
+html:root .spc:before{content:"";position:absolute;inset:-7px}
+html:root .stx{cursor:pointer}
+html:root .snow{display:block;font-size:13px;color:var(--muted);margin-top:2px;line-height:1.6}
+html:root .snow b{font-weight:500;color:var(--acc-dk)}
+html:root .snow svg{vertical-align:-2px;color:var(--green);margin-inline-end:4px}
+html:root .sbar{display:block;height:4px;border-radius:999px;background:var(--fill);margin-top:6px;overflow:hidden}
+html:root .sbar i{display:block;height:100%;background:var(--acc);border-radius:999px}
+html:root .sopen{display:inline-flex;align-items:center;gap:4px;border:0;background:none;padding:0;min-height:44px;margin:-6px 0 -10px;font:inherit;font-size:13px;color:var(--acc-dk);font-weight:500;cursor:pointer}
+html:root .tkl li.so{border-bottom:0;padding-bottom:2px}
+html:root .tkl li.sli{display:block;padding:0 0 10px}
+html:root .spn{padding-inline-start:40px}
+html:root ul.sst{list-style:none;margin:0;padding:0}
+html:root ul.sst li{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:15px;font-weight:400;line-height:1.6}
+html:root ul.sst li:last-child{border-bottom:0}
+html:root ul.sst li>span{flex:1;min-width:0;overflow-wrap:anywhere}
+html:root ul.sst .sk{flex:none;width:26px;height:26px;border-radius:999px;display:grid;place-items:center;padding:0;border:2px solid var(--line2);background:#fff;cursor:pointer;position:relative;color:var(--green)}
+html:root ul.sst .sk:before{content:"";position:absolute;inset:-9px}
+html:root ul.sst li.ok .sk{background:var(--green-soft);border-color:transparent}
+html:root ul.sst li.ok .sk:disabled{cursor:default;opacity:1}
+html:root ul.sst li.ok>span{color:var(--muted)}
+html:root ul.sst li.cur{background:var(--acc-soft);border-radius:14px;margin:2px -8px;padding:6px 8px;border-bottom:0}
+html:root ul.sst li.cur .sk{border-color:var(--acc)}
+html:root ul.sst li.nx>span{color:var(--muted)}
+html:root ul.sst small{display:block;font-size:12px;color:var(--muted)}
+html:root .spay{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:0 8px;font-size:12px;background:var(--amber-soft);color:var(--amber);margin-inline-start:6px;vertical-align:1px}
+html:root .sdel{flex:none;border:0;background:transparent;color:var(--muted);min-width:44px;min-height:44px;margin:-9px 0 -9px -10px;display:grid;place-items:center;font:inherit;font-size:13px;cursor:pointer}
+html:root .sdel.arm{color:var(--red);font-weight:600}
+html:root .sadd{display:flex;gap:8px;margin-top:8px}
+html:root .sadd input{flex:1;min-width:0}
+html:root .sadd button{flex:none;border:0;border-radius:999px;background:var(--acc-soft);color:var(--acc-dk);font:inherit;font-size:13px;font-weight:500;padding:0 14px;min-height:44px;display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+html:root .spn .rhint{margin-top:6px}
 </style>
 </head>
 <body>
@@ -1522,9 +1556,9 @@ html:root .note.bad .attok{display:flex;width:100%;min-height:44px;margin-top:10
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=113"></script>
+<script src="api.js?v=114"></script>
 <script>
-const APP_VER = '113';
+const APP_VER = '114';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -5238,7 +5272,7 @@ async function krUndel(id) {
 
 function rpItems(arr, tags, cls, r, isAdmin) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
-  return '<ul class="rpi ' + (cls || '') + '">' + arr.map((x, i) => { const qb = r ? rqBlock(r, x, rpArr(r.cur).indexOf(x), isAdmin) : ''; return `<li>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${r ? rqTag(r, x, isAdmin) : ''}${qb ? `<div class="qsub">${qb}</div>` : ''}</li>`; }).join('') + '</ul>';
+  return '<ul class="rpi ' + (cls || '') + '">' + arr.map((x, i) => { const qb = r ? rqBlock(r, x, rpArr(r.cur).indexOf(x), isAdmin) : ''; const ss = r && cls === 'cur' ? stOf(r, x) : []; return `<li>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${r ? rqTag(r, x, isAdmin) : ''}${ss.length ? stNowHtml(ss) : ''}${qb ? `<div class="qsub">${qb}</div>` : ''}</li>`; }).join('') + '</ul>';
 }
 function rpLaterHtml(arr) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
@@ -6100,8 +6134,9 @@ function rpTickList(r, cur, tags, isAdmin) {
   const all = rpArr(r.cur);
   return '<ul class="tkl">' + cur.map((x, i) => {
     const j = all.indexOf(x), k = rpTk(r, x), ret = rpSt(k) === 'ret', qb = rqBlock(r, x, j, isAdmin);
-    return `<li${qb ? ' class="hq"' : ''}><button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button><span>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${rqTag(r, x, isAdmin)}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}` : ''}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell" onclick="rpDefOpen('${r.id}',${j})" aria-label="تأجيل إلى الأعمال اللاحقة">${I('clock', 15)}</button><button class="ibell" onclick="rpShareOpen('${r.id}',${j})" aria-label="تنبيه على هذا العمل">${I('bell', 15)}</button>` : ''}</li>${qb ? `<li class="qli"><div class="qsub">${qb}</div></li>` : ''}`;
-  }).join('') + `</ul><div class="rhint" style="margin-top:6px">${I('info', 13)}${isAdmin ? 'اضغط الدائرة إذا أُنجز العمل، والجرس لتنبيه الموظف على عمل محدد' : 'اضغط الدائرة إذا أنجزت العمل، ويُرسل للمدير العام للاعتماد'}</div>`;
+    const ss = stOf(r, x), sl = ss.filter(s => !s.done).length, so = RP.sopen === stKey(r, x), lc = [qb ? 'hq' : '', ss.length ? 'stp' : '', so ? 'so' : ''].filter(Boolean).join(' ');
+    return `<li${lc ? ` class="${lc}"` : ''}>${ss.length && sl ? `<button class="spc" onclick="rpStToggle('${r.id}',${j})" aria-label="الخطوات">${ss.length - sl}/${ss.length}</button>` : `<button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button>`}<span><span class="stx" onclick="rpStToggle('${r.id}',${j})">${esc(x)}</span>${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${rqTag(r, x, isAdmin)}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}` : ''}${rpAlertLine(r, x, isAdmin)}${ss.length ? stNowHtml(ss) + `<button class="sopen" onclick="rpStToggle('${r.id}',${j})" aria-expanded="${so}">${I(so ? 'chevron-up' : 'chevron-down', 14)}الخطوات</button>` : ''}</span>${isAdmin ? `<button class="ibell" onclick="rpDefOpen('${r.id}',${j})" aria-label="تأجيل إلى الأعمال اللاحقة">${I('clock', 15)}</button><button class="ibell" onclick="rpShareOpen('${r.id}',${j})" aria-label="تنبيه على هذا العمل">${I('bell', 15)}</button>` : ''}</li>${so ? `<li class="sli"><div class="spn">${stPanelHtml(r, x, j, ss, isAdmin)}</div></li>` : ''}${qb ? `<li class="qli"><div class="qsub">${qb}</div></li>` : ''}`;
+  }).join('') + `</ul><div class="rhint" style="margin-top:6px">${I('info', 13)}${isAdmin ? 'اضغط الدائرة إذا أُنجز العمل، والجرس لتنبيه الموظف على عمل محدد' : 'اضغط الدائرة إذا أنجزت العمل، ويُرسل للمدير العام للاعتماد'}</div><div class="rhint" style="margin-top:2px">${I('list-checks', 13)}اضغط على اسم العمل تضيف له خطوات</div>`;
 }
 function rpLreqRows(r) {
   const a = rpLreqShow(r);
@@ -6315,6 +6350,70 @@ document.addEventListener('pointerdown', ev => {
   };
   g.addEventListener('pointermove', move); g.addEventListener('pointerup', up); g.addEventListener('pointercancel', up);
 });
+/* الإصدار 114: خطوات تحت العمل الحالي. العمل اللي له خطوات مكان دائرته رقم (2/5)، وتحت اسمه الخطوة الحالية وشريط.
+   الضغط على اسم العمل يفتح خطواته وخانة «خطوة جديدة». الخطوات اللي بالنص تنأشر بدون اعتماد، وآخر خطوة هي إنجاز العمل نفسه (rpTick)،
+   فعند الموظف تطلب التوثيق وتروح «بانتظار الاعتماد». الخطوة اللي تبدأ بـ«دفعة» عليها علامة بس */
+function stOf(r, item) { return rpArr(r && r.steps).filter(s => s && s.item === item); }
+function stKey(r, item) { return r.id + '|' + item; }
+function stMe() { return BOOT.page === 'admin' ? 'admin' : (S.empData ? S.empData.id : ''); }
+function stNowHtml(ss) {
+  const n = ss.filter(s => s.done).length, c = ss.find(s => !s.done);
+  if (!c) return `<small class="snow">${I('check', 12, 2.5)}<span>خلصت الخطوات كلها</span></small>`;
+  return `<small class="snow"><span>الخطوة ${n + 1} من ${ss.length}</span> · <span>الحين:</span> <b>${esc(c.t)}</b></small><span class="sbar"><i style="width:${Math.round(n / ss.length * 100)}%"></i></span>`;
+}
+function stPanelHtml(r, x, j, ss, isAdmin) {
+  const me = stMe(), left = ss.filter(s => !s.done).length, c = ss.find(s => !s.done);
+  let h = ss.length ? '<ul class="sst">' + ss.map(s => {
+    const last = !s.done && left === 1, canUn = s.done && (isAdmin || s.doneBy === me), canDel = isAdmin || (!s.done && s.by === me), arm = RP.sarm === s.id;
+    const bt = s.done
+      ? `<button class="sk" ${canUn ? `onclick="rpStTick('${s.id}',true)" aria-label="تراجع عن الخطوة"` : 'disabled aria-label="خطوة منجزة"'}>${I('check', 14, 2.5)}</button>`
+      : `<button class="sk" onclick="${last ? `rpTick('${r.id}',${j},this)` : `rpStTick('${s.id}',false)`}" aria-label="${last ? 'تم الإنجاز' : 'تمت الخطوة'}"></button>`;
+    const meta = s.done ? (s.doneBy === 'admin' ? 'المدير العام' : shortName(s.doneName || '')) + ' · ' + rpTickWhen(s.done) : s.by !== 'admin' ? 'أضافها ' + shortName(s.name || '') : '';
+    return `<li class="${s.done ? 'ok' : s === c ? 'cur' : 'nx'}">${bt}<span>${esc(s.t)}${s.pay ? `<span class="spay">${I('banknote', 12)}دفعة</span>` : ''}${meta ? `<small>${esc(meta)}</small>` : ''}</span>${canDel ? `<button class="sdel${arm ? ' arm' : ''}" onclick="rpStDel('${s.id}')" aria-label="حذف الخطوة">${arm ? 'حذف؟' : I('x', 14, 2.5)}</button>` : ''}</li>`;
+  }).join('') + '</ul>' : '';
+  if (left === 1) h += `<div class="rhint">${I('info', 13)}${isAdmin ? 'آخر خطوة تنهي العمل وتنقله للأعمال المنجزة' : 'آخر خطوة تنهي العمل، وتنرسل للمدير العام للاعتماد'}</div>`;
+  return h + `<div class="sadd"><input id="st_new" placeholder="خطوة جديدة" maxlength="200" value="${esc(RP.sd || '')}" oninput="RP.sd=this.value" onkeydown="if(event.key==='Enter')rpStAdd('${r.id}',${j})"><button onclick="rpStAdd('${r.id}',${j})">${I('plus', 14)}إضافة</button></div>`;
+}
+function rpStToggle(id, j) {
+  const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
+  const item = rpArr(r.cur)[j]; if (item == null) return;
+  const k = stKey(r, item);
+  RP.sopen = RP.sopen === k ? null : k; RP.sd = ''; RP.sarm = null;
+  rpRerender();
+  if (RP.sopen && !stOf(r, item).length) setTimeout(() => { const i = document.getElementById('st_new'); if (i) i.focus(); }, 50);
+}
+async function rpStAdd(id, j) {
+  if (RP.busy) return;
+  const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
+  const item = rpArr(r.cur)[j]; if (item == null) return;
+  const inp = document.getElementById('st_new'), t = String((inp && inp.value) || RP.sd || '').trim();
+  if (!t) return toast('اكتب الخطوة أولاً', null, 'er');
+  RP.busy = true;
+  try {
+    await call('apiRepStepAdd', id, item, t);
+    RP.sd = ''; RP.sopen = stKey(r, item);
+    await rpTickReload();
+    RP.busy = false; rpRerender(); toast('انضافت الخطوة');
+    setTimeout(() => { const i = document.getElementById('st_new'); if (i) i.focus(); }, 50);
+  } catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
+async function rpStTick(sid, undo) {
+  if (RP.busy) return;
+  RP.busy = true; RP.sarm = null;
+  try {
+    await call('apiRepStepTick', sid, !!undo);
+    await rpTickReload();
+    RP.busy = false; rpRerender();
+    toast(undo ? 'رجعت الخطوة' : 'تمت الخطوة', undo ? null : () => rpStTick(sid, true));
+  } catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
+async function rpStDel(sid) {
+  if (RP.busy) return;
+  if (RP.sarm !== sid) { RP.sarm = sid; rpRerender(); return; }
+  RP.busy = true; RP.sarm = null;
+  try { await call('apiRepStepDel', sid); await rpTickReload(); RP.busy = false; rpRerender(); toast('انحذفت الخطوة'); }
+  catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
 async function rpTickReload() { rpApply(await callT(20000, 'apiRepList')); RP.stale = false; rfBar(); }
 async function rpTick(id, i, btn) {
   if (RP.busy) return;

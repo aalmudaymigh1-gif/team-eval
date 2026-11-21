@@ -823,6 +823,10 @@
     async apiRepQuoteAdd(id, item, a) { return rpc('rep_quote_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), a: a || {} }); },
     async apiRepQuoteOk(qid, undo) { return rpc('rep_quote_ok', { k: CRED.k || '', qid: String(qid || ''), undo: !!undo }); },
     async apiRepQuoteDel(qid) { return rpc('rep_quote_del', { k: CRED.k || '', t: CRED.t || '', qid: String(qid || '') }); },
+    /* الإصدار 114: خطوات تحت العمل الحالي */
+    async apiRepStepAdd(id, item, txt) { const r = await rpc('rep_step_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), txt: String(txt || '') }); flush(); return r; },
+    async apiRepStepTick(sid, undo) { return rpc('rep_step_tick', { k: CRED.k || '', t: CRED.t || '', sid: String(sid || ''), undo: !!undo }); },
+    async apiRepStepDel(sid) { return rpc('rep_step_del', { k: CRED.k || '', t: CRED.t || '', sid: String(sid || '') }); },
     async apiRepCurAdd(id, item) { return rpc('rep_cur_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || '') }); },
     async apiRepLaterAdd(id, item, aft) { return rpc('rep_later_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), aft: String(aft || '') }); },
     async apiRepCurOrder(id, items) { return rpc('rep_cur_order', { k: CRED.k || '', id: String(id || ''), items: (items || []).map(String) }); },
