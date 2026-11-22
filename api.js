@@ -97,7 +97,6 @@
     r.logs = r.logs || [];
     r.fin = (r.fin || []).map(f => Object.assign({}, f, { amount: Number(f.amount) || 0, months: Number(f.months) || 0 }));
     r.tprojs = Array.isArray(r.tprojs) ? r.tprojs : []; /* 118: [الموظف، المشروع] من جدول المهام، للتنبيه بس */
-    r.projects = (r.projects || []).map(p => Object.assign({}, p, { lat: p.lat == null ? null : Number(p.lat), lng: p.lng == null ? null : Number(p.lng) }));
     r.invoices = (r.invoices || []).map(x => Object.assign({}, x, { amount: Math.round((Number(x.amount) || 0) * 100) / 100,
       photos: Array.isArray(x.photos) ? x.photos : [] }));
     return r;
@@ -482,7 +481,7 @@
       tx: txList_(fin.filter(f => f.emp === emp.id)).slice(0, 30),
       rules: settings_(),
       team: (RAW.team || []).filter(t => t.id !== emp.id).map(t => ({ id: t.id, name: t.name })),
-      projects: RAW.projects.filter(p => !p.archived).map(p => ({ id: p.id, name: p.name, lat: p.lat, lng: p.lng })),
+      projects: RAW.projects.filter(p => !p.archived).map(p => ({ id: p.id, name: p.name })),
       attend: !!emp.attend,
       alerts: (RAW.alerts || []).filter(a => a.kind === 'task'),
       lang: emp.lang || 'ar',
@@ -518,7 +517,7 @@
       alerts: RAW.alerts || [],
       guides: RAW.guides.map(g => ({ id: g.id, ts: g.ts, title: g.title, points: g.points, q: g.q,
         reads: RAW.greads.filter(x => x.guide === g.id).map(x => Object.assign({ name: (empById(x.emp) || {}).name || '' }, x)) })),
-      projects: projects.map(p => ({ id: p.id, name: p.name, archived: p.archived, lat: p.lat, lng: p.lng, budget: Number((RAW.budgets || {})[p.id]) || 0 })),
+      projects: projects.map(p => ({ id: p.id, name: p.name, archived: p.archived, budget: Number((RAW.budgets || {})[p.id]) || 0 })),
       criteria: CRITERIA.map(c => ({ n: c.n, s: c.s, short: c.short })),
       today: todayS,
       yesterday: addDay(todayS, -1),
@@ -1010,7 +1009,6 @@
     },
     async apiEmpLang(k, empId, lang) { return adminDo(k, 'emp_lang', { emp: empId, lang: lang }); },
     async apiAttToggle(k, empId, on) { return adminDo(k, 'att_toggle', { emp: empId, on: !!on }); },
-    async apiProjLoc(k, id, lat, lng) { return adminDo(k, 'proj_loc', { id: id, lat: lat == null ? '' : String(lat), lng: lng == null ? '' : String(lng) }); },
     async apiAttDel(k, id) { return adminDo(k, 'att_del', { id: id }); },
     /* الإصدار 97 */
     async apiAttBad(k, id, reason) { return adminDo(k, 'att_bad', { id: id, reason: String(reason || '') }); },

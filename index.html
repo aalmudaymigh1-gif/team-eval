@@ -1391,9 +1391,9 @@ html:root .spn .rhint{margin-top:6px}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=119"></script>
+<script src="api.js?v=120"></script>
 <script>
-const APP_VER = '119';
+const APP_VER = '120';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1564,20 +1564,9 @@ function t12(s) { if (!s) return ''; const h = Number(s.slice(11, 13)), m = s.sl
 function hrs(ms) { const m = Math.max(0, Math.round(ms / 60000)); return Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'); }
 function nowHM() { return new Intl.DateTimeFormat('en-GB', {timeZone: 'Asia/Riyadh', hour: '2-digit', minute: '2-digit', hour12: false}).format(new Date()); }
 function addMin(hm, n) { const t = Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3, 5)) + n; return String(Math.floor(t / 60) % 24).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
-function distM(a1, o1, a2, o2) {
-  const R = 6371000, r = x => x * Math.PI / 180, da = r(a2 - a1), dn = r(o2 - o1);
-  const h = Math.sin(da / 2) ** 2 + Math.cos(r(a1)) * Math.cos(r(a2)) * Math.sin(dn / 2) ** 2;
-  return Math.round(2 * R * Math.asin(Math.sqrt(h)));
-}
 function mapUrl(lat, lng) { return 'https:' + SL2 + 'maps.google.com/?q=' + lat + ',' + lng; }
 function projOf(ps, id) { return (ps || []).find(p => p.id === id) || null; }
 function isOff(day) { return new Date(day + 'T12:00:00Z').getUTCDay() === 5; }
-function attFlag(r, ps) {
-  if (r.inLat == null) return '<span class="badge a">بدون موقع</span>';
-  const p = projOf(ps, r.project);
-  if (p && p.lat != null) { const m = distM(r.inLat, r.inLng, p.lat, p.lng); if (m > 300) return `<span class="badge late">بعيد عن المشروع ${m > 999 ? (m / 1000).toFixed(1) + ' كم' : m + ' م'}</span>`; }
-  return '';
-}
 
 /* عند الموظف */
 const ATT_STEP = {home: ['طلعت من البيت', 'صوّر الشارع', 'طلوع من البيت'], in: ['وصلت المشروع', 'صوّر المكان', 'وصول المشروع'], out: ['طلعت من المشروع', 'صوّر المكان', 'طلوع من المشروع']};
@@ -1622,7 +1611,7 @@ function getPos() {
 }
 async function openCam(mode) {
   camStop();
-  CAM.mode = mode; CAM.shot = null; CAM.manual = false;
+  CAM.mode = mode; CAM.shot = null;
   ovOpen(`<div class="cam"><b class="shh">${ATT_STEP[mode][0]}: ${ATT_STEP[mode][1]}</b>
     <video id="camv" autoplay playsinline muted></video><div class="err" id="camerr"></div>
     <button class="btn" id="snapb" onclick="snapCam()">${I('camera', 18)}صوّر</button>
@@ -1639,12 +1628,6 @@ async function openCam(mode) {
     const b = $('#snapb'); if (b) b.disabled = true;
   }
 }
-function autoProj(d) {
-  if (!CAM.pos) return '';
-  let best = null, bd = 1e12;
-  (d.projects || []).forEach(p => { if (p.lat == null) return; const m = distM(CAM.pos.lat, CAM.pos.lng, p.lat, p.lng); if (m < bd) { bd = m; best = p; } });
-  return best && bd <= 1000 ? best.id : '';
-}
 function snapCam() {
   const v = $('#camv');
   if (!v || !v.videoWidth) return;
@@ -1654,14 +1637,12 @@ function snapCam() {
   c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
   CAM.shot = c; camStop();
   const d = S.empData;
-  if (CAM.mode === 'in') CAM.proj = autoProj(d) || lsGet('att_proj') || ((d.projects || [])[0] || {}).id || '';
+  if (CAM.mode === 'in') CAM.proj = lsGet('att_proj') || ((d.projects || [])[0] || {}).id || ''; /* 120: بدون اختيار تلقائي بالموقع */
   camConfirm();
 }
 function locText() {
   if (CAM.pos) {
-    let t = 'الموقع: تم ✓';
-    if (CAM.mode === 'in') { const p = projOf(S.empData.projects, CAM.proj); if (p && p.lat != null) { const m = distM(CAM.pos.lat, CAM.pos.lng, p.lat, p.lng); if (m > 300) t += ' · بعيد عن المشروع ' + m + ' م'; } }
-    return t;
+    return 'الموقع: تم ✓';
   }
   return CAM.posWait ? 'جاري تحديد الموقع…' : (CAM.posErr || 'ما قدرنا نحدد الموقع') + '، وبينسجل بدون موقع';
 }
@@ -1669,13 +1650,12 @@ function camConfirm() {
   const d = S.empData, ps = d.projects || [];
   ovOpen(`<div class="cam"><img class="camimg" src="${CAM.shot.toDataURL('image/jpeg', 0.7)}" alt="الصورة">
     ${CAM.mode === 'in' ? `<label class="sub" for="camproj" style="display:block;margin-top:10px">المشروع</label>
-      <select id="camproj" onchange="CAM.proj=this.value;CAM.manual=true;camRefresh()"><option value="">بدون مشروع</option>${ps.map(p => `<option value="${p.id}" ${CAM.proj === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>` : ''}
+      <select id="camproj" onchange="CAM.proj=this.value"><option value="">بدون مشروع</option>${ps.map(p => `<option value="${p.id}" ${CAM.proj === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>` : ''}
     <div class="sub" id="camloc" style="margin-top:8px">${locText()}</div><div class="err" id="camerr"></div>
     <button class="btn" id="camsend" onclick="sendAtt()">${I('check', 18, 2.5)}سجّل: ${ATT_STEP[CAM.mode][0]}</button>
     <button class="btn2" style="width:100%;border:0" onclick="openCam(CAM.mode)">أعد التصوير</button></div>`);
 }
 function camRefresh() {
-  if (CAM.mode === 'in' && !CAM.manual && CAM.shot) { const a = autoProj(S.empData); if (a) { CAM.proj = a; const s = $('#camproj'); if (s) s.value = a; } }
   const el = $('#camloc'); if (el) el.textContent = locText();
 }
 async function sendAtt() {
@@ -1746,7 +1726,7 @@ function renderAttLog(empId) {
   h += '<div class="card atl">' + list.map(r => {
     const arm = S.armed === 'att_' + r.id, armU = S.armed === 'attu_' + r.id, p = projOf(d.projects, r.project);
     return `<div class="atd ${r.bad ? 'bad' : ''}"><div class="hd"><b>${esc(dayLabel(r.date))}</b><span>${r.bad ? '<span class="badge rd">غير صحيح</span>' : r.out ? 'اشتغل ' + hrs(r.outMs - r.inMs) : r.in ? (r.date < d.today ? '<span class="badge a">بدون طلوع</span>' : 'في الشغل') : '<span class="badge a">ما وصل المشروع</span>'}</span></div>
-      <div class="sub">${[p ? esc(p.name) : '', r.in ? 'الطريق ' + hrs(r.inMs - r.homeMs) : '', r.bad ? 'ساعاته ما تنحسب' : ''].filter(Boolean).join(' · ')}${r.late ? ` <span class="badge late">متأخر ${r.late} د</span>` : ''}${r.in && r.inLat != null ? ' ' + attFlag(r, d.projects) : ''}</div>
+      <div class="sub">${[p ? esc(p.name) : '', r.in ? 'الطريق ' + hrs(r.inMs - r.homeMs) : '', r.bad ? 'ساعاته ما تنحسب' : ''].filter(Boolean).join(' · ')}${r.late ? ` <span class="badge late">متأخر ${r.late} د</span>` : ''}</div>
       <div class="at3">${attStepCol('طلع من البيت', r.home, r.homePhoto, r.homeLat, r.homeLng, r.homeAcc)}${attStepCol('وصل المشروع', r.in, r.inPhoto, r.inLat, r.inLng, r.inAcc)}${attStepCol('طلع من المشروع', r.out, r.outPhoto, r.outLat, r.outLng, r.outAcc)}</div>
       ${r.bad ? `<div class="atbad"><b>تسجيل غير صحيح</b>${r.badLog ? ' · الأمانة والمصداقية' : ' · بدون تقصير'}<div>السبب: ${esc(r.badReason)}</div></div>` : ''}
       <div class="atf">${r.bad ? `<button class="btn2 ${armU ? 'arm' : ''}" onclick="attBadUndo('${r.id}')">${armU ? 'تأكيد التراجع' : 'تراجع'}</button>` : `<button class="btn2 rd" onclick="askAttBad('${r.id}')">تسجيل غير صحيح</button>`}<button class="lnk dl ${arm ? 'arm' : ''}" onclick="delAtt('${r.id}')">${arm ? 'تأكيد الحذف' : 'حذف'}</button></div></div>`;
@@ -1814,39 +1794,6 @@ async function toggleAtt(id) {
   const e = empById(id);
   try { S.data = await call('apiAttToggle', BOOT.key, id, !e.attend); renderAdmin(); toast(!e.attend ? 'تفعّل الحضور له' : 'انطفى الحضور له'); }
   catch (err) { $('#e_' + id).textContent = err; }
-}
-function parseLoc(s) {
-  s = String(s || '').replace(/[٠-٩]/g, c => '٠١٢٣٤٥٦٧٨٩'.indexOf(c));
-  const m = s.match(/@(-?\d+\.\d+),\s*(-?\d+\.\d+)/) || s.match(/[?&](?:q|query|ll)=(-?\d+\.\d+),\s*(-?\d+\.\d+)/) || s.match(/^\s*(-?\d+\.\d+)\s*[,،]\s*(-?\d+\.\d+)\s*$/);
-  return m ? {lat: Number(m[1]), lng: Number(m[2])} : null;
-}
-function askProjLoc(id) {
-  const p = (S.data.projects || []).find(x => x.id === id);
-  if (!p) return;
-  ovOpen(`<label class="shh">موقع «${esc(p.name)}»</label>
-    <div class="sub" style="margin-bottom:10px">${p.lat != null ? `محدد ✓ · <a class="cu" href="${mapUrl(p.lat, p.lng)}" target="_blank" rel="noopener">شوفه على الخريطة</a>` : 'ما تحدد للحين'}</div>
-    <button class="btn" onclick="projLocHere('${id}')">${I('map-pin', 18)}أنا في المشروع الحين، خذ موقعي</button>
-    <div class="sub" style="margin:12px 0 4px">أو الصق الإحداثيات أو رابط خرائط قوقل الطويل (اللي فيه @ ورقمين)</div>
-    <input id="plin" placeholder="24.7136, 46.6753">
-    <div class="err" id="plerr"></div>
-    <div class="g21"><button class="btn2 cu" onclick="projLocPaste('${id}')">حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>
-    ${p.lat != null ? `<button class="btn2 rd" style="width:100%;margin-top:8px" onclick="projLocSave('${id}', null, null)">شيل الموقع</button>` : ''}`);
-}
-function projLocHere(id) {
-  if (!navigator.geolocation) { $('#plerr').textContent = 'الجوال ما يدعم تحديد الموقع'; return; }
-  $('#plerr').textContent = 'جاري تحديد موقعك…';
-  navigator.geolocation.getCurrentPosition(p => projLocSave(id, p.coords.latitude, p.coords.longitude),
-    e => { $('#plerr').textContent = e.code === 1 ? 'اسمح بالموقع من إعدادات الجوال' : 'ما قدرنا نحدد الموقع، جرّب مرة ثانية'; },
-    {enableHighAccuracy: true, timeout: 20000, maximumAge: 0});
-}
-function projLocPaste(id) {
-  const v = parseLoc($('#plin').value);
-  if (!v) { $('#plerr').textContent = 'ما قدرت أقرا الموقع. الروابط المختصرة ما تنفع، الصق الإحداثيات مثل 24.7136, 46.6753'; return; }
-  projLocSave(id, v.lat, v.lng);
-}
-async function projLocSave(id, lat, lng) {
-  try { S.data = await call('apiProjLoc', BOOT.key, id, lat, lng); ovClose(); renderAdmin(); toast(lat == null ? 'انشال الموقع' : 'انحفظ موقع المشروع'); }
-  catch (e) { const el = $('#plerr'); if (el) el.textContent = e; }
 }
 
 function toTop() { const sc = document.getElementById('scr'); if (sc) sc.scrollTop = 0; }
@@ -3653,7 +3600,6 @@ function projectsCard(d) {
     <div class="sub" style="margin:4px 0 6px">لما يخلص المشروع أرشفه، يختفي من الاختيار وتقاريره وفواتيره تبقى محفوظة.</div>
     ${act.map(p => `<div class="prow"><input id="pn_${p.id}" value="${esc(p.name)}">
       <button class="del" onclick="saveProj('${p.id}')">${I('check', 15)}حفظ</button>
-      <button class="del" onclick="askProjLoc('${p.id}')">${I('map-pin', 15)}${p.lat != null ? 'الموقع ✓' : 'الموقع'}</button>
       <button class="del" onclick="askProjBudget('${p.id}')">${I('wallet', 15)}${p.budget ? 'الميزانية ✓' : 'الميزانية'}</button>
       <button class="del" onclick="archProj('${p.id}', true)">${I('archive', 15)}أرشفة</button></div>
 `).join('')}
