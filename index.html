@@ -1341,6 +1341,16 @@ html:root .ivsum{background:var(--acc-soft);color:var(--acc-dk);border-radius:16
 html:root .ivsum.bad{background:#F6ECEA;color:var(--red)}
 .etabs.e4.e3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 html:root .note.bad .attok{display:flex;width:100%;min-height:44px;margin-top:10px;justify-content:center;background:rgba(255,255,255,.7)!important;color:var(--red)!important;border:0!important}
+/* الإصدار 121: نافذة تأكيد المخالفة، وأعمال «متابعة الأعمال الموكلة»، و«اطّلع» في القائمة، وبطاقة مخالفات اليوم */
+.cfv{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.cfv>span{color:var(--muted);flex:none}.cfv>b{text-align:start}.cfv>b.nw{font-weight:400}.cfv small{font-weight:400;color:var(--muted)}
+.cfv:last-of-type{border-bottom:0;margin-bottom:10px}
+.fwh{padding:10px 16px 4px;font-size:13px;font-weight:600;color:var(--acc-dk)}
+.fwk .gr{align-items:flex-start}
+html:root .fwk .gr .n small{margin-top:2px}html:root .fwk .gr .n small.ok{color:var(--green)}html:root .fwk .gr .n small.no{color:var(--red)}
+.fnt{margin-top:10px}.fwn{margin-top:6px}
+html:root .ent .d .sn.ok{color:var(--green)}html:root .ent .d .sn.no{color:var(--red)}
+.note.bad .vl{margin-top:4px}
 /* الإصدار 116: أزرار العهدة في الملف، وأزرار الراتب في صفحته شبكة */
 html:root .fxbt.n2{grid-template-columns:1fr 1fr}
 html:root .salact{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -1391,9 +1401,9 @@ html:root .spn .rhint{margin-top:6px}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=120"></script>
+<script src="api.js?v=121"></script>
 <script>
-const APP_VER = '120';
+const APP_VER = '121';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1429,7 +1439,7 @@ const BOOT = (function () {
   if (k && !e) { try { history.replaceState(null, '', location.pathname + location.hash); } catch (x) {} }
   return {page: page, key: page === 'admin' ? s : '', legacy: page === 'admin' ? k : '', token: page === 'emp' ? e : '', url: location.origin + location.pathname, firstRun: false};
 })();
-const S = {view:'rec', data:null, emp:null, type:null, crits:[], misses:[], star:false, starNote:'', date:null, dateMode:'today', note:'', busy:false, armed:null, lastId:null, form:null, preview:null, photos:{}, pf:'all', mopen:{}, mc:{}, upN:0, ret:null, upload:null, empData:null, empPreview:false, eopen:{}, iv:{f:''}, fx:{seg:'e', emp:'', proj:null, rv:false, ord:false, all:false}, iopen:{}, ic:{}, invForm:false, ishots:[], ishotLoading:false, inv:{amount:'', desc:'', project:''}, sheet:false, sheetMore:false, pc:{}, popen:{}, etab:'tasks', eShowDone:false, cm:'', shotLoading:false, vu:{}, vreq:{},};
+const S = {view:'rec', data:null, emp:null, type:null, crits:[], misses:[], fws:[], fnt:'', star:false, starNote:'', date:null, dateMode:'today', note:'', busy:false, armed:null, lastId:null, form:null, preview:null, photos:{}, pf:'all', mopen:{}, mc:{}, upN:0, ret:null, upload:null, empData:null, empPreview:false, eopen:{}, iv:{f:''}, fx:{seg:'e', emp:'', proj:null, rv:false, ord:false, all:false}, iopen:{}, ic:{}, invForm:false, ishots:[], ishotLoading:false, inv:{amount:'', desc:'', project:''}, sheet:false, sheetMore:false, pc:{}, popen:{}, etab:'tasks', eShowDone:false, cm:'', shotLoading:false, vu:{}, vreq:{},};
 const $ = s => document.querySelector(s);
 const toEn = s => String(s == null ? '' : s).replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x660)).replace(/[\u06F0-\u06F9]/g, d => String(d.charCodeAt(0) - 0x6F0));
 const esc = s => toEn(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1585,6 +1595,18 @@ async function attSeen(id, btn) {
   catch (e) { if (btn) btn.disabled = false; toastErr(String(e && e.message || e)); }
 }
 function attCardHtml(d, isPreview) { return attCardHtml0(d, isPreview) + (d.attend ? attBadHtml(d) : ''); }
+/* الإصدار 121: بطاقة مخالفات اليوم (كلها في بطاقة وحدة) مع «فهمت». تختفي بـ«فهمت» أو 12 الليل بتوقيت الرياض */
+function violHtml(d) {
+  const v = d.viol || [], n = v.length, me = BOOT.page === 'emp' && !S.empPreview;
+  if (!n) return '';
+  const tl = n === 1 ? 'تم رصد مخالفة' : n === 2 ? 'تم رصد مخالفتين' : 'تم رصد ' + n + (n <= 10 ? ' مخالفات' : ' مخالفة');
+  return `<div class="note bad" style="margin-top:8px"><div style="flex:1"><b>${tl}</b> · <span>اليوم</span>${v.map(x => `<div class="vl"><b>${esc(x.crit)}</b>${x.note ? ' — ' + esc(x.note).replace(/\n/g, '<br>') : ''}</div>`).join('')}${me ? `<button class="btn2 attok" onclick="violSeen(this)">فهمت</button>` : ''}</div></div>`;
+}
+async function violSeen(btn) {
+  if (btn) btn.disabled = true;
+  try { const r = await call('apiLogSeen', BOOT.token); renderEmp(r, false); }
+  catch (e) { if (btn) btn.disabled = false; toastErr(String(e && e.message || e)); }
+}
 function attCardHtml0(d, isPreview) {
   if (!d.attend) return '';
   const r = (d.att || []).find(x => x.date === d.today);
@@ -2045,8 +2067,9 @@ function renderRec() {
       ${S.dateMode==='other' ? `<input type="date" value="${S.date}" max="${d.today}" onchange="S.date=this.value;renderRec()">` : ''}</div>
     ${emp.id && !trk ? daySumHtml(emp, S.date) : ''}
     <div class="blk"><div class="lab">${I('sparkles', 14)}الأداء — اضغط على اللي قصّر فيه</div><div class="gcard">${perf.map(c => row(c, '')).join('')}</div></div>
+    ${emp.id && S.misses.includes(FOL) ? folHtml(emp) : ''}
     <div class="blk"><div class="lab">${I('users', 14)}السلوك</div><div class="gcard">${beh.map(c => row(c, 'b')).join('')}</div></div>
-    ${S.misses.length ? `<div class="blk"><input placeholder="ملاحظة (اختياري)" value="${esc(S.note)}" oninput="S.note=this.value"></div>` : ''}
+    ${S.misses.some(c => c !== FOL) ? `<div class="blk"><input placeholder="ملاحظة (اختياري)" value="${esc(S.note)}" oninput="S.note=this.value"></div>` : ''}
     <div class="blk"><div class="gcard"><div class="gr" onclick="togStar()"><span class="gi s">${I('star', 17, 2.4)}</span>
       <span class="n">موقف مميز <small>فوق الواجب${trk ? '' : ' · ' + M(st.star, '+', 't')}</small></span>
       <span class="tg st ${S.star ? 'on' : ''}"></span></div></div>
@@ -2084,8 +2107,52 @@ function daySumHtml(emp, date) {
     ${cell(o.ticks === null ? (RP.failed ? '—' : '…') : o.ticks, o.ticks === 1 ? 'عمل أشّره' : 'أعمال أشّرها')}
     ${cell(o.inv, o.inv === 1 ? 'فاتورة' : 'فواتير', '', o.inv ? M(o.invSum, '', 't') : '')}</div></div>`;
 }
-function setEmp(id) { S.emp = id; renderRec(); }
-function togMiss(i) { const n = S.data.criteria[i].n; S.misses = S.misses.includes(n) ? S.misses.filter(x => x !== n) : S.misses.concat(n); renderRec(); }
+/* الإصدار 121: «متابعة الأعمال الموكلة»: أعماله الحالية من تقارير المشاريع اللي له فيها شغل (نفس تعريف «مشاريعي»)،
+   مجمعة بالمشروع مع حالة التنبيه. اختيار العمل يكتب سطره في الملاحظة، والملاحظة تنعدل */
+const FOL = 'متابعة الأعمال الموكلة';
+function folReset() { S.fws = []; S.fnt = ''; }
+function folLine(t, pn) { return 'لم يُنفّذ: ' + t + ' · ' + pn; }
+function folWorks(emp) {
+  const out = [];
+  (S.data.projects || []).filter(p => !p.archived).forEach(p => {
+    if (!((emp.tprojs || []).includes(p.id) || rpArr(RP.reps).some(r => r.proj === p.id && r.by === emp.id))) return;
+    const r = rpLast(p.id), items = rpArr(r && r.cur);
+    if (items.length) out.push({p: p, r: r, items: items});
+  });
+  return out;
+}
+function folAlert(r, item, emp) {
+  let a = null;
+  rpAlertsOf(r, item).forEach(x => { if (x.emp === emp.id && (!a || x.at > a.at)) a = x; });
+  return !a ? ['', 'ما فيه تنبيه'] : a.seen ? ['ok', 'شاف التنبيه ' + rpTickWhen(a.seen)] : ['no', 'أرسلت تنبيه · ما شافه'];
+}
+function folHtml(emp) {
+  if (RP.reps === null && !RP.failed && !RP.loading) rpLoad().then(() => { if (S.view === 'rec' && !S.preview && BOOT.page === 'admin') renderRec(); });
+  S.fws = S.fws || []; S.fl = [];
+  const had = API.dayMisses(emp.id, S.date).includes(FOL);
+  let list;
+  if (RP.reps === null) list = `<div class="gcard fwk"><div class="gr"><span class="n">${RP.failed ? 'تعذّر تحميل التقارير. اكتب الملاحظة بنفسك' : 'جاري تحميل أعماله…'}</span></div></div>`;
+  else {
+    const ws = folWorks(emp);
+    list = !ws.length ? `<div class="gcard fwk"><div class="gr"><span class="n">ما عنده أعمال حالية في التقارير. اكتب الملاحظة بنفسك</span></div></div>`
+      : `<div class="gcard fwk">${ws.map(w => `<div class="fwh">${esc(w.p.name)}</div>${w.items.map(it => {
+          const ln = folLine(it, w.p.name), i = S.fl.push(ln) - 1, on = S.fws.includes(ln), st = folAlert(w.r, it, emp);
+          return `<button class="gr ${on ? 'off' : ''}" onclick="folTog(${i})"><span class="n">${esc(it)}<small class="${st[0]}">${esc(st[1])}</small></span><span class="mk ${on ? 'no' : 'ok'}">${I(on ? 'circle-x' : 'circle', 24, 2)}</span></button>`;
+        }).join('')}`).join('')}</div>`;
+  }
+  return `<div class="blk"><div class="lab">${I('list-checks', 14)}أعمال ${esc(shortName(emp.name))} الحالية — اختر اللي ما سواه</div>${list}
+    <textarea class="fnt" rows="2" placeholder="ملاحظة متابعة الأعمال (اختياري)" oninput="S.fnt=this.value">${esc(S.fnt || '')}</textarea>
+    <div class="sub fwn">${had ? 'متسجلة عليه اليوم: الأعمال اللي تختارها تنضاف لملاحظتها بدون خصم جديد' : 'التقصير مو على عمل محدد؟ اكتب الملاحظة بنفسك'}</div></div>`;
+}
+function folTog(i) {
+  const ln = (S.fl || [])[i]; if (!ln) return;
+  const lines = rpLines(S.fnt);
+  if ((S.fws || []).includes(ln)) { S.fws = S.fws.filter(x => x !== ln); S.fnt = lines.filter(x => x !== ln).join('\n'); }
+  else { S.fws = (S.fws || []).concat(ln); if (!lines.includes(ln)) S.fnt = lines.concat(ln).join('\n'); }
+  renderRec();
+}
+function setEmp(id) { if (S.emp !== id) folReset(); S.emp = id; renderRec(); }
+function togMiss(i) { const n = S.data.criteria[i].n; S.misses = S.misses.includes(n) ? S.misses.filter(x => x !== n) : S.misses.concat(n); if (n === FOL && !S.misses.includes(n)) folReset(); renderRec(); }
 function togStar() { S.star = !S.star; renderRec(); }
 function setDate(m) {
   S.dateMode = m;
@@ -2094,32 +2161,60 @@ function setDate(m) {
   renderRec();
 }
 
-async function save() {
+/* الإصدار 121: فيه تقصير؟ نافذة «تأكيد إصدار المخالفة» أول، وما ينسجل شي ولا ينرسل إلا بـ«تأكيد». «إلغاء» يلغي الكل (حتى الموقف المميز)
+   ويرجع للتقييم بنفس الاختيارات. الموقف المميز لحاله ينحفظ على طول */
+function save() {
   const err = $('#err');
   err.textContent = '';
   if (!S.emp) return err.textContent = 'اختر الموظف';
   if (!S.misses.length && !S.star) { toast('تمام، ما عليه تقصير'); return; }
   if (S.star && !S.starNote.trim()) return err.textContent = 'اكتب وش سوّى عشان الموقف المميز';
   if (S.busy) return;
+  if (!S.misses.length) return doSave();
+  const d = S.data, st = d.settings, e = empById(S.emp), had = API.dayMisses(S.emp, S.date);
+  const gen = S.note.trim(), fnt = (S.fnt || '').trim();
+  let ded = 0;
+  const crit = S.misses.map(c => {
+    const dup = had.includes(c);
+    if (!dup) ded += heavy(c) ? st.trust : st.miss;
+    return esc(c) + (dup ? (c === FOL && fnt ? ' <small>(متسجلة اليوم، ينضاف لها)</small>' : ' <small>(متسجل اليوم، ما يتكرر)</small>') : '');
+  });
+  const row = (l, v, cls) => `<div class="cfv"><span>${l}</span><b class="${cls || ''}">${v}</b></div>`;
+  ovOpen(`<label class="shh">تأكيد إصدار المخالفة</label>
+    <div class="sub" style="margin:-6px 0 6px">بعد التأكيد توصله المخالفة فورًا</div>
+    ${row('الموظف', esc(e.name))}${row('اليوم', esc(dayLabel(S.date)))}${row('المعيار', crit.join('<br>'))}
+    ${gen && S.misses.some(c => c !== FOL) ? row('الملاحظة', esc(gen), 'nw') : ''}${S.misses.includes(FOL) && fnt ? row(S.misses.length > 1 ? 'متابعة الأعمال' : 'الملاحظة', esc(fnt).replace(/\n/g, '<br>'), 'nw') : ''}
+    ${S.star ? row('موقف مميز', esc(S.starNote.trim()) + (e.track ? '' : ' · ' + M(st.star, '+', 't')), 'nw') : ''}
+    ${e.track ? row('الخصم', 'متابعة فقط') : row('الخصم', ded ? M(ded, '', 't') : 'بدون خصم جديد', ded ? 'neg' : '')}
+    <div class="g21"><button class="btn2 cu" onclick="ovClose();doSave()">${I('check', 16, 2.5)}تأكيد</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
+}
+
+async function doSave() {
+  if (S.busy) return;
   S.busy = true;
-  const b = $('#saveBtn'); b.disabled = true; b.textContent = 'جاري الحفظ…';
+  const b = $('#saveBtn'); if (b) { b.disabled = true; b.textContent = 'جاري الحفظ…'; }
   try {
-    const name = empById(S.emp).name;
-    const res = await call('apiAdd', BOOT.key, {emp:S.emp, date:S.date, misses:S.misses, note:S.note, star: S.star ? {note:S.starNote} : null});
-    S.data = res; S.lastId = res.lastId;
-    S.misses = []; S.star = false; S.starNote = ''; S.note = ''; S.dateMode = 'today'; S.date = S.data.today;
+    const name = empById(S.emp).name, notes = {};
+    if (S.misses.includes(FOL)) notes[FOL] = S.fnt || '';
+    const res = await call('apiAdd', BOOT.key, {emp:S.emp, date:S.date, misses:S.misses, note:S.note, notes:notes, star: S.star ? {note:S.starNote} : null});
+    S.data = res; S.lastId = res.lastId; S.lastNote = res.lastNote || null;
+    S.misses = []; S.star = false; S.starNote = ''; S.note = ''; folReset(); S.dateMode = 'today'; S.date = S.data.today;
     S.busy = false;
     renderAdmin();
-    toast(res.skipped ? 'انحفظ لـ ' + name + ' (' + res.skipped + ' متسجل اليوم من قبل)' : 'انحفظ لـ ' + name, undoLast);
+    toast((res.appended ? 'انضاف لمخالفة اليوم عند ' + name : 'انحفظ لـ ' + name) + (res.skipped ? ' (' + res.skipped + ' متسجل اليوم من قبل)' : ''), undoLast);
   } catch (e) {
     S.busy = false; renderRec(); $('#err').textContent = e;
   }
 }
 
 async function undoLast() {
-  if (!S.lastId) return;
+  if (!S.lastId && !S.lastNote) return;
   toastClear();
-  try { S.data = await call('apiDelete', BOOT.key, S.lastId); S.lastId = null; renderAdmin(); toast('انحذف'); }
+  try {
+    if (S.lastNote) { S.data = await call('apiNoteUndo', BOOT.key, S.lastNote); S.lastNote = null; }
+    if (S.lastId) { S.data = await call('apiDelete', BOOT.key, S.lastId); S.lastId = null; }
+    renderAdmin(); toast('انحذف');
+  }
   catch (e) { toastErr(e); }
 }
 
@@ -2298,7 +2393,7 @@ function floorNote(m) { return !m.track && m.base - m.deduct + m.reward + m.clea
 function entryHtml(x, canDelete, noAmt) {
   const del = canDelete ? `<button class="del ${S.armed===x.id?'arm':''}" onclick="armLog('${x.id}')">${S.armed===x.id?'تأكيد الحذف':I('trash-2', 15)}</button>` : '';
   return `<div class="ent"><div class="ico ${x.type==='+'?'s':'m'}">${I(x.type==='+' ? 'star' : 'x', 15, 2.5)}</div>
-    <div class="t"><div>${x.type==='+' ? 'موقف مميز' : x.crits.map(esc).join('، ')}${x.note ? ' — ' + esc(x.note) : ''}</div><div class="d">${dmy(x.date)}${noAmt ? '' : x.dup ? '<span> · </span><span>مكرر بنفس اليوم</span>' : x.over ? '<span> · </span><span>فوق حد المكافأة</span>' : ''}</div></div>
+    <div class="t"><div>${x.type==='+' ? 'موقف مميز' : x.crits.map(esc).join('، ')}${x.note ? ' — ' + esc(x.note).replace(/\n/g, '<br>') : ''}</div><div class="d">${dmy(x.date)}${noAmt ? '' : x.dup ? '<span> · </span><span>مكرر بنفس اليوم</span>' : x.over ? '<span> · </span><span>فوق حد المكافأة</span>' : ''}${x.type === '-' && x.at && BOOT.page === 'admin' && !S.preview ? '<span> · </span>' + (x.seen ? `<span class="sn ok">اطّلع عليها ${esc(t12(x.seen))}</span>` : '<span class="sn no">ما اطّلع</span>') : ''}</div></div>
     ${noAmt ? '' : `<div class="p">${M(Math.abs(x.pts), x.pts > 0 ? '+' : x.pts < 0 ? '−' : '')}</div>`}${del}</div>`;
 }
 
@@ -3758,7 +3853,7 @@ function renderEmp(d, isPreview) {
   if (rsub) { $('#app').innerHTML = `<div class="top"><div><h1></h1></div></div><div id="view">${rsub}</div>`; rpHead(); rpAfterDetail(); return; }
   $('#app').innerHTML = `
     ${isPreview ? `<button class="back" onclick="closePreview()">${I('arrow-right', 17)}رجوع للفريق</button><div class="note info">${I('eye', 16)}هذي معاينة، والموظف يشوف نفس الصفحة.</div>` : ''}
-    <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>`}</div>${isPreview ? '' : pushHtml()}${mainTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) : ''}
+    <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>`}</div>${isPreview ? '' : pushHtml()}${mainTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) + violHtml(d) : ''}
     <div class="segc etabs e4 e3"><button class="${S.etab === 'rep' ? 'on' : ''}" onclick="S.etab='rep';RP.sent=null;RP.open=null;RP.hist=null;rerenderEmp()">تقاريري</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري${nRetInv ? '<span class="nb">' + nRetInv + '</span>' : ''}</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">راتبي</button></div>
     ${S.etab === 'inv' ? empInvHtml(d, isPreview) : S.etab === 'rep' ? rpEmpHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
   if (!isPreview) prefetchImgs();

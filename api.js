@@ -8,7 +8,8 @@
   const FILES_URL = SB_URL + '/functions/v1/files';
   let CRED = {};
   /* الإصدار 109: تعديل الفاتورة وإضافة فاتورة المدير والميزانية واعتماد المهمة يكتبون إشعار (للموظف أو تنبيه ميزانية)، فينرسل فورًا */
-  const NOTIFY = ['inv_approve', 'inv_return', 'inv_fix', 'inv_upd', 'inv_edit', 'inv_add', 'proj_budget', 'att_bad', 'att_bad_undo'];
+  /* الإصدار 121: المخالفة والموقف المميز وحذفها وإضافة عمل لمخالفة اليوم وحذف يوم الحضور كلها ترسل فورًا (بدون مهلة الدقيقتين) */
+  const NOTIFY = ['inv_approve', 'inv_return', 'inv_fix', 'inv_upd', 'inv_edit', 'inv_add', 'proj_budget', 'att_bad', 'att_bad_undo', 'log_add', 'log_del', 'log_note_add', 'att_del'];
   function flush() {
     fetch(FN_URL, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: '{"op":"flush"}', keepalive: true }).catch(() => {});
   }
@@ -17,6 +18,7 @@
   const HEAVY = [TRUST];
   const heavy = c => HEAVY.indexOf(c) >= 0;
   const STAR_CRIT = 'موقف مميز';
+  const FOLLOW = 'متابعة الأعمال الموكلة';
   const MAX_VID = 45 * 1024 * 1024;
   const DEF = { miss: 5, trust: 10, star: 5, starCap: 100, clean: 0 }; /* الإصدار 117: «شهر بدون تقصير» افتراضه 0 مثل الإعداد */
   const CRITERIA = [
@@ -424,19 +426,25 @@
       if (l.type === '+' && l.crit !== STAR_CRIT) return;
       const mk = l.date.slice(0, 7), sn = snap_(l.emp, mk), st = sn ? settings_(sn.st || {}) : settings_();
       const g = l.group + l.type;
-      if (!map[g]) { map[g] = { id: l.group, date: l.date, type: l.type, crits: [], note: l.note, pts: 0, dup: false, over: false }; order.push(g); }
+      if (!map[g]) { map[g] = { id: l.group, date: l.date, type: l.type, crits: [], note: l.note, notes: [], pts: 0, dup: false, over: false, at: '', seen: '', unseen: false }; order.push(g); }
       if (l.type === '+') {
         const ak = l.emp + '|' + mk, got = acc[ak] || 0, add = Math.max(0, Math.min(st.star, st.starCap - got));
         acc[ak] = got + add; map[g].pts += add; if (add < st.star) map[g].over = true;
         return;
       }
       map[g].crits.push(l.crit);
+      /* الإصدار 121: لكل معيار ملاحظته (متابعة الأعمال لها ملاحظة لحالها)، ووقت الإشعار ووقت «فهمت» */
+      const nt = String(l.note || '').trim();
+      if (nt && map[g].notes.indexOf(nt) < 0) map[g].notes.push(nt);
+      map[g].note = map[g].notes.join('\n');
+      if (l.at) { if (!map[g].at || l.at < map[g].at) map[g].at = l.at; if (!l.seen) map[g].unseen = true; else if (l.seen > map[g].seen) map[g].seen = l.seen; }
       const k = l.emp + '|' + l.date + '|' + l.crit;
       if (seen[k]) { map[g].dup = true; return; }
       seen[k] = true;
       map[g].pts -= heavy(l.crit) ? st.trust : st.miss;
     });
     /* الإصدار 115: الصفوف جاية بالأقدم أول (التاريخ ثم وقت التسجيل)، فنقلبها قبل الترتيب عشان داخل اليوم الواحد يطلع الأحدث فوق */
+    order.forEach(g => { const x = map[g]; if (x.unseen) x.seen = ''; delete x.unseen; delete x.notes; });
     return order.map(g => map[g]).reverse().sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
   }
   /* العهدة: c باقي معه، o له عندك من جيبه، t كل اللي له عندك */
@@ -472,6 +480,9 @@
       fin: finMonth_(emp, fin, logs, now),
       sal: salSt_(emp, fin, logs, now),
       entries: groups_(mine.filter(l => l.date.slice(0, 7) === now)),
+      /* الإصدار 121: مخالفات اليوم اللي وصله إشعارها وما ضغط «فهمت» (تختفي 12 الليل بتوقيت الرياض) */
+      viol: mine.filter(l => l.type === '-' && l.at && !l.seen && l.at.slice(0, 10) === todayS)
+        .sort((a, b) => a.at < b.at ? -1 : a.at > b.at ? 1 : 0).map(l => ({ id: l.id, crit: l.crit, note: l.note || '', at: l.at })),
       history: monthsRange_(startMonth_(emp, logs, fin), now).reverse().map(mk => {
         const f = finMonth_(emp, fin, logs, mk);
         return { month: mk, label: monthLabel_(mk), bonus: f.bonus, net: f.net,
@@ -630,18 +641,42 @@
       let misses = (x.misses || []).filter((c, i, a) => a.indexOf(c) === i && CRITERIA.some(k2 => k2.n === c));
       const starNote = x.star ? String(x.star.note || '').trim().slice(0, 300) : '';
       if (x.star && !starNote) throw new Error('اكتب وش سوّى عشان الموقف المميز');
-      const sameDay = RAW.logs.filter(l => l.emp === x.emp && l.date === x.date && l.type === '-').map(l => l.crit);
+      /* الإصدار 121: ملاحظة لكل معيار (x.notes)، واللي ما له ملاحظة ياخذ العامة */
+      const notes = x.notes && typeof x.notes === 'object' ? x.notes : {};
+      const gen = String(x.note || '').trim().slice(0, 300);
+      const noteOf = c => Object.prototype.hasOwnProperty.call(notes, c) ? String(notes[c] || '').trim().slice(0, c === FOLLOW ? 1000 : 300) : gen;
+      const day = RAW.logs.filter(l => l.emp === x.emp && l.date === x.date && l.type === '-');
+      const sameDay = day.map(l => l.crit);
+      /* «متابعة الأعمال الموكلة» متسجلة بنفس اليوم: الأعمال الجديدة تنضاف لملاحظتها بدون خصم جديد */
+      let append = null;
+      if (misses.indexOf(FOLLOW) >= 0 && sameDay.indexOf(FOLLOW) >= 0) {
+        const old = day.filter(l => l.crit === FOLLOW && !/^bad/.test(l.group || '')).pop();
+        const have = String(old ? old.note || '' : '').split('\n').map(s => s.trim());
+        const add = noteOf(FOLLOW).split('\n').map(s => s.trim()).filter((s, i, a) => s && have.indexOf(s) < 0 && a.indexOf(s) === i).join('\n');
+        if (old && add) append = { id: old.id, add: add };
+      }
       const before = misses.length;
       misses = misses.filter(c => sameDay.indexOf(c) < 0);
-      const skipped = before - misses.length;
-      if (!misses.length && !starNote) throw new Error(skipped ? 'هالتقصير متسجل له بنفس اليوم' : 'كل شي تمام، ما فيه شي تسجله');
-      const grp = uid();
-      const note = String(x.note || '').trim().slice(0, 300);
-      const rows = misses.map(c => ({ date: x.date, emp: x.emp, type: '-', crit: c, note: note, grp: grp }));
-      if (starNote) rows.push({ date: x.date, emp: x.emp, type: '+', crit: STAR_CRIT, note: starNote, grp: grp });
-      const out = await adminDo(k, 'log_add', { rows: rows });
-      out.lastId = grp; out.skipped = skipped;
+      const skipped = before - misses.length - (append ? 1 : 0);
+      if (!misses.length && !starNote && !append) throw new Error(skipped ? 'هالتقصير متسجل له بنفس اليوم' : 'كل شي تمام، ما فيه شي تسجله');
+      let out = null, grp = null;
+      if (append) out = await adminDo(k, 'log_note_add', append);
+      if (misses.length || starNote) {
+        grp = uid();
+        const rows = misses.map(c => ({ date: x.date, emp: x.emp, type: '-', crit: c, note: noteOf(c), grp: grp }));
+        if (starNote) rows.push({ date: x.date, emp: x.emp, type: '+', crit: STAR_CRIT, note: starNote, grp: grp });
+        out = await adminDo(k, 'log_add', { rows: rows });
+      }
+      out.lastId = grp; out.lastNote = append; out.skipped = skipped; out.appended = !!append;
       return out;
+    },
+
+    /* الإصدار 121: «تراجع» بعد إضافة عمل لمخالفة اليوم: يشيل السطر المضاف بس */
+    /* معايير التقصير المسجلة للموظف بهاليوم (للتنبيه في نافذة التأكيد) */
+    dayMisses(emp, date) { return RAW ? RAW.logs.filter(l => l.emp === emp && l.date === date && l.type === '-').map(l => l.crit) : []; },
+    async apiNoteUndo(k, n) {
+      if (!RAW || CRED.k !== k) await loadAdmin(k);
+      return adminDo(k, 'log_note_add', { id: n.id, add: n.add, undo: '1' });
     },
 
     async apiDelete(k, group) {
@@ -978,6 +1013,8 @@
     async apiAttIn(token, dataUrl, pos, project) { return attDo(token, 'att_in', dataUrl, pos, project); },
     async apiAttOut(token, dataUrl, pos) { return attDo(token, 'att_out', dataUrl, pos, ''); },
     async apiAttSeen(token, id) { return empDo(token, 'att_seen', { id: String(id || '') }); },
+    /* الإصدار 121: «فهمت» على بطاقة مخالفات اليوم */
+    async apiLogSeen(token) { return empDo(token, 'log_seen', {}); },
     async apiGuideAdd(k, x) {
       const title = String(x.title || '').trim().slice(0, 120);
       if (!title) throw new Error('اكتب عنوان التوجيه');
