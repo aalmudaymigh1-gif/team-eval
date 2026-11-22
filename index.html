@@ -37,8 +37,8 @@ svg.i{flex:none;display:inline-block;vertical-align:middle}
 h1{font-size:17px;font-weight:600;letter-spacing:0;margin:0;line-height:1.35}
 .top .sub{margin-top:2px}
 .sub{color:var(--muted);font-size:13px}
-.rf,.ibtn{background:var(--surface);border:1px solid var(--line2);color:var(--text);width:42px;height:42px;border-radius:var(--r);cursor:pointer;flex:none;display:flex;align-items:center;justify-content:center;padding:0;transition:transform .15s var(--ease),background .15s}
-.rf:active,.ibtn:active{transform:scale(.94);background:var(--fill)}
+.rf{background:var(--surface);border:1px solid var(--line2);color:var(--text);width:42px;height:42px;border-radius:var(--r);cursor:pointer;flex:none;display:flex;align-items:center;justify-content:center;padding:0;transition:transform .15s var(--ease),background .15s}
+.rf:active{transform:scale(.94);background:var(--fill)}
 .rf.spin svg{animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
@@ -118,7 +118,7 @@ input[type=date]{color-scheme:light;margin-top:8px}
 .btn2{background:transparent;color:var(--text);border:1.5px solid var(--line2);font-size:14px;padding:10px 12px;font-weight:500}
 .btn2.cu{background:var(--acc);border-color:var(--acc);color:var(--acc-ink);font-weight:600}
 .btn2.arm{background:var(--red);border-color:var(--red);color:#fff;font-weight:600}
-.btn2.soft{background:var(--acc-soft);border-color:transparent;color:var(--acc)}
+
 .btn:disabled,.btn2:disabled{opacity:.45}
 
 .dock,.save{position:fixed;left:0;right:0;bottom:0;z-index:6;background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:12px 18px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(15,20,25,.06)}
@@ -187,11 +187,9 @@ details summary::-webkit-details-marker{display:none}
 .task.late b{color:var(--red)}
 .task.done b{color:var(--muted);font-weight:500}
 .task b{font-weight:600}
-.tact{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+
 .ph{display:block;width:100%;max-height:420px;object-fit:contain;border-radius:var(--r);margin-top:10px;background:var(--fill)}
-.upl{margin-top:10px}
-.pgh{color:var(--acc);font-size:13px;font-weight:600;margin:16px 0 2px;display:flex;align-items:center;gap:6px}
-.pgh+.task{border-top:0;padding-top:6px}
+
 .mst{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .mi{position:relative;width:74px;height:74px;border-radius:12px;background:var(--fill);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);text-align:center;line-height:1.3}
 .mi img{width:100%;height:100%;object-fit:cover}
@@ -200,9 +198,7 @@ details summary::-webkit-details-marker{display:none}
 .madd{width:74px;height:74px;border-radius:12px;border:1.5px dashed var(--line2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--acc);font-size:12px;cursor:pointer;text-align:center;line-height:1.3}
 .vid{display:block;width:100%;height:440px;border:0;border-radius:var(--r);margin-top:10px;background:var(--fill)}
 .mbtn{background:var(--acc-soft);border:0;color:var(--acc);font-size:13px;font-weight:600;border-radius:10px;padding:7px 11px;cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:6px}
-.titem{border-top:1px solid var(--line);margin-top:16px;padding-top:2px}
-.titem-h{margin:12px 0 8px}
-.titem-h b{font-size:14px;color:var(--acc)}
+
 .inrow{display:flex;gap:8px;margin-top:8px}
 .inrow input{flex:1;min-width:0}
 .inrow .btn2{flex:none;padding:0 16px}
@@ -220,37 +216,27 @@ details summary::-webkit-details-marker{display:none}
 input,textarea,select{font-size:16px}
 select{width:100%;background:var(--fill);border:1.5px solid transparent;color:var(--text);font:inherit;font-size:16px;border-radius:var(--r);padding:11px 12px;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer}
 select:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-ring)}
-.tqs{margin-top:14px}
+
 .scards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
 .sc{display:flex;flex-direction:column;align-items:flex-start;padding:10px 12px;border-radius:14px;border:2px solid transparent;cursor:pointer;text-align:right;min-height:66px;background:var(--acc-soft);color:var(--acc);transition:transform .12s var(--ease)}
 .sc:active{transform:scale(.97)}
 .sc b{font-size:17px;line-height:1.2;font-weight:600}.sc span{font-size:12px;font-weight:600}
 .sc.a{background:var(--amber-soft);color:#85642B}.sc.r{background:var(--red-soft);color:var(--red)}
 .sc.on{border-color:currentColor}.sc.z{opacity:.55}
-.tfil{display:flex;gap:6px;align-items:center;margin:12px 0 0}
-.tfil select{flex:1;min-width:0;width:auto;padding:8px 12px;font-size:14px;border-radius:999px;background:var(--surface);border:1.5px solid var(--line2)}
-.tfil select.on{border-color:var(--acc);background:var(--acc-soft);color:var(--acc);font-weight:600}
-.tfil .chip{flex:none;border-radius:999px;padding:8px 12px}
+
 .chip.on.u{border-color:var(--red);background:var(--red-soft);color:var(--red)}
-.tfil .ibtn{width:40px;height:40px}
+
 .lnk{background:none;border:0;font:inherit;font-size:13px;font-weight:600;color:var(--acc);padding:8px 0 0;cursor:pointer;align-self:flex-start}
 .sech{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;margin:20px 0 2px}
 .sech span{font-size:12px;font-weight:600;color:#4B5563;background:var(--fill);border-radius:999px;padding:0 8px}
 .sech.a{color:#85642B}.sech.r{color:var(--red)}.sech.m{color:var(--muted)}
-.tli{border-bottom:1px solid var(--line)}
-.tli.dn{display:flex;justify-content:space-between;gap:8px;padding:10px 0}
-.trow2{display:flex;gap:11px;align-items:flex-start;width:100%;background:none;border:0;text-align:right;padding:12px 0;cursor:pointer}
-.trow2:active{background:var(--fill)}
-.ring{width:22px;height:22px;border-radius:50%;border:2px solid var(--faint);flex:none;margin-top:2px;background:#fff}
-.ring.r{border-color:var(--red)}.ring.a{border-color:var(--amber);background:var(--amber-soft)}.ring.g{border-color:var(--green);background:var(--green)}
+
 .tb{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .th{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .th .badge{flex:none}
 .tt{font-size:15px;font-weight:600;line-height:1.45}.tt.l{color:var(--red)}.tt.d{color:var(--muted);font-weight:500;text-decoration:line-through}
 .tm{font-size:13px;color:var(--muted)}
-.mbs{display:flex;gap:6px;flex-wrap:wrap}
-.mb{font-size:12px;border-radius:6px;padding:0 7px;background:var(--fill);color:#374151}.mb.u{background:var(--red-soft);color:var(--red);font-weight:600}
-.racts{margin:0 33px 12px 0}
+
 .btn2.rd{color:var(--red);border-color:var(--red-line);font-weight:600}
 .dtog{width:100%;background:none;border:0;text-align:right;font-size:13px;font-weight:600;color:var(--green);padding:16px 0 6px;cursor:pointer}
 .fab{position:fixed;left:18px;bottom:calc(26px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;background:var(--acc);color:#fff;border:0;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(31,58,95,.3);cursor:pointer;z-index:8;padding:0}
@@ -265,17 +251,11 @@ select:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-ring)}
 .shh{font-size:13px;font-weight:600;color:var(--muted)}
 .qtt{font-size:17px;font-weight:600;background:transparent;border:0;border-bottom:1.5px solid var(--acc);border-radius:0;padding:8px 2px}
 .qtt:focus{background:transparent;box-shadow:none}
-.qrow{display:flex;gap:6px;flex-wrap:wrap}
-.qsel{display:inline-flex;align-items:center;background:var(--fill);border-radius:999px;padding-right:12px;color:var(--muted)}
-.qsel select{width:auto;background:transparent;border:0;padding:9px 10px 9px 14px;font-size:15px;color:var(--text)}
-.qsel select:focus{box-shadow:none}
+
 .g21{display:grid;grid-template-columns:2fr 1fr;gap:8px}
 .g21 .btn2{padding:13px;font-size:15px}
 .tg.on.u{background:var(--red)}
-.dhead{display:flex;align-items:flex-start;gap:10px;margin-top:10px}
-.dtitle{flex:1;font-size:17px;font-weight:600;background:transparent;padding:6px 8px;margin:0 -8px}
-textarea.dtitle{font-family:inherit;color:inherit;border:0;resize:none;overflow:hidden;line-height:1.5;min-height:38px;display:block;min-width:0}
-.dhead .badge{margin-top:10px;flex:none}
+
 .dprops{border:1px solid var(--line);border-radius:var(--r2);margin-top:12px;overflow:hidden}
 .dp{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:4px 14px;border-bottom:1px solid var(--line);min-height:52px}
 .dp:last-child{border-bottom:0}
@@ -283,17 +263,13 @@ textarea.dtitle{font-family:inherit;color:inherit;border:0;resize:none;overflow:
 .dp select,.dp input{width:auto;max-width:65%;background:transparent;border:0;padding:8px 4px;margin:0;font-weight:600;font-size:15px;text-align:left}
 .dp input.lt{color:var(--red)}
 .dnote{min-height:84px}
-.abar{position:sticky;bottom:0;z-index:4;background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding:12px 0 calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);margin-top:18px}
-.abar .btn2{padding:13px;font-size:15px;width:100%}
+
 .pgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px}
 .pgrid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;cursor:zoom-in;display:block}
 .pph{aspect-ratio:1;border-radius:12px;background:var(--fill);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
 .full{width:100%;max-height:70vh;object-fit:contain;border-radius:12px;background:#000}
 .etabs{margin-top:14px}
-.ecard{border:1px solid var(--line);border-radius:var(--r2);padding:14px;margin-top:10px;background:var(--surface)}
-.ecard.rt{border-color:var(--red-line)}
-.ecard .tt{font-size:17px;font-weight:600}
-.enote{margin-top:6px;font-size:14px;color:#374151;white-space:pre-line}
+
 .bigdo{display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:var(--acc);color:#fff;border-radius:999px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;-webkit-user-select:none;user-select:none}
 .bigdo:active{transform:scale(.97)}
 .note.a2{background:var(--amber-soft);color:#85642B}
@@ -303,24 +279,14 @@ textarea.dtitle{font-family:inherit;color:inherit;border:0;resize:none;overflow:
 .shots{display:flex;gap:8px;flex-wrap:wrap}
 .shot{position:relative;width:78px;height:78px}
 .shot img{width:100%;height:100%;object-fit:cover;border-radius:12px;display:block}
-.pgrp{border:1px solid var(--line2);border-radius:var(--r2);overflow:hidden;margin-top:14px;background:var(--surface)}
-.pgh2{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;background:var(--acc);color:#fff;border:0;padding:13px 16px;font:inherit;font-size:17px;font-weight:600;text-align:right;cursor:pointer}
-.pgh2 .n{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);border-radius:999px;padding:2px 10px;font-size:13px;font-weight:600;flex:none}
-.chev{display:inline-flex;transform:rotate(90deg);transition:transform .15s}.chev.up{transform:rotate(-90deg)}
-.pgrp .tli{padding:0 14px}.pgrp .tli:last-child{border-bottom:0}
-.ecard.in{border:0;border-top:1px solid var(--line);border-radius:0;margin:0}
-.pgh2+.ecard.in{border-top:0}
-.dlate{color:var(--red);font-weight:600}
+
 .scards{grid-template-columns:repeat(2,minmax(0,1fr))}
 .ivr{padding:12px 0;border-bottom:1px solid var(--line)}
 .ivr:last-child{border-bottom:0}
 .ivr.rv{border:1px solid var(--amber-line,#EBDCBE);border-radius:var(--r2);padding:12px 14px;margin-top:10px;background:var(--surface)}
 .iva{font-size:15px;font-weight:600;white-space:nowrap;flex:none}.iva.g{color:var(--green)}.iva.r{color:var(--red)}
 .ivr .lnk.dl{color:var(--muted);font-size:13px;padding-top:6px}.ivr .lnk.dl.arm{color:var(--red)}
-.ivtot{padding:10px 16px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--line)}
-.pgrp .ivr{padding:12px 16px}
-.ivbal{display:flex;justify-content:space-between;align-items:center;background:var(--acc);color:#fff;border-radius:var(--r2);padding:14px 16px;margin-top:14px}
-.ivbal span{font-size:13px;opacity:.9}.ivbal b{font-size:17px;font-weight:600}.ivbal small{font-size:13px;font-weight:500}
+
 .tabs button{font-size:12px}
 .shot .x{position:absolute;top:3px;left:3px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:15px;line-height:32px;padding:0;cursor:pointer}
 video.vid{height:auto;max-height:70vh;background:#000}
@@ -357,17 +323,10 @@ details.rul summary{min-height:44px}
 .attc{background:#EDF4EF;border:1px solid #CFE1D5;color:#3A6249;border-radius:16px;padding:12px 14px;margin:12px 0 4px}
 .attc .r1{display:flex;justify-content:space-between;gap:8px;font-size:13px}.attc .el{font-size:17px;font-weight:600;margin:4px 0 8px}
 .attc.done{background:var(--fill);border-color:var(--line2);color:var(--text)}.attc.done .el{margin-bottom:0}
-.attout{width:100%;background:#B05A52;color:#fff;border:0;border-radius:999px;padding:11px;font:inherit;font-weight:600;cursor:pointer}
+
 .cam video,.camimg{width:100%;border-radius:14px;background:#000;display:block;max-height:56vh;object-fit:cover;margin-top:8px}
 .cam .btn{margin-top:12px}.cam select{margin-top:4px}
-.atr{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}.atr:last-child{border-bottom:0}
-.atr .badge{margin-top:0;font-size:12px;padding:2px 8px}
-.atph{display:flex;gap:6px;margin-top:6px}.atph img,.atph .pph{width:58px;height:58px;border-radius:10px;object-fit:cover;aspect-ratio:auto;cursor:pointer}
-.ecs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
-.ec{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:1px;background:var(--acc);color:#fff;border:0;border-radius:16px;padding:14px;font:inherit;text-align:start;cursor:pointer;min-height:118px}
-.ec b{font-size:15px;margin-top:14px;font-weight:600}.ec .l{font-size:12px;opacity:.8;margin-top:4px}.ec .v{font-size:17px;font-weight:600;line-height:1.2}
-.ec .o{font-size:12px;opacity:.7;margin-top:2px}.ec .o.r{opacity:1;color:#EDCFCB;font-weight:600}
-.ec .pend{position:absolute;top:10px;left:10px;background:#C2954A;color:#85642B;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:600}
+
 .strb{width:100%;background:none;border:0;font:inherit;color:inherit;text-align:start;cursor:pointer;padding:0}
 .erow{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:start;cursor:pointer}
 .ilinks{display:flex;gap:16px}
@@ -383,22 +342,7 @@ details.rul summary{min-height:44px}
 .pushb .bigdo{width:100%;justify-content:center;margin-top:10px;border:0;cursor:pointer;font-family:inherit}
 .pushb .later{display:block;margin:8px auto 0;background:none;border:0;color:var(--muted);font-size:12px;font-family:inherit;cursor:pointer}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-.tcard{padding:14px}
-.tmh{display:flex;align-items:center;gap:8px;min-height:34px}
-.tmh>svg{color:var(--acc);flex:none}
-.tmh>b{font-size:15px;font-weight:600;flex:1;min-width:0;line-height:1.3}
-.tbad{display:flex;gap:5px}
-.tbad .badge{font-size:12px;padding:2px 8px}
-.thero{display:grid;grid-template-columns:1.25fr 1fr;gap:8px;margin-top:12px}
-.thero>div{border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:2px}
-.thero span{font-size:12px;display:flex;align-items:center;gap:5px}
-.thero b{font-size:17px;font-weight:600;letter-spacing:-.3px;line-height:1.2}
-.thero small{font-size:12px;font-weight:500;margin-right:4px}
-.thero .h1{background:linear-gradient(150deg,var(--acc),var(--acc-2));color:#fff}
-.thero .h1 span,.thero .h1 small{color:rgba(255,255,255,.75)}
-.thero .h2{background:var(--fill)}
-.thero .h2 span,.thero .h2 small{color:var(--muted)}
-.thero .h2 b{font-size:17px;margin-top:auto}
+
 .tbrk{margin-top:10px;font-size:13px}
 .tbrk>div{display:flex;justify-content:space-between;padding:5px 2px}
 .tbrk span{color:var(--muted)}
@@ -406,44 +350,18 @@ details.rul summary{min-height:44px}
 .tbrk .tot{border-top:1px solid var(--line2);margin-top:3px;padding-top:7px}
 .tbrk .tot span{color:var(--text);font-weight:600}
 .tbrk .tot b{font-weight:600;font-size:14px}
-.tat{margin-top:12px;background:var(--fill);border-radius:var(--r);padding:10px 12px}
-.tath{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted);flex-wrap:wrap}
-.tath svg{color:var(--faint)}
-.tatst{margin-right:auto;display:flex;gap:4px;flex-wrap:wrap}
-.tath .badge{font-size:12px;padding:2px 8px}
-.tatl{font-size:13px;color:var(--muted);line-height:1.8;margin-top:6px}
-.tat .atph img,.tat .atph .pph{width:52px;height:52px}
-.tatk{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:4px}
-.tatk .lnk{padding-top:4px}
-.tgo{margin-right:auto;font-size:13px}
-.tacts{display:grid;grid-template-columns:repeat(3,1fr);margin-top:12px;border:1.5px solid var(--line2);border-radius:var(--r);overflow:hidden}
-.tacts button{background:none;border:0;font:inherit;font-size:12px;font-weight:500;color:var(--text);padding:9px 2px;display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer;white-space:nowrap}
-.tacts button+button{border-right:1px solid var(--line2)}
-.tacts button svg{color:var(--acc)}
-.tacts button:active{background:var(--fill)}
-.tlbl{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);font-weight:600;margin:14px 0 2px}
-.tlbl svg,.tnone svg{color:var(--faint)}
+
 .tents .ent{padding:9px 0}
-.tnone{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--faint);margin-top:11px}
-.tnone span{opacity:.6}
-.tsec{display:flex;align-items:center;justify-content:space-between;margin:18px 4px 8px;font-size:12px;color:var(--muted)}
-.tgroup{padding:0 14px}
-.tmrow{padding:14px 0}
-.tmrow+.tmrow{border-top:1px solid var(--line)}
+
 .tst{display:flex;gap:14px}
 .tst>span{display:flex;flex-direction:column;align-items:center;font-size:12px;color:var(--muted);line-height:1.25}
 .tst b{font-size:17px;font-weight:600;color:var(--text)}
-.tat a.lnk{text-decoration:none}
 
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.grid3 .btn2{padding:10px 6px;font-size:13px}
-.btn2.dedb{color:var(--red);border-color:var(--red-line);background:var(--red-soft)}
 .ctitle .ci.dedi{background:var(--red-soft);color:var(--red)}
 .dedch{display:flex;gap:6px;flex-wrap:wrap}
 .dedch button{font:inherit;font-size:13px;font-weight:600;border-radius:999px;padding:6px 14px;border:1.5px solid var(--line2);background:var(--surface);color:var(--text);cursor:pointer}
 .dedch button.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
-.gsh{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--text);font-size:13px}
-.gnew{display:flex;align-items:center;gap:4px;font-size:13px}
+
 .gcard{padding:14px}
 .gch{display:flex;align-items:flex-start;gap:10px}
 .gti{flex:1;min-width:0}
@@ -530,17 +448,13 @@ h1{font-size:17px;font-weight:600;letter-spacing:0}
 .ctitle{font-weight:500;font-size:15px}
 .ctitle .ci{background:none!important;color:var(--muted)!important;width:auto;height:auto}
 .kpi{background:#fff;border:1px solid var(--line);border-radius:18px}
-.kpi.hero,.thero .h1{background:#fff!important;color:var(--text)!important;border:1px solid var(--line)}
-.kpi.hero .k,.thero .h1 span{color:var(--muted)!important}
-.kpi.hero .v small,.thero .h1 small,.thero small{color:var(--acc-dk)!important}
-.kpi .v,.thero b{font-weight:400!important}
-.thero .h2{background:#fff!important;border:1px solid var(--line)}
+.kpi.hero{background:#fff!important;color:var(--text)!important;border:1px solid var(--line)}
+.kpi.hero .k{color:var(--muted)!important}
+.kpi.hero .v small{color:var(--acc-dk)!important}
+.kpi .v{font-weight:400!important}
+
 .tbrk{background:#fff;border:1px solid var(--line);border-radius:18px;padding:6px 14px}
-.tat{background:#fff!important;border:1px solid var(--line);border-radius:18px!important}
-.tacts{border:1px solid var(--line2)!important;border-radius:999px!important;background:#fff}
-.tacts button{font-weight:400!important}
-.tacts button svg,.tmh>svg{color:var(--muted)!important}
-.tgroup{background:var(--surface)}
+
 .tst b{font-weight:400!important}
 /* الأزرار والكبسولات */
 .empc,.dedch button,.wchips button{border:1px solid var(--line2)!important;background:#fff!important;color:var(--muted)!important;font-weight:400!important;padding:8px 20px!important}
@@ -554,7 +468,7 @@ h1{font-size:17px;font-weight:600;letter-spacing:0}
 .badge,.pill{font-weight:500;border-radius:999px}
 .badge.wait{background:var(--acc-soft);color:var(--acc-dk)}
 .attgo{background:var(--acc)!important;border-radius:var(--r2)!important}
-.pgh2,.ivbal,.ec,.stc{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--line2)}
+.stc{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--line2)}
 .gban{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--line2)!important;box-shadow:none!important}
 .gbi{background:var(--acc-soft)!important;color:var(--acc-dk)}
 .gbt small{color:var(--muted)!important;opacity:1}
@@ -567,19 +481,17 @@ input,textarea,select{border-radius:16px!important;background:#fff!important}
 .dock{background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 38%)!important;padding-top:26px!important}
 .fab{bottom:calc(104px + env(safe-area-inset-bottom))!important;background:var(--acc)!important;box-shadow:0 8px 24px rgba(79,116,147,.30)!important}
 .mn{display:inline-flex;align-items:center;gap:.22em;white-space:nowrap;direction:ltr;unicode-bidi:isolate;color:var(--text)!important;font-size:15px;font-weight:500;letter-spacing:0;font-variant-numeric:tabular-nums;vertical-align:baseline}
-.thero .h1 span.mn,.thero .h2 span.mn,span.mn.mn{color:var(--text)!important;opacity:1}
-span.mn.mn.pos,.thero span.mn.pos{color:var(--green)!important}
-span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
+span.mn.mn{color:var(--text)!important;opacity:1}
+span.mn.mn.pos{color:var(--green)!important}
+span.mn.mn.neg{color:var(--red)!important}
 .mn .rs{height:.78em;width:auto;flex:none;opacity:.9}
 .mn.big{font-size:17px;font-weight:500;gap:.2em}
 .kpi .v{font-size:17px!important;font-weight:500!important}
 .mn.big .rs{height:.66em}
 .mn.t{font-size:inherit;font-weight:500}
-.thero b,.kpi .v,.stc .v,.ivbal b,.ec .v,.ivd .amt{color:var(--text)!important}
+.kpi .v,.stc .v,.ivd .amt{color:var(--text)!important}
 .tvseg{margin:14px 0 4px}
-.pgrp.ep .pgh2{background:var(--acc)!important;color:#fff!important;border:0!important;font-size:14px;font-weight:500;padding:10px 14px}
-.pgrp.ep .pgh2 .n{font-size:12px;font-weight:500;background:rgba(255,255,255,.2);color:#fff}
-.ecard .tt,.trow2 .tt{font-size:15px!important;font-weight:300!important}
+
 .kpi .v small.gstar,.kpi .k .gstar{color:var(--amber)!important}.kpi .k .gstar{display:inline-flex}
 .vrec{margin-top:10px;display:flex;align-items:center;gap:10px;border:1.5px dashed var(--line2);border-radius:14px;padding:12px 14px;color:var(--acc-dk);font:inherit;font-size:14px;font-weight:500;background:none;width:100%;cursor:pointer;text-align:start}
 .vrec.on{border:1px solid var(--red);color:var(--red);background:var(--red-soft);cursor:default}
@@ -587,15 +499,8 @@ span.mn.mn.neg,.thero span.mn.neg{color:var(--red)!important}
 @keyframes vpulse{50%{opacity:.3}}
 .vrec .tm{margin-inline-start:auto;font-variant-numeric:tabular-nums;color:var(--text)}.vrec .tm.h{color:var(--faint);font-size:12px}
 .vrec .stp{background:var(--red);color:#fff;border:0;border-radius:999px;padding:6px 16px;font:inherit;font-size:13px;cursor:pointer}
-.vpl{margin-top:10px;display:flex;align-items:center;gap:10px;background:var(--acc-soft);border-radius:14px;padding:10px 12px}
-.vpl .pb{width:36px;height:36px;border-radius:50%;background:var(--acc);color:#fff;border:0;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;padding:0}
-.vpl .pb .pa,.vpl.pl .pb .py{display:none}.vpl.pl .pb .pa{display:block}
-.vpl .wv{flex:1;display:flex;align-items:center;gap:2px;height:26px;min-width:0}
-.vpl .wv i{flex:1;background:var(--acc);opacity:.4;border-radius:2px;min-width:2px}.vpl .wv i.on{opacity:1;background:var(--acc-dk)}
-.vpl .d{font-size:13px;color:var(--acc-dk);font-variant-numeric:tabular-nums}
-.vpl .rm{color:var(--muted);background:none;border:0;padding:4px;cursor:pointer;font:inherit;font-size:13px;display:flex}.vpl .rm.arm{color:var(--red);font-weight:600}
-.vpl .vup{font-size:12px;color:var(--muted)}
-.vcap{font-size:12px;color:var(--muted);margin-top:6px}
+
+
 html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 body{padding:0!important}
 #scr{position:fixed;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding:env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 190px)}
@@ -622,11 +527,7 @@ img.ph{cursor:zoom-in}
 .qch button{border:1px solid var(--line2);background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:14px;color:var(--text);cursor:pointer}
 .qch button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 .qch button.nw{color:var(--acc-dk);border-style:dashed}
-.qtools{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:start}
-.qtools>div{min-width:0}
-.qtools>#tfMedia_0:has(.mi),.qtools>#tfVoice:has(.vpl),.qtools>#tfVoice:has(.vrec.on){grid-column:1/-1}
-.qtools .vrec{margin-top:0;justify-content:center;padding:12px 8px}.qtools .vrec .tm.h{display:none}
-.qtools .vrec.on{justify-content:flex-start}
+
 .qadd{margin-top:0!important;justify-content:center;cursor:pointer}
 .qbig{width:100%;padding:14px!important;font-size:15px!important}
 .fxh{display:flex;align-items:baseline;justify-content:space-between;margin:14px 2px 12px}
@@ -639,11 +540,7 @@ img.ph{cursor:zoom-in}
 .fxa .r{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;font:inherit;font-size:14px;color:var(--text);background:none;border:0;text-align:start;cursor:pointer}
 .fxa .r+.r{border-top:1px solid #EFE2C8}.fxa .dt{width:8px;height:8px;border-radius:50%;background:var(--amber);flex:none}
 .fxa .r em{margin-inline-start:auto;font-style:normal;color:var(--muted);display:flex;align-items:center;gap:6px}
-.fxn{display:flex;align-items:center;justify-content:space-between;width:100%;background:var(--acc);color:#fff;border:0;border-radius:16px;padding:14px 16px;font:inherit;font-size:15px;font-weight:500;margin-top:8px;cursor:pointer;text-align:start}
-.fxn .cv{display:flex;opacity:.85}.fxn .am{display:flex;align-items:center;gap:8px;font-size:14px}.fxn .am span.mn.mn{color:#fff!important}.fxn.ar{opacity:.6}
-.fxn .ord{display:flex;gap:6px}
-.fxn .ord button{width:34px;height:34px;border-radius:10px;border:0;background:rgba(255,255,255,.22);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.fxn .ord button[disabled]{opacity:.3}
+
 .fxt{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:2px 2px 0;font-size:13px;color:var(--muted)}
 .fxt button{background:none;border:0;font:inherit;font-size:13px;color:var(--acc-dk);display:flex;align-items:center;gap:6px;cursor:pointer;flex:none}
 .fxt button.dn{background:var(--acc);color:#fff;border-radius:999px;padding:6px 18px}
@@ -667,8 +564,7 @@ img.ph{cursor:zoom-in}
 body.kb .tabs,body.kb .fab{opacity:0!important;pointer-events:none!important;transform:translateY(24px)!important}
 
 /* الإصدار 52: صف المهمة سطرين، والرقمين كبسولات */
-.trow2 .tm .tu{color:var(--red);font-weight:600}
-.trow2 .tm .dlate{color:var(--red)}
+
 .scards{display:flex!important;gap:8px;margin-top:12px}
 .sc{flex:1;flex-direction:row!important;align-items:center!important;justify-content:center;gap:8px;min-height:44px!important;padding:0 14px!important;border-radius:999px!important}
 .sc b{font-size:17px!important;line-height:1!important}.sc span{font-size:13px!important}
@@ -691,7 +587,6 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .imp{display:flex;gap:7px;align-items:flex-start;margin-top:12px;font-size:13px;line-height:1.7;color:var(--muted)}.imp svg{color:var(--red);flex:none;margin-top:3px}.imp b{color:var(--text);font-weight:500}
 
 /* الإصدار 55: برواز حول كل موظف (اسمه وفروعه)، ومهامه في صفحته */
-.tfr{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:0 12px 12px;margin-top:14px}.tfr .tbh{margin-top:12px}
 
 /* الإصدار 56: قفل مجموعة المشروع، وترتيب الفريق، وقوائم المالية بيضا بدال الأشرطة الزرقا */
 
@@ -702,7 +597,7 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .tbr .ord{display:flex;gap:6px;flex:none}.tbr .ord button{width:34px;height:34px;border-radius:10px;border:0;background:var(--fill);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer}.tbr .ord button[disabled]{opacity:.3}
 
 .fxt.tord{margin:12px 2px 0}
-.pgh2 .pge{display:flex;align-items:center;gap:8px;flex:none}.pgh2 .cg{display:flex;transition:transform .2s var(--ease);transform:rotate(-90deg)}.pgrp.cl .pgh2 .cg{transform:none}
+
 /* الإصدار 57: كل البطاقات بلون بطاقات التقييم، و«رتّب» المشاريع مثل الفريق، والرواتب من يوم 28، والإعدادات فروع */
 .fseg .ordb{background:none;border:0;font:inherit;font-size:13px;color:var(--acc-dk);display:flex;align-items:center;gap:6px;cursor:pointer;flex:none;padding:0 2px}
 .fxs.two{grid-template-columns:1fr 1fr}
@@ -749,7 +644,7 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .fvn{margin:0 2px 6px;min-height:18px}.fseg .segc button{min-height:44px}.fvl{padding-top:2px;padding-bottom:2px}
 .ivfx{margin:2px 0 6px}.ivr .ivfx{margin:4px 0 0}.ivfx .badge{font-size:12px;padding:2px 8px}
 /* الإصدار 96: ملف الموظف في الفريق */
-.fxs.one{grid-template-columns:1fr}.fxs.tft{margin:12px 0 0}.fxs.tfs{margin:4px 0 0}.fxs .tv{font-size:17px;font-weight:600}
+.fxs.one{grid-template-columns:1fr}.fxs.tft{margin:12px 0 0}.fxs .tv{font-size:17px;font-weight:600}
 .fxt.tadd{margin:10px 2px 0}.fxt.tadd button{min-height:44px}.fxdue .fqa .btn2{min-height:44px}.fxdue .fqn{min-height:44px;justify-content:center}
 .tfc{display:block;width:100%;text-align:right;font:inherit;color:inherit;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:0 12px 12px;margin-top:10px}
 .tfc:active{background:var(--fill)}.tfc .tbh{margin:12px 2px 6px}.tfc .cv{color:var(--faint);display:flex;flex:none}
@@ -757,7 +652,7 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .tfc .chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 2px 0}
 .badge.rd{background:var(--red-soft);color:var(--red)}
 .tfile .tbh{margin-top:14px}.tfile .tbh .lnkb{width:44px;height:44px}.tfile .tbh .rate{height:44px}
-.tfile .fxbt button{min-height:56px;background:var(--surface)}.fxbt.n4{grid-template-columns:repeat(4,1fr)}
+.tfile .fxbt button{min-height:56px;background:var(--surface)}
 .tfn{margin-top:10px;padding-top:4px;padding-bottom:4px;border-color:var(--red-line)}
 .tfn .row{align-items:center;gap:10px;padding:8px 0}.tfn .row+.row{border-top:1px solid var(--line)}
 .tfn .tx{min-width:0;display:flex;flex-direction:column}.tfn .tx b{font-weight:600;font-size:14px}.tfn .ac{display:flex;align-items:center;gap:10px;flex:none}
@@ -783,13 +678,7 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .ssp .card{margin-top:12px}
 .ssp .prow{flex-wrap:wrap;row-gap:4px}.ssp .prow input{flex:1 1 100%}.ssp .prow .del{flex:none}
 .grab{position:relative}.grab::before{content:'';position:absolute;inset:-16px -80px -10px}
-.ring.ck{display:flex;align-items:center;justify-content:center;color:#fff;border-color:var(--line2)}.ring.ck.on{background:var(--acc);border-color:var(--acc)}
-.tli.sel .tt{color:var(--acc-dk)}
-.tfil .ibtn.on{background:var(--acc-soft);border-color:var(--acc-ring);color:var(--acc-dk)}
-.selbar{position:fixed;left:0;right:0;bottom:calc(max(4px,calc(env(safe-area-inset-bottom) - 10px)) + 74px);padding:0 18px;z-index:8;max-width:520px;margin:0 auto}
-.selbar .btn2{width:100%;box-shadow:0 8px 24px rgba(42,42,40,.12)}
-.selbar .btn2.rd{background:#fff}
-#tlist:has(+ #selbar .selbar){padding-bottom:70px}
+
 /* الإصدار 59: صفحة الموظف بنفس تصميم صفحاتي */
 .empv .attc,.empv .attc.done{background:var(--surface);border-color:var(--line);color:var(--text)}
 .empv .attc .r1{color:var(--muted)}
@@ -805,7 +694,7 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .empv .ivb .tbr.neg .v span.mn.mn,.empv .ivb .tbr.neg .k{color:var(--red)!important}
 .empv .ivsend{width:100%;margin-top:10px}
 .empv .stx{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:4px}.empv .stx.g{color:var(--green)}
-.empv .ecard .tm .tu{color:var(--red);font-weight:600}
+
 /* الإصدار 60: الدخول بجلسة، والرفع بإعادة محاولة، ومساحات ضغط أكبر */
 .login{max-width:420px;margin:12vh auto 0;display:flex;flex-direction:column;gap:12px;text-align:center}
 .login h1{font-size:17px;font-weight:600;margin:0}.login .ei{margin:0 auto;color:var(--muted)}
@@ -813,15 +702,14 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .codebox{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--fill);border-radius:16px;padding:12px;margin:0 0 10px}
 .codebox b{font-size:17px;font-weight:600;letter-spacing:.12em;word-break:break-all}.codebox small{font-size:12px;color:var(--muted)}
 .mi.fail{outline:2px solid var(--red);outline-offset:-2px}
-.mprog{position:absolute;inset:auto 0 0 0;background:rgba(0,0,0,.6);color:#fff;padding:2px 0;font-size:12px}
-.mretry{position:absolute;inset:auto 0 0 0;border:0;background:var(--red);color:#fff;font:inherit;font-size:12px;padding:5px 0;display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer}
+
 .tdel{color:var(--muted)}
 .fxt button,.fseg .ordb,.tbr .ord button{min-height:40px;min-width:40px}
 .ilinks .lnk,.ivr .lnk.dl{min-height:40px;display:inline-flex;align-items:center;padding:0 6px}
 .prow .del{min-height:40px;padding:0 8px}
 .del{min-height:40px}
 .tg:before{content:'';position:absolute;inset:-6px -4px}
-.empv .ecard .badge{background:none!important;padding:0;font-weight:500}
+
 /* الإصدار 61: الفريق 3 أسطر، والمواقف داخل الحافز، والرابط زر جنب «قيّمه» */
 .lnkb{width:40px;height:40px;border-radius:999px;border:1px solid var(--line2);background:#fff;color:var(--acc-dk);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;margin-inline-start:auto}
 .tbh .lnkb+.rate{margin-inline-start:8px}.tbr .v .lv{color:var(--muted);font-weight:400}
@@ -857,17 +745,14 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .rpc:active{background:var(--fill)}
 .rph{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .rph b{font-size:15px;font-weight:600;min-width:0;overflow-wrap:anywhere}
-.rpm{font-size:12px;color:var(--muted);flex:none}
+
 .rpd{display:flex;gap:7px;align-items:flex-start;margin-top:10px;padding:9px 11px;border-radius:14px;background:var(--amber-soft);color:#85642B;font-size:14px;line-height:1.55;overflow-wrap:anywhere}
 .rpd svg{flex:none;margin-top:3px}
 .rpd b{font-weight:600}
 .rpd.ok{background:none;padding:2px 0 0;color:var(--muted);font-size:13px}
 .rpd.ok svg{color:var(--green)}
 .rpd.ok b{color:var(--text);font-weight:500}
-.rpr{margin-top:8px;font-size:13px;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
-.rpr b{color:var(--text);font-weight:500}
-.rpr.nt{display:flex;align-items:center;gap:5px;margin-top:6px}
-.rph2{font-size:13px;color:var(--muted);margin:22px 2px 8px}
+
 .tbr .v .lv{color:var(--acc-dk)}
 .rpmeta{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin:2px 0 12px}
 .rpdec{background:var(--amber-soft);border-radius:18px;padding:12px 14px;margin-bottom:6px;color:#6E5323}
@@ -887,7 +772,7 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .rpgone b{font-weight:500;color:var(--text)}
 .rpe{font-size:14px;color:var(--faint);padding:4px 0}
 .rpf{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.rpf img,.rvid{width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;background:var(--fill);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;color:var(--muted)}
+.rpf img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;background:var(--fill);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;color:var(--muted)}
 .rdoc{display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
 .rdoc svg{color:var(--acc-dk);flex:none}
 .rdoc b{display:block;font-size:14px;font-weight:500;overflow-wrap:anywhere}
@@ -908,10 +793,7 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .rok .rokc{width:64px;height:64px;border-radius:50%;background:var(--green-soft);color:var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
 .rok b{display:block;font-size:17px;font-weight:600;margin-bottom:6px}
 .rok>div{font-size:15px}
-.rpr.up{display:flex;align-items:flex-start;gap:5px;color:var(--green);-webkit-line-clamp:unset}
-.rpr.up svg{flex:none;margin-top:4px}
-.rpr.up b{color:var(--green)}
-.rpr.lt{display:flex;align-items:center;gap:5px;margin-top:6px;font-size:12px}
+
 .tg2.g{color:var(--green);background:var(--green-soft)}
 .rpi.lat li{color:#6E6E69}
 .rpi.lat li:before{background:transparent;border:1.5px solid var(--faint);width:6px;height:6px;top:14px}
@@ -948,9 +830,7 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .rpi.dn li:before{display:none}
 .rpi.dn li svg{position:absolute;right:0;top:9px;color:var(--green)}
 .rpgone.rm svg{color:var(--red)}
-.rpr.lt{gap:14px}
-.rpr.lt span{display:inline-flex;align-items:center;gap:5px}
-.rpr.lt .okc{color:var(--green)}
+
 .hday{margin-top:14px;padding-bottom:6px;border-bottom:1px solid var(--line)}
 .hdh{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
 .hdh span{font-weight:400;color:var(--muted)}
@@ -962,8 +842,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .rpmeta .edl{margin-inline-start:auto;flex:none}
 .rpmeta>span{min-width:0}
 .edt{color:var(--acc-dk);font-size:12px}
-.ecm{display:flex;justify-content:flex-end;margin-top:-4px}
-.dhead .pen{width:34px;height:34px;border-radius:50%;background:var(--fill);border:0;color:var(--muted);display:flex;align-items:center;justify-content:center;flex:none;padding:0;cursor:pointer}
+
 .erow{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
 .erow input{flex:1;min-width:0;border:1.5px solid var(--line2)!important;padding:9px 11px;font-size:16px;border-radius:12px;background:#fff;color:var(--text)}
 .erow.dn input{color:var(--muted)}
@@ -989,12 +868,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .cfm b{display:block;font-size:17px;font-weight:600;margin-bottom:6px}
 .cfm p{margin:0 0 16px;color:var(--muted);font-size:14px;line-height:1.6}
 .cfm .btn2{width:100%;margin-top:8px}
-.medit{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.mchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);border-radius:999px;padding:4px 6px 4px 12px;font-size:13px;color:var(--text);background:#fff}
-.mchip button{position:relative;border:0;background:var(--fill);color:var(--muted);border-radius:999px;min-width:36px;height:36px;display:flex;align-items:center;justify-content:center;padding:0 8px;font:inherit;font-size:12px;cursor:pointer}
-.mchip button::after{content:'';position:absolute;inset:-4px}
-.mchip.arm button{background:var(--red);color:#fff}
-.mchip.add{color:var(--acc-dk);border-style:dashed;padding:8px 14px;cursor:pointer}
+
 #ov .sheet:has(#apc)>*{flex-shrink:0}
 /* الإصدار 66: الأعمال الحالية حيّة */
 .rpi.cur li{border-bottom:1px solid var(--line);padding-top:9px;padding-bottom:9px}
@@ -1067,16 +941,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .ials.me{color:#3F5A72;background:var(--acc-soft);border-radius:10px;padding:5px 8px}
 .rpmeta+.ials{margin:8px 0 0}
 .ibell{flex:none;width:34px;height:34px;border:0;border-radius:10px;background:var(--fill);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer}
-.albn{display:flex;align-items:center;gap:7px;width:100%;margin-top:8px;padding:9px 11px;border:0;border-radius:12px;background:var(--acc-soft);color:#3F5A72;font:inherit;font-size:13px;text-align:start;cursor:pointer}
-.albn>span:first-of-type{flex:1;min-width:0}
-.albn .go{flex:none;font-weight:600;color:#fff;background:var(--acc);border-radius:999px;padding:8px 13px}
-.ecard.hl{box-shadow:0 0 0 2px var(--acc-ring)}
-.alst{margin-top:12px;border:1px solid var(--line);border-radius:var(--r);padding:8px 12px}
-.alst .alh{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:2px}
-.alst .alr{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:5px 0;border-top:1px solid var(--line)}
-.alst .alr:first-of-type{border-top:0}
-.alst .alr b{display:flex;align-items:center;gap:4px;font-weight:500;color:var(--muted)}
-.alst .alr b.ok{color:var(--green)}
+
 .rfbar{position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:40;display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:14px;background:#2A2A28;color:#fff;font-size:13px;line-height:1.5;box-shadow:0 8px 24px rgba(0,0,0,.18)}
 .rfbar.adm{bottom:calc(84px + env(safe-area-inset-bottom))}
 .rfbar svg{flex:none}
@@ -1134,14 +999,12 @@ a.rdoc{text-decoration:none;color:var(--text)}
 /* الإصدار 81: صفحة الموظف من اليسار لليمين لما تكون لغته غير العربي */
 .lsel{width:auto;min-width:118px;font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line2);border-radius:12px;background:var(--surface);color:var(--text)}
 html[dir=ltr] svg.fl{transform:scaleX(-1)}
-html[dir=ltr] .chev{transform:rotate(-90deg)}html[dir=ltr] .chev.up{transform:rotate(90deg)}
-html[dir=ltr] .pgh2 .cg{transform:rotate(90deg)}html[dir=ltr] .pgrp.cl .pgh2 .cg{transform:none}
+
 html[dir=ltr] .rpfold .cv2.on{transform:rotate(90deg)}
-html[dir=ltr] .racts{margin:0 0 12px 33px}
-html[dir=ltr] .qsel select{padding:9px 14px 9px 10px}
+
 html[dir=ltr] .rpv li{padding:3px 0 3px 14px}
 html[dir=ltr] .rpi li{padding:5px 0 5px 14px}
-html[dir=ltr] .mchip{padding:4px 12px 4px 6px}
+
 html[dir=ltr] .ctitle .sp{margin-left:auto;margin-right:0}
 html[dir=ltr] .gr{text-align:left}
 html[dir=ltr] .gr+.gr:before{left:58px;right:0}
@@ -1151,18 +1014,14 @@ html[dir=ltr] .sum .badge:last-child{margin-left:auto;margin-right:0}
 html[dir=ltr] .tbl td:last-child{text-align:right}
 html[dir=ltr] .mi .x{right:3px;left:auto}
 html[dir=ltr] .sc{text-align:left}
-html[dir=ltr] .trow2{text-align:left}
+
 html[dir=ltr] .dtog{text-align:left}
 html[dir=ltr] .fab{right:18px;left:auto}
-html[dir=ltr] .qsel{padding-left:12px;padding-right:0}
+
 html[dir=ltr] .dp select,html[dir=ltr] .dp input{text-align:right}
-html[dir=ltr] .pgh2{text-align:left}
+
 html[dir=ltr] .shot .x{right:3px;left:auto}
-html[dir=ltr] .ec .pend{right:10px;left:auto}
-html[dir=ltr] .thero small{margin-left:4px;margin-right:0}
-html[dir=ltr] .tatst{margin-left:auto;margin-right:0}
-html[dir=ltr] .tgo{margin-left:auto;margin-right:0}
-html[dir=ltr] .tacts button+button{border-left:1px solid var(--line2);border-right:0}
+
 html[dir=ltr] .gpts ol{padding-left:20px;padding-right:0}
 html[dir=ltr] .gban{text-align:left}
 html[dir=ltr] .grow{text-align:left}
@@ -1228,16 +1087,14 @@ html:root .empty{color:var(--muted)}
 html:root .tm,html:root .rpm2,html:root .rpmeta,html:root .fxh span,html:root .fxt,html:root .ent .d,html:root .gr .n small,html:root .tkt,html:root .rhint,html:root .empi,html:root .tbh2,html:root .dyh span{color:var(--muted)}
 
 /* ===== البطاقات: بدون حدود ثقيلة، بظل خفيف ===== */
-html:root .card,html:root .rpcard,html:root .pgrp,html:root .tfc,html:root .ecard,html:root .qc,html:root .tbl2,html:root .gcard,html:root .dprops,html:root .lbox,html:root .rpc,html:root .tbrk{background:var(--surface)!important;border:1px solid var(--line)!important;border-radius:24px!important;box-shadow:var(--el)!important}
+html:root .card,html:root .rpcard,html:root .tfc,html:root .tbl2,html:root .gcard,html:root .dprops,html:root .lbox,html:root .rpc,html:root .tbrk{background:var(--surface)!important;border:1px solid var(--line)!important;border-radius:24px!important;box-shadow:var(--el)!important}
 html:root .card{padding:18px}
-html:root .pgrp .ecard{border:0!important;border-top:1px solid var(--line)!important;border-radius:0!important;box-shadow:none!important}
-html:root .pgrp .pgh2+.ecard{border-top:0!important}
 
 /* ===== الأزرار: دائرية ===== */
 html:root .btn{border-radius:999px!important;min-height:52px;padding:13px 18px!important;font-size:15px!important;font-weight:600!important;box-shadow:0 8px 22px rgba(63,97,126,.22)!important;background:var(--acc)!important;color:#fff!important}
 html:root .btn2{border-radius:999px!important;min-height:44px;font-weight:500!important;border:0!important;background:var(--fill)!important;color:var(--text)}
 html:root .btn2.cu,html:root .bigdo,html:root .save .btn,html:root .dock .btn{border-radius:999px!important;font-weight:600!important;background:var(--acc)!important;color:#fff!important;box-shadow:0 6px 16px rgba(63,97,126,.20)!important}
-html:root .ibtn{width:44px!important;height:44px!important;border-radius:50%!important;border:0!important;background:var(--fill)!important;color:var(--text)}
+
 html:root .lnk{color:var(--acc-dk)!important;font-weight:500;min-height:44px;display:inline-flex;align-items:center}
 html:root .mbtn{min-height:44px;border-radius:999px;color:var(--acc-dk);background:var(--acc-soft);font-weight:500;padding:0 14px}
 html:root .del{color:var(--muted);min-height:44px;min-width:44px;justify-content:center;border-radius:50%}
@@ -1267,10 +1124,10 @@ html:root .qlab{color:var(--muted);font-weight:600;font-size:13px;margin:8px 4px
 /* ===== الحقول: معبّاة ناعمة بدون إطار ===== */
 html:root input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]),html:root select,html:root textarea{border:1.5px solid transparent!important;background:var(--fill)!important;border-radius:16px!important;color:var(--text);min-height:48px}
 html:root input::placeholder,html:root textarea::placeholder{color:var(--faint);opacity:1}
-html:root .dp select,html:root .dp input,html:root .dprops input,html:root .dprops select,html:root textarea.dtitle,html:root input.dtitle{background:transparent!important;min-height:44px}
+html:root .dp select,html:root .dp input,html:root .dprops input,html:root .dprops select{background:transparent!important;min-height:44px}
 html:root .dp input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]),html:root .dprops input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]){background:transparent!important}
 html:root .qtt{padding:10px 14px!important;font-size:17px;font-weight:600}
-html:root .tfil select,html:root .fvf select{border-radius:999px!important;min-height:44px;padding:0 12px}
+html:root .fvf select{border-radius:999px!important;min-height:44px;padding:0 12px}
 html:root .sheet .crow input,html:root .sheet .lrow input,html:root .prow input{min-height:44px}
 html:root .vrec{border:0!important;border-radius:16px!important;min-height:48px;color:var(--text)!important;background:var(--fill)}
 html:root .vrec svg{color:var(--acc)}
@@ -1291,21 +1148,16 @@ html:root .sc.z{opacity:.8}
 html:root .sc b{font-size:17px!important;font-weight:600}
 html:root .sc span{font-weight:500!important}
 html:root .sc:not(.a):not(.r){color:var(--acc-dk)}
-html:root .pgrp{overflow:hidden}
-html:root .pgrp.ep .pgh2,html:root .pgh2{background:var(--surface)!important;color:var(--text)!important;border:0!important;font-size:15px!important;font-weight:600!important;padding:14px 16px 8px!important;min-height:48px}
-html:root .pgrp.ep .pgh2 .n,html:root .pgh2 .n{background:var(--acc-soft)!important;color:var(--acc-dk)!important;font-size:12px!important;font-weight:500!important}
-html:root .pgrp.cl .pgh2{padding-bottom:14px!important}
-html:root .ecard .tt,html:root .trow2 .tt{font-weight:500!important;font-size:15px!important}
-html:root .ring{border-color:var(--line2);border-width:2px;width:24px;height:24px}
+
 html:root .dtog{color:var(--green);min-height:44px}
 
 /* ===== بطاقات الأرقام: خلفية فاتحة بدون حدود ===== */
-html:root .kpi,html:root .thero>div,html:root .fxs div,html:root .fxs button.due{background:var(--fill)!important;border:0!important;border-radius:20px!important;box-shadow:none!important}
+html:root .kpi,html:root .fxs div,html:root .fxs button.due{background:var(--fill)!important;border:0!important;border-radius:20px!important;box-shadow:none!important}
 html:root .fxs button.due,html:root .fxs div.due{background:var(--red-soft)!important}
-html:root .fxs b,html:root .kpi .k,html:root .thero span{color:var(--muted)!important;font-size:12px;font-weight:500!important}
+html:root .fxs b,html:root .kpi .k{color:var(--muted)!important;font-size:12px;font-weight:500!important}
 html:root .fxs div.due b,html:root .fxs button.due b,html:root .fxs div.due small,html:root .fxs button.due small{color:var(--red)!important}
 html:root .fxs small,html:root .kpi .v small{color:var(--faint)!important}
-html:root .kpi .v,html:root .thero b,html:root .fxs .tv{font-weight:600!important;font-size:17px!important}
+html:root .kpi .v,html:root .fxs .tv{font-weight:600!important;font-size:17px!important}
 
 /* ===== القوائم داخل البطاقات ===== */
 html:root .tbr{min-height:58px;padding:0 16px}
@@ -1315,7 +1167,7 @@ html:root .tbr .v{color:var(--muted)}
 html:root .tbr .ch{color:var(--faint)}
 html:root .tbh .n b{font-size:17px;font-weight:600}
 html:root .tbh .n span,html:root .tbh .n .ls{color:var(--muted)}
-html:root .tacts{border-radius:999px!important;border:0!important;background:var(--fill)!important}
+
 html:root .tfile .fxbt button{border-radius:20px!important;border:0!important;background:var(--fill)!important;font-weight:500}
 html:root .dyh b{font-size:14px;font-weight:600}
 html:root .rst span{border-radius:999px;color:var(--text);background:var(--fill);border:0}
@@ -1340,12 +1192,12 @@ html:root .tg.on{background:var(--acc)}
 /* ===== متفرقات ===== */
 html:root .etabs.e4 button .nb{background:var(--fill2);color:var(--text)}
 html:root .etabs.e4 button.on .nb{background:var(--acc-soft)!important;color:var(--acc-dk)!important}
-html:root .rpmeta button,html:root .ndel,html:root .pen,html:root .str .ed,html:root .slp .ed{position:relative}
-html:root .rpmeta button::after,html:root .ndel::after,html:root .pen::after{content:"";position:absolute;inset:-10px -6px}
+html:root .rpmeta button,html:root .ndel,html:root .str .ed,html:root .slp .ed{position:relative}
+html:root .rpmeta button::after,html:root .ndel::after{content:"";position:absolute;inset:-10px -6px}
 html:root .login .ei{color:var(--acc)}
 html:root .tro{color:var(--acc-dk)}
 html:root .pushb{background:var(--acc-soft);border-radius:24px;padding:14px 16px}html:root .pushb .ph1{color:var(--acc-dk)}html:root .pushb p{color:var(--muted)}html:root .pushb .later{min-height:44px}
-html:root textarea.dtitle,html:root input.dtitle{border:0!important}
+
 html:root .btn2.rd{background:var(--red-soft)!important;color:var(--red)!important;font-weight:600!important}
 html:root .btn2.arm{background:var(--red)!important;color:#fff!important;font-weight:600!important}
 html:root .madd{color:var(--acc-dk);border-radius:20px;border-color:var(--acc-ring);background:var(--surface)}
@@ -1355,12 +1207,11 @@ html:root .gpi i{color:var(--acc-dk)}
 html:root .mk.ok{color:var(--green)}html:root .mk.no{color:var(--red)}html:root .ast.ok .dot{background:var(--green);border-color:var(--green)}html:root .ast.cur .dot{border-color:var(--green)}
 
 /* الإصدار 103: الفرع الرئيسي (عنوان المجموعة أو المشروع) بالأزرق المطفي وتحته خط أزرق فاتح، بنفس مقاس الخط */
-html:root .pgrp.ep .pgh2,html:root .pgrp .pgh2{color:var(--acc-dk)!important;padding:14px 16px 12px!important;border-bottom:2px solid var(--acc-ring)!important}
-html:root .pgrp.ep.cl .pgh2,html:root .pgrp.cl .pgh2{border-bottom:0!important;padding-bottom:14px!important}
+
 html:root .rpc .rph{padding-bottom:10px;margin-bottom:8px;border-bottom:2px solid var(--acc-ring)}
 html:root .rpc .rph b{color:var(--acc-dk)}
 /* الإصدار 104: نص المهمة بوزن نص العمل، خط رفيع بين الأعمال في التقارير، وزر «أنجزتها» صغير على نفس سطر المهمة */
-html:root .ecard .tt,html:root .trow2 .tt{font-weight:400!important}
+
 html:root .rpc .rpv li{padding-top:8px;padding-bottom:8px;border-bottom:1px solid var(--line)}
 html:root .rpc .rpv li:last-child{border-bottom:0}
 html:root .rpc .rpv li:before{top:17px}
@@ -1368,11 +1219,7 @@ html:root .rpcard .rpi li{padding-top:9px;padding-bottom:9px;border-bottom:1px s
 html:root .rpcard .rpi li:last-child{border-bottom:0}
 html:root .rpcard .rpi li:before{margin-top:4px}
 html:root .rpcard .rpi.dn li svg{margin-top:4px}
-html:root .ecard{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:center}
-html:root .ecard>*{grid-column:1/-1}
-html:root .ecard>.th,html:root .ecard>.tm{grid-column:1}
-html:root .ecard>.bigdo{grid-column:2;grid-row:1/span 2;align-self:center;position:relative;margin:0!important;width:auto!important;max-width:132px;min-height:36px;padding:6px 12px!important;border-radius:18px!important;white-space:normal;text-align:center;line-height:1.35;background:var(--acc-soft)!important;color:var(--acc-dk)!important;box-shadow:none!important;font-size:13px;font-weight:600!important}
-html:root .ecard>.bigdo::after{content:"";position:absolute;inset:-6px -4px}
+
 /* الإصدار 105: بند الفاتورة، وتقسيم مصروف المشروع حسب البند */
 html:root .icat{margin-top:8px}
 html:root .ivd .icat{margin-bottom:10px}
@@ -1563,9 +1410,9 @@ html:root .spn .rhint{margin-top:6px}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=117"></script>
+<script src="api.js?v=118"></script>
 <script>
-const APP_VER = '117';
+const APP_VER = '118';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1576,7 +1423,7 @@ function fetchT(u, o, ms) {
 async function checkUpdate(force) {
   if (BOOT.page === 'denied' || /^preview/.test(BOOT.key || BOOT.token || '')) return false;
   if (!force && Date.now() - verAt < 20000) return false;
-  if (S.upN || S.rec || S.vup || !AU.paused || S.gr || CAM.stream || CAM.shot || S.doing || S.invForm || S.form || S.gform || S.ret || S.sheet || tfFilled().length || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) return false;
+  if (S.upN || S.gr || CAM.stream || CAM.shot || S.invForm || S.form || S.gform || S.ret || S.sheet || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) return false;
   verAt = Date.now();
   try {
     /* الإصدار 76: أول نشيك تاريخ الملف بطلب صغير (HEAD). ننزّل الصفحة كاملة بس إذا تغيّر */
@@ -1601,7 +1448,7 @@ const BOOT = (function () {
   if (k && !e) { try { history.replaceState(null, '', location.pathname + location.hash); } catch (x) {} }
   return {page: page, key: page === 'admin' ? s : '', legacy: page === 'admin' ? k : '', token: page === 'emp' ? e : '', url: location.origin + location.pathname, firstRun: false};
 })();
-const S = {view:'rec', data:null, emp:null, type:null, crits:[], misses:[], star:false, starNote:'', date:null, dateMode:'today', note:'', busy:false, armed:null, lastId:null, form:null, preview:null, tf:{emps:[], project:null, newP:false, items:[newItem()]}, photos:{}, pf:'all', mopen:{}, mc:{}, upN:0, ret:null, doing:null, upload:null, empData:null, empPreview:false, tq:{f:'', emp:'all', proj:'all', urg:false, q:'', search:false, showDone:false}, tqLoaded:false, eopen:{}, iv:{f:''}, fx:{seg:'e', emp:'', proj:null, rv:false, ord:false, all:false}, iopen:{}, ic:{}, invForm:false, ishots:[], ishotLoading:false, inv:{amount:'', desc:'', project:''}, td:null, sheet:false, sheetMore:false, pc:{}, popen:{}, etab:'tasks', eShowDone:false, shots:[], cm:'', shotLoading:false, rec:null, vu:{}, vreq:{}, vup:null};
+const S = {view:'rec', data:null, emp:null, type:null, crits:[], misses:[], star:false, starNote:'', date:null, dateMode:'today', note:'', busy:false, armed:null, lastId:null, form:null, preview:null, photos:{}, pf:'all', mopen:{}, mc:{}, upN:0, ret:null, upload:null, empData:null, empPreview:false, eopen:{}, iv:{f:''}, fx:{seg:'e', emp:'', proj:null, rv:false, ord:false, all:false}, iopen:{}, ic:{}, invForm:false, ishots:[], ishotLoading:false, inv:{amount:'', desc:'', project:''}, sheet:false, sheetMore:false, pc:{}, popen:{}, etab:'tasks', eShowDone:false, cm:'', shotLoading:false, vu:{}, vreq:{},};
 const $ = s => document.querySelector(s);
 const toEn = s => String(s == null ? '' : s).replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x660)).replace(/[\u06F0-\u06F9]/g, d => String(d.charCodeAt(0) - 0x6F0));
 const esc = s => toEn(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1629,8 +1476,6 @@ const hm12 = (h, m) => (h % 12 || 12) + ':' + m + ' ' + (h < 12 ? 'ص' : 'م');
 function dueL(s, yr) { if (!s) return ''; const m = MONTHS_AR[Number(s.slice(5, 7)) - 1] || ''; return Number(s.slice(8, 10)) + ' ' + m + (yr ? ' ' + s.slice(0, 4) : ''); }
 function dueState(u, today) { if (!u || !u.due) return ''; return u.due < today ? 'late' : u.due === today ? 'today' : 'soon'; }
 const dmyt = s => { const m = /[ T](\d\d):(\d\d)/.exec(s || ''); return dmy(s) + (m ? ' · ' + hm12(+m[1], m[2]) : ''); };
-const signed = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n);
-const nqt = n => n === 1 ? 'نقطة' : n === 2 ? 'نقطتين' : n <= 10 ? 'نقاط' : 'نقطة';
 const TRUST = 'الأمانة والمصداقية';
 const HEAVY = [TRUST];
 const heavy = c => HEAVY.indexOf(c) >= 0;
@@ -1643,8 +1488,8 @@ const CRIT_IC = {'الحضور والمواعيد':'clock','جودة الشغل'
 function emptyHtml(icon, text) { return '<div class="empty"><div class="ei">' + I(icon, 24) + '</div>' + text + '</div>'; }
 function ctitle(icon, text, extra) { return '<div class="ctitle"><span class="ci">' + I(icon, 17) + '</span>' + text + (extra ? '<span class="sp">' + extra + '</span>' : '') + '</div>'; }
 function segc(items, cur, fn) { return '<div class="segc">' + items.map(x => '<button class="' + (cur === x[0] ? 'on' : '') + '" onclick="' + fn + '(\'' + x[0] + '\')">' + x[1] + '</button>').join('') + '</div>'; }
-const ACC_IMG = 'image/' + '*', ACC_MEDIA = ACC_IMG + ',video/' + '*';
 /* الإصدار 107: مرفق الفاتورة صورة أو PDF. الصورة نص (dataURL) والـPDF كائن {pdf: File, name} */
+const ACC_IMG = 'image/' + '*'; /* 118 */
 const ACC_INV = ACC_IMG + ',application/pdf,.pdf';
 function isPdfPath(p) { return /\.pdf$/i.test(String(p || '')); }
 function isPdfFile(f) { return !!f && (f.type === 'application/pdf' || /\.pdf$/i.test(String(f.name || ''))); }
@@ -1679,7 +1524,7 @@ function pdfRefresh() {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pdfRefresh(); });
 setInterval(pdfRefresh, 40 * 60000);
 function pdfLink(u, f) { return `<a class="pdoc" href="${esc(u)}"${f ? ` data-f="${esc(f)}" onclick="return pdfGo(event,this)"` : ''} target="_blank" rel="noopener">${I('file-text', 22)}<b>ملف PDF</b><small>فتح الملف</small></a>`; }
-const SL2 = '/' + '/', DRV_URL = 'https:' + SL2 + 'drive.google.com/file/d/', WA_URL = 'https:' + SL2 + 'wa.me/?text=';
+const SL2 = '/' + '/', WA_URL = 'https:' + SL2 + 'wa.me/?text='; /* 118 */
 const PUSH = {
   ok: 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window,
   ios: /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1),
@@ -1892,21 +1737,6 @@ function loadAttPhotos() {
     } catch (e) {}
   });
 }
-function attRowLines(r, ps, today) {
-  const p = projOf(ps, r.project), L = [];
-  L.push('طلع من البيت ' + t12(r.home));
-  if (r.in) L.push('وصل ' + (p ? esc(p.name) : 'المشروع') + ' ' + t12(r.in) + ' · الطريق ' + hrs(r.inMs - r.homeMs));
-  if (r.out) L.push('طلع ' + t12(r.out) + ' · اشتغل ' + hrs(r.outMs - r.inMs) + ' ساعة');
-  else if (r.in) L.push(today && r.date < today ? 'ما سجّل طلوعه من المشروع' : 'له ' + hrs(Date.now() - r.inMs) + ' ساعة في الشغل');
-  return L.join('<br>');
-}
-function attLinks(r) {
-  const a = [];
-  if (r.homeLat != null) a.push(`<a class="lnk dl" href="${mapUrl(r.homeLat, r.homeLng)}" target="_blank" rel="noopener">موقع الطلوع من البيت</a>`);
-  if (r.inLat != null) a.push(`<a class="lnk dl" href="${mapUrl(r.inLat, r.inLng)}" target="_blank" rel="noopener">موقع الوصول</a>`);
-  if (r.outLat != null) a.push(`<a class="lnk dl" href="${mapUrl(r.outLat, r.outLng)}" target="_blank" rel="noopener">موقع الطلوع</a>`);
-  return a.join('');
-}
 function teamBreak(m) {
   return `<div class="tbrk">
     <div><span>الحافز الأساسي</span><b>${sar(m.base)}</b></div>
@@ -2039,159 +1869,12 @@ async function projLocSave(id, lat, lng) {
 }
 
 function toTop() { const sc = document.getElementById('scr'); if (sc) sc.scrollTop = 0; }
-const AU = new Audio(), VMAX = 180;
-AU.preload = 'auto';
-const PLAY_SVG = '<svg class="py" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12.5-7.5z"/></svg><svg class="pa" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg>';
-function vOf(t) { return (t.media || []).find(x => x.t === 'a') || null; }
-function mOf(t) { return (t.media || []).filter(x => x.t !== 'a'); }
-function fmtS(n) { n = Math.max(0, Math.round(n || 0)); return Math.floor(n / 60) + ':' + String(n % 60).padStart(2, '0'); }
-function vWave(key) {
-  let h = 7, o = '';
-  for (const c of String(key)) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  for (let i = 0; i < 30; i++) { h = (h * 1103515245 + 12345) >>> 0; o += '<i style="height:' + (25 + (h >>> 16) % 75) + '%"></i>'; }
-  return o;
-}
-function vPlayerHtml(key, d, extra) {
-  const on = AU.dataset.k === key, dur = on && isFinite(AU.duration) && AU.duration > 0 ? AU.duration : d;
-  const n = on && dur ? Math.round(Math.min(1, AU.currentTime / dur) * 30) : 0;
-  const w = vWave(key).split('</i>').map((x, i) => i < n ? x.replace('<i ', '<i class="on" ') : x).join('</i>');
-  return `<div class="vpl ${on && !AU.paused ? 'pl' : ''}" data-k="${esc(key)}" data-d="${d || 0}" dir="ltr"><button class="pb" onclick="vToggle('${esc(key)}')" aria-label="تشغيل الشرح الصوتي">${PLAY_SVG}</button><span class="wv">${w}</span><span class="d">${fmtS(on && AU.currentTime > 0 ? AU.currentTime : d)}</span>${extra || ''}</div>`;
-}
-function vUi() {
-  document.querySelectorAll('.vpl[data-k]').forEach(el => {
-    const on = AU.dataset.k === el.dataset.k, d = Number(el.dataset.d) || 0;
-    const dur = on && isFinite(AU.duration) && AU.duration > 0 ? AU.duration : d;
-    const n = on && dur ? Math.round(Math.min(1, AU.currentTime / dur) * 30) : 0;
-    el.classList.toggle('pl', on && !AU.paused);
-    el.querySelectorAll('.wv i').forEach((b, i) => b.classList.toggle('on', i < n));
-    const t = el.querySelector('.d'); if (t) t.textContent = fmtS(on && AU.currentTime > 0 ? AU.currentTime : d);
-  });
-}
-['play', 'pause', 'timeupdate'].forEach(ev => AU.addEventListener(ev, vUi));
-AU.addEventListener('ended', () => { try { AU.currentTime = 0; } catch (e) {} AU.pause(); vUi(); });
-function vSrc(key) { return key === 'tf' ? ((S.tf.items[0].voice || {}).url || '') : (S.vu[key] || ''); }
-function vToggle(key) {
-  if (AU.dataset.k === key && !AU.paused) { AU.pause(); return; }
-  const url = vSrc(key);
-  if (!url) { vFetch([key], true); return; }
-  if (AU.dataset.k !== key || AU.src !== url) { AU.src = url; AU.dataset.k = key; }
-  const p = AU.play();
-  if (p && p.catch) p.catch(() => toastErr('ما اشتغل المقطع، اضغط مرة ثانية'));
-  vUi();
-}
-async function vFetch(ids, play) {
-  const need = ids.filter(id => id && id !== 'tf' && !S.vu[id] && !S.vreq[id]);
-  if (!need.length) return;
-  need.forEach(id => { S.vreq[id] = 1; });
-  try { Object.assign(S.vu, await API.apiFileUrls(need)); } catch (e) { if (play) toastErr(e); }
-  need.forEach(id => { delete S.vreq[id]; });
-  if (play && S.vu[need[0]]) {
-    AU.src = S.vu[need[0]]; AU.dataset.k = need[0];
-    try { await AU.play(); } catch (e) { toast('المقطع جاهز، اضغط تشغيل'); }
-    vUi();
-  }
-}
-function vStopIf(key) { if (AU.dataset.k === key) { AU.pause(); AU.removeAttribute('src'); AU.dataset.k = ''; } }
 
-function recBarHtml(r) { return `<div class="vrec on"><span class="dot"></span>يسجّل…<span class="tm" id="vrt">${fmtS(r.sec)}</span><button class="stp" onclick="recStop()">وقّف</button></div>`; }
-async function recStart(where) {
-  if (S.rec) return;
-  if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder)) return toastErr('جوالك ما يدعم التسجيل من التطبيق، حدّث النظام');
-  if (!AU.paused) AU.pause();
-  let stream;
-  try { stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true}}); }
-  catch (e) { return toastErr('ما قدرت أفتح المايكروفون، اسمح للتطبيق يستخدمه من الإعدادات'); }
-  const mt = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'].find(x => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(x)) || '';
-  let mr;
-  try { mr = new MediaRecorder(stream, mt ? {mimeType: mt, audioBitsPerSecond: 64000} : undefined); }
-  catch (e) { stream.getTracks().forEach(t => t.stop()); return toastErr('ما قدرت أبدأ التسجيل'); }
-  const r = S.rec = {where, mr, stream, chunks: [], t0: Date.now(), sec: 0};
-  mr.ondataavailable = e => { if (e.data && e.data.size) r.chunks.push(e.data); };
-  mr.onstop = () => recDone(r);
-  mr.start(1000);
-  r.iv = setInterval(() => {
-    r.sec = Math.floor((Date.now() - r.t0) / 1000);
-    if (r.sec >= VMAX) recStop(); else { const el = $('#vrt'); if (el) el.textContent = fmtS(r.sec); }
-  }, 300);
-  drawVoice(where);
-}
-function recStop(cancel) {
-  const r = S.rec;
-  if (!r || r.stopping) return;
-  r.stopping = true; r.cancel = !!cancel; clearInterval(r.iv);
-  r.sec = Math.min(VMAX, Math.max(1, Math.round((Date.now() - r.t0) / 1000)));
-  try { if (r.mr.state !== 'inactive') r.mr.stop(); else recDone(r); } catch (e) { recDone(r); }
-  r.stream.getTracks().forEach(t => t.stop());
-}
-async function recDone(r) {
-  if (r.done) return;
-  r.done = true;
-  if (S.rec === r) S.rec = null;
-  if (r.cancel) return drawVoice(r.where);
-  const type = String(r.mr.mimeType || (r.chunks[0] && r.chunks[0].type) || 'audio/mp4').split(';')[0];
-  const blob = new Blob(r.chunks, {type});
-  if (blob.size < 500) { toastErr('التسجيل قصير، سجّل مرة ثانية'); return drawVoice(r.where); }
-  const tf = r.where === 'tf', it = S.tf.items[0], v = {st: 'up', d: r.sec, url: URL.createObjectURL(blob)};
-  if (tf) it.voice = v; else S.vup = r.where;
-  drawVoice(r.where);
-  S.upN++;
-  try {
-    v.id = await callT(300000, 'apiUploadAud', BOOT.key, blob);
-    v.st = 'ok'; S.vu[v.id] = v.url;
-    if (!tf) { S.data = await call('apiTaskUpdate', BOOT.key, r.where, {voice: v.id, vd: v.d}); toast('انحفظ الشرح الصوتي'); }
-  } catch (e) {
-    if (tf && it.voice === v) it.voice = null;
-    toastErr('ما ارتفع التسجيل، ' + e);
-  }
-  S.upN--;
-  if (tf) drawVoice('tf');
-  else { S.vup = null; if (S.td === r.where) renderAdmin(); }
-}
-function drawVoice(where) {
-  if (where === 'tf') { const el = $('#tfVoice'); if (el) el.innerHTML = tfVoiceHtml(); return; }
-  const el = $('#dVoice'), t = S.td === where && allTasks().find(x => x.id === where);
-  if (el && t) el.innerHTML = dVoiceHtml(t);
-}
-function tfVoiceHtml() {
-  const r = S.rec, v = S.tf.items[0].voice;
-  if (r && r.where === 'tf') return recBarHtml(r);
-  if (v) return vPlayerHtml('tf', v.d, v.st === 'up' ? '<span class="vup">يرفع…</span>' : `<button class="rm" onclick="rmVoice()" aria-label="حذف التسجيل">${I('trash-2', 17)}</button>`)
-    + `<div class="vcap">${v.st === 'up' ? 'جاري رفع التسجيل… خلك بالصفحة لين يخلص' : 'شرح صوتي · اسمعه قبل ما تضيف، أو احذفه وسجّل من جديد'}</div>`;
-  return `<button class="vrec" onclick="recStart('tf')">${I('mic', 18)}سجّل شرح صوتي<span class="tm h">لين 3 دقايق</span></button>`;
-}
-function rmVoice() {
-  const it = S.tf.items[0];
-  if (!it.voice || it.voice.st === 'up') return;
-  vStopIf('tf'); it.voice = null; drawVoice('tf');
-}
-function dVoiceHtml(t) {
-  const id = t.id, r = S.rec, v = vOf(t), edit = t.status !== 'done';
-  if (r && r.where === id) return recBarHtml(r);
-  if (S.vup === id) return '<div class="sub" style="margin-top:8px">جاري رفع التسجيل… خلك بالصفحة لين يخلص</div>';
-  if (v) {
-    const arm = S.armed === 'vdel_' + id;
-    return vPlayerHtml(v.id, v.d, edit ? `<button class="rm ${arm ? 'arm' : ''}" onclick="delVoice('${id}')" aria-label="حذف الشرح الصوتي">${arm ? 'احذفه؟' : I('trash-2', 17)}</button>` : '')
-      + (edit ? `<button class="lnk" onclick="recStart('${id}')">سجّل بداله</button>` : '');
-  }
-  return edit ? `<button class="vrec" onclick="recStart('${id}')">${I('mic', 18)}سجّل شرح صوتي<span class="tm h">لين 3 دقايق</span></button>` : '';
-}
-async function delVoice(id) {
-  if (S.armed !== 'vdel_' + id) { S.armed = 'vdel_' + id; return drawVoice(id); }
-  S.armed = null;
-  const t = allTasks().find(x => x.id === id), v = t && vOf(t);
-  if (v) vStopIf(v.id);
-  try { S.data = await call('apiTaskUpdate', BOOT.key, id, {voice: ''}); renderAdmin(); toast('انحذف الشرح الصوتي'); }
-  catch (e) { toastErr(e); renderAdmin(); }
-}
 
-function newItem(dueMode) { return {title: '', note: '', dueMode: dueMode || 'none', due: '', media: [], urgent: false, proof: lsGet('tf_proof') || 'photo'}; }
-const PROOFS = [['photo', 'صورة'], ['invoice', 'فاتورة'], ['note', 'ملاحظة']];
-const PROOF_HINT = {photo: 'يصوّر الشغل بعد ما يخلص', invoice: 'يصوّر الفاتورة ويكتب المبلغ والمحل، وتنحسب على مشروع المهمة', note: 'يكتب وش سوّى، بدون صورة'};
 
 function call(fn, ...args) { return callT(30000, fn, ...args); }
 /* الإصدار 74: عمليات الحفظ ما تعطي «فشل» بعد 30 ثانية، تنتظر الرد. والضغطة الثانية على نفس العملية وهي ماشية ما تسوي شي */
-const READ_FN = ['apiAdmin', 'apiEmp', 'apiPreview', 'apiTasksOld', 'apiProofAdmin', 'apiProofEmp', 'apiMediaAdmin', 'apiMediaEmp', 'apiInvImgAdmin', 'apiInvImgEmp', 'apiFileUrls', 'apiRepList', 'apiNotifs', 'attPhoto', 'apiCleanup', 'pushKey',
-  'apiUploadImg', 'apiUploadVid', 'apiUploadAud', 'apiRepUpload', 'apiMediaDiscard', 'apiAdminLogin', 'apiAlertSeen'];
+const READ_FN = ['apiAdmin', 'apiEmp', 'apiPreview', 'apiInvImgAdmin', 'apiInvImgEmp', 'apiFileUrls', 'apiRepList', 'apiNotifs', 'attPhoto', 'apiCleanup', 'pushKey', 'apiUploadImg', 'apiRepUpload', 'apiAdminLogin', 'apiAlertSeen'];
 const INFL = {};
 function callT(ms, fn, ...args) {
   const write = READ_FN.indexOf(fn) < 0;
@@ -2301,8 +1984,8 @@ function toastErr(e) {
 function toastLoad(msg) { return tNew('ld', msg); }
 function toastDone(t) { if (!t) return; t.fin = true; setTimeout(() => { if (t.type === 'ld') tKill(t); }, 700); }
 function toastClear() { TST.slice().forEach(tKill); }
-const LD_MSG = {apiAttHome: 'جاري التسجيل…', apiAttIn: 'جاري التسجيل…', apiAttOut: 'جاري التسجيل…', apiUploadImg: 'جاري رفع الصورة…', apiUploadVid: 'جاري رفع الفيديو…',
-  apiInvAddAdmin: 'جاري حفظ الفاتورة…', apiInvAdd: 'جاري إرسال الفاتورة…', apiTaskDone: 'جاري إرسال الإثبات…', apiTasksDelete: 'جاري الحذف…'};
+const LD_MSG = {apiAttHome: 'جاري التسجيل…', apiAttIn: 'جاري التسجيل…', apiAttOut: 'جاري التسجيل…', apiUploadImg: 'جاري رفع الصورة…',
+  apiInvAddAdmin: 'جاري حفظ الفاتورة…', apiInvAdd: 'جاري إرسال الفاتورة…'};
 
 function empLink(t) { return BOOT.url + '?e=' + t; }
 function adminLink() { return BOOT.url; }
@@ -2402,7 +2085,7 @@ function mountTabs() {
   if (old) old.remove();
   if (t) { t.id = 'tabsDock'; document.body.appendChild(t); }
 }
-function go(v) { S.ed = null; NF.open = false; RP.open = null; RP.hist = null; RP.book = null; S.tsub = null; S.tfile = null; S.tdue = false; S.tord = false; S.ssub = null; S.tsel = null; if (S.rec) recStop(true); if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, card: false, cdf: '', cdm: '', ord: false, all: false, lf: 'all', fp: '', fe: '', fs: ''}); S.view = v; lsSet('adm_view', v); S.attLog = null; S.armed = null; S.form = null; S.ret = null; S.td = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
+function go(v) { S.ed = null; NF.open = false; RP.open = null; RP.hist = null; RP.book = null; S.tsub = null; S.tfile = null; S.tdue = false; S.tord = false; S.ssub = null; if (v === 'inv') v = 'fin'; if (v !== 'fin' || S.view === 'fin') Object.assign(S.fx, {emp: '', proj: null, rv: false, card: false, cdf: '', cdm: '', ord: false, all: false, lf: 'all', fp: '', fe: '', fs: ''}); S.view = v; lsSet('adm_view', v); S.attLog = null; S.armed = null; S.form = null; S.ret = null; if (S.sheet) ovClose(); renderAdmin(); toTop(); }
 function rerender() { renderAdmin(); }
 
 /* ---------- تسجيل ---------- */
@@ -2452,12 +2135,11 @@ function renderRec() {
 
 /* الإصدار 106: ملخص يوم الموظف فوق التقييم. للقراءة فقط: الحضور، المهام اللي أنجزها، الأعمال اللي أشّرها في التقارير، وفواتيره */
 function daySum(emp, date) {
-  const d = S.data, o = {att: null, tasks: 0, ticks: null, inv: 0, invSum: 0};
+  const d = S.data, o = {att: null, ticks: null, inv: 0, invSum: 0};
   if (emp.attend) {
     const a = (d.attendance || []).find(x => x.emp === emp.id && x.date === date);
     o.att = !a ? {v: 'ما سجّل', c: 'r'} : a.bad ? {v: 'غير صحيح', c: 'r'} : {v: (a.in ? t12(a.in) : a.home ? 'طلع من البيت' : '—') + (a.in ? (a.out ? ' – ' + t12(a.out) : ' · ما طلع') : ''), c: '', s: a.late > 0 ? 'تأخر ' + a.late + ' د' : ''};
   }
-  o.tasks = (emp.tasks || []).filter(t => (t.status === 'done' || t.status === 'review') && String(t.doneAt || '').slice(0, 10) === date).length;
   if (RP.reps !== null) {
     o.ticks = 0;
     rpArr(RP.reps).forEach(r => rpArr(r.ticks).forEach(t => { if (t && t.by === emp.id && t.st !== 'ret' && t.at && new Date(Number(t.at) + 3 * 3600e3).toISOString().slice(0, 10) === date) o.ticks++; }));
@@ -2477,12 +2159,6 @@ function daySumHtml(emp, date) {
 function setEmp(id) { S.emp = id; renderRec(); }
 function togMiss(i) { const n = S.data.criteria[i].n; S.misses = S.misses.includes(n) ? S.misses.filter(x => x !== n) : S.misses.concat(n); renderRec(); }
 function togStar() { S.star = !S.star; renderRec(); }
-function setType(t) { S.type = t; renderRec(); }
-function togCrit(i) {
-  const n = S.data.criteria[i].n;
-  S.crits = S.crits.includes(n) ? S.crits.filter(x => x !== n) : S.crits.concat(n);
-  renderRec();
-}
 function setDate(m) {
   S.dateMode = m;
   if (m === 'today') S.date = S.data.today;
@@ -2529,7 +2205,6 @@ function renderTeam() {
   const addB = `<button onclick="ssub('add')">${I('plus', 16)}إضافة موظف</button>`;
   if (!d.employees.length) { $('#view').innerHTML = '<div class="card" style="margin-top:16px">' + emptyHtml('users', 'ما فيه موظفين') + `</div><div class="fxt tord tadd">${addB}<span></span></div>`; return; }
   if (S.attLog) return renderAttLog(S.attLog);
-  if (S.td) return renderTaskDetail();
   const e = S.tsub && empById(S.tsub.id);
   if (e && (S.tsub.k === 'sal' || S.tsub.k === 'cu')) return renderFinEmp(finCtx(), e.id, S.tsub.k);
   if (e) { $('#view').innerHTML = teamSub(d, e, S.tsub.k); return; }
@@ -2575,7 +2250,7 @@ function tsub(id, k) {
   if (id) { S.tfile = id; if (k === 'sal' || k === 'cu') Object.assign(S.fx, {all: false, pm: '', cm: false, rt: false, lf: k === 'sal' ? 's' : 'c'}); }
   renderTeam(); toTop();
 }
-function openFile(id) { if (S.view !== 'team') Object.assign(S.fx, {fp: '', fe: '', fs: '', all: false}); S.view = 'team'; lsSet('adm_view', 'team'); S.tfile = id; S.tsub = null; S.ssub = null; S.attLog = null; S.td = null; S.tord = false; S.armed = null; S.form = null; renderAdmin(); toTop(); }
+function openFile(id) { if (S.view !== 'team') Object.assign(S.fx, {fp: '', fe: '', fs: '', all: false}); S.view = 'team'; lsSet('adm_view', 'team'); S.tfile = id; S.tsub = null; S.ssub = null; S.attLog = null; S.tord = false; S.armed = null; S.form = null; renderAdmin(); toTop(); }
 function openEmpSet(id) { S.tfile = id; S.armed = null; S.form = null; S.ed = null; S.ssub = 'emp:' + id; renderTeam(); toTop(); }
 function rateEmp(id) { go('rec'); setEmp(id); }
 function tbRow(icon, k, v, on) {
@@ -2595,15 +2270,13 @@ function empFacts(e) {
   const d = S.data, c = finCtx(), p = Object.assign({c: 0, o: 0}, c.parts[e.id] || {});
   const left = u => Math.max(0, Math.round((u.net - (u.credit || 0)) * 100) / 100), dueU = u => !!u.due && u.due <= d.today;
   const un = e.unpaid || [], late = un.filter(dueU), cur = un.find(u => !dueU(u)) || null;
-  const ts = [] /* v113 */, rv = ts.filter(t => t.status === 'review').length, op = ts.filter(t => t.status === 'open' || t.status === 'returned').length, lt = ts.filter(t => t.late).length;
   const iv = c.items.filter(x => x.emp === e.id && x.kind === 'inv' && x.status === 'review');
   const needs = [];
-  if (rv) needs.push({t: rv === 1 ? 'إثبات مهمة ينتظر اعتمادك' : rv === 2 ? 'إثباتين ينتظرون اعتمادك' : rv + ' إثباتات تنتظر اعتمادك', c: rv === 1 ? 'إثبات مهمة' : rv === 2 ? 'إثباتين' : rv + ' إثباتات', s: 'المهام', b: 'افتح', on: `tsub('${e.id}','tasks')`});
   if (iv.length) needs.push({t: iv.length === 1 ? 'فاتورة تنتظر اعتمادك' : iv.length === 2 ? 'فاتورتين تنتظر اعتمادك' : iv.length + ' فواتير تنتظر اعتمادك', c: iv.length === 1 ? 'فاتورة تنتظر' : iv.length === 2 ? 'فاتورتين تنتظر' : iv.length + ' فواتير تنتظر', s: 'تعتمدها من المالية', a: iv.reduce((a, x) => a + x.amount, 0), b: 'افتح', on: "go('fin');openFinRv()"});
   late.forEach(u => { const k = 'payq_' + e.id + u.month; needs.push({t: 'راتب ' + u.label, c: 'راتب ' + u.label, s: (u.due < d.today ? 'متأخر من ' : 'مستحق ') + dueL(u.due), a: left(u), b: S.armed === k ? 'تأكيد الصرف' : 'اصرف', arm: S.armed === k, r: 1, on: `payQuick('${e.id}','${u.month}')`}); });
   if (p.c < 0) needs.push({t: 'عهدته بالسالب', c: 'عهدة بالسالب', s: 'صرف أكثر من اللي معه', a: -p.c, b: 'عطيته', r: 1, on: `askGive('${e.id}')`});
   if (p.o > 0) needs.push({t: 'له عندك من جيبه', c: 'له من جيبه', s: 'فواتير دفعها من جيبه', a: p.o, b: 'سدّدته', on: `askSdad('${e.id}', ${p.o})`});
-  return {p, un, late, cur, left, rv, op, lt, needs, lateSum: Math.round(late.reduce((a, u) => a + left(u), 0) * 100) / 100, leftAll: Math.round(un.reduce((a, u) => a + left(u), 0) * 100) / 100};
+  return {p, un, late, cur, left, needs, lateSum: Math.round(late.reduce((a, u) => a + left(u), 0) * 100) / 100, leftAll: Math.round(un.reduce((a, u) => a + left(u), 0) * 100) / 100};
 }
 function fmN(n) { return (Math.round(n * 100) / 100).toLocaleString('en-US'); }
 function teamEmp(d, e) {
@@ -2611,7 +2284,7 @@ function teamEmp(d, e) {
   const sal = f.cur ? fmN(f.left(f.cur)) + ' · ' + dueL(f.cur.due) : f.late.length ? 'متأخر ' + fmN(f.lateSum) : e.salary ? 'منصرف' : '';
   const chips = f.needs.map(x => `<span class="badge ${x.r ? 'rd' : 'a'}">${esc(x.c)}${x.a != null ? ' ' + fmN(x.a) : ''}</span>`).join('');
   return `<button class="tfc" onclick="openFile('${e.id}')"><div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span><span data-seen="${e.id}">${seenHtml(e.seen, e.left)}</span></div><span class="cv">${I('chevron-left', 18)}</span></div>
-    <div class="ln">${sal ? `<span>الراتب <b>${sal}</b></span>` : ''}${f.p.c ? `<span>العهدة <b class="${f.p.c < 0 ? 'r' : ''}">${(f.p.c < 0 ? '−' : '') + fmN(Math.abs(f.p.c))}</b></span>` : ''}${f.op ? `<span>المهام <b>${f.op}</b></span>` : ''}${!sal && !f.p.c && !f.op ? '<span>ما عنده شي مفتوح</span>' : ''}</div>${chips ? `<div class="chips">${chips}</div>` : ''}</button>`;
+    <div class="ln">${sal ? `<span>الراتب <b>${sal}</b></span>` : ''}${f.p.c ? `<span>العهدة <b class="${f.p.c < 0 ? 'r' : ''}">${(f.p.c < 0 ? '−' : '') + fmN(Math.abs(f.p.c))}</b></span>` : ''}${!sal && !f.p.c ? '<span>ما عنده شي مفتوح</span>' : ''}</div>${chips ? `<div class="chips">${chips}</div>` : ''}</button>`;
 }
 /* الإصدار 96: ملف الموظف: ملخص بنظرة، ثم اللي ينتظر المدير، ثم الأزرار السريعة، ثم الفروع وكل فرع قيمته عليه */
 function renderEmpFile(e) {
@@ -2634,7 +2307,6 @@ function renderEmpFile(e) {
       <button onclick="askRet('${id}', ${Math.max(0, f.p.c)})">${I('rotate-ccw', 18)}رجّع لي</button></div>`;
   const lv = [m.misses ? m.misses + ' تقصير' : '', m.stars ? m.stars + ' مميز' : ''].filter(Boolean).join(' · ');
   const bd = (t, r) => ` <span class="badge ${r ? 'rd' : 'a'}">${t}</span>`;
-  const taskV = (f.op ? f.op + ' مفتوحة' : 'ما عنده') + (f.lt ? ` · <span class="lt">${f.lt} متأخرة</span>` : '') + (f.rv ? bd(f.rv + ' تنتظرك') : '');
   const salV = f.un.length > 1 ? f.un.length + ' شهور · باقي ' + M(f.leftAll, '', 't') + (f.lateSum ? bd('متأخر ' + fmN(f.lateSum), 1) : '') : f.cur ? M(f.left(f.cur), '', 't') + ' · ' + dueL(f.cur.due) : f.late.length ? M(f.lateSum, '', 't') + bd('متأخر', 1) : e.salary ? 'منصرف' : 'ما انحط له راتب';
   const cuV = f.p.c < 0 ? M(-f.p.c, '−', 'neg') + bd('بالسالب', 1) : f.p.c > 0 ? 'معه ' + M(f.p.c, '', 't') : 'ما معه عهدة';
   const setV = (e.salary ? 'راتب ' + fmN(e.salary) : 'بدون راتب') + (m.track ? ' · متابعة فقط' : ' · حافز ' + fmN(e.max || 0));
@@ -2675,24 +2347,10 @@ async function seenPoll() {
   seenPaint();
 }
 setInterval(seenPoll, 60000);
-function teamTasksHtml(d, e) {
-  const list = allTasks().filter(t => t.emp === e.id);
-  list.forEach(t => { t.b = tBucket(t, d.today); });
-  const rv = list.filter(t => t.b === 'review').sort(byUrgent), done = list.filter(t => t.b === 'done');
-  let h = '';
-  if (rv.length) h += `<div class="sech a">تنتظر اعتمادك<span>${rv.length}</span></div>` + rv.map(t => taskRowHtml(t, true)).join('');
-  projGroups(list.filter(t => t.b === 'open')).forEach(g => {
-    h += pgrpHtml(g);
-  });
-  if (!h) h = emptyHtml('check-check', 'ما عنده مهام مفتوحة');
-  if (done.length) h += `<button class="dtog" onclick="S.tdone=!S.tdone;renderTeam()">${S.tdone ? 'إخفاء اللي خلصت' : 'خلصت مؤخرًا (' + done.length + ')'}</button>` + (S.tdone ? done.map(t => taskRowHtml(t, true)).join('') : '');
-  return '<div class="tsb">' + h + '</div>';
-}
 function teamSub(d, e, k) {
   const m = e.month, nm = esc(shortName(e.name));
   let h = `<button class="back" onclick="tsub(null)">${I('arrow-right', 17)}${nm}</button>`;
   if (k === 'bonus') return h + `<h2>حافز ومواقف ${nm}</h2><div class="tsb">${teamBreak(m)}${impHtml(m)}<div class="tbh2">المواقف</div>${e.recent.length ? '<div class="tents">' + e.recent.map(x => entryHtml(x, true, m.track)).join('') + '</div>' : emptyHtml('history', 'ما فيه مواقف مسجلة')}</div>`;
-  if (k === 'tasks') return h + `<h2>مهام ${nm}</h2>` + teamTasksHtml(d, e);
   if (k === 'log') return h + `<h2>مواقف ${nm}</h2><div class="tsb">${impHtml(m)}${e.recent.length ? '<div class="tents">' + e.recent.map(x => entryHtml(x, true, m.track)).join('') + '</div>' : emptyHtml('history', 'ما فيه مواقف مسجلة')}</div>`;
   return h + `<h2>رابط ${nm}</h2><div class="tsb"><div class="tbl2">${tbRow('send', 'أرسله واتساب', '', `waEmp('${e.id}')`)}${tbRow('copy', 'انسخ الرابط', '', `copyEmp('${e.id}')`)}${tbRow('eye', 'شوف صفحته', '', `preview('${e.id}')`)}</div></div>`;
 }
@@ -2731,77 +2389,10 @@ function closePreview() { S.preview = null; renderAdmin(); toTop(); }
 /* ---------- المهام (المدير) ---------- */
 
 function addDays(s, n) { const d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
-function dueLabel(t, today) {
-  if (!t.due) return 'بدون موعد';
-  if (t.due === today) return 'اليوم';
-  if (t.due === addDays(today, 1)) return 'بكرة';
-  if (t.due === addDays(today, -1)) return 'أمس';
-  return dmy(t.due);
-}
-function statusBadge(t) {
-  if (t.status === 'done') return `<span class="badge">${t.lateDone ? 'خلصت متأخرة' : 'خلصت'}</span>`;
-  if (t.late) return '<span class="badge late">متأخرة</span>';
-  if (t.status === 'returned') return '<span class="badge late">رجعت</span>';
-  return '<span class="badge wait">مطلوبة</span>';
-}
 
 function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
-function activeProjects() { return (S.data.projects || []).filter(p => !p.archived); }
 
-function allTasks() {
-  const out = [];
-  S.data.employees.forEach(e => (e.tasks || []).forEach(t => out.push(Object.assign({}, t, {emp: e.id, ename: e.name}))));
-  return out;
-}
-function tBucket(t, today) {
-  if (t.status === 'review') return 'review';
-  if (t.status === 'done') return 'done';
-  return 'open';
-}
-function pillOf(t, b, emp) {
-  if (t.status === 'review') return ['a', emp ? 'انرسلت' : 'تنتظر اعتمادك'];
-  if (t.status === 'done') return ['', t.lateDone ? 'خلصت متأخرة' : 'خلصت'];
-  if (t.status === 'returned') return ['late', emp ? 'رجعت لك' : 'رجعت'];
-  return null;
-}
-function pillHtml(p) { return p ? `<span class="badge ${p[0]}">${p[1]}</span>` : ''; }
-function dueHtml(t, today) {
-  if (!t.due) return '';
-  return `<span class="${t.due < today ? 'dlate' : ''}">موعدها ${dueLabel(t, today)}</span>`;
-}
-function byUrgent(a, b) {
-  const x = a.due || '9', y = b.due || '9';
-  return ((b.urgent ? 1 : 0) - (a.urgent ? 1 : 0)) || ((b.status === 'returned' ? 1 : 0) - (a.status === 'returned' ? 1 : 0)) || (x < y ? -1 : x > y ? 1 : 0);
-}
-function projGroups(list) {
-  const order = (S.data && S.data.projects ? S.data.projects : []).map(p => p.id);
-  const by = {}, keys = [];
-  list.forEach(t => { const k = t.project || ''; if (!by[k]) { by[k] = {key: k, name: t.pname || 'عام', items: []}; keys.push(k); } by[k].items.push(t); });
-  const rank = k => k === '' ? 1e6 : (order.indexOf(k) < 0 ? 1e5 : order.indexOf(k));
-  return keys.sort((a, b) => rank(a) - rank(b)).map(k => { by[k].items.sort(byUrgent); return by[k]; });
-}
-function loadTq() {
-  if (S.tqLoaded) return;
-  S.tqLoaded = true;
-  try { const v = JSON.parse(lsGet('tq') || '{}'); if (typeof v.emp === 'string') S.tq.emp = v.emp; if (typeof v.proj === 'string') S.tq.proj = v.proj; S.tq.urg = !!v.urg; } catch (e) {}
-  const d = S.data;
-  if (S.tq.emp !== 'all' && !d.employees.some(e => e.id === S.tq.emp)) S.tq.emp = 'all';
-  if (S.tq.proj !== 'all' && !(d.projects || []).some(p => p.id === S.tq.proj)) S.tq.proj = 'all';
-}
-function saveTq() { lsSet('tq', JSON.stringify({emp: S.tq.emp, proj: S.tq.proj, urg: S.tq.urg})); }
-function tqActive() { const q = S.tq; return !!(q.f || q.emp !== 'all' || q.proj !== 'all' || q.urg || (q.q || '').trim()); }
-function clearTq() { Object.assign(S.tq, {f: '', emp: 'all', proj: 'all', urg: false, q: ''}); saveTq(); renderTasks(); }
-function togSearch() { S.tq.search = !S.tq.search; if (!S.tq.search) S.tq.q = ''; renderTasks(); const i = $('#tqs'); if (i) i.focus(); }
-function tqMatch(t) {
-  const q = S.tq, s = (q.q || '').trim();
-  if (q.emp !== 'all' && t.emp !== q.emp) return false;
-  if (q.proj === 'gen' && t.project) return false;
-  if (q.proj !== 'all' && q.proj !== 'gen' && t.project !== q.proj) return false;
-  if (q.urg && !t.urgent) return false;
-  if (s && (t.title + ' ' + (t.note || '') + ' ' + (t.pname || '')).indexOf(s) < 0) return false;
-  return true;
-}
 
 function tvSeg(d) {
   const n = (d.guides || []).filter(g => g.reads.some(r => !r.done)).length, nr = RP.reps ? rpNPend() : 0;
@@ -2809,7 +2400,7 @@ function tvSeg(d) {
 }
 function renderTasks() {
   /* الإصدار 113: المهام انتقلت لتقارير مشاريعها. الصفحة «الأعمال»: التقارير والتوجيهات بس */
-  S.td = null; if (S.tview !== 'g') S.tview = 'r';
+  if (S.tview !== 'g') S.tview = 'r';
   rpEnsure();
   if (S.tview === 'r') return rpAdminView();
   if (S.tview === 'g') {
@@ -2817,199 +2408,12 @@ function renderTasks() {
     const fb = $('#fab'); fb.innerHTML = I('plus', 26, 2.5); fb.setAttribute('aria-label', 'توجيه جديد'); fb.classList.toggle('hide', !!S.gform || !S.data.employees.some(e => e.guide));
     return;
   }
-  loadTq();
-  const d = S.data, q = S.tq;
-  const empOpts = '<option value="all">كل الموظفين</option>' + d.employees.map(e => `<option value="${e.id}" ${q.emp === e.id ? 'selected' : ''}>${esc(e.name)}</option>`).join('');
-  const projOpts = `<option value="all">كل المشاريع</option>` + (d.projects || []).map(p => `<option value="${p.id}" ${q.proj === p.id ? 'selected' : ''}>${esc(p.name)}${p.archived ? ' (مؤرشف)' : ''}</option>`).join('');
-  $('#view').innerHTML = tvSeg(d) + `
-    ${q.search ? `<input id="tqs" class="tqs" type="search" placeholder="ابحث بالعنوان أو الوصف أو المشروع" value="${esc(q.q)}" oninput="S.tq.q=this.value;drawTaskList()">` : ''}
-    <div class="scards" id="tcards"></div>
-    <div class="tfil">
-      <select aria-label="الموظف" class="${q.emp !== 'all' ? 'on' : ''}" onchange="S.tq.emp=this.value;saveTq();renderTasks()">${empOpts}</select>
-      <select aria-label="المشروع" class="${q.proj !== 'all' ? 'on' : ''}" onchange="S.tq.proj=this.value;saveTq();renderTasks()">${projOpts}</select>
-      <button class="chip ${q.urg ? 'on u' : ''}" onclick="S.tq.urg=!S.tq.urg;saveTq();renderTasks()">عاجلة</button>
-      <button class="ibtn" onclick="togSearch()" aria-label="بحث">${I(q.search ? 'x' : 'search', 18)}</button>
-      <button class="ibtn ${S.tsel ? 'on' : ''}" onclick="togSel()" aria-label="تحديد">${I('square-check', 18)}</button>
-    </div>
-    ${tqActive() && !q.f ? '<button class="lnk" onclick="clearTq()">مسح الفلاتر</button>' : ''}
-    <div id="selh"></div>
-    <div id="tlist"></div>
-    <div id="selbar"></div>`;
-  const fb = $('#fab'); fb.innerHTML = I('plus', 26, 2.5); fb.classList.toggle('hide', !!S.tsel);
-  drawTaskList();
 }
 
-function drawTaskList() {
-  const el = $('#tlist'); if (!el) return;
-  const today = S.data.today, q = S.tq;
-  const list = allTasks().filter(tqMatch);
-  list.forEach(t => { t.b = tBucket(t, today); });
-  const cnt = k => list.filter(t => t.b === k).length;
-  $('#tcards').innerHTML = [['review', 'تنتظر اعتمادك', 'a'], ['open', 'مفتوحة', 'n']].map(c => {
-    const n = cnt(c[0]);
-    return `<button class="sc ${c[2]} ${q.f === c[0] ? 'on' : ''} ${n ? '' : 'z'}" onclick="S.tq.f=S.tq.f==='${c[0]}'?'':'${c[0]}';drawTaskList()"><b>${n}</b><span>${c[1]}</span></button>`;
-  }).join('');
-  let h = '';
-  const rv = list.filter(t => t.b === 'review').sort(byUrgent);
-  if (rv.length && q.f !== 'open') h += `<div class="sech a">تنتظر اعتمادك<span>${rv.length}</span></div>` + rv.map(t => taskRowHtml(t, true)).join('');
-  if (q.f !== 'review') projGroups(list.filter(t => t.b === 'open')).forEach(g => {
-    h += pgrpHtml(g);
-  });
-  const done = list.filter(t => t.b === 'done');
-  if (!h && !(done.length && !q.f)) h = emptyHtml('check-check', tqActive() ? 'ما فيه مهام بهالفلاتر' : 'ما فيه مهام مفتوحة. اضغط + وأضف أول مهمة');
-  if (done.length && !q.f) h += `<button class="dtog" onclick="S.tq.showDone=!S.tq.showDone;drawTaskList()">${q.showDone ? 'إخفاء اللي خلصت' : 'خلصت مؤخرًا (' + done.length + ')'}</button>` + (q.showDone ? done.map(t => taskRowHtml(t, true)).join('') : '');
-  el.innerHTML = h;
-  const oc = API.oldCount ? API.oldCount() : 0;
-  if (oc && !q.f && (q.showDone || (q.q || '').trim())) el.insertAdjacentHTML('beforeend', `<button class="dtog" id="oldb" onclick="loadOldTasks()">${I('history', 15)}${(q.q || '').trim() ? 'دوّر في السجل الأقدم' : 'السجل الأقدم (' + oc + ')'}</button>`);
-  drawSel(list);
-}
 
-async function loadOldTasks() {
-  const b = $('#oldb'); if (b) { b.disabled = true; b.textContent = 'جاري الجلب…'; }
-  try { S.data = await call('apiTasksOld', BOOT.key, (S.tq.q || '').trim()); S.tq.showDone = true; drawTaskList(); }
-  catch (e) { toastErr(e); if (b) b.disabled = false; }
-}
-/* الإصدار 58: تحديد أكثر من مهمة وحذفها */
-function togSel() { S.tsel = S.tsel ? null : []; S.armed = null; renderTasks(); }
-function selTask(id) { const i = S.tsel.indexOf(id); if (i >= 0) S.tsel.splice(i, 1); else S.tsel.push(id); S.armed = null; drawTaskList(); }
-function selVisible() { return [...document.querySelectorAll('#tlist .trow2')].map(b => (/selTask\('([^']+)'\)/.exec(b.getAttribute('onclick') || '') || [])[1]).filter(Boolean); }
-function selAll() { const v = selVisible(), all = v.length && v.every(x => S.tsel.includes(x)); S.tsel = all ? [] : v; S.armed = null; drawTaskList(); }
-function drawSel(list) {
-  const hd = $('#selh'), bar = $('#selbar'); if (!hd || !bar) return;
-  if (!S.tsel) { hd.innerHTML = ''; bar.innerHTML = ''; return; }
-  const ids = new Set(allTasks().map(t => t.id)); S.tsel = S.tsel.filter(x => ids.has(x));
-  const n = S.tsel.length, v = selVisible(), all = v.length && v.every(x => S.tsel.includes(x)), arm = S.armed === 'tdel';
-  hd.innerHTML = `<div class="fxt tord"><button onclick="selAll()">${all ? 'إلغاء تحديد الكل' : 'تحديد الكل'}</button><button class="dn" onclick="togSel()">تم</button></div>`;
-  const w = n === 1 ? 'مهمة وحدة' : n === 2 ? 'مهمتين' : n + (n > 10 ? ' مهمة' : ' مهام');
-  bar.innerHTML = `<div class="selbar"><button class="btn2 ${arm ? 'arm' : 'rd'}" ${n ? '' : 'disabled'} onclick="delSel()">${I('trash-2', 17)}${!n ? 'حدد المهام اللي تبي تحذفها' : arm ? 'تأكيد حذف ' + w : 'حذف ' + w}</button></div>`;
-}
-async function delSel() {
-  const ids = (S.tsel || []).slice(); if (!ids.length || S.busy) return;
-  if (S.armed !== 'tdel') { S.armed = 'tdel'; drawTaskList(); return; }
-  S.busy = true;
-  try { S.data = await call('apiTasksDelete', BOOT.key, ids); S.tsel = null; S.armed = null; S.busy = false; renderAdmin(); toast(ids.length === 1 ? 'انحذفت المهمة' : ids.length === 2 ? 'انحذفت مهمتين' : 'انحذفت ' + ids.length + (ids.length > 10 ? ' مهمة' : ' مهام')); }
-  catch (e) { S.busy = false; S.armed = null; S.tsel = null; toastErr(e); refresh(true); }
-}
 
-/* الإصدار 56: مجموعة المشروع في المهام تنقفل وتنفتح بالضغط على شريطها، ويتذكرها */
-function grpClosed() { if (!S.gcl) { try { S.gcl = JSON.parse(lsGet('gcl') || '{}'); } catch (e) { S.gcl = {}; } } return S.gcl; }
-function togGrp(k) { const c = grpClosed(); if (c[k]) delete c[k]; else c[k] = 1; lsSet('gcl', JSON.stringify(c)); if (S.view === 'team') renderTeam(); else drawTaskList(); }
-function pgrpHtml(g) {
-  const cl = !!grpClosed()[g.key], n = g.items.length;
-  return `<div class="pgrp ep ${cl ? 'cl' : ''}"><button class="pgh2" onclick="togGrp('${esc(g.key)}')" aria-expanded="${!cl}"><span>${esc(g.name)}</span><span class="pge"><span class="n">${n === 1 ? 'مهمة وحدة' : n === 2 ? 'مهمتين' : n + (n > 10 ? ' مهمة' : ' مهام')}</span><span class="cg">${I('chevron-left', 16)}</span></span></button>${cl ? '' : g.items.map(t => taskRowHtml(t, false)).join('')}</div>`;
-}
-function taskRowHtml(t, showProj) {
-  const today = S.data.today, p = pillOf(t, t.b, false);
-  const ring = t.status === 'done' ? 'g' : t.status === 'review' ? 'a' : t.status === 'returned' ? 'r' : '';
-  const nm = mOf(t).length, np = (t.proofs || []).length;
-  const tags = [t.proof === 'invoice' ? 'فاتورة' + (t.inv ? ' ' + M(t.inv.amount, '', 't') : '') : t.proof === 'note' ? 'ملاحظة' : '', nm ? 'شرح ' + nm : '', vOf(t) ? 'صوت' : '', np ? 'إثبات ' + np : ''];
-  const sn = shortName(t.ename), en = S.data.employees.filter(e => shortName(e.name) === sn).length > 1 ? t.ename : sn;
-  const when = t.status === 'done' ? 'خلصت ' + dmy(t.doneAt) : t.status === 'review' ? 'انرسلت ' + dmy(t.doneAt) : dueHtml(t, today);
-  const meta = [t.urgent && t.status !== 'done' ? '<b class="tu">عاجلة</b>' : '', esc(en), showProj ? esc(t.pname || 'عام') : '', when].concat(tags).filter(Boolean).join(' · ');
-  if (S.tsel && S.view === 'task') { const on = S.tsel.includes(t.id);
-    return `<div class="tli ${on ? 'sel' : ''}"><button class="trow2" onclick="selTask('${t.id}')"><span class="ring ck ${on ? 'on' : ''}">${on ? I('check', 14, 3) : ''}</span>
-    <span class="tb"><span class="th"><span class="tt ${t.status === 'done' ? 'd' : ''}">${esc(t.title)}</span>${pillHtml(p)}</span>
-    <span class="tm">${meta}</span></span></button></div>`; }
-  return `<div class="tli"><button class="trow2" onclick="openTask('${t.id}')"><span class="ring ${ring}"></span>
-    <span class="tb"><span class="th"><span class="tt ${t.status === 'done' ? 'd' : ''}">${esc(t.title)}</span>${pillHtml(p)}</span>
-    <span class="tm">${meta}</span></span></button>
-    ${t.status === 'review' ? `<div class="racts">${t.comment ? `<div class="note good" style="margin:0 0 8px">${esc(t.comment)}</div>` : ''}<div class="grid2"><button class="btn2 cu" onclick="askApprove('${t.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askReturn('${t.id}')">رجّعها</button></div></div>` : ''}</div>`;
-}
 
-function openTask(id) { S.td = id; S.armed = null; renderAdmin(); toTop(); }
-function closeTask() { if (S.rec) recStop(true); S.td = null; S.armed = null; renderAdmin(); toTop(); }
-async function approveTask(id) {
-  try { S.data = await call('apiTaskApprove', BOOT.key, id); renderAdmin(); toast('تم الاعتماد'); }
-  catch (e) { toastErr(e); }
-}
-function askReturn(id) {
-  const rt0 = allTasks().find(x => x.id === id), invOk = rt0 && rt0.inv && rt0.inv.status === 'ok';
-  ovOpen(`<label class="shh" for="rr">وش الناقص؟</label>
-    <input id="rr" placeholder="اكتب سبب الإرجاع" onkeydown="if(event.key==='Enter')doReturn('${id}')">
-    <div class="sub">الموظف يشوف السبب فوق المهمة، وترجع له مطلوبة.${invOk ? ' فاتورتها المعتمدة (' + Number(rt0.inv.amount).toLocaleString('en-US') + ') ترجع معها وتطلع من الحساب لين يرسلها من جديد.' : ''}</div>
-    <div class="err" id="rrerr"></div>
-    <div class="g21"><button class="btn2 arm" onclick="doReturn('${id}')">رجّعها له</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
-  setTimeout(() => { const i = $('#rr'); if (i) i.focus(); }, 80);
-}
-async function doReturn(id) {
-  const r = $('#rr').value.trim();
-  if (!r) { $('#rrerr').textContent = 'اكتب السبب عشان يعرف وش ناقص'; return; }
-  const un = lockBtn();
-  try { S.data = await call('apiTaskReturn', BOOT.key, id, r); ovClose(); renderAdmin(); toast('رجعت له'); }
-  catch (e) { un(); $('#rrerr').textContent = e; }
-}
-async function closeByAdmin(id) {
-  if (S.armed !== 'close_' + id) { S.armed = 'close_' + id; renderAdmin(); return; }
-  lockBtn('جاري الحفظ…');
-  try { S.data = await call('apiTaskClose', BOOT.key, id); S.armed = null; renderAdmin(); toast('تسجلت إنها خلصت'); }
-  catch (e) { S.armed = null; renderAdmin(); toastErr(e); }
-}
-async function updTask(id, x) {
-  try { S.data = await call('apiTaskUpdate', BOOT.key, id, x); renderAdmin(); toast('انحفظ'); }
-  catch (e) { toastErr(e); renderAdmin(); }
-}
 
-function renderTaskDetail() {
-  const d = S.data, t = allTasks().find(x => x.id === S.td);
-  if (!t) { S.td = null; return renderTasks(); }
-  const today = d.today, b = tBucket(t, today), p = pillOf(t, b, false);
-  const ps = (d.projects || []).filter(x => !x.archived || x.id === t.project);
-  const id = t.id, np = (t.proofs || []).length, armDel = S.armed === 'task_' + id;
-  /* الإصدار 90: المهمة اللي تنتظر الاعتماد يطلع إثباتها وملاحظة الموظف فوق */
-  const rvTop = t.status === 'review';
-  const pfH = `${np ? `<div class="lbl">إثبات الإنجاز${t.doneAt ? ' · ' + dmy(t.doneAt) : ''}</div>${proofHtml(t)}` : ''}
-    ${t.comment && t.status !== 'open' ? `<div class="note good">${I('message-circle', 16)}<div><b>${esc(t.ename)}:</b> ${esc(t.comment)}${t.cmtEdited ? ' <span class="edt">عدّله المدير العام</span>' : ''}</div></div><div class="ecm"><button class="edl" onclick="openCmtEdit('${id}')">${I('pencil', 15)}تعديل ملاحظة الموظف</button></div>` : ''}`;
-  $('#view').innerHTML = `<button class="back" onclick="closeTask()">${I('arrow-right', 17)}${S.view === 'team' && S.tsub ? 'مهام ' + esc(shortName((empById(S.tsub.id) || {}).name || '')) : 'المهام'}</button>
-    <div class="dhead"><textarea class="dtitle" rows="1" aria-label="عنوان المهمة" oninput="dtGrow(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}" onchange="updTask('${id}',{title:this.value.split(String.fromCharCode(10)).join(' ').trim()})">${esc(t.title)}</textarea><button class="pen" aria-label="تعديل العنوان" onclick="const i=this.previousElementSibling;i.focus();i.setSelectionRange(i.value.length,i.value.length)">${I('pencil', 15)}</button>${pillHtml(p)}</div>
-    ${rvTop ? pfH : ''}
-    <div class="dprops">
-      <label class="dp"><span>الموظف</span><select onchange="updTask('${id}',{emp:this.value})">${d.employees.map(e => `<option value="${e.id}" ${t.emp === e.id ? 'selected' : ''}>${esc(e.name)}</option>`).join('')}</select></label>
-      <label class="dp"><span>المشروع</span><select onchange="updTask('${id}',{project:this.value})">${t.project ? '' : '<option value="" selected>اختر المشروع</option>'}${ps.map(x => `<option value="${x.id}" ${t.project === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>
-      <label class="dp"><span>الموعد</span><input type="date" class="${t.due && t.due < today && t.status !== 'done' ? 'lt' : ''}" value="${t.due || ''}" onchange="updTask('${id}',{due:this.value})"></label>
-      <div class="dp"><span>عاجلة</span><button class="tg ${t.urgent ? 'on u' : ''}" aria-label="عاجلة" onclick="updTask('${id}',{urgent:${t.urgent ? 'false' : 'true'}})"></button></div>
-      <label class="dp"><span>الإثبات</span><select onchange="updTask('${id}',{proof:this.value})" ${t.status === 'open' || t.status === 'returned' ? '' : 'disabled'}>${PROOFS.map(o => `<option value="${o[0]}" ${(t.proof || 'photo') === o[0] ? 'selected' : ''}>${o[1]}</option>`).join('')}</select></label>
-    </div>
-    ${t.inv ? `<div class="note ${t.inv.status === 'ok' ? 'good' : 'info'}">${I('receipt', 16)}<div><b>فاتورة ${M(t.inv.amount, '', 't')}</b>${t.inv.vendor ? ' · ' + esc(t.inv.vendor) : ''} · ${t.inv.paidBy === 'card' ? 'أنا' : t.inv.paidBy === 'own' ? 'من جيبه' : 'من العهدة'}${t.inv.status === 'review' ? ' · تنعتمد مع المهمة' : ''} <button class="lnk dl" onclick="openInvD('${t.inv.id}')">التفاصيل</button></div></div>` : ''}
-    ${t.status === 'returned' && t.reason ? `<div class="note bad">${I('rotate-ccw', 16)}<div><b>رجّعتها:</b> ${esc(t.reason)}</div></div>` : ''}
-    <div class="lbl">الوصف</div>
-    <textarea class="dnote" placeholder="تعليمات أو تفاصيل للموظف…" onchange="updTask('${id}',{note:this.value})">${esc(t.note)}</textarea>
-    ${vOf(t) || t.status !== 'done' ? `<div class="lbl">الشرح الصوتي</div><div id="dVoice">${dVoiceHtml(t)}</div>` : ''}
-    ${mOf(t).length || t.status !== 'done' ? `<div class="lbl">الشرح</div>${mOf(t).length ? mediaHtml(t) : ''}${mEditHtml(t)}` : ''}
-    ${rvTop ? '' : pfH}
-    ${t.status === 'done' && t.apNote ? `<div class="note good">${I('check-check', 16)}<div><b>تعليقك عند الاعتماد:</b> ${esc(t.apNote)}</div></div>` : ''}
-    <div class="abar">${detailActions(t)}</div>
-    <div id="alst">${taskAlertsHtml(id)}</div>
-    <button class="del ${armDel ? 'arm' : ''}" style="margin:16px auto 0;display:flex" onclick="delTask('${id}')">${I('trash-2', 15)}${armDel ? 'تأكيد حذف المهمة' : 'حذف المهمة'}</button>`;
-  if (vOf(t)) vFetch([vOf(t).id]);
-  dtGrow($('#view .dtitle'));
-}
-function detailActions(t) {
-  const id = t.id;
-  if (t.status === 'review') return `<div class="grid2"><button class="btn2 cu" onclick="askApprove('${id}')">${I('check', 17, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askReturn('${id}')">رجّعها</button></div>`;
-  if (t.status === 'done') return `<button class="btn2 rd" onclick="askReturn('${id}')">${I('rotate-ccw', 16)}ما خلصت، رجّعها له</button>`;
-  const arm = S.armed === 'close_' + id;
-  const invR = t.inv && t.inv.status === 'returned';
-  const cb = `<button class="btn2 ${arm ? 'arm' : ''}" onclick="closeByAdmin('${id}')">${I('check-check', 17)}${arm ? (invR ? 'فاتورتها مرتجعة، الإغلاق يعتمدها معها. اضغط مرة ثانية' : 'تأكيد: خلصت ' + (t.proof === 'note' ? 'بدون ملاحظة من الموظف' : t.proof === 'invoice' ? 'بدون فاتورة' : 'بدون صورة إثبات')) : 'خلّصتها أنا'}</button>`;
-  if (arm) return cb;
-  return `<div class="grid2"><button class="btn2 cu" id="pingb" onclick="pingTask('${id}')">${I('bell-ring', 17)}ذكّره</button>${cb}</div>`;
-}
-/* الإصدار 86: حالة التذكيرات على المهمة: «تم الإرسال» و«تمت المشاهدة» مع الوقت */
-function taskAlertsHtml(id) {
-  const as = rpArr((S.data || {}).alerts).filter(a => a.kind === 'task' && a.ref === id).slice(0, 3);
-  if (!as.length) return '';
-  return `<div class="alst"><div class="alh">${I('bell-ring', 14)}التذكيرات</div>${as.map(a => `<div class="alr"><span>أُرسل ${esc(rpTickWhen(a.at))}</span>${a.seen ? `<b class="ok">${I('check-check', 13)}تمت المشاهدة ${esc(rpTickWhen(a.seen))}</b>` : `<b>${I('check', 13)}تم الإرسال</b>`}</div>`).join('')}</div>`;
-}
-async function pingTask(id) {
-  const b = $('#pingb'); if (!b || b.disabled) return;
-  b.disabled = true;
-  try {
-    const res = await call('apiTaskRemind', BOOT.key, id);
-    if (res && res.id && S.data) { (S.data.alerts = rpArr(S.data.alerts)).unshift({id: res.id, kind: 'task', ref: id, emp: '', at: Date.now(), seen: null}); const x = $('#alst'); if (x) x.innerHTML = taskAlertsHtml(id); }
-    b.innerHTML = I('check', 17, 2.5) + 'انرسل';
-    toast('انرسل التذكير');
-    setTimeout(() => { const x = $('#pingb'); if (x) { x.disabled = false; x.innerHTML = I('bell-ring', 17) + 'ذكّره'; } }, 4000);
-  } catch (e) { b.disabled = false; toastErr(e); }
-}
 
 function ovOpen(html) {
   const o = $('#ov'), again = o.classList.contains('on'), old = again && o.querySelector('.sheet'), top = old ? old.scrollTop : 0;
@@ -3018,237 +2422,36 @@ function ovOpen(html) {
   document.documentElement.classList.add('lock');
   if (top) { const sh = o.querySelector('.sheet'); if (sh) sh.scrollTop = top; }
 }
-function ovClose() { if (S.rec && S.rec.where === 'tf') recStop(true); vStopIf('tf'); if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); document.documentElement.classList.remove('lock'); S.sheet = false; RP.form = null; RP.edit = null; RP.td = null; }
-function openSheet() {
-  const d = S.data, tf = S.tf;
-  if (!d.employees.length) return toast('أضف موظف من الفريق أول', null, 'in');
-  const ids = d.employees.map(e => e.id);
-  tf.emps = tf.emps.filter(x => ids.includes(x));
-  if (!tf.emps.length) { const last = lsGet('tf_emp'); tf.emps = [ids.includes(last) ? last : ids[0]]; }
-  tf.project = pickProj(tf.project, activeProjects());
-  S.sheet = true; S.sheetMore = false;
-  drawSheet();
-  setTimeout(() => { const i = $('#qtTitle'); if (i) i.focus(); }, 80);
-}
-function drawSheet() {
-  if (!S.sheet) return;
-  const d = S.data, tf = S.tf, it = tf.items[0], all = d.employees.length > 1 && tf.emps.length === d.employees.length;
-  const ap = activeProjects(), pf = it.proof || 'photo';
-  const chip = (on, click, label, cls) => `<button class="${on ? 'on' : ''} ${cls || ''}" onclick="${click}">${label}</button>`;
-  ovOpen(`<label class="shh" for="qtTitle">مهمة جديدة</label>
-    <input id="qtTitle" class="qtt" placeholder="عنوان المهمة" value="${esc(it.title)}" oninput="S.tf.items[0].title=this.value" onkeydown="if(event.key==='Enter')addTask()">
-    <div class="qlab">${I('user', 14)}لمين</div>
-    <div class="qch">${d.employees.map(e => chip(!all && tf.emps[0] === e.id, `qtEmp('${e.id}')`, esc(shortName(e.name)))).join('')}${d.employees.length > 1 ? chip(all, "qtEmp('all')", 'الكل') : ''}</div>
-    <div class="qlab">${I('folder', 14)}المشروع</div>
-    <div class="qch">${ap.map(p => chip(tf.project === p.id, `qtProj('${p.id}')`, esc(p.name))).join('')}${chip(false, 'S.tf.newP=!S.tf.newP;drawSheet()', '+ جديد', 'nw')}</div>
-    ${tf.newP ? `<div class="grid2" style="grid-template-columns:1fr auto"><input id="np_tf" placeholder="اسم المشروع الجديد" onkeydown="if(event.key==='Enter')addProject('tf')"><button class="btn2 cu" onclick="addProject('tf')">أضف</button></div><div class="err" id="nperr"></div>` : ''}
-    <div class="qlab">${I('calendar', 14)}الموعد</div>
-    <div class="qch">${[['none', 'بدون'], ['today', 'اليوم'], ['tom', 'بكرة'], ['other', 'تاريخ…']].map(x => chip((it.dueMode || 'none') === x[0], `qtDue('${x[0]}')`, x[1])).join('')}</div>
-    ${it.dueMode === 'other' ? `<input type="date" value="${it.due || d.today}" min="${d.today}" onchange="S.tf.items[0].due=this.value">` : ''}
-    <div class="qtools"><div id="tfMedia_0">${tfMediaHtml(0)}</div><div id="tfVoice">${tfVoiceHtml()}</div></div>
-    ${S.sheetMore ? `<div class="sub" style="margin:4px 0 0">الإثبات</div>
-      <div class="segc">${PROOFS.map(o => `<button class="${pf === o[0] ? 'on' : ''}" onclick="S.tf.items[0].proof='${o[0]}';lsSet('tf_proof','${o[0]}');drawSheet()">${o[1]}</button>`).join('')}</div>
-      <div class="sub" style="margin:-4px 0 4px">${PROOF_HINT[pf]}</div>
-      <label class="lbl" for="qtNote" style="margin:4px 0 0">الوصف</label><textarea id="qtNote" placeholder="تفاصيل إضافية للموظف" oninput="S.tf.items[0].note=this.value">${esc(it.note)}</textarea>
-      <div class="trow" style="padding:0"><div class="n"><b>عاجلة</b><small>تطلع أول مجموعتها وعليها علامة</small></div><button class="tg ${it.urgent ? 'on u' : ''}" aria-label="عاجلة" onclick="S.tf.items[0].urgent=!S.tf.items[0].urgent;drawSheet()"></button></div>`
-      : `<button class="lnk" onclick="S.sheetMore=true;drawSheet()">+ تفاصيل أكثر (الإثبات، الوصف، عاجلة)${pf !== 'photo' ? ' · الإثبات: ' + (PROOFS.find(o => o[0] === pf) || ['', ''])[1] : ''}${it.urgent ? ' · عاجلة' : ''}</button>`}
-    <div class="err" id="tferr"></div>
-    <button class="btn2 cu qbig" id="tfBtn" onclick="addTask()">إضافة</button>
-    <div class="sub" style="text-align:center">تبقى النافذة مفتوحة لإضافة مهمة أخرى، وللإغلاق اسحبها للأسفل</div>`);
-}
-function qtEmp(v) { S.tf.emps = v === 'all' ? S.data.employees.map(e => e.id) : [v]; if (v !== 'all') lsSet('tf_emp', v); drawSheet(); }
-function qtProj(v) { S.tf.project = v; S.tf.newP = false; lsSet('tf_proj', v); drawSheet(); }
-function qtDue(v) { const it = S.tf.items[0]; it.dueMode = v; it.due = v === 'other' ? (it.due || S.data.today) : ''; drawSheet(); }
+function ovClose() { if (typeof camStop === 'function') camStop(); const o = $('#ov'); o.innerHTML = ''; o.classList.remove('on'); document.documentElement.classList.remove('lock'); S.sheet = false; RP.form = null; RP.edit = null; RP.td = null; }
 
 async function addProject(from) {
-  const inp = $(from === 'tf' ? '#np_tf' : '#pn_new'), err = $(from === 'tf' ? '#nperr' : '#perr');
+  const inp = $('#pn_new'), err = $('#perr');
   const name = inp.value.trim();
   if (!name) { err.textContent = 'اكتب اسم المشروع'; return; }
   try {
     const r = await call('apiProjectAdd', BOOT.key, name);
     S.data = r.data;
-    if (from === 'tf') { S.tf.newP = false; S.tf.project = r.id; lsSet('tf_proj', r.id); }
-    renderAdmin(); if (from === 'tf') drawSheet(); toast('انضاف المشروع');
+    renderAdmin(); toast('انضاف المشروع');
   } catch (e) { err.textContent = e; }
 }
 
 /* ---------- مرفقات المهمة الجديدة ---------- */
 
-function tfFilled() { return S.tf.items.filter(it => it.title.trim() || it.note.trim() || it.media.length || it.voice); }
-function tfBtnLabel() { return 'إضافة'; }
 
-function tfMediaHtml(k) {
-  const it = S.tf.items[k], m = it.media;
-  const up = m.some(x => x.st === 'up');
-  if (!m.length) return `<label class="vrec qadd">${I('camera', 18)}صورة أو فيديو<input type="file" accept="${ACC_MEDIA}" multiple style="display:none" onchange="pickMedia(this, ${k})"></label><div class="err">${esc(it.merr || '')}</div>`;
-  return `<div class="mst">
-    ${m.map((x, i) => `<div class="mi ${x.st === 'up' ? 'up' : ''} ${x.st === 'err' ? 'fail' : ''}">
-      ${x.t === 'i' && x.prev ? `<img src="${x.prev}" alt="">` : x.t === 'v' ? `<span>▶<br>فيديو${x.mb ? '<br>' + x.mb + ' م.ب' : ''}</span>` : ''}
-      ${x.st === 'up' ? `<span class="mprog">${x.pct != null ? 'يرفع ' + Math.round(x.pct * 100) + '%' : 'يرفع…'}</span>` : ''}
-      ${x.st === 'err' ? `<button class="mretry" onclick="retryMedia(${k},${i})" aria-label="أعد المحاولة">${I('rotate-cw', 16)}أعد المحاولة</button>` : ''}
-      ${x.st === 'up' ? '' : `<button class="x" onclick="rmMedia(${k},${i})" aria-label="حذف">×</button>`}
-    </div>`).join('')}
-    ${m.length < 5 ? `<label class="madd">${I('camera', 20)}صورة أو فيديو<input type="file" accept="${ACC_MEDIA}" multiple style="display:none" onchange="pickMedia(this, ${k})"></label>` : ''}
-  </div>${up ? '<div class="sub" style="margin-top:6px">جاري الرفع… خلك بالصفحة لين يخلص</div>' : ''}${m.some(x => x.st === 'err') ? `<div class="err">${esc(m.filter(x => x.st === 'err').map(x => x.err).filter(Boolean)[0] || 'ما ارتفع')}. اضغط «أعد المحاولة» أو احذفه.</div>` : ''}<div class="err">${esc(it.merr || '')}</div>`;
-}
-function drawTfMedia(k) {
-  const el = $('#tfMedia_' + k); if (el) el.innerHTML = tfMediaHtml(k);
-  const b = $('#tfBtn'); if (b && !b.disabled) b.textContent = tfBtnLabel();
-}
 
-async function pickMedia(input, k) {
-  const it = S.tf.items[k];
-  const files = Array.from(input.files || []);
-  input.value = '';
-  const room = 5 - it.media.length;
-  const errs = [];
-  if (files.length > room) errs.push('الحد 5 مرفقات للمهمة');
-  const items = [];
-  files.slice(0, room).forEach(f => {
-    const isV = f.type.indexOf('video' + '/') === 0 || /\.(mov|mp4|m4v|3gp|webm)$/i.test(f.name);
-    const isI = f.type.indexOf('image' + '/') === 0;
-    if (!isV && !isI) { errs.push('الملف ' + f.name + ' مو صورة ولا فيديو'); return; }
-    if (isV && f.size > 45 * 1024 * 1024) { errs.push('الفيديو كبير (' + Math.round(f.size / 1048576) + ' م.ب)، الحد 45 م.ب تقريبًا دقيقة. صوّره أقصر'); return; }
-    const x = {t: isV ? 'v' : 'i', st: 'up', file: f, mb: isV ? Math.max(1, Math.round(f.size / 1048576)) : 0};
-    it.media.push(x); items.push(x);
-  });
-  it.merr = errs.join(' · ');
-  const kk = () => S.tf.items.indexOf(it);
-  drawTfMedia(kk());
-  for (const x of items) await upMedia(it, x);
-}
-/* الإصدار 60: المرفق اللي يفشل يبقى ظاهر وفيه «أعد المحاولة»، والصورة ما ترتفع مرتين */
-async function upMedia(it, x) {
-  const kk = () => S.tf.items.indexOf(it);
-  x.st = 'up'; x.err = ''; x.pct = null;
-  S.upN++;
-  if (kk() >= 0) drawTfMedia(kk());
-  try {
-    if (x.t === 'i') {
-      const data = x.prev || await resizeImg(x.file, 1600, 0.8);
-      x.prev = data; if (kk() >= 0) drawTfMedia(kk());
-      x.id = await callT(120000, 'apiUploadImg', BOOT.key, data);
-      S.mc[x.id] = data;
-    } else {
-      let last = 0;
-      x.id = await callT(600000, 'apiUploadVid', BOOT.key, x.file, p => { x.pct = p; if (Date.now() - last > 300 && kk() >= 0) { last = Date.now(); drawTfMedia(kk()); } });
-    }
-    x.st = 'ok'; delete x.file;
-  } catch (e) {
-    x.st = 'err'; x.err = (x.t === 'v' ? 'ما ارتفع الفيديو: ' : 'ما ارتفعت الصورة: ') + e;
-  }
-  S.upN--;
-  if (kk() >= 0) drawTfMedia(kk());
-}
-function retryMedia(k, i) { const it = S.tf.items[k], x = it && it.media[i]; if (x && x.st === 'err') upMedia(it, x); }
 
-function rmMedia(k, i) {
-  const it = S.tf.items[k], x = it && it.media[i];
-  if (!x || x.st === 'up') return;
-  it.media.splice(i, 1); drawTfMedia(k);
-  if (x.id) call('apiMediaDiscard', BOOT.key, x.id).catch(() => {});
-}
 
-function itemDue(it) {
-  const t = S.data.today;
-  return it.dueMode === 'today' ? t : it.dueMode === 'tom' ? addDays(t, 1) : it.dueMode === 'other' ? (it.due || t) : '';
-}
 
-async function addTask() {
-  const tf = S.tf, it = tf.items[0], err = $('#tferr');
-  if (err) err.textContent = '';
-  if (!tf.emps.length) { if (err) err.textContent = 'اختر الموظف'; return; }
-  if (!tf.project) { if (err) err.textContent = 'اختر المشروع، أو أضف مشروع جديد'; return; }
-  if (!it.title.trim()) { if (err) err.textContent = 'اكتب المهمة'; const i = $('#qtTitle'); if (i) i.focus(); return; }
-  if (S.rec) { if (err) err.textContent = 'وقّف التسجيل أول'; return; }
-  if (S.upN) { if (err) err.textContent = 'انتظر لين يخلص رفع المرفقات'; return; }
-  if (it.media.some(x => x.st === 'err')) { if (err) err.textContent = 'فيه مرفق ما ارتفع: أعد المحاولة أو احذفه'; return; }
-  if (S.busy) return;
-  S.busy = true;
-  const b = $('#tfBtn'); if (b) { b.disabled = true; b.textContent = 'جاري الإضافة…'; }
-  try {
-    const items = [{title: it.title, due: itemDue(it), note: it.note, urgent: !!it.urgent, proof: it.proof || 'photo', media: it.media.filter(x => x.id).map(x => ({id: x.id, t: x.t})).concat(it.voice && it.voice.id ? [{id: it.voice.id, t: 'a', d: it.voice.d}] : [])}];
-    S.data = await call('apiTasksAdd', BOOT.key, {emps: tf.emps, project: tf.project || '', items});
-    vStopIf('tf');
-    const keep = newItem(it.dueMode); if (it.dueMode === 'other') keep.due = it.due;
-    S.tf = {emps: tf.emps, project: tf.project, newP: false, items: [keep]};
-    S.busy = false;
-    renderAdmin(); drawSheet();
-    toast(tf.emps.length > 1 ? 'انضافت للكل' : 'انضافت');
-    setTimeout(() => { const i = $('#qtTitle'); if (i) i.focus(); }, 80);
-  } catch (e) {
-    S.busy = false;
-    if (err) err.textContent = e;
-    if (b) { b.disabled = false; b.textContent = 'إضافة'; }
-  }
-}
 
-function redrawTasks(admin) { admin ? renderTasks() : rerenderEmp(); }
 
-function mediaHtml(t) {
-  const m = mOf(t);
-  if (!m.length) return '';
-  const ni = m.filter(x => x.t === 'i').length, nv = m.length - ni;
-  const what = [ni ? (ni === 1 ? 'صورة' : ni === 2 ? 'صورتين' : ni + ' صور') : '', nv ? (nv === 1 ? 'فيديو' : nv + ' فيديو') : ''].filter(Boolean).join(' و');
-  const admin = S.view === 'task' && !S.preview && BOOT.page === 'admin';
-  if (!S.mopen[t.id]) return `<button class="mbtn" onclick="openMedia('${t.id}', ${admin})">${I('paperclip', 15)}شوف الشرح (${what})</button>`;
-  return `<div>${m.map(x => x.t === 'i'
-      ? (S.mc[x.id] && S.mc[x.id] !== 'loading' ? `<img src="${S.mc[x.id]}" class="ph" alt="صورة الشرح" onclick="zoomOpen(this.src,'صورة الشرح')">` : '<div class="sub" style="margin-top:8px">جاري تحميل الصورة…</div>')
-      : (S.mc[x.id] && S.mc[x.id] !== 'loading' ? `<video class="vid" src="${esc(S.mc[x.id])}" controls playsinline preload="metadata"></video>` : '<div class="sub" style="margin-top:8px">جاري تحميل الفيديو…</div>')).join('')}
-    <button class="mbtn" onclick="S.mopen['${t.id}']=false;redrawTasks(${admin})">${I('x', 15)}إخفاء الشرح</button></div>`;
-}
 
-async function openMedia(id, admin) {
-  S.mopen[id] = true;
-  const t = findTask(id);
-  const need = t ? mOf(t).filter(x => !S.mc[x.id]) : [];
-  need.forEach(x => { S.mc[x.id] = 'loading'; });
-  redrawTasks(admin);
-  await Promise.all(need.map(async x => {
-    try { S.mc[x.id] = BOOT.page === 'admin' ? await call('apiMediaAdmin', BOOT.key, id, x.id) : await call('apiMediaEmp', BOOT.token, id, x.id); }
-    catch (e) { delete S.mc[x.id]; toastErr(e); }
-  }));
-  redrawTasks(admin);
-}
 
-function findTask(id) {
-  const lists = BOOT.page === 'admin' ? S.data.employees.map(e => e.tasks).concat(S.preview ? [S.preview.tasks] : []) : [S.empData ? S.empData.tasks : []];
-  for (const l of lists) { const t = (l || []).find(x => x.id === id); if (t) return t; }
-  return null;
-}
 
-async function delTask(id) {
-  if (S.armed !== 'task_' + id) { S.armed = 'task_' + id; renderAdmin(); return; }
-  try { S.data = await call('apiTaskDelete', BOOT.key, id); S.armed = null; S.td = null; renderAdmin(); toast('انحذفت'); }
-  catch (e) { S.armed = null; renderAdmin(); toastErr(e); }
-}
 
-function proofHtml(t) {
-  const ids = t.proofs || [];
-  if (!S.popen[t.id]) return `<button class="mbtn" onclick="openProofs('${t.id}')">${I('image', 15)}عرض صور الإثبات (${ids.length})</button>`;
-  return `<div class="pgrid">${ids.map(f => S.pc[f] && S.pc[f] !== 'loading' ? (isPdfPath(f) ? pdfLink(S.pc[f], f) : `<img src="${S.pc[f]}" alt="صورة إثبات" onclick="viewImg('${f}')">`) : '<div class="pph">جاري التحميل…</div>').join('')}</div>`;
-}
 function redrawAny() { if (BOOT.page === 'admin' && !S.preview) renderAdmin(); else rerenderEmp(); }
-async function openProofs(id) {
-  S.popen[id] = true;
-  const t = findTask(id);
-  const need = t ? (t.proofs || []).filter(f => !S.pc[f]) : [];
-  need.forEach(f => { S.pc[f] = 'loading'; });
-  redrawAny();
-  await Promise.all(need.map(async f => {
-    try { S.pc[f] = BOOT.page === 'admin' ? await call('apiProofAdmin', BOOT.key, id, f) : await call('apiProofEmp', BOOT.token, id, f); }
-    catch (e) { delete S.pc[f]; toastErr(e); }
-  }));
-  redrawAny();
-}
-function viewImg(f) {
-  if (!S.pc[f] || S.pc[f] === 'loading') return;
-  showFull(S.pc[f], f, 'صورة إثبات');
-}
 
 /* ---------- الفواتير (المدير) ---------- */
 
-const money = n => (Math.round((Number(n) || 0) * 100) / 100).toLocaleString('en-US', {maximumFractionDigits: 2});
 function addMonths(d, m) {
   const x = new Date(d.slice(0, 10) + 'T12:00:00Z'); const day = x.getUTCDate();
   x.setUTCMonth(x.getUTCMonth() + m); if (x.getUTCDate() < day) x.setUTCDate(0);
@@ -3369,13 +2572,10 @@ function prefetchImgs() {
       const d = admin ? S.data : S.empData;
       if (!d) return;
       const invs = admin ? ((d.inv || {}).items || []) : ((d.inv || {}).items || []);
-      const tasks = admin ? (d.employees || []).flatMap(e => e.tasks || []) : (d.tasks || []);
       const invP = invs.slice(0, 80).flatMap(x => x.photos || []).filter(f => !S.ic[f]);
-      const prP = tasks.filter(t => t.status !== 'done' || admin).slice(0, 60).flatMap(t => t.proofs || []).filter(f => !S.pc[f]);
-      if (!invP.length && !prP.length) return;
-      const m = await API.prefetch(invP.concat(prP));
+      if (!invP.length) return;
+      const m = await API.prefetch(invP);
       invP.forEach(f => { if (m[f] && !S.ic[f]) S.ic[f] = m[f]; });
-      prP.forEach(f => { if (m[f] && !S.pc[f]) S.pc[f] = m[f]; });
     } catch (e) {}
   }, 250);
 }
@@ -3691,9 +2891,6 @@ async function invDel(id) {
   try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذفت', () => delRestore(0, id)); }
   catch (e) { S.armed = null; renderInv(); toastErr(e); }
 }
-/* الإصدار 98: الفواتير مجمّعة حسب اليوم: عنوان اليوم مرة وحدة بعدده ومجموعه، وتحته فواتيره بسطر مختصر فيه الوقت بس. الضغط يفتح التفاصيل */
-/* الإصدار 100: عنوان المهمة الطويل ينكسر على سطور بدل ما ينقص */
-function dtGrow(el) { if (!el) return; el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
 function invDayLabel(dt, today) {
   const l = dayLabel(dt).replace(new RegExp(' ' + today.slice(0, 4) + '$'), '');
   return dt === today ? 'اليوم · ' + l : dt === addDays(today, -1) ? 'أمس · ' + l : l;
@@ -4008,7 +3205,6 @@ function salaryTable(u) {
   return `<table class="tbl">
     <tr><td class="sub">الراتب الأساسي</td><td>${sar(u.base)}</td></tr>
     ${u.track ? '' : `<tr><td class="sub">الحافز</td><td class="pos">${sarS(u.bonus,'+')}</td></tr>`}
-    ${u.advance ? `<tr><td class="sub">راتب مقدم</td><td class="neg">${sarS(u.advance,'−')}</td></tr>` : ''}
     ${u.inst ? `<tr><td class="sub">قسط السلفة</td><td class="neg">${sarS(u.inst,'−')}</td></tr>` : ''}
     ${(u.deds || []).map(x => `<tr><td class="sub">خصم · ${esc(x.note)}</td><td class="neg">${sarS(x.amount,'−')}</td></tr>`).join('')}
     <tr class="tot"><td>الصافي</td><td>${sar(u.net)}</td></tr>
@@ -4035,7 +3231,7 @@ function dedFormHtml(f) {
 function formHtml(e, f) {
   if (f.kind === 'ded') return dedFormHtml(f);
   const loan = f.kind === 'loan';
-  return `<div class="ctitle" style="font-size:15px"><span class="ci">${I(loan ? 'hand-coins' : 'banknote', 16)}</span>${loan ? 'سلفة جديدة' : 'راتب مقدم'}</div>
+  return `<div class="ctitle" style="font-size:15px"><span class="ci">${I(loan ? 'hand-coins' : 'banknote', 16)}</span>سلفة جديدة</div>
     <div class="grid2" style="margin-top:10px">
       <div class="field"><span>المبلغ (ريال)</span><input id="f_amount" class="qtt" inputmode="decimal" oninput="amtPv(this.value,'apv_f')">${amtPvHtml('', 'apv_f')}</div>
       ${loan ? `<div class="field"><span>عدد الأقساط (شهور)</span><input id="f_months" type="number" inputmode="numeric" value="3"></div>` : '<div></div>'}
@@ -4111,7 +3307,6 @@ function txText(t) {
   if (t.kind === 'part') return 'دفعة من الراتب';
   if (t.kind === 'pay' && t.via) return 'انسدد راتب ' + t.label + ' بالدفعات';
   if (t.kind === 'loan') return 'سلفة على ' + t.months + ' ' + (t.months <= 10 ? 'شهور' : 'شهر') + ' · الخصم من ' + t.label;
-  if (t.kind === 'adv') return 'راتب مقدم من راتب ' + t.label;
   if (t.kind === 'ded') return 'خصم من راتب ' + t.label;
   return 'صرف راتب ' + t.label;
 }
@@ -4572,15 +3767,6 @@ function filesPageHtml() {
     ${fs.slice(0, 60).map(f => `<div class="row"><span dir="ltr" style="font-size:12px">${esc(String(f.path).slice(8, 20))}…</span><span class="sub">${esc(f.kind)} · ${esc(String(f.created_at || '').slice(0, 10))}</span></div>`).join('')}
     ${del && fs.length ? `<button class="btn2 ${S.armed==='clean'?'arm':''}" style="width:100%;margin-top:10px" onclick="if(S.armed!=='clean'){S.armed='clean';renderSet();}else{S.armed=null;loadClean(true);}">${S.armed==='clean'?'تأكيد الحذف':'احذفها'}</button>` : ''}</div>`;
 }
-async function newAdmin() {
-  if (S.armed !== 'admin') { S.armed = 'admin'; renderSet(); return; }
-  try {
-    const r = await call('apiNewAdminLink', BOOT.key);
-    BOOT.key = r.key; S.armed = null;
-    $('#view').innerHTML = `<div class="card"><b>رابطك الجديد</b><div class="sub" style="margin-top:6px">احذف الأيقونة القديمة من الشاشة الرئيسية، وافتح هذا الرابط وأضفه من جديد.</div>
-      <div class="link">${esc(adminLink(r.key))}</div><a class="btn2" href="${esc(adminLink(r.key))}">افتح الرابط الجديد</a></div>`;
-  } catch (e) { toastErr(e); }
-}
 
 function rulesHtml(st) {
   st = st || {};
@@ -4590,7 +3776,7 @@ function rulesHtml(st) {
     <div>• نفس التقصير ينحسب مرة وحدة باليوم، واليوم اللي ما فيه تسجيل ينحسب ناجح.</div>
     <div>• كل موقف مميز فوق الواجب يزيد ${M(st.star, '', 't')}، لين ${M(st.starCap, '', 't')} بالشهر.</div>
     ${Number(st.clean) > 0 ? `<div>• إذا خلص الشهر بدون ولا تقصير، مكافأة ${M(st.clean, '', 't')}.</div>` : ''}
-    <div>• الحافز ينصرف مع راتب نفس الشهر، والسلف والراتب المقدم ينخصمون من الراتب.</div>
+    <div>• الحافز ينصرف مع راتب نفس الشهر، والسلف تنخصم من الراتب.</div>
     <div class="sub" style="margin-top:8px">الأداء: الحضور والمواعيد، جودة الشغل، إدارة العمال، حل المشاكل، متابعة الأعمال الموكلة، التركيز والانتباه، تأمين المشروع.<br>السلوك: الأمانة والمصداقية، الاحترام وحسن التعامل، الالتزام بالتعليمات، النظافة، الانضباط والمظهر.</div></div>`;
 }
 
@@ -4635,10 +3821,9 @@ async function loadEmp() {
 
 function renderEmp(d, isPreview) {
   S.empData = d; S.empPreview = isPreview;
-  const nOpen = (d.tasks || []).filter(t => t.status === 'open' || t.status === 'returned').length;
   const nRetInv = ((d.inv || {}).items || []).filter(x => x.kind === 'inv' && x.status === 'returned' && !x.task).length;
   if (!['rep', 'inv', 'pay'].includes(S.etab)) S.etab = 'rep';
-  const tasksTab = false, mainTab = S.etab === 'rep';
+  const mainTab = S.etab === 'rep';
   $('#app').classList.add('empv');
   if (NF.open && !isPreview) { $('#app').innerHTML = `<div class="top"><div><h1></h1></div><div class="topr">${nfBell()}</div></div><div id="view"></div>`; nfRender(); return; }
   if (!isPreview) nfEnsure();
@@ -4648,9 +3833,8 @@ function renderEmp(d, isPreview) {
     ${isPreview ? `<button class="back" onclick="closePreview()">${I('arrow-right', 17)}رجوع للفريق</button><div class="note info">${I('eye', 16)}هذي معاينة، والموظف يشوف نفس الصفحة.</div>` : ''}
     <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>`}</div>${isPreview ? '' : pushHtml()}${mainTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) : ''}
     <div class="segc etabs e4 e3"><button class="${S.etab === 'rep' ? 'on' : ''}" onclick="S.etab='rep';RP.sent=null;RP.open=null;RP.hist=null;rerenderEmp()">تقاريري</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري${nRetInv ? '<span class="nb">' + nRetInv + '</span>' : ''}</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">راتبي</button></div>
-    ${S.etab === 'inv' ? empInvHtml(d, isPreview) : S.etab === 'rep' ? rpEmpHtml(d, isPreview) + guideDoneHtml(d) : tasksTab ? empTasksHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
+    ${S.etab === 'inv' ? empInvHtml(d, isPreview) : S.etab === 'rep' ? rpEmpHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
   if (!isPreview) prefetchImgs();
-  if (tasksTab) vFetch((d.tasks || []).filter(t => t.status === 'open' || t.status === 'returned').map(t => (vOf(t) || {}).id));
 }
 
 function empPayHtml(d) {
@@ -4698,81 +3882,9 @@ function empPayHtml(d) {
 
 /* ---------- المهام (الموظف) ---------- */
 
-function empTasksHtml(d, isPreview) {
-  const today = d.today, mode = isPreview ? 'preview' : 'emp';
-  const ts = (d.tasks || []).map(t => Object.assign({}, t, {b: tBucket(t, today)}));
-  const open = ts.filter(t => t.status === 'open' || t.status === 'returned'), ret = ts.filter(t => t.status === 'returned').sort(byUrgent);
-  const cnt = open.length === 1 ? 'عندك مهمة وحدة' : open.length === 2 ? 'عندك مهمتين' : 'عندك ' + open.length + (open.length > 10 ? ' مهمة' : ' مهام');
-  let h = open.length ? '' : emptyHtml('check-check', 'ما عليك مهام الحين، يعطيك العافية');
-  if (ret.length) h += `<div class="sech r">رجعت لك</div>` + ret.map(t => empCardHtml(t, mode, false)).join('');
-  projGroups(ts.filter(t => t.status === 'open')).forEach((g, i) => {
-    const hot = g.items.some(t => t.urgent || t.late), k = g.key || 'gen', on = S.eopen[k] !== undefined ? S.eopen[k] : (i === 0 || hot);
-    h += `<div class="pgrp ep"><button class="pgh2" aria-expanded="${on}" onclick="S.eopen['${k}']=${on ? 'false' : 'true'};rerenderEmp()"><span>${esc(g.name)}</span><span class="n">${g.items.length === 1 ? 'مهمة وحدة' : g.items.length === 2 ? 'مهمتين' : g.items.length + (g.items.length > 10 ? ' مهمة' : ' مهام')}<span class="chev ${on ? 'up' : ''}">${I('arrow-right', 15, 2.5)}</span></span></button>${on ? g.items.map(t => empCardHtml(t, mode, true)).join('') : ''}</div>`;
-  });
-  const rv = ts.filter(t => t.status === 'review');
-  if (rv.length) h += `<div class="sech a">انرسلت، تنتظر المدير العام</div>` + rv.map(t => empCardHtml(t, mode, false)).join('');
-  const done = ts.filter(t => t.status === 'done').slice(0, 10);
-  if (done.length) h += `<button class="dtog" onclick="S.eShowDone=!S.eShowDone;rerenderEmp()">${S.eShowDone ? 'إخفاء اللي خلصت' : 'خلصت (' + done.length + ')'}</button>` + (S.eShowDone ? done.map(t => `<div class="tli dn"><span class="tt d">${esc(t.title)}</span><span class="tm">${dmy(t.doneAt)}</span></div>${t.apNote ? `<div class="note good" style="margin:0 0 8px"><div><b>تعليق المدير العام:</b> ${esc(t.apNote)}</div></div>` : ''}`).join('') : '');
-  return h;
-}
 
-function empCardHtml(t, mode, inGroup) {
-  const today = S.empData.today, p = pillOf(t, t.b, true), open = t.status === 'open' || t.status === 'returned';
-  let act = '';
-  if (open && mode === 'emp') act = S.doing === t.id ? proofFormHtml(t)
-    : t.proof === 'note' ? `<button class="bigdo" style="border:0;font-family:inherit;cursor:pointer" onclick="S.doing='${t.id}';S.shots=[];S.cm='';rerenderEmp()">${I('pencil', 15, 2.2)}أنجزتها</button>`
-    : `<label class="bigdo">${I('camera', 15, 2.2)}${t.proof === 'invoice' ? 'أنجزتها · صوّر الفاتورة' : 'أنجزتها'}<input type="file" accept="${ACC_IMG}" capture="environment" style="display:none" onchange="startDone('${t.id}', this)"></label>`;
-  const meta = [t.urgent && open ? '<b class="tu">عاجلة</b>' : '', inGroup ? '' : (t.pname ? esc(t.pname) : ''), t.status === 'review' ? 'انرسلت ' + dmy(t.doneAt) : dueHtml(t, today), open && t.proof === 'invoice' ? 'الإثبات: فاتورة' : open && t.proof === 'note' ? 'الإثبات: ملاحظة' : ''].filter(Boolean).join(' · ');
-  const al = mode === 'emp' && open ? alTaskFor(t.id) : null;
-  return `<div class="ecard ${inGroup ? 'in' : ''} ${t.status === 'returned' ? 'rt' : ''} ${S.hlTask === t.id ? 'hl' : ''}" data-tid="${esc(t.id)}">
-    <div class="th"><span class="tt">${esc(t.title)}</span>${pillHtml(p)}</div>
-    ${al ? `<button class="albn" onclick="alTap('${al.id}',this)">${I('bell-ring', 15)}<span><b>تذكير من المدير العام</b> · ${esc(rpTickWhen(al.at))}</span><span class="go">تأكيد المشاهدة</span></button>` : ''}
-    ${meta ? `<div class="tm">${meta}</div>` : ''}
-    ${t.status === 'returned' && t.reason ? `<div class="note bad"><div><b>المدير العام يقول:</b> ${esc(t.reason)}</div></div>` : ''}
-    ${t.status === 'done' && t.apNote ? `<div class="note good"><div><b>تعليق المدير العام:</b> ${esc(t.apNote)}</div></div>` : ''}
-    ${t.note && open ? `<div class="enote">${esc(t.note)}</div>` : ''}
-    ${open && vOf(t) ? vPlayerHtml(vOf(t).id, vOf(t).d) + '<div class="vcap">شرح صوتي من المدير العام</div>' : ''}
-    ${open ? mediaHtml(t) : ''}
-    ${act}</div>`;
-}
 
-function proofFormHtml(t) {
-  const pf = t.proof || 'photo', max = pf === 'invoice' ? 3 : 5;
-  if (pf === 'note') return `<div class="pform">
-    <textarea placeholder="ملاحظة الإنجاز (إلزامية)" oninput="S.cm=this.value;const b=document.getElementById('sendb');if(b)b.disabled=this.value.trim().length<3">${esc(S.cm || '')}</textarea>
-    <button class="btn" id="sendb" ${(S.cm || '').trim().length >= 3 && !S.busy ? '' : 'disabled'} onclick="sendDone('${t.id}')">${S.busy ? 'جاري الإرسال…' : I('send', 17) + 'إرسال'}</button>
-    <button class="btn2" style="width:100%;border:0" onclick="S.doing=null;S.cm='';rerenderEmp()">إلغاء</button>
-    <div class="err" id="uperr"></div></div>`;
-  const inv = pf === 'invoice', f = S.dinv || (S.dinv = {amount: '', vendor: '', cat: '', paidBy: 'cash'});
-  return `<div class="pform">
-    ${inv ? `<div class="sub">فاتورة «${esc(t.title)}» · تنحسب على ${esc(t.pname || 'عام')}</div>` : ''}
-    <div class="shots">${S.shots.map((s, i) => `<div class="shot"><img src="${s}" alt="صورة"><button class="x" onclick="S.shots.splice(${i},1);rerenderEmp()" aria-label="حذف الصورة">×</button></div>`).join('')}
-    ${S.shots.length < max ? `<label class="madd">${I('camera', 20)}${inv ? 'الفاتورة' : 'صورة'}<input type="file" accept="${ACC_IMG}" multiple style="display:none" onchange="startDone('${t.id}', this)"></label>` : ''}</div>
-    ${S.shotLoading ? '<div class="sub">جاري تجهيز الصورة…</div>' : ''}
-    ${inv ? `<div class="grid2"><input class="qtt" inputmode="decimal" placeholder="المبلغ" value="${esc(f.amount)}" oninput="S.dinv.amount=this.value;amtPv(this.value,'apv_dinv')"><input placeholder="المحل" value="${esc(f.vendor)}" oninput="S.dinv.vendor=this.value"></div>${amtPvHtml(f.amount, 'apv_dinv')}
-      ${catPick(f.cat || '', v => `S.dinv.cat='${v}';rerenderEmp()`)}
-      <div class="sub" style="margin:4px 0 -2px">دفعت من؟</div>
-      <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'المدير العام']].map(o => `<button class="${f.paidBy === o[0] ? 'on' : ''}" onclick="S.dinv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>` : ''}
-    <input placeholder="تعليق (اختياري)" value="${esc(S.cm || '')}" oninput="S.cm=this.value">
-    <button class="btn" id="sendb" ${S.shots.length && !S.busy && !S.shotLoading ? '' : 'disabled'} onclick="sendDone('${t.id}')">${S.busy ? esc(S.upProg || 'جاري الإرسال…') : I('send', 17) + 'إرسال'}</button>
-    <button class="btn2" style="width:100%;border:0" onclick="S.doing=null;S.shots=[];S.dinv=null;rerenderEmp()">إلغاء</button>
-    <div class="err" id="uperr"></div></div>`;
-}
 
-async function startDone(id, input) {
-  const files = Array.from(input.files || []);
-  input.value = '';
-  if (!files.length) return;
-  if (S.doing !== id) { S.doing = id; S.shots = []; S.cm = ''; S.dinv = null; }
-  S.shotLoading = true; rerenderEmp();
-  /* الإصدار 91: مهمة الفاتورة حدها 3 صور من الاختيار نفسه */
-  const tk = ((S.empData || {}).tasks || []).find(x => x.id === id), mx = tk && tk.proof === 'invoice' ? 3 : 5;
-  if (files.length > mx - S.shots.length) toast('الحد ' + mx + ' صور، أخذت أول ' + Math.max(0, mx - S.shots.length), null, 'er');
-  for (const f of files.slice(0, Math.max(0, mx - S.shots.length))) {
-    try { S.shots.push(await resizeImg(f)); } catch (e) { toastErr(e); }
-  }
-  S.shotLoading = false; rerenderEmp();
-}
 
 function empInvHtml(d, isPreview) {
   const iv = d.inv || {balance: 0, o: 0, items: []}, c = iv.c != null ? iv.c : (iv.balance || 0), t = iv.o || 0;
@@ -4894,29 +4006,6 @@ function resizeImg(file, maxD, q) {
   });
 }
 
-async function sendDone(id) {
-  const t = (S.empData.tasks || []).find(x => x.id === id) || {}, pf = t.proof || 'photo', err = m => { const el = $('#uperr'); if (el) el.textContent = m; };
-  if (S.busy) return;
-  if (pf === 'note' && (S.cm || '').trim().length < 3) return err('اكتب وش سوّيت');
-  if (pf !== 'note' && !S.shots.length) return err(pf === 'invoice' ? 'صوّر الفاتورة' : 'لازم ترفق صورة');
-  let extra = null;
-  if (pf === 'invoice') {
-    const f = S.dinv || {};
-    if (!(API.parseAmt(f.amount) > 0)) return err('اكتب المبلغ');
-    if (!String(f.vendor || '').trim()) return err('اكتب اسم المحل');
-    extra = {amount: f.amount, vendor: f.vendor, cat: f.cat || '', paidBy: f.paidBy || 'cash'};
-  }
-  S.busy = true; S.upProg = ''; rerenderEmp();
-  /* الإصدار 87: يبين كم صورة ارتفعت ونسبتها، ولو علّق الرفع يطلع خطأ واضح بعد مهلة قصيرة، والصور اللي ارتفعت ما تنعاد */
-  const prog = (dn, n, pc) => { S.upProg = dn >= n ? 'جاري الإرسال…' : 'جاري رفع الصور: ' + dn + ' من ' + n + ' · ' + pc + '%'; const b = document.getElementById('sendb'); if (b) b.textContent = S.upProg; };
-  try {
-    const d = await callT(240000, 'apiTaskDone', BOOT.token, id, S.cm || '', pf === 'note' ? [] : S.shots, extra, prog);
-    S.busy = false; S.upProg = ''; S.doing = null; S.shots = []; S.cm = ''; S.dinv = null;
-    renderEmp(d, false); toast('انرسلت، يعطيك العافية');
-  } catch (e) {
-    S.busy = false; S.upProg = ''; rerenderEmp(); err(e);
-  }
-}
 
 /* ---------- التحديث ---------- */
 
@@ -4950,7 +4039,7 @@ async function refresh(silent) {
   }
   if (S.upN) { if (!silent) toast('انتظر لين يخلص الرفع', null, 'in'); return; }
   if (S.gr) return;
-  if (silent && (S.doing || S.invForm || S.form || S.gform || S.ret || S.sheet || tfFilled().length || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || ''))) return;
+  if (silent && (S.invForm || S.form || S.gform || S.ret || S.sheet || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || ''))) return;
   if (await checkUpdate(!silent)) return;
   refreshing = Date.now();
   document.querySelectorAll('.rf').forEach(b => b.classList.add('spin'));
@@ -4962,8 +4051,6 @@ async function refresh(silent) {
       renderAdmin();
     } else if (BOOT.page === 'emp') {
       const d = await call('apiEmp', BOOT.token);
-      /* الإصدار 74: التحديث ما يمسح نموذج الإثبات وصوره إذا المهمة لسه مفتوحة */
-      if (!(S.doing && (d.tasks || []).some(t => t.id === S.doing && (t.status === 'open' || t.status === 'returned')))) { S.doing = null; S.shots = []; }
       S.upload = null;
       renderEmp(d, false);
     }
@@ -4983,7 +4070,7 @@ async function refresh(silent) {
 (function () {
   let y0 = null, pulled = 0;
   const ind = document.getElementById('ptr');
-  const ptrOk = e => !(document.documentElement.classList.contains('lock') || document.documentElement.classList.contains('zlock') || document.body.classList.contains('kb') || S.rec || S.gr || S.sheet || CAM.stream
+  const ptrOk = e => !(document.documentElement.classList.contains('lock') || document.documentElement.classList.contains('zlock') || document.body.classList.contains('kb') || S.gr || S.sheet || CAM.stream
     || (e.target && e.target.closest && e.target.closest('#ov')));
   window.addEventListener('touchstart', e => { y0 = document.getElementById('scr').scrollTop <= 0 && ptrOk(e) ? e.touches[0].clientY : null; pulled = 0; }, {passive: true});
   window.addEventListener('touchmove', e => {
@@ -5002,7 +4089,7 @@ async function refresh(silent) {
   document.addEventListener('touchstart', e => {
     sh = null;
     const s = e.target && e.target.closest && e.target.closest('#ov .sheet');
-    if (!s || S.rec || $('#zv')) return;
+    if (!s || $('#zv')) return;
     hd = !!e.target.closest('.grab,.shh');
     if (!hd && (s.scrollTop > 0 || e.target.closest('input,textarea,select,video,audio,[contenteditable]'))) return;
     sh = s; sy = e.touches[0].clientY; dy = 0; t0 = Date.now(); drag = false;
@@ -5074,7 +4161,6 @@ async function refresh(silent) {
   });
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') healSoon(300);
-    if (document.visibilityState === 'hidden' && S.rec) recStop();
     if (document.visibilityState === 'visible') { if (Date.now() - lastLoad > 60000) refresh(true); else checkUpdate(); seenPing(true); seenPoll(); }
     if (document.visibilityState === 'hidden') seenBye();
   });
@@ -5086,7 +4172,6 @@ const RP = {reps: null, projs: [], need: false, loading: 0, failed: false, open:
 const RP_ACC = 'image/' + '*,video/' + '*,.pdf,.xlsx,.xls,.doc,.docx';
 const RP_DOC = ['pdf', 'xlsx', 'xls', 'doc', 'docx'];
 
-function rpAdmin() { return BOOT.page === 'admin' && !S.preview; }
 function rpData() { return BOOT.page === 'admin' && !S.preview ? S.data : S.empData; }
 function rpToday() { return (rpData() || {}).today || ''; }
 function rpArr(a) { return Array.isArray(a) ? a : []; }
@@ -5116,14 +4201,7 @@ function rpNPend() { return rpProjs().filter(p => { const r = rpLast(p.id); retu
 function rpUpdBy(r) { return r.updBy ? (r.updBy === 'المدير العام' ? r.updBy : shortName(r.updBy)) : rpBy(r); }
 function rpBy(r) { return r.by === 'admin' ? 'المدير العام' : shortName(r.byName || ''); }
 function rpDay(s) { const d = new Date(s + 'T12:00:00'); return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_AR[d.getMonth()]; }
-function rpRel(s) {
-  const t = rpToday();
-  if (s === t) return 'اليوم';
-  const y = new Date(t + 'T12:00:00Z'); y.setUTCDate(y.getUTCDate() - 1);
-  return s === y.toISOString().slice(0, 10) ? 'أمس' : rpDay(s);
-}
 function rpNDone(n) { return n === 1 ? 'عمل منجز واحد' : n === 2 ? 'عملان منجزان' : n <= 10 ? n + ' أعمال منجزة' : n + ' عملاً منجزاً'; }
-function rpNLater(n) { return n === 1 ? 'عمل لاحق واحد' : n === 2 ? 'عملان لاحقان' : n <= 10 ? n + ' أعمال لاحقة' : n + ' عملاً لاحقاً'; }
 function rpReplyT(v) { return v === 'ok' ? 'اعتُمد' : v === 'no' ? 'لم يُعتمد' : 'تم الرد'; }
 
 function rpEnsure() { if ((RP.reps === null && !RP.failed) || RP.need) rpLoad(); }
@@ -5158,7 +4236,7 @@ async function rpLoad_(manual) {
 function rpResolve(id) { return (RP.alias || {})[id] || id; }
 function rpRerender() {
   if (BOOT.page === 'admin' && !S.preview) {
-    if (S.view === 'task' && !S.td && S.tview === 'r') renderTasks(); else rpSegCount();
+    if (S.view === 'task' && S.tview === 'r') renderTasks(); else rpSegCount();
   } else if (S.empData && S.etab === 'rep') rerenderEmp();
 }
 function rpSegCount() {
@@ -5511,28 +4589,6 @@ function rpEmpHtml(d, isPreview) {
   }
   return h;
 }
-function rpEmpCardHtml(r, d, share) {
-  const dec = rpArr(r.decide), up = rpArr(r.up), rest = rpArr(r.cur).filter(x => !up.includes(x)), n = rpOf(r.proj).length, nd = rpArr(r.done).length;
-  const notes = rpArr(r.notes), last = notes[notes.length - 1];
-  return `<button class="rpc" onclick="rpOpen('${r.id}')">
-    <div class="rph"><b>${esc(rpPName(r.proj))}</b><span class="rpm">${esc(rpBy(r))} · ${esc(rpRel(r.date))}</span></div>
-    ${share ? `<div class="rpd ok">${I('bell-ring', 15)}<div><b>المدير العام:</b> ${esc(share.msg || 'راجع هذا التقرير')}</div></div>` : ''}
-    ${dec.length ? (r.reply ? `<div class="rpd ok">${I('circle-check', 15)}<div><b>${rpReplyT(r.reply)}:</b> ${esc(dec.join('، '))}</div></div>` : `<div class="rpd">${I('triangle-alert', 15)}<div><b>بانتظار قرار المدير العام:</b> ${esc(dec.join('، '))}</div></div>`) : ''}
-    ${!share && last && r.by === (d || {}).id ? `<div class="rpd ok">${I('message-circle', 15)}<div><b>ملاحظة المدير العام:</b> ${esc(last.text)}</div></div>` : ''}
-    ${up.length ? `<div class="rpr up">${I('clock', 13)}<span><b>حان وقته:</b> ${esc(up.join('، '))}</span></div>` : ''}
-    ${rest.length ? `<div class="rpr"><b>المتبقي:</b> ${esc(rest.join('، '))}</div>` : ''}
-    <div class="rpr lt">${nd ? `<span class="okc">${I('check-check', 13)}أُنجز ${nd}</span>` : ''}<span>${I('file-text', 13)}${n === 1 ? 'تقرير واحد' : n === 2 ? 'تقريران' : n + (n > 10 ? ' تقريراً' : ' تقارير')}</span>${r.edited ? '<span>عدّله المدير العام</span>' : ''}</div>
-  </button>`;
-}
-function rpPickProj(id) { RP.eProj = id; RP.sent = null; lsSet('rp_proj', id); rerenderEmp(); }
-function rpEmpRowHtml(r, d) {
-  const dec = rpArr(r.decide), notes = rpArr(r.notes), last = notes[notes.length - 1], nl = rpArr(r.later).length;
-  return `<button class="rpc" onclick="rpOpen('${r.id}')">
-    <div class="rph"><b>${esc(dayLabel(r.date))}</b><span class="rpm">${esc(rpBy(r))}${r.edited ? ' · عدّله المدير العام' : ''}</span></div>
-    <div class="rpr">المنجزة: ${rpArr(r.done).length} · الحالية: ${rpArr(r.cur).length}${nl ? ` · اللاحقة: ${nl}` : ''}${dec.length ? ` · القرار: ${r.reply ? rpReplyT(r.reply) : 'بانتظار المدير العام'}` : ''}</div>
-    ${last && r.by === (d || {}).id ? `<div class="rpd ok">${I('message-circle', 15)}<div><b>ملاحظة المدير العام:</b> ${esc(last.text)}</div></div>` : ''}
-  </button>`;
-}
 function rpEmpSub(d) {
   if (RP.reps === null || !(RP.open || RP.hist)) return '';
   const body = RP.hist ? rpHistHtml(false) : rpDetailHtml(false);
@@ -5846,30 +4902,6 @@ async function rpEditSave() {
   rpRerender();
   toast('حُفظ التعديل');
 }
-function openCmtEdit(id) {
-  const t = allTasks().find(x => x.id === id);
-  if (!t) return;
-  S.sheet = true;
-  ovOpen(`<label class="shh">تعديل ملاحظة الموظف</label>
-    <div class="sub" style="margin:-6px 0 6px">${esc(t.title)}</div>
-    <textarea id="cmt_e" class="rta" oninput="rpGrow(this)">${esc(t.comment || '')}</textarea>
-    <div class="rhint">${I('info', 13)}تظهر عليها علامة «عدّله المدير العام»</div>
-    <div class="err" id="cmt_err"></div>
-    <button class="btn2 cu qbig" id="cmt_b" onclick="saveCmtEdit('${id}')">${I('check', 17, 2.5)}حفظ التعديل</button>`);
-  rpGrowAll();
-}
-async function saveCmtEdit(id) {
-  const b = $('#cmt_b'), el = $('#cmt_e');
-  if (!b || b.disabled) return;
-  b.disabled = true; b.textContent = 'جاري الحفظ…';
-  try {
-    S.data = await call('apiTaskComment', BOOT.key, id, el.value);
-    ovClose(); renderAdmin(); toast('حُفظ التعديل');
-  } catch (e) {
-    b.disabled = false; b.innerHTML = I('check', 17, 2.5) + 'حفظ التعديل';
-    const er = $('#cmt_err'); if (er) er.textContent = e;
-  }
-}
 
 /* الإصدار 65: الإشعارات، ومسودة التقرير، وتعليق الاعتماد، وتعديل الشرح */
 const NF = {items: null, need: false, loading: false, open: false, seen: +(lsGet('nf_seen') || 0), prev: 0, more: false};
@@ -5921,7 +4953,6 @@ function goLink(u) {
 }
 /* الإصدار 86: فتح التنبيه نفسه (من الإشعار أو من داخل التطبيق) يسجّل المشاهدة مرة وحدة، ويوصل المدير العام إشعار */
 function alAll() { return rpArr((S.empData || {}).alerts).concat(rpArr(RP.alerts)); }
-function alTaskFor(tid) { return rpArr((S.empData || {}).alerts).find(a => a.kind === 'task' && a.ref === tid && !a.seen && Date.now() - a.at < 7 * 864e5) || null; }
 function alMark(r) {
   if (!r || !r.id) return;
   alAll().forEach(a => { if (a.id === r.id) a.seen = r.seen || Date.now(); });
@@ -5932,23 +4963,12 @@ async function alSeen(id) {
 function alSeenRep(rid) {
   rpArr(RP.alerts).filter(a => a.ref === rid && !a.seen).forEach(a => { a.seen = Date.now(); alSeen(a.id); });
 }
-async function alTap(id, btn) {
-  if (btn) { btn.disabled = true; btn.querySelector('.go').textContent = 'جاري…'; }
-  const r = await alSeen(id);
-  if (!r) { if (btn) { btn.disabled = false; btn.querySelector('.go').textContent = 'تأكيد المشاهدة'; } return toastErr('ما فيه اتصال، تأكد من النت وجرّب مرة ثانية'); }
-  rerenderEmp();
-}
 async function alOpen(id) {
   let a = alAll().find(x => x.id === id) || null;
   const r = await alSeen(id);
   if (r) a = r;
   if (!a) { S.etab = 'rep'; rerenderEmp(); toTop(); return; }
-  if (a.kind === 'task') {
-    S.etab = 'rep'; S.hlTask = a.ref; rerenderEmp();
-    setTimeout(() => { const el = document.querySelector('[data-tid="' + a.ref + '"]'); if (el) el.scrollIntoView({block: 'center'}); }, 80);
-    setTimeout(() => { if (S.hlTask === a.ref) { S.hlTask = null; const el = document.querySelector('[data-tid="' + a.ref + '"]'); if (el) el.classList.remove('hl'); } }, 4000);
-    return;
-  }
+  if (a.kind === 'task') { S.etab = 'rep'; rerenderEmp(); toTop(); return; } /* 118: تنبيه مهمة قديم يفتح «تقاريري» */
   S.etab = 'rep'; RP.sent = null; RP.hist = null; RP.open = rpResolve(a.ref);
   if (!rpArr(RP.reps).some(x => x.id === RP.open)) rpLoad();
   rerenderEmp(); toTop();
@@ -6042,70 +5062,11 @@ function rpLeaveAsk(msg) {
 function rpLeaveGo() { const c = $('#cfm'); if (c) c.remove(); if (RP.form) rpDraftNow(RP.form); ovClose(); }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && RP.form) rpDraftSave(); });
 
-function askApprove(id) {
-  const t = allTasks().find(x => x.id === id);
-  if (!t) return;
-  ovOpen(`<label class="shh">اعتماد المهمة</label>
-    <div class="sub" style="margin:-6px 0 8px">${esc(t.title)} · ${esc(shortName(t.ename || ''))}</div>
-    <label class="qlab" for="apc">${I('message-circle', 14)}تعليق للموظف (اختياري)</label>
-    <textarea id="apc" class="rta sm" placeholder="اكتب التعليق" oninput="rpGrow(this)"></textarea>
-    <div class="rhint">${I('info', 13)}يصل التعليق إلى الموظف مع إشعار الاعتماد</div>
-    <div class="err" id="aperr"></div>
-    <button class="btn2 cu qbig" id="apb" onclick="doApprove('${id}')">${I('check', 17, 2.5)}اعتمدها</button>`);
-  rpGrowAll();
-}
-async function doApprove(id) {
-  const b = $('#apb'); if (!b || b.disabled) return;
-  b.disabled = true; b.textContent = 'جاري الاعتماد…';
-  try {
-    S.data = await call('apiTaskApprove2', BOOT.key, id, ($('#apc') || {}).value || '');
-    ovClose(); renderAdmin(); toast('تم الاعتماد');
-  } catch (e) {
-    b.disabled = false; b.innerHTML = I('check', 17, 2.5) + 'اعتمدها';
-    const er = $('#aperr'); if (er) er.textContent = e;
-  }
-}
 
-function mEditHtml(t) {
-  const m = mOf(t), id = t.id;
-  return `<div class="medit">${m.map((x, i) => { const arm = S.armed === 'md_' + id + '_' + i; return `<span class="mchip ${arm ? 'arm' : ''}">${I(x.t === 'v' ? 'play' : 'image', 14)}${x.t === 'v' ? 'فيديو' : 'صورة'} ${i + 1}<button onclick="delMedia('${id}',${i})" aria-label="حذف">${arm ? 'تأكيد الحذف' : I('x', 13, 2.5)}</button></span>`; }).join('')}
-    ${m.length < 5 && t.status !== 'done' ? `<label class="mchip add">${I('plus', 14)}إضافة صورة أو فيديو<input type="file" multiple accept="${ACC_MEDIA}" style="display:none" onchange="addMedia('${id}',this)"></label>` : ''}</div>`;
-}
-async function delMedia(id, i) {
-  const k = 'md_' + id + '_' + i;
-  if (S.armed !== k) { S.armed = k; renderAdmin(); return; }
-  S.armed = null;
-  const t = allTasks().find(x => x.id === id); if (!t) return;
-  const m = mOf(t).filter((x, j) => j !== i);
-  try { S.data = await call('apiTaskMedia', BOOT.key, id, m); renderAdmin(); toast('انحذف من الشرح'); }
-  catch (e) { toastErr(e); renderAdmin(); }
-}
-async function addMedia(id, inp) {
-  const fs = Array.from(inp.files || []); inp.value = '';
-  const t = allTasks().find(x => x.id === id); if (!t || !fs.length) return;
-  const m = mOf(t).slice();
-  if (m.length + fs.length > 5) return toast('الحد 5 مرفقات للمهمة', null, 'er');
-  const ld = toastLoad('جاري رفع الشرح…');
-  S.upN++;
-  try {
-    for (const f of fs) {
-      if (String(f.type).indexOf('video') === 0) {
-        if (f.size > 45 * 1024 * 1024) throw 'الفيديو أكبر من 45 ميغابايت، صوّر مقطعاً أقصر';
-        m.push({t: 'v', id: await callT(600000, 'apiUploadVid', BOOT.key, f)});
-      } else {
-        const data = await resizeImg(f, 1600, 0.8);
-        const p = await callT(120000, 'apiUploadImg', BOOT.key, data);
-        S.mc[p] = data; m.push({t: 'i', id: p});
-      }
-    }
-    S.data = await call('apiTaskMedia', BOOT.key, id, m);
-    S.upN--; toastDone(ld); renderAdmin(); toast('انضاف للشرح');
-  } catch (e) { S.upN--; toastDone(ld); toastErr(e); }
-}
 
 /* الإصدار 66: إرسال التقرير (تنبيه) */
 function rpShareDefault(r, item) {
-  const es = (S.data.employees || []).filter(e => (e.tasks || []).some(t => t.project === r.proj) || (RP.reps || []).some(x => x.proj === r.proj && x.by === e.id)).map(e => e.id);
+  const es = (S.data.employees || []).filter(e => (e.tprojs || []).includes(r.proj) || (RP.reps || []).some(x => x.proj === r.proj && x.by === e.id)).map(e => e.id);
   const k = item ? rpTk(r, item) : null;
   if (k && k.by && k.by !== 'admin') return [k.by];
   if (r.by !== 'admin' && !es.includes(r.by)) es.push(r.by);
@@ -6655,7 +5616,7 @@ function subHead() {
     h1.textContent = h2.textContent;
     const fx = h2.parentNode.classList.contains('fxh') ? h2.parentNode : null, sp = fx && fx.querySelector('span');
     if (fx && (!sp || /^\d*$/.test(sp.textContent.trim()))) fx.remove(); else h2.remove();
-  } else if (S.td) h1.textContent = 'تفاصيل المهمة';
+  }
   top.classList.add('subp');
   h1.parentNode.insertBefore(back, h1);
 }

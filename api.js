@@ -8,7 +8,7 @@
   const FILES_URL = SB_URL + '/functions/v1/files';
   let CRED = {};
   /* الإصدار 109: تعديل الفاتورة وإضافة فاتورة المدير والميزانية واعتماد المهمة يكتبون إشعار (للموظف أو تنبيه ميزانية)، فينرسل فورًا */
-  const NOTIFY = ['tasks_add', 'task_return', 'task_update', 'task_approve', 'inv_approve', 'inv_return', 'inv_fix', 'inv_upd', 'inv_edit', 'inv_add', 'proj_budget', 'att_bad', 'att_bad_undo'];
+  const NOTIFY = ['inv_approve', 'inv_return', 'inv_fix', 'inv_upd', 'inv_edit', 'inv_add', 'proj_budget', 'att_bad', 'att_bad_undo'];
   function flush() {
     fetch(FN_URL, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: '{"op":"flush"}', keepalive: true }).catch(() => {});
   }
@@ -17,7 +17,7 @@
   const HEAVY = [TRUST];
   const heavy = c => HEAVY.indexOf(c) >= 0;
   const STAR_CRIT = 'موقف مميز';
-  const MAX_MEDIA = 5, MAX_VID = 45 * 1024 * 1024;
+  const MAX_VID = 45 * 1024 * 1024;
   const DEF = { miss: 5, trust: 10, star: 5, starCap: 100, clean: 0 }; /* الإصدار 117: «شهر بدون تقصير» افتراضه 0 مثل الإعداد */
   const CRITERIA = [
     { n: 'الحضور والمواعيد', s: 'الأداء', short: 'الحضور', bad: 'ركّز على الحضور بوقتك والالتزام بمواعيد التسليم.' },
@@ -56,7 +56,7 @@
   }
   /* الإصدار 74: كل عملية تطلع برقم طلب (rid). لو وصلت السيرفر مرتين ينحفظ أول وحدة بس، والإعادة بعد فشل الاتصال تستخدم نفس الرقم */
   const RID = {};
-  const NO_RID = ['ticket', 'push_sub', 'proj_add', 'admin_newkey'];
+  const NO_RID = ['ticket', 'push_sub', 'proj_add'];
   const RID_SKIP = ['grp', 'lat', 'lng', 'acc', 'rid'];
   const ridKey = (op, a) => op + '|' + JSON.stringify(a, (k, v) => RID_SKIP.indexOf(k) >= 0 ? undefined : v);
   const newRid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)).replace(/[^a-z0-9-]/gi, '');
@@ -77,18 +77,14 @@
   const gemp = (t, op, a) => rpc('guide_emp', { t: t, op: op, a: a || {} });
 
   let RAW = null;
-  /* الإصدار 60: التحميل الخفيف (المهام المنتهية من أكثر من 90 يوم تنجاب عند الطلب)، ولو الدالة الجديدة مو موجودة يرجع للقديمة */
-  let LITE = true;
-  const noFn = e => /Could not find the function|schema cache|PGRST202/i.test(String(e && e.message || e));
+  /* الإصدار 60: التحميل الخفيف (آخر 90 يوم). من 118 ما فيه رجوع للدوال القديمة admin_raw و emp_raw */
   async function loadAdmin(k) {
     CRED = { k: k };
-    if (LITE) { try { RAW = norm(await rpc('admin_raw2', { k: k, days: 90 })); return RAW; } catch (e) { if (!noFn(e)) throw e; LITE = false; } }
-    RAW = norm(await rpc('admin_raw', { k: k })); return RAW;
+    RAW = norm(await rpc('admin_raw2', { k: k, days: 90 })); return RAW;
   }
   async function loadEmp(t) {
     CRED = { t: t };
-    if (LITE) { try { RAW = norm(await rpc('emp_raw2', { t: t, days: 90 })); return RAW; } catch (e) { if (!noFn(e)) throw e; LITE = false; } }
-    RAW = norm(await rpc('emp_raw', { t: t })); return RAW;
+    RAW = norm(await rpc('emp_raw2', { t: t, days: 90 })); return RAW;
   }
 
   function norm(r) {
@@ -100,10 +96,7 @@
       outLat: x.outLat == null ? null : Number(x.outLat), outLng: x.outLng == null ? null : Number(x.outLng), late: Number(x.late) || 0 }));
     r.logs = r.logs || [];
     r.fin = (r.fin || []).map(f => Object.assign({}, f, { amount: Number(f.amount) || 0, months: Number(f.months) || 0 }));
-    r.tasks = (r.tasks || []).map(t => {
-      const pr = Array.isArray(t.proofs) ? t.proofs : [];
-      return Object.assign({}, t, { photo: pr[0] || '', extra: pr.slice(1), media: Array.isArray(t.media) ? t.media : [], urgent: !!t.urgent, proof: t.proof || 'photo' });
-    });
+    r.tprojs = Array.isArray(r.tprojs) ? r.tprojs : []; /* 118: [الموظف، المشروع] من جدول المهام، للتنبيه بس */
     r.projects = (r.projects || []).map(p => Object.assign({}, p, { lat: p.lat == null ? null : Number(p.lat), lng: p.lng == null ? null : Number(p.lng) }));
     r.invoices = (r.invoices || []).map(x => Object.assign({}, x, { amount: Math.round((Number(x.amount) || 0) * 100) / 100,
       photos: Array.isArray(x.photos) ? x.photos : [] }));
@@ -447,26 +440,6 @@
     /* الإصدار 115: الصفوف جاية بالأقدم أول (التاريخ ثم وقت التسجيل)، فنقلبها قبل الترتيب عشان داخل اليوم الواحد يطلع الأحدث فوق */
     return order.map(g => map[g]).reverse().sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
   }
-  function taskInv_(id) {
-    const x = RAW.invoices.filter(v => v.task === id).slice(-1)[0];
-    return x ? { id: x.id, amount: x.amount, vendor: x.vendor || '', paidBy: x.paidBy, status: x.status } : null;
-  }
-  function tasksFor_(empId, tasks, today, pmap) {
-    const mine = tasks.filter(t => t.emp === empId);
-    const open = mine.filter(t => t.status !== 'done').sort((a, b) => {
-      const x = a.due || '9999-99-99', y = b.due || '9999-99-99';
-      return x < y ? -1 : x > y ? 1 : (a.ts < b.ts ? -1 : 1);
-    });
-    const done = mine.filter(t => t.status === 'done').sort((a, b) => a.doneAt < b.doneAt ? 1 : -1).slice(0, 15);
-    return open.concat(done).map(t => ({
-      id: t.id, title: t.title, due: t.due, note: t.note, status: t.status, doneAt: t.doneAt.slice(0, 10),
-      comment: t.comment, cmtEdited: !!t.cmtEdited, apNote: t.apNote || '', hasPhoto: !!t.photo, reason: t.reason, urgent: t.urgent,
-      proofs: [t.photo].concat(t.extra || []).filter(Boolean),
-      project: pmap[t.project] ? t.project : '', pname: pmap[t.project] || '', media: t.media, proof: t.proof || 'photo',
-      inv: t.proof === 'invoice' ? taskInv_(t.id) : null,
-      late: t.status !== 'done' && t.status !== 'review' && !!t.due && t.due < today,
-      lateDone: t.status === 'done' && !!t.due && t.doneAt.slice(0, 10) > t.due }));
-  }
   /* العهدة: c باقي معه، o له عندك من جيبه، t كل اللي له عندك */
   function invParts_(rows, empId) {
     let g = 0, rt = 0, sd = 0, cash = 0, own = 0;
@@ -496,7 +469,6 @@
       id: emp.id,
       name: emp.name,
       today: todayS,
-      tasks: tasksFor_(emp.id, RAW.tasks, todayS, pmap),
       month: calcMonth_(emp, logs, now),
       fin: finMonth_(emp, fin, logs, now),
       sal: salSt_(emp, fin, logs, now),
@@ -529,9 +501,8 @@
 
   function adminPayload_() {
     const emps = RAW.employees.filter(e => e.active);
-    const logs = RAW.logs, fin = RAW.fin, tasks = RAW.tasks, now = nowMonth(), todayS = RAW.today;
+    const logs = RAW.logs, fin = RAW.fin, now = nowMonth(), todayS = RAW.today;
     const projects = RAW.projects, pmap = projMap_(projects);
-    const empIds = emps.map(e => e.id);
     const bal = {};
     const parts = {};
     emps.forEach(e => { parts[e.id] = invParts_(RAW.invoices, e.id); bal[e.id] = parts[e.id].c; });
@@ -547,8 +518,7 @@
       alerts: RAW.alerts || [],
       guides: RAW.guides.map(g => ({ id: g.id, ts: g.ts, title: g.title, points: g.points, q: g.q,
         reads: RAW.greads.filter(x => x.guide === g.id).map(x => Object.assign({ name: (empById(x.emp) || {}).name || '' }, x)) })),
-      projects: projects.map(p => ({ id: p.id, name: p.name, archived: p.archived, lat: p.lat, lng: p.lng, budget: Number((RAW.budgets || {})[p.id]) || 0,
-        open: tasks.filter(t => t.project === p.id && t.status !== 'done' && empIds.indexOf(t.emp) >= 0).length })),
+      projects: projects.map(p => ({ id: p.id, name: p.name, archived: p.archived, lat: p.lat, lng: p.lng, budget: Number((RAW.budgets || {})[p.id]) || 0 })),
       criteria: CRITERIA.map(c => ({ n: c.n, s: c.s, short: c.short })),
       today: todayS,
       yesterday: addDay(todayS, -1),
@@ -564,7 +534,7 @@
           unpaid: sal.open,
           loans: loanBalances_(e, fin),
           tx: txList_(fin.filter(f => f.emp === e.id)),
-          tasks: tasksFor_(e.id, tasks, todayS, pmap)
+          tprojs: RAW.tprojs.filter(x => x[0] === e.id).map(x => x[1])
         };
       })
     };
@@ -585,40 +555,27 @@
     if (r && r.dup) out.__dup = true;
     return out;
   }
-  /* الإصدار 76: العملية وتحديث البيانات في طلب واحد (admin_exec2 و emp_exec2). لو الدالة مو موجودة يرجع للطريقة القديمة */
-  let X2 = true;
-  async function exec2(fn, args, op, a) {
-    if (!X2) return null;
-    try { return await withRid(x => rpc(fn, Object.assign({}, args, { op: op, a: x, days: 90 })), op, a || {}); }
-    catch (e) { if (!noFn(e)) throw e; X2 = false; return null; }
+  /* الإصدار 76: العملية وتحديث البيانات في طلب واحد (admin_exec2 و emp_exec2). من 118 ما فيه رجوع للطريقة القديمة */
+  function exec2(fn, args, op, a) {
+    return withRid(x => rpc(fn, Object.assign({}, args, { op: op, a: x, days: 90 })), op, a || {});
   }
   async function adminDo(k, op, a) {
     const x2 = await exec2('admin_exec2', { k: k }, op, a);
-    if (x2) {
-      CRED = { k: k }; RAW = norm(x2.raw);
-      if (NOTIFY.indexOf(op) >= 0) flush();
-      const out = adminPayload_();
-      if (x2.r && x2.r.dup) out.__dup = true;
-      return out;
-    }
-    const r = await aexec(k, op, a);
+    CRED = { k: k }; RAW = norm(x2.raw);
     if (NOTIFY.indexOf(op) >= 0) flush();
-    return reloadAdmin(k, r);
+    const out = adminPayload_();
+    if (x2.r && x2.r.dup) out.__dup = true;
+    return out;
   }
   async function empDo(t, op, a) {
     const x2 = await exec2('emp_exec2', { t: t }, op, a);
-    if (x2) {
-      CRED = { t: t }; RAW = norm(x2.raw);
-      flush();
-      const emp = empById(RAW.me);
-      if (!emp) throw new Error('الرابط غير صالح');
-      const out = empPayload_(emp);
-      if (x2.r && x2.r.dup) out.__dup = true;
-      return out;
-    }
-    const r = await eexec(t, op, a);
+    CRED = { t: t }; RAW = norm(x2.raw);
     flush();
-    return reloadEmp(t, r);
+    const emp = empById(RAW.me);
+    if (!emp) throw new Error('الرابط غير صالح');
+    const out = empPayload_(emp);
+    if (x2.r && x2.r.dup) out.__dup = true;
+    return out;
   }
   const empById = id => RAW.employees.filter(e => e.id === id)[0];
 
@@ -859,12 +816,6 @@
       return { id: r.id, data: await reloadAdmin(k) };
     },
 
-    async apiTaskRemind(k, id) {
-      const r = await rpc('task_remind', { k: k, id: String(id) });
-      flush();
-      if (RAW && r && r.id) (RAW.alerts = RAW.alerts || []).unshift({ id: r.id, kind: 'task', ref: String(id), item: null, emp: (RAW.tasks.find(t => t.id === String(id)) || {}).emp || '', msg: '', at: Date.now(), seen: null });
-      return r || true;
-    },
     async apiEmpOrder(k, ids) {
       if (!Array.isArray(ids) || !ids.length) throw new Error('ما فيه ترتيب');
       await rpc('emp_order', { k: k, ids: ids.map(String) });
@@ -886,87 +837,16 @@
       return adminDo(k, 'proj_save', a);
     },
 
-    async apiTasksAdd(k, x) {
-      if (!RAW || !RAW.employees || CRED.k !== k) await loadAdmin(k);
-      const act = RAW.employees.filter(e => e.active).map(e => e.id);
-      const ids = (x.emps || []).filter((id, i, a) => a.indexOf(id) === i && act.indexOf(id) >= 0);
-      if (!ids.length) throw new Error('اختر الموظف');
-      const project = String(x.project || '');
-      if (!project) throw new Error('اختر المشروع');
-      if (!RAW.projects.some(p => p.id === project)) throw new Error('المشروع غير موجود');
-      const items = (x.items || []).slice(0, 20);
-      if (!items.length) throw new Error('اكتب المهمة');
-      const rows = [];
-      items.forEach((it, n) => {
-        const title = String(it.title || '').trim().slice(0, 200);
-        if (!title) throw new Error('اكتب عنوان المهمة ' + (n + 1));
-        const due = String(it.due || '');
-        if (due && !/^\d{4}-\d{2}-\d{2}$/.test(due)) throw new Error('الموعد غير صحيح');
-        const note = String(it.note || '').trim().slice(0, 1000);
-        const media = (it.media || []).filter(m => m && m.id && (m.t === 'i' || m.t === 'v')).slice(0, MAX_MEDIA)
-          .map(m => ({ id: String(m.id), t: m.t }));
-        const voice = (it.media || []).find(m => m && m.id && m.t === 'a');
-        if (voice) media.push({ id: String(voice.id), t: 'a', d: Math.max(0, Math.round(Number(voice.d) || 0)) });
-        const proof = ['invoice', 'note'].indexOf(it.proof) >= 0 ? it.proof : 'photo';
-        ids.forEach(id => rows.push({ emp: id, title: title, due: due, note: note, project: project, media: media, urgent: !!it.urgent, proof: proof }));
-      });
-      return adminDo(k, 'tasks_add', { rows: rows });
-    },
 
-    oldCount() { return (RAW && RAW.tasksOld) || 0; },
     /* الإصدار 97: «طلعت» ترسل حتى والصفحة تتقفل، وقائمة آخر ظهور للمدير */
     seenOff() { if (!CRED.k && !CRED.t) return; try { fetch(SB_URL + '/rest/v1/rpc/app_seen_off', { method: 'POST', keepalive: true, headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ k: CRED.k || '', t: CRED.t || '' }) }).catch(() => {}); } catch (e) {} },
     async seenList() { const r = await rpc('app_seen_list', { k: CRED.k || '' }); if (RAW && r) { RAW.seen = r.seen || {}; RAW.left = r.left || {}; } return r; },
     seen(ver, label) { rpc('app_seen_mark', { k: CRED.k || '', t: CRED.t || '', ver: String(ver || ''), label: String(label || '').slice(0, 60) }).catch(() => {}); },
-    async apiTasksOld(k, q) {
-      const old = await rpc('admin_tasks_old', { k: k, q: String(q || ''), lim: 200 });
-      const n = norm({ tasks: old || [] }).tasks, have = new Set(RAW.tasks.map(t => t.id));
-      RAW.tasks = RAW.tasks.concat(n.filter(t => !have.has(t.id)));
-      if (!String(q || '').trim()) RAW.tasksOld = Math.max(0, (RAW.tasksOld || 0) - n.length);
-      return adminPayload_();
-    },
-    async apiTaskDelete(k, id) { return adminDo(k, 'task_del', { id: id }); },
-    async apiTasksDelete(k, ids) {
-      if (!Array.isArray(ids) || !ids.length) throw new Error('ما حددت مهام');
-      await rpc('tasks_del', { k: k, ids: ids.map(String) });
-      return reloadAdmin(k);
-    },
 
-    async apiTaskReturn(k, id, reason) {
-      const r = String(reason || '').trim().slice(0, 300);
-      if (!r) throw new Error('اكتب السبب عشان يعرف وش ناقص');
-      return adminDo(k, 'task_return', { id: id, reason: r });
-    },
 
-    async apiTaskApprove(k, id) { return adminDo(k, 'task_approve', { id: id }); },
-    async apiTaskClose(k, id) { return adminDo(k, 'task_close', { id: id }); },
 
-    async apiTaskUpdate(k, id, x) {
-      x = x || {};
-      const a = { id: id };
-      ['title', 'emp', 'note', 'project'].forEach(f => { if (x[f] !== undefined) a[f] = String(x[f] || ''); });
-      if (x.due !== undefined) {
-        const v = String(x.due || '');
-        if (v && !/^\d{4}-\d{2}-\d{2}$/.test(v)) throw new Error('الموعد غير صحيح');
-        a.due = v;
-      }
-      if (x.urgent !== undefined) a.urgent = !!x.urgent;
-      if (x.proof !== undefined) a.proof = String(x.proof);
-      if (x.voice !== undefined) { a.voice = String(x.voice || ''); a.vd = Math.max(0, Math.round(Number(x.vd) || 0)); }
-      return adminDo(k, 'task_update', a);
-    },
 
-    async apiTaskDone(token, id, comment, dataUrls, extra, onProg) {
-      const paths = await empUpload(token, dataUrls || [], 5, onProg);
-      const x = extra || {}, a = { id: id, comment: String(comment || ''), proofs: paths };
-      if (x.amount !== undefined) { a.amount = cleanAmount_(x.amount); a.vendor = String(x.vendor || '').trim(); a.cat = String(x.cat || ''); a.paidBy = x.paidBy || 'cash'; }
-      return empDo(token, 'task_done', a);
-    },
 
-    async apiProofAdmin(k, id, fid) { return imgUrl(fid); },
-    async apiProofEmp(t, id, fid) { return imgUrl(fid); },
-    async apiMediaAdmin(k, taskId, fid) { return fileUrl(fid); },
-    async apiMediaEmp(t, taskId, fid) { return fileUrl(fid); },
     async apiInvImgAdmin(k, id, fid) { return imgUrl(fid); },
     async apiInvImgEmp(t, id, fid) { return imgUrl(fid); },
     prefetch: prefetch,
@@ -984,26 +864,7 @@
       return p;
     },
 
-    async apiUploadVid(k, file, onProgress) {
-      if (!file) throw new Error('ما وصل الفيديو، جرّب مرة ثانية');
-      if (file.size > MAX_VID) throw new Error('الفيديو أكبر من الحد، صوّره أقصر');
-      const ext = ((String(file.name || '').match(/\.(\w{2,4})$/) || [])[1] || 'mp4').toLowerCase();
-      const known = { mov: 'video/quicktime', mp4: 'video/mp4', m4v: 'video/mp4', webm: 'video/webm', '3gp': 'video/3gpp' };
-      let type = String(file.type || '');
-      if (['video/mp4', 'video/quicktime', 'video/webm', 'video/3gpp'].indexOf(type) < 0) type = known[ext] || 'video/mp4';
-      const r = await aexec(k, 'ticket', { kind: 'vid', ext: ext === 'm4v' ? 'mp4' : ext });
-      return put(r.path, file, type, onProgress);
-    },
 
-    async apiUploadAud(k, blob) {
-      if (!blob || !blob.size) throw new Error('ما وصل التسجيل، جرّب مرة ثانية');
-      if (blob.size > 20 * 1024 * 1024) throw new Error('التسجيل كبير، سجّل أقصر');
-      let type = String(blob.type || '').split(';')[0];
-      const ext = { 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a', 'audio/aac': 'aac', 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mpeg': 'mp3', 'audio/wav': 'wav' }[type];
-      if (!ext) type = 'audio/mp4';
-      const r = await aexec(k, 'ticket', { kind: 'aud', ext: ext || 'm4a' });
-      return put(r.path, blob, type);
-    },
 
     async apiFileUrls(ids) {
       const ps = Array.from(new Set((ids || []).filter(Boolean))).slice(0, 50);
@@ -1014,7 +875,6 @@
       return out;
     },
 
-    async apiMediaDiscard() { return true; },
 
     async apiInvAdd(token, x, dataUrls) {
       x = x || {};
@@ -1178,11 +1038,6 @@
       return r;
     },
     async apiRepEdit(id, a) { const r = await rpc('rep_edit', { k: CRED.k || '', id: String(id || ''), a: a || {} }); flush(); return r; },
-    async apiRepShare(id, emps, msg) {
-      const r = await rpc('rep_share', { k: CRED.k || '', id: String(id || ''), emps: emps || [], msg: String(msg || '') });
-      flush();
-      return r;
-    },
     async apiRepTick(id, item, undo, files, note) {
       const r = await rpc('rep_tick', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), undo: !!undo, files: (files || []).map(f => ({ p: f.p, t: f.t })), note: String(note || '') });
       flush();
@@ -1199,20 +1054,6 @@
     async apiRepDecDel(id, item) { return rpc('rep_dec_del', { k: CRED.k || '', id: String(id || ''), item: String(item || '') }); },
     async trGet(texts, lang) { return rpc('tr_get', { k: CRED.k || '', t: CRED.t || '', texts: texts, tl: lang }); },
     async apiNotifs() { return rpc('notif_list', { k: CRED.k || '', t: CRED.t || '' }); },
-    async apiTaskApprove2(k, id, txt) {
-      await rpc('task_approve2', { k: k, id: String(id || ''), txt: String(txt || '') });
-      flush();
-      return reloadAdmin(k);
-    },
-    async apiTaskMedia(k, id, media) {
-      await rpc('task_media_set', { k: k, id: String(id || ''), media: (media || []).map(x => ({ t: x.t, id: x.id })) });
-      flush();
-      return reloadAdmin(k);
-    },
-    async apiTaskComment(k, id, txt) {
-      await rpc('task_comment_edit', { k: k, id: String(id || ''), txt: String(txt || '') });
-      return reloadAdmin(k);
-    },
     async apiRepUpload(x, onProgress) {
       const key = x.t === 'i' ? x.d : x.file;
       if (UPD.has(key)) return UPD.get(key);
