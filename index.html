@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
-<title>تقييم الفريق</title>
+<title>إدارة الفريق</title>
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
@@ -16,7 +16,7 @@
 (function () {
   var emp = /[?&]e=/.test(location.search);
   document.write('<link rel="manifest" href="manifest-' + (emp ? 'emp' : 'admin') + '.json">' +
-    '<meta name="apple-mobile-web-app-title" content="' + (emp ? 'تقييمي' : 'الفريق') + '">');
+    '<meta name="apple-mobile-web-app-title" content="' + (emp ? 'صفحتي' : 'إدارة الفريق') + '">');
 })();
 </script>
 <style>
@@ -1563,9 +1563,9 @@ html:root .spn .rhint{margin-top:6px}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=116"></script>
+<script src="api.js?v=117"></script>
 <script>
-const APP_VER = '116';
+const APP_VER = '117';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1596,7 +1596,7 @@ const BOOT = (function () {
   const k = q.get('k') || '', e = q.get('e') || '';
   let s = ''; try { s = localStorage.getItem('adm_s') || ''; } catch (x) {}
   const page = e ? 'emp' : 'admin';
-  document.title = page === 'emp' ? 'تقييمي' : 'تقييم الفريق';
+  document.title = page === 'emp' ? 'صفحتي' : 'إدارة الفريق'; /* الإصدار 117: الاسم الجديد */
   /* الإصدار 60: مفتاح المدير ما يبقى في العنوان. ينبدل بجلسة محفوظة في الجهاز */
   if (k && !e) { try { history.replaceState(null, '', location.pathname + location.hash); } catch (x) {} }
   return {page: page, key: page === 'admin' ? s : '', legacy: page === 'admin' ? k : '', token: page === 'emp' ? e : '', url: location.origin + location.pathname, firstRun: false};
@@ -2712,7 +2712,7 @@ function floorNote(m) { return !m.track && m.base - m.deduct + m.reward + m.clea
 function entryHtml(x, canDelete, noAmt) {
   const del = canDelete ? `<button class="del ${S.armed===x.id?'arm':''}" onclick="armLog('${x.id}')">${S.armed===x.id?'تأكيد الحذف':I('trash-2', 15)}</button>` : '';
   return `<div class="ent"><div class="ico ${x.type==='+'?'s':'m'}">${I(x.type==='+' ? 'star' : 'x', 15, 2.5)}</div>
-    <div class="t"><div>${x.type==='+' ? 'موقف مميز' : x.crits.map(esc).join('، ')}${x.note ? ' — ' + esc(x.note) : ''}</div><div class="d">${dmy(x.date)}</div></div>
+    <div class="t"><div>${x.type==='+' ? 'موقف مميز' : x.crits.map(esc).join('، ')}${x.note ? ' — ' + esc(x.note) : ''}</div><div class="d">${dmy(x.date)}${noAmt ? '' : x.dup ? '<span> · </span><span>مكرر بنفس اليوم</span>' : x.over ? '<span> · </span><span>فوق حد المكافأة</span>' : ''}</div></div>
     ${noAmt ? '' : `<div class="p">${M(Math.abs(x.pts), x.pts > 0 ? '+' : x.pts < 0 ? '−' : '')}</div>`}${del}</div>`;
 }
 
@@ -2814,7 +2814,7 @@ function renderTasks() {
   if (S.tview === 'r') return rpAdminView();
   if (S.tview === 'g') {
     $('#view').innerHTML = tvSeg(S.data) + guidesHtml(S.data);
-    const fb = $('#fab'); fb.innerHTML = I('plus', 26, 2.5); fb.classList.toggle('hide', !!S.gform || !S.data.employees.some(e => e.guide));
+    const fb = $('#fab'); fb.innerHTML = I('plus', 26, 2.5); fb.setAttribute('aria-label', 'توجيه جديد'); fb.classList.toggle('hide', !!S.gform || !S.data.employees.some(e => e.guide));
     return;
   }
   loadTq();
@@ -3451,7 +3451,7 @@ function renderFin() {
   } else {
     const act = (d.projects || []).filter(p => !p.archived);
     if (S.fx.ord && act.length > 1) {
-      h += `<div class="fxt"><span>رتّبها مثل ما تبي، والترتيب يمشي على المهام بعد</span><button class="dn" onclick="S.fx.ord=false;renderFin()">تم</button></div>`
+      h += `<div class="fxt"><span>رتّبها مثل ما تبي، والترتيب يمشي على التطبيق كله</span><button class="dn" onclick="S.fx.ord=false;renderFin()">تم</button></div>`
         + '<div class="tbl2 fxl2">' + act.map((p, i) => `<div class="tbr ordr"><span class="ic">${I('folder', 16)}</span><span class="k">${esc(p.name)}</span><span class="ord"><button ${i === 0 ? 'disabled' : ''} onclick="projMove('${p.id}',-1)" aria-label="فوق">${SV_UP}</button><button ${i === act.length - 1 ? 'disabled' : ''} onclick="projMove('${p.id}',1)" aria-label="تحت">${SV_DN}</button></span></div>`).join('') + '</div>';
     } else {
       const used = new Set(c.items.filter(x => x.kind === 'inv').map(x => x.project || ''));
@@ -4449,7 +4449,7 @@ function renderSet() {
       <div class="err" id="lkerr"></div></div>`);
   if (k === 'files') return page('الملفات غير المستخدمة', filesPageHtml());
   if (k === 'del') return page('المحذوفات', delPageHtml());
-  if (k === 'rules') return page('طريقة الحساب', `<div class="card">${rulesHtml(st)}</div>`);
+  if (k === 'rules') return page('شرح الحافز', `<div class="card">${rulesHtml(st)}</div>`);
   const em = inT && k.indexOf('emp:') === 0 && empById(k.slice(4));
   if (em) return page('إعدادات ' + esc(shortName(em.name)), form(em));
   S.ssub = null;
@@ -4466,7 +4466,7 @@ function renderSet() {
       ${tbRow('lock', 'الدخول والأجهزة', '', "ssub('link')")}
       ${tbRow('folder-x', 'الملفات غير المستخدمة', S.clean ? (S.clean.count + ' ملف') : '', "ssub('files');loadClean()")}
       ${tbRow('trash-2', 'المحذوفات', (d.deleted || []).length ? String((d.deleted || []).length) : '', "ssub('del')")}
-      ${tbRow('info', 'طريقة الحساب', '', "ssub('rules')")}
+      ${tbRow('info', 'شرح الحافز', 'يشوفه الموظف', "ssub('rules')")}
     </div></div></div>`;
 }
 function ssub(k) { S.ssub = k; S.armed = null; S.ed = null; renderSet(); toTop(); }
@@ -4474,13 +4474,13 @@ function ssub(k) { S.ssub = k; S.armed = null; S.ed = null; renderSet(); toTop()
 function projectsCard(d) {
   const ps = d.projects || [], act = ps.filter(p => !p.archived), arch = ps.filter(p => p.archived);
   return `<div class="card">${ctitle('folder', 'المشاريع')}
-    <div class="sub" style="margin:4px 0 6px">لما يخلص المشروع أرشفه، يختفي من الاختيار ومهامه تبقى محفوظة.</div>
+    <div class="sub" style="margin:4px 0 6px">لما يخلص المشروع أرشفه، يختفي من الاختيار وتقاريره وفواتيره تبقى محفوظة.</div>
     ${act.map(p => `<div class="prow"><input id="pn_${p.id}" value="${esc(p.name)}">
       <button class="del" onclick="saveProj('${p.id}')">${I('check', 15)}حفظ</button>
       <button class="del" onclick="askProjLoc('${p.id}')">${I('map-pin', 15)}${p.lat != null ? 'الموقع ✓' : 'الموقع'}</button>
       <button class="del" onclick="askProjBudget('${p.id}')">${I('wallet', 15)}${p.budget ? 'الميزانية ✓' : 'الميزانية'}</button>
       <button class="del" onclick="archProj('${p.id}', true)">${I('archive', 15)}أرشفة</button></div>
-      ${p.open ? `<div class="sub" style="margin:-4px 0 4px">${p.open === 1 ? 'مهمة وحدة مطلوبة' : p.open === 2 ? 'مهمتين مطلوبة' : p.open + (p.open > 10 ? ' مهمة' : ' مهام') + ' مطلوبة'}</div>` : ''}`).join('')}
+`).join('')}
     <div class="inrow"><input id="pn_new" placeholder="اسم مشروع جديد" onkeydown="if(event.key==='Enter')addProject('set')"><button class="btn2 cu" onclick="addProject('set')">${I('plus', 16, 2.5)}إضافة</button></div>
     <div class="err" id="perr"></div>
     ${arch.length ? `<details style="margin-top:6px"><summary>المؤرشفة (${arch.length})</summary>
@@ -4568,7 +4568,7 @@ function filesPageHtml() {
   if (!c) return '<div class="card"><div class="sub">جاري الجلب…</div></div>';
   if (c.error) return `<div class="card"><div class="err">${esc(c.error)}</div></div>`;
   const fs = c.files || [], del = c.mode === 'delete';
-  return `<div class="card"><div class="sub" style="margin:0 0 8px">${fs.length ? fs.length + ' ملف ما تستخدمه أي مهمة ولا فاتورة ولا حضور، وعمره أكثر من يوم.' : 'ما فيه ملفات غير مستخدمة.'} ${del ? 'الحذف مفعّل.' : 'الوضع الحين معاينة بس، وما ينحذف شي.'}</div>
+  return `<div class="card"><div class="sub" style="margin:0 0 8px">${fs.length ? fs.length + ' ملف ما يستخدمه أي تقرير ولا فاتورة ولا حضور ولا سعر، وعمره أكثر من يوم.' : 'ما فيه ملفات غير مستخدمة.'} ${del ? 'الحذف مفعّل.' : 'الوضع الحين معاينة بس، وما ينحذف شي.'}</div>
     ${fs.slice(0, 60).map(f => `<div class="row"><span dir="ltr" style="font-size:12px">${esc(String(f.path).slice(8, 20))}…</span><span class="sub">${esc(f.kind)} · ${esc(String(f.created_at || '').slice(0, 10))}</span></div>`).join('')}
     ${del && fs.length ? `<button class="btn2 ${S.armed==='clean'?'arm':''}" style="width:100%;margin-top:10px" onclick="if(S.armed!=='clean'){S.armed='clean';renderSet();}else{S.armed=null;loadClean(true);}">${S.armed==='clean'?'تأكيد الحذف':'احذفها'}</button>` : ''}</div>`;
 }
@@ -4647,7 +4647,7 @@ function renderEmp(d, isPreview) {
   $('#app').innerHTML = `
     ${isPreview ? `<button class="back" onclick="closePreview()">${I('arrow-right', 17)}رجوع للفريق</button><div class="note info">${I('eye', 16)}هذي معاينة، والموظف يشوف نفس الصفحة.</div>` : ''}
     <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>`}</div>${isPreview ? '' : pushHtml()}${mainTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) : ''}
-    <div class="segc etabs e4 e3"><button class="${S.etab === 'rep' ? 'on' : ''}" onclick="S.etab='rep';RP.sent=null;RP.open=null;RP.hist=null;rerenderEmp()">تقاريري</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري${nRetInv ? '<span class="nb">' + nRetInv + '</span>' : ''}</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">حافزي</button></div>
+    <div class="segc etabs e4 e3"><button class="${S.etab === 'rep' ? 'on' : ''}" onclick="S.etab='rep';RP.sent=null;RP.open=null;RP.hist=null;rerenderEmp()">تقاريري</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري${nRetInv ? '<span class="nb">' + nRetInv + '</span>' : ''}</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">راتبي</button></div>
     ${S.etab === 'inv' ? empInvHtml(d, isPreview) : S.etab === 'rep' ? rpEmpHtml(d, isPreview) + guideDoneHtml(d) : tasksTab ? empTasksHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
   if (!isPreview) prefetchImgs();
   if (tasksTab) vFetch((d.tasks || []).filter(t => t.status === 'open' || t.status === 'returned').map(t => (vOf(t) || {}).id));

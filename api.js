@@ -1,4 +1,4 @@
-/* تقييم الفريق — طبقة الاتصال مع Supabase (بديل Code.gs) */
+/* إدارة الفريق — طبقة الاتصال مع Supabase */
 (function () {
   const SB_URL = 'https://qwagdoopszcyezywyfad.supabase.co';
   const SB_KEY = 'sb_publishable_QS6Ujy65uyr2MQJUT-691g_2vkeRKxP';
@@ -18,7 +18,7 @@
   const heavy = c => HEAVY.indexOf(c) >= 0;
   const STAR_CRIT = 'موقف مميز';
   const MAX_MEDIA = 5, MAX_VID = 45 * 1024 * 1024;
-  const DEF = { miss: 5, trust: 10, star: 5, starCap: 100, clean: 50 };
+  const DEF = { miss: 5, trust: 10, star: 5, starCap: 100, clean: 0 }; /* الإصدار 117: «شهر بدون تقصير» افتراضه 0 مثل الإعداد */
   const CRITERIA = [
     { n: 'الحضور والمواعيد', s: 'الأداء', short: 'الحضور', bad: 'ركّز على الحضور بوقتك والالتزام بمواعيد التسليم.' },
     { n: 'جودة الشغل', s: 'الأداء', short: 'جودة الشغل', bad: 'راجع الشغل قبل التسليم عشان ما نحتاج نعيده.' },
@@ -342,7 +342,7 @@
     return best;
   }
 
-  /* ---------- الحساب (نفس منطق Code.gs) ---------- */
+  /* ---------- الحساب ---------- */
   function calcMonth_(emp, logs, mk) {
     const sn = snap_(emp.id, mk);
     if (sn) emp = Object.assign({}, emp, { max: Number(sn.max) || 0, track: !!sn.track });
@@ -424,15 +424,25 @@
       id: f.id, date: f.date, ts: f.ts || '', kind: f.kind, amount: f.amount, months: f.months, start: f.start, via: !!(f.details && f.details.part), fromParts: fromP_(f),
       month: f.month, label: f.month ? monthLabel_(f.month) : (f.start ? monthLabel_(f.start) : ''), note: f.note }));
   }
+  /* الإصدار 117: مبلغ كل موقف في القائمة نفس اللي انحسب في الحافز (calcMonth_): المعيار ينحسب مرة باليوم،
+     والمكافأة تقف عند حدها بالشهر، والمبالغ من إعدادات الشهر المثبتة. المكرر يبقى ظاهر بعلامة ومبلغه صفر */
   function groups_(rows) {
-    const st = settings_();
-    const map = {}, order = [];
+    const map = {}, order = [], seen = {}, acc = {};
     rows.forEach(l => {
       if (l.type === '+' && l.crit !== STAR_CRIT) return;
+      const mk = l.date.slice(0, 7), sn = snap_(l.emp, mk), st = sn ? settings_(sn.st || {}) : settings_();
       const g = l.group + l.type;
-      if (!map[g]) { map[g] = { id: l.group, date: l.date, type: l.type, crits: [], note: l.note, pts: 0 }; order.push(g); }
-      if (l.type === '+') map[g].pts += st.star;
-      else { map[g].crits.push(l.crit); map[g].pts -= heavy(l.crit) ? st.trust : st.miss; }
+      if (!map[g]) { map[g] = { id: l.group, date: l.date, type: l.type, crits: [], note: l.note, pts: 0, dup: false, over: false }; order.push(g); }
+      if (l.type === '+') {
+        const ak = l.emp + '|' + mk, got = acc[ak] || 0, add = Math.max(0, Math.min(st.star, st.starCap - got));
+        acc[ak] = got + add; map[g].pts += add; if (add < st.star) map[g].over = true;
+        return;
+      }
+      map[g].crits.push(l.crit);
+      const k = l.emp + '|' + l.date + '|' + l.crit;
+      if (seen[k]) { map[g].dup = true; return; }
+      seen[k] = true;
+      map[g].pts -= heavy(l.crit) ? st.trust : st.miss;
     });
     /* الإصدار 115: الصفوف جاية بالأقدم أول (التاريخ ثم وقت التسجيل)، فنقلبها قبل الترتيب عشان داخل اليوم الواحد يطلع الأحدث فوق */
     return order.map(g => map[g]).reverse().sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
@@ -652,7 +662,7 @@
     }));
   }
 
-  /* ---------- الواجهات (نفس أسماء Code.gs) ---------- */
+  /* ---------- الواجهات ---------- */
   const API = {
     async apiAdmin(k) { await loadAdmin(k); return adminPayload_(); },
 
@@ -829,17 +839,17 @@
     },
     async apiEmpPayday(k, empId, day, next) { return adminDo(k, 'emp_payday', { emp: empId, day: Number(day), next: !!next }); },
     /* الإصدار 94 */
-    async apiRepLaterPut(id, item, why, aft) { return rpc('rep_later_put', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), why: String(why || ''), aft: String(aft || '') }); },
+    async apiRepLaterPut(id, item, why, aft) { const r = await rpc('rep_later_put', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), why: String(why || ''), aft: String(aft || '') }); flush(); return r; }, /* v117 */
     async apiRepNoteDel(id, at, txt) { return rpc('rep_note_del', { k: CRED.k || '', id: String(id || ''), at: Number(at) || 0, txt: String(txt || '') }); },
-    async apiRepQuoteAdd(id, item, a) { return rpc('rep_quote_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), a: a || {} }); },
-    async apiRepQuoteOk(qid, undo) { return rpc('rep_quote_ok', { k: CRED.k || '', qid: String(qid || ''), undo: !!undo }); },
+    async apiRepQuoteAdd(id, item, a) { const r = await rpc('rep_quote_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), a: a || {} }); flush(); return r; }, /* v117 */
+    async apiRepQuoteOk(qid, undo) { const r = await rpc('rep_quote_ok', { k: CRED.k || '', qid: String(qid || ''), undo: !!undo }); flush(); return r; }, /* v117 */
     async apiRepQuoteDel(qid) { return rpc('rep_quote_del', { k: CRED.k || '', t: CRED.t || '', qid: String(qid || '') }); },
     /* الإصدار 114: خطوات تحت العمل الحالي */
     async apiRepStepAdd(id, item, txt) { const r = await rpc('rep_step_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), txt: String(txt || '') }); flush(); return r; },
     async apiRepStepTick(sid, undo) { return rpc('rep_step_tick', { k: CRED.k || '', t: CRED.t || '', sid: String(sid || ''), undo: !!undo }); },
     async apiRepStepDel(sid) { return rpc('rep_step_del', { k: CRED.k || '', t: CRED.t || '', sid: String(sid || '') }); },
-    async apiRepCurAdd(id, item) { return rpc('rep_cur_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || '') }); },
-    async apiRepLaterAdd(id, item, aft) { return rpc('rep_later_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), aft: String(aft || '') }); },
+    async apiRepCurAdd(id, item) { const r = await rpc('rep_cur_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || '') }); flush(); return r; }, /* v117 */
+    async apiRepLaterAdd(id, item, aft) { const r = await rpc('rep_later_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), aft: String(aft || '') }); flush(); return r; }, /* v117 */
     async apiRepCurOrder(id, items) { return rpc('rep_cur_order', { k: CRED.k || '', id: String(id || ''), items: (items || []).map(String) }); },
 
     async apiProjectAdd(k, name) {
@@ -1178,9 +1188,9 @@
       flush();
       return r;
     },
-    async apiRepNow(id, item, undo) { return rpc('rep_later_now', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), undo: !!undo }); },
-    async apiRepLreqReview(id, rid, ok, note) { return rpc('rep_lreq_review', { k: CRED.k || '', id: String(id || ''), rid: String(rid || ''), ok: !!ok, note: String(note || '') }); },
-    async apiRepLaterReview(id, item, ok, note) { return rpc('rep_later_review', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), ok: !!ok, note: String(note || '') }); },
+    async apiRepNow(id, item, undo) { const r = await rpc('rep_later_now', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), undo: !!undo }); flush(); return r; }, /* v117 */
+    async apiRepLreqReview(id, rid, ok, note) { const r = await rpc('rep_lreq_review', { k: CRED.k || '', id: String(id || ''), rid: String(rid || ''), ok: !!ok, note: String(note || '') }); flush(); return r; }, /* v117 */
+    async apiRepLaterReview(id, item, ok, note) { const r = await rpc('rep_later_review', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), ok: !!ok, note: String(note || '') }); flush(); return r; }, /* v117 */
     async apiRepUndone(id, item) { const r = await rpc('rep_undone', { k: CRED.k || '', id: String(id || ''), item: String(item || '') }); flush(); return r; },
     /* الإصدار 86: اعتماد الإنجاز أو إرجاعه، والتنبيه على عمل محدد، وتسجيل مشاهدة التنبيه */
     async apiRepReview(id, item, ok, note) { const r = await rpc('rep_review', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), ok: !!ok, note: String(note || '') }); flush(); return r; },
