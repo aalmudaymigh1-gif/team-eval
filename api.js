@@ -252,7 +252,7 @@
   const rr2 = n => Math.round(n * 100) / 100;
   const fromP_ = p => Number((p.details && p.details.fromParts) || 0);
   function payDetails_(f) {
-    return { base: f.base, bonus: f.bonus, points: f.points, target: f.target, max: f.max,
+    return { base: f.base, bonus: f.bonus, max: f.max, /* 119: points و target انشالوا (ما تنقرا) */
       advance: f.advance, inst: f.inst, deds: f.deds, loanParts: f.loanParts, net: f.net };
   }
   /* الإصدار 83: الرواتب المتراكمة والدفعات. الدفعة تتوزع على أقدم راتب ما انصرف، والشهر اللي يكتمل يتقفل بصرف «سُدد بالدفعات» */
@@ -362,7 +362,7 @@
     return {
       month: mk, label: monthLabel_(mk), base: base, deduct: deduct, reward: reward, clean: clean, bonus: bonus,
       misses: misses + trust, trustMisses: trust, stars: stars, salary: emp.salary, total: emp.salary + bonus,
-      points: bonus, target: 0, max: base, settings: st, track: track,
+      max: base, settings: st, track: track,
       strength: stars ? { crit: 'مواقف مميزة', text: starTxt + ' هالشهر، يعطيك العافية.' } : null,
       improve: w ? { crit: w.n, text: w.bad } : null
     };
@@ -389,7 +389,7 @@
     if (pay && pay.details) {
       const d = pay.details;
       return { month: mk, label: monthLabel_(mk), paid: true, paidAmount: pay.amount, paidDate: pay.date, payId: pay.id, due: dueDate_(emp, mk), fromParts: fromP_(pay), viaParts: !!d.part,
-        base: d.base, bonus: d.bonus, points: d.points, target: d.target, max: d.max,
+        base: d.base, bonus: d.bonus, max: d.max,
         advance: d.advance, inst: d.inst, deds: d.deds || [], loanParts: d.loanParts || {}, net: d.net, warn10: false, track: !!emp.track };
     }
     const c = calcMonth_(emp, logs, mk);
@@ -399,10 +399,10 @@
     const deds = fin.filter(f => f.kind === 'ded' && f.emp === emp.id && f.month === mk).map(f => ({ note: f.note, amount: f.amount }));
     const dedT = deds.reduce((s, f) => s + f.amount, 0);
     return { month: mk, label: monthLabel_(mk), paid: false, due: dueDate_(emp, mk),
-      base: sal, bonus: c.bonus, points: c.points, target: 20, max: c.max,
+      base: sal, bonus: c.bonus, max: c.max,
       advance: advance, inst: due.total, deds: deds, loanParts: due.parts,
       net: sal + c.bonus - advance - due.total - dedT,
-      warn10: due.total + dedT > sal * 0.1, track: sn ? !!sn.track : !!emp.track, snap: !!sn };
+      warn10: due.total + dedT > sal * 0.1, track: sn ? !!sn.track : !!emp.track };
   }
   function loanBalances_(emp, fin) {
     const pays = fin.filter(f => f.kind === 'pay' && f.emp === emp.id);
@@ -475,7 +475,7 @@
       entries: groups_(mine.filter(l => l.date.slice(0, 7) === now)),
       history: monthsRange_(startMonth_(emp, logs, fin), now).reverse().map(mk => {
         const f = finMonth_(emp, fin, logs, mk);
-        return { month: mk, label: monthLabel_(mk), points: f.points, bonus: f.bonus, net: f.net,
+        return { month: mk, label: monthLabel_(mk), bonus: f.bonus, net: f.net,
           paid: f.paid, paidAmount: f.paidAmount, paidDate: f.paidDate };
       }),
       loans: loanBalances_(emp, fin),
