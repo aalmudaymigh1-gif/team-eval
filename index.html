@@ -665,9 +665,10 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .empv .attc,.empv .attc.done{background:var(--surface);border-color:var(--line);color:var(--text)}
 .empv .attc .r1{color:var(--muted)}
 .empv .kpi,.empv .kpi.hero{background:var(--surface)!important;border-color:var(--line)!important}
-.empv .note.good,.empv .note.info{background:none;padding:2px 0;color:var(--muted);font-size:13px}
-.empv .note.good svg{color:var(--green);flex:none;margin-top:2px}
-.empv .note.good b{color:var(--text);font-weight:500}
+/* الإصدار 122: ملاحظة المدير العام في التقرير (.rpn) بنفس شكلها عند المدير، فتنستثنى من تنسيق ملاحظات صفحة الموظف (:where عشان ما تتغير قوة المحدد) */
+.empv .note.good:where(:not(.rpn)),.empv .note.info{background:none;padding:2px 0;color:var(--muted);font-size:13px}
+.empv .note.good:where(:not(.rpn)) svg{color:var(--green);flex:none;margin-top:2px}
+.empv .note.good:where(:not(.rpn)) b{color:var(--text);font-weight:500}
 .empv .note.bad{font-size:13px}
 .empv .ivr .badge{background:none;padding:0;font-weight:500}
 .empv .ivr .badge:not(.a):not(.late){color:var(--muted)}
@@ -1362,7 +1363,7 @@ html:root .flrn svg{flex:none;margin-top:3px}
 html:root .tkl li.stp{align-items:flex-start}
 html:root .spc{flex:none;width:30px;height:30px;border-radius:999px;border:0;background:var(--acc-soft);color:var(--acc-dk);font:inherit;font-size:12px;font-weight:600;display:grid;place-items:center;direction:ltr;padding:0;cursor:pointer;position:relative}
 html:root .spc:before{content:"";position:absolute;inset:-7px}
-html:root .stx{cursor:pointer}
+html:root .wtx{cursor:pointer}
 html:root .snow{display:block;font-size:13px;color:var(--muted);margin-top:2px;line-height:1.6}
 html:root .snow b{font-weight:500;color:var(--acc-dk)}
 html:root .snow svg{vertical-align:-2px;color:var(--green);margin-inline-end:4px}
@@ -1401,9 +1402,9 @@ html:root .spn .rhint{margin-top:6px}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=121"></script>
+<script src="api.js?v=122"></script>
 <script>
-const APP_VER = '121';
+const APP_VER = '122';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -4501,7 +4502,7 @@ function rpDetailHtml(isAdmin) {
   h += rpAlertLine(r, null, isAdmin);
   /* الإصدار 94: الملاحظات أول الصفحة (كانت آخرها)، والمدير يحذف الملاحظة بضغطتين */
   const decWait = isAdmin && dec.length && !r.reply;
-  const nRow = n => `<div class="note good">${I('message-circle', 16)}<div style="flex:1;min-width:0"><b>المدير العام:</b> ${esc(n.text)}</div>${isAdmin ? `<button class="ndel ${RP.narm === n.at ? 'arm' : ''}" onclick="rpNoteDel('${r.id}',${Number(n.at) || 0})" aria-label="حذف الملاحظة">${RP.narm === n.at ? 'تأكيد الحذف' : I('x', 14, 2.5)}</button>` : ''}</div>`;
+  const nRow = n => `<div class="note good rpn">${I('message-circle', 16)}<div style="flex:1;min-width:0"><b>المدير العام:</b> ${esc(n.text)}</div>${isAdmin ? `<button class="ndel ${RP.narm === n.at ? 'arm' : ''}" onclick="rpNoteDel('${r.id}',${Number(n.at) || 0})" aria-label="حذف الملاحظة">${RP.narm === n.at ? 'تأكيد الحذف' : I('x', 14, 2.5)}</button>` : ''}</div>`;
   if (isAdmin) h += `<div class="lbl">ملاحظاتك</div>${notes.map(nRow).join('')}${decWait ? '' : `<div class="ncmp"><textarea id="rnote" class="dnote" rows="1" placeholder="اكتب ملاحظة على التقرير" oninput="RP.draft=this.value;rpGrow(this)">${esc(RP.draft || '')}</textarea><button class="btn2 cu" onclick="rpReply('${r.id}','note')" aria-label="إرسال الملاحظة">${I('send', 16)}</button></div>`}`;
   else if (notes.length) h += `<div class="lbl">ملاحظات المدير العام</div>${notes.map(nRow).join('')}`;
   let decNote = false; /* الإصدار 90: خانة الملاحظة داخل بطاقة القرار لما القرار ينتظر */
@@ -5145,7 +5146,7 @@ function rpTickList(r, cur, tags, isAdmin) {
   return '<ul class="tkl">' + cur.map((x, i) => {
     const j = all.indexOf(x), k = rpTk(r, x), ret = rpSt(k) === 'ret', qb = rqBlock(r, x, j, isAdmin);
     const ss = stOf(r, x), sl = ss.filter(s => !s.done).length, so = RP.sopen === stKey(r, x), lc = [qb ? 'hq' : '', ss.length ? 'stp' : '', so ? 'so' : ''].filter(Boolean).join(' ');
-    return `<li${lc ? ` class="${lc}"` : ''}>${ss.length && sl ? `<button class="spc" onclick="rpStToggle('${r.id}',${j})" aria-label="الخطوات">${ss.length - sl}/${ss.length}</button>` : `<button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button>`}<span><span class="stx" onclick="rpStToggle('${r.id}',${j})">${esc(x)}</span>${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${rqTag(r, x, isAdmin)}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}` : ''}${rpAlertLine(r, x, isAdmin)}${ss.length ? stNowHtml(ss) + `<button class="sopen" onclick="rpStToggle('${r.id}',${j})" aria-expanded="${so}">${I(so ? 'chevron-up' : 'chevron-down', 14)}الخطوات</button>` : ''}</span>${isAdmin ? `<button class="ibell" onclick="rpDefOpen('${r.id}',${j})" aria-label="تأجيل إلى الأعمال اللاحقة">${I('clock', 15)}</button><button class="ibell" onclick="rpShareOpen('${r.id}',${j})" aria-label="تنبيه على هذا العمل">${I('bell', 15)}</button>` : ''}</li>${so ? `<li class="sli"><div class="spn">${stPanelHtml(r, x, j, ss, isAdmin)}</div></li>` : ''}${qb ? `<li class="qli"><div class="qsub">${qb}</div></li>` : ''}`;
+    return `<li${lc ? ` class="${lc}"` : ''}>${ss.length && sl ? `<button class="spc" onclick="rpStToggle('${r.id}',${j})" aria-label="الخطوات">${ss.length - sl}/${ss.length}</button>` : `<button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button>`}<span><span class="wtx" onclick="rpStToggle('${r.id}',${j})">${esc(x)}</span>${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${rqTag(r, x, isAdmin)}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}` : ''}${rpAlertLine(r, x, isAdmin)}${ss.length ? stNowHtml(ss) + `<button class="sopen" onclick="rpStToggle('${r.id}',${j})" aria-expanded="${so}">${I(so ? 'chevron-up' : 'chevron-down', 14)}الخطوات</button>` : ''}</span>${isAdmin ? `<button class="ibell" onclick="rpDefOpen('${r.id}',${j})" aria-label="تأجيل إلى الأعمال اللاحقة">${I('clock', 15)}</button><button class="ibell" onclick="rpShareOpen('${r.id}',${j})" aria-label="تنبيه على هذا العمل">${I('bell', 15)}</button>` : ''}</li>${so ? `<li class="sli"><div class="spn">${stPanelHtml(r, x, j, ss, isAdmin)}</div></li>` : ''}${qb ? `<li class="qli"><div class="qsub">${qb}</div></li>` : ''}`;
   }).join('') + `</ul><div class="rhint" style="margin-top:6px">${I('info', 13)}${isAdmin ? 'اضغط الدائرة إذا أُنجز العمل، والجرس لتنبيه الموظف على عمل محدد' : 'اضغط الدائرة إذا أنجزت العمل، ويُرسل للمدير العام للاعتماد'}</div><div class="rhint" style="margin-top:2px">${I('list-checks', 13)}اضغط على اسم العمل تضيف له خطوات</div>`;
 }
 function rpLreqRows(r) {
