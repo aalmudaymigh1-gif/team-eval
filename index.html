@@ -1418,9 +1418,9 @@ html:root .sheet .btn2.mact svg{color:var(--acc-dk)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=124"></script>
+<script src="api.js?v=125"></script>
 <script>
-const APP_VER = '124';
+const APP_VER = '125';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -5479,14 +5479,31 @@ async function rpTick(id, i, btn) {
   const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
   const item = rpArr(r.cur)[i]; if (!item) return;
   if (BOOT.page !== 'admin') { if (rpSt(rpTk(r, item)) === 'pend') return toast('الطلب مرسل من قبل، بانتظار الاعتماد', null, 'in'); return rpTdOpen(id, item); }
+  /* v125: الإنجاز عندي بتأكيد، والتراجع من التنبيه يرجّعه لمكانه بدون سطر «أعاده المدير العام» */
+  RP.tq = {id: id, t: item};
+  ovOpen(`<label class="shh">إنجاز العمل؟</label>
+    <div class="sub" style="margin:-6px 0 12px">«${esc(item)}» ينتقل إلى الأعمال المنجزة</div>
+    <button class="btn2 cu qbig" onclick="rpTickGo()">${I('check', 17)}تأكيد الإنجاز</button>
+    <button class="btn2" style="width:100%;margin-top:8px" onclick="RP.tq=null;ovClose()">إلغاء</button>`);
+}
+async function rpTickGo() {
+  const q = RP.tq; if (!q || RP.busy) return;
+  const r = (RP.reps || []).find(x => x.id === q.id), pos = r ? rpArr(r.cur).indexOf(q.t) : -1;
+  RP.tq = null; ovClose();
+  if (pos < 0) return toast('العمل غير موجود في الأعمال الحالية، حدّث الصفحة', null, 'in');
   RP.busy = true;
-  if (btn) { btn.classList.add('on'); btn.innerHTML = I('check', 15, 3); }
   try {
-    await call('apiRepTick', id, item, false);
+    await call('apiRepTick', q.id, q.t, false);
     await rpTickReload();
     RP.busy = false; rpRerender();
-    toast('انتقل إلى الأعمال المنجزة', () => rpUntick(id, item));
+    toast('انتقل إلى الأعمال المنجزة', () => rpTickBack(q.id, q.t, pos));
   } catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
+async function rpTickBack(id, item, pos) {
+  if (RP.busy) return;
+  RP.busy = true;
+  try { await call('apiRepTickBack', id, item, pos); await rpTickReload(); RP.busy = false; rpRerender(); toast('رجع إلى الأعمال الحالية'); }
+  catch (e) { RP.busy = false; toastErr(e); }
 }
 async function rpUntick(id, item) {
   if (RP.busy) return;

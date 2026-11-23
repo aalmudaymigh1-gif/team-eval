@@ -1078,6 +1078,7 @@
       flush();
       return r;
     },
+    async apiRepTickBack(id, item, pos) { return await rpc('rep_tick_back', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), pos: Math.max(0, parseInt(pos, 10) || 0) }); }, /* v125: «تراجع» من التنبيه يرجّع العمل لمكانه بدون سطر الرجوع */
     async apiRepNow(id, item, undo) { const r = await rpc('rep_later_now', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), undo: !!undo }); flush(); return r; }, /* v117 */
     async apiRepLreqReview(id, rid, ok, note) { const r = await rpc('rep_lreq_review', { k: CRED.k || '', id: String(id || ''), rid: String(rid || ''), ok: !!ok, note: String(note || '') }); flush(); return r; }, /* v117 */
     async apiRepLaterReview(id, item, ok, note) { const r = await rpc('rep_later_review', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), ok: !!ok, note: String(note || '') }); flush(); return r; }, /* v117 */
