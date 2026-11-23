@@ -1081,6 +1081,9 @@
     async apiRepNow(id, item, undo) { const r = await rpc('rep_later_now', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), undo: !!undo }); flush(); return r; }, /* v117 */
     async apiRepLreqReview(id, rid, ok, note) { const r = await rpc('rep_lreq_review', { k: CRED.k || '', id: String(id || ''), rid: String(rid || ''), ok: !!ok, note: String(note || '') }); flush(); return r; }, /* v117 */
     async apiRepLaterReview(id, item, ok, note) { const r = await rpc('rep_later_review', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), ok: !!ok, note: String(note || '') }); flush(); return r; }, /* v117 */
+    /* v123: طلب الموظف تغيير «تبدأ بعد» للعمل اللاحق (undo يلغي طلبه)، واعتماد المدير العام أو رفضه */
+    async apiRepAfterReq(id, item, aft, undo) { const r = await rpc('rep_after_req', { t: CRED.t || '', id: String(id || ''), item: String(item || ''), aft: String(aft || ''), undo: !!undo }); if (!undo) flush(); return r; },
+    async apiRepAfterReview(id, item, ok, note) { const r = await rpc('rep_after_review', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), ok: !!ok, note: String(note || '') }); flush(); return r; },
     async apiRepUndone(id, item) { const r = await rpc('rep_undone', { k: CRED.k || '', id: String(id || ''), item: String(item || '') }); flush(); return r; },
     /* الإصدار 86: اعتماد الإنجاز أو إرجاعه، والتنبيه على عمل محدد، وتسجيل مشاهدة التنبيه */
     async apiRepReview(id, item, ok, note) { const r = await rpc('rep_review', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), ok: !!ok, note: String(note || '') }); flush(); return r; },

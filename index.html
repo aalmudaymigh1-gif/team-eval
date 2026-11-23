@@ -1393,6 +1393,9 @@ html:root .sadd{display:flex;gap:8px;margin-top:8px}
 html:root .sadd input{flex:1;min-width:0}
 html:root .sadd button{flex:none;border:0;border-radius:999px;background:var(--acc-soft);color:var(--acc-dk);font:inherit;font-size:13px;font-weight:500;padding:0 14px;min-height:44px;display:inline-flex;align-items:center;gap:4px;cursor:pointer}
 html:root .spn .rhint{margin-top:6px}
+/* الإصدار 123: زر «تغيير» و«إلغاء الطلب» على العمل اللاحق عند الموظف (زر صغير فاتح على نفس السطر) */
+html:root .nwl .aqb{flex:none;align-self:center;border:0;border-radius:999px;background:var(--acc-soft);color:var(--acc-dk);font:inherit;font-size:13px;font-weight:500;padding:0 14px;min-height:36px;cursor:pointer}
+html:root .nwl .aqb:disabled{opacity:.6}
 </style>
 </head>
 <body>
@@ -1402,9 +1405,9 @@ html:root .spn .rhint{margin-top:6px}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=122"></script>
+<script src="api.js?v=123"></script>
 <script>
-const APP_VER = '122';
+const APP_VER = '123';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -4216,11 +4219,15 @@ function rpSt(k) { return k ? (k.st || 'ok') : ''; }
 function rpPendL(r) { return rpArr(r && r.cur).filter(x => rpSt(rpTk(r, x)) === 'pend'); }
 /* الإصدار 88: طلبات نقل الأعمال اللاحقة للحالية (req على العمل اللاحق) */
 function rpReqL(r) { return rpArr(r && r.later).filter(x => x && x.req); }
+/* الإصدار 123: طلب الموظف تغيير «تبدأ بعد» (areq على العمل اللاحق)، ورفضه أو سقوطه (arej) يظهر 3 أيام */
+function rpAreqL(r) { return rpArr(r && r.later).filter(x => x && x.areq); }
+function rpArejShow(x) { return !!(x && x.arej && !x.areq && Date.now() - (x.arej.at || 0) < 3 * 864e5); }
+function rpAftTxt(a) { return a ? 'تبدأ بعد: ' + esc(a) : 'غير مرتبطة بعمل'; }
 /* الإصدار 89: طلبات إضافة عمل لاحق من الموظف (lreq): pend بانتظار الاعتماد، no مرفوض ويظهر 3 أيام */
 function rpLreqP(r) { return rpArr(r && r.lreq).filter(x => x && x.st === 'pend'); }
 function rpLreqShow(r) { const n = Date.now(); return rpArr(r && r.lreq).filter(x => x && (x.st === 'pend' || (x.st === 'no' && n - (x.rat || 0) < 3 * 864e5))); }
 function rpNowOf(r, t) { const a = rpArr(r && r.nows); for (let i = a.length - 1; i >= 0; i--) if (a[i].t === t) return a[i]; return null; }
-function rpNPend() { return rpProjs().filter(p => { const r = rpLast(p.id); return rpPend(r) || rpPendL(r).length || rpReqL(r).length || rpLreqP(r).length || rqPendN(r); }).length; }
+function rpNPend() { return rpProjs().filter(p => { const r = rpLast(p.id); return rpPend(r) || rpPendL(r).length || rpReqL(r).length || rpAreqL(r).length || rpLreqP(r).length || rqPendN(r); }).length; }
 function rpUpdBy(r) { return r.updBy ? (r.updBy === 'المدير العام' ? r.updBy : shortName(r.updBy)) : rpBy(r); }
 function rpBy(r) { return r.by === 'admin' ? 'المدير العام' : shortName(r.byName || ''); }
 function rpDay(s) { const d = new Date(s + 'T12:00:00'); return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_AR[d.getMonth()]; }
@@ -4304,7 +4311,7 @@ function rpAgeDays(r) { const t = rpToday(), u = rpUpdMs(r); if (!t || !u) retur
 function rpSummaryHtml() {
   const ps = rpProjs(), withR = ps.filter(p => rpLast(p.id)), none = ps.filter(p => !rpLast(p.id));
   rpSeedSeen();
-  const rank = r => rpPend(r) || rpPendL(r).length || rpReqL(r).length || rpLreqP(r).length ? 2 : rpIsNew(r) ? 1 : 0;
+  const rank = r => rpPend(r) || rpPendL(r).length || rpReqL(r).length || rpAreqL(r).length || rpLreqP(r).length ? 2 : rpIsNew(r) ? 1 : 0;
   withR.sort((a, b) => { const ra = rpLast(a.id), rb = rpLast(b.id); return rank(rb) - rank(ra) || (rb.upd || 0) - (ra.upd || 0); });
   let h = withR.length ? '<div class="rpl">' + withR.map(p => rpCardHtml(rpLast(p.id))).join('') + '</div>' : emptyHtml('file-text', 'لا توجد تقارير بعد. التقارير التي يرسلها الموظفون تظهر هنا');
   if (none.length && withR.length) {
@@ -4318,7 +4325,7 @@ function rpCardHtml(r, o) {
   const dec = rpArr(r.decide), up = rpArr(r.up), cur = rpArr(r.cur), ord = up.filter(x => cur.includes(x)).concat(cur.filter(x => !up.includes(x)));
   const nc = cur.length, nl = rpArr(r.later).length, nd = rpArr(r.done).length, age = rpAgeDays(r), me = (o.d || {}).id;
   const notes = rpArr(r.notes), last = notes[notes.length - 1];
-  const npd = rpPendL(r).length + rpReqL(r).length + rpLreqP(r).length + rqPendN(r), nret = o.emp ? rpArr(r.cur).filter(x => { const k = rpTk(r, x); return rpSt(k) === 'ret' && k.by === me; }).length : 0;
+  const npd = rpPendL(r).length + rpReqL(r).length + rpAreqL(r).length + rpLreqP(r).length + rqPendN(r), nret = o.emp ? rpArr(r.cur).filter(x => { const k = rpTk(r, x); return rpSt(k) === 'ret' && k.by === me; }).length : 0;
   const chip = o.share ? '<span class="rchip new">تنبيه</span>' : !o.emp && npd ? `<span class="rchip dec">بانتظار اعتمادك (${npd})</span>` : nret ? '<span class="rchip old">أُعيد إليك عمل</span>' : rpPend(r) ? `<span class="rchip dec">${o.emp ? 'بانتظار المدير العام' : 'بانتظار قرارك'}</span>` : rpIsNew(r, me) ? '<span class="rchip new">تحديث جديد</span>' : age > 3 ? `<span class="rchip old">بدون تحديث من ${age} ${age <= 10 ? 'أيام' : 'يوماً'}</span>` : '';
   const st = [nc ? `<span><i></i>${nc === 1 ? 'عمل حالي واحد' : nc === 2 ? 'عملان حاليان' : nc + ' حالية'}</span>` : '',
     nl ? `<span><i class="l"></i>${nl === 1 ? 'عمل لاحق واحد' : nl === 2 ? 'عملان لاحقان' : nl + ' لاحقة'}</span>` : '',
@@ -4516,7 +4523,7 @@ function rpDetailHtml(isAdmin) {
   const lat = rpArr(r.later), nh = rpHistOf(r.proj).reduce((a, g) => a + g.items.length, 0);
   const canOrd = isAdmin && rpCanTick(r, true) && cur.length > 1, ordm = canOrd && RP.ord && RP.ord.id === r.id;
   if (r.ord && cur.length > 1 && !tags[0]) tags[0] = ['الأهم', 'g'];
-  h += rpPendHtml(r, pend, isAdmin, isAdmin ? rpReqL(r) : [], isAdmin ? rpLreqP(r) : []);
+  h += rpPendHtml(r, pend, isAdmin, isAdmin ? rpReqL(r) : [], isAdmin ? rpLreqP(r) : [], isAdmin ? rpAreqL(r) : []);
   h += `<div class="rpcard now"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${canOrd ? (ordm ? `<button class="rchb dn fl" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur', (rpLast(r.proj) || {}).id === r.id ? r : null, isAdmin)}${rpCanTick(r, isAdmin) && !ordm ? rpCurAddHtml(r) + (cur.length ? rqAddBtn(r) : '') : ''}</div>`;
   /* الإصدار 94: بطاقة الأعمال اللاحقة مطوية، تنفتح بالضغط على عنوانها */
   const ltOpen = RP.ltOpen === r.id;
@@ -4527,11 +4534,11 @@ function rpDetailHtml(isAdmin) {
   return h;
 }
 /* الإصدار 86: بطاقة «بانتظار الاعتماد». للمدير العام زرّين: اعتماد الإنجاز، أو إرجاع للعمل مع ملاحظة تظهر للموظف */
-function rpPendHtml(r, pend, isAdmin, reqs, lqs) {
-  reqs = reqs || []; lqs = lqs || [];
-  if (!pend.length && !reqs.length && !lqs.length) return '';
+function rpPendHtml(r, pend, isAdmin, reqs, lqs, aqs) {
+  reqs = reqs || []; lqs = lqs || []; aqs = aqs || [];
+  if (!pend.length && !reqs.length && !lqs.length && !aqs.length) return '';
   const all = rpArr(r.cur);
-  return `<div class="rpcard pd"><div class="rch"><span class="ci">${I('hourglass', 16)}</span>بانتظار الاعتماد<span class="cn">${pend.length + reqs.length + lqs.length}</span></div><ul class="pdl">${lqs.map(x => rpLreqItem(r, x)).join('')}${reqs.map(x => rpReqItem(r, x)).join('')}${pend.map(x => {
+  return `<div class="rpcard pd"><div class="rch"><span class="ci">${I('hourglass', 16)}</span>بانتظار الاعتماد<span class="cn">${pend.length + reqs.length + lqs.length + aqs.length}</span></div><ul class="pdl">${lqs.map(x => rpLreqItem(r, x)).join('')}${reqs.map(x => rpReqItem(r, x)).join('')}${aqs.map(x => rpAreqItem(r, x)).join('')}${pend.map(x => {
     const k = rpTk(r, x), i = all.indexOf(x), rv = RP.rv && RP.rv.id === r.id && RP.rv.t === x;
     const who = k.by === 'admin' ? 'المدير العام' : shortName(k.name || '');
     let act = '';
@@ -4706,7 +4713,7 @@ function rpLaterFormHtml() {
   const lr = rpLast(f.proj), st = t => rpArr(lr && lr.later).find(y => y.t === t) || {};
   const mvb = (x, i) => {
     if (f.admin) return `<button class="lmv" onclick="rpMoveNow(${i})">نقل إلى الحالية</button>`;
-    if (st(x.t).req) return '<span class="tg2 a" style="flex:none">بانتظار الاعتماد</span>';
+    if (st(x.t).req || st(x.t).areq) return '<span class="tg2 a" style="flex:none">بانتظار الاعتماد</span>';
     return `<button class="lmv ${x.ask ? 'on' : ''}" onclick="rpAsk(${i})">${x.ask ? 'إلغاء طلب النقل' : 'طلب نقل للحالية'}</button>`;
   };
   const rows = f.later.map((x, i) => `<div class="lrow ${rpWillMove(x) ? 'mv' : ''}"><div class="lt"><b>${esc(x.t)}</b><small>${x.after ? (rpWillMove(x) ? I('check', 12, 3) + 'أُنجز «' + esc(x.after) + '»، وستنتقل إلى الأعمال الحالية عند الإرسال' : 'تبدأ بعد: ' + esc(x.after)) : 'غير مرتبطة بعمل'}</small>${!f.admin && x.ask && !st(x.t).req ? '<small>يُرسل طلب النقل للمدير العام مع التقرير، وينتقل بعد موافقته</small>' : !f.admin && !x.ask && st(x.t).rej ? rpReqLine(st(x.t)) : ''}${!f.admin && !st(x.t).t ? '<small>عمل جديد: يُرسل للمدير العام للاعتماد مع التقرير</small>' : ''}</div>
@@ -5161,7 +5168,7 @@ function rpLreqRows(r) {
 function rpLreqItem(r, x) {
   const rv = RP.lqv && RP.lqv.id === r.id && RP.lqv.rid === x.id;
   const act = !rpCanTick(r, true) ? '' : rv ? `<div class="rvf"><textarea id="lqv_note" class="rta sm" placeholder="سبب الرفض (اختياري)، يظهر للموظف" oninput="RP.lqv.note=this.value;rpGrow(this)">${esc(RP.lqv.note || '')}</textarea><div class="grid2"><button class="btn2 rd" onclick="rpLqRev('${r.id}','${x.id}',false,this)">${I('x', 15)}رفض</button><button class="btn2" onclick="RP.lqv=null;rpRerender()">إلغاء</button></div></div>`
-    : `<div class="grid2 pdb"><button class="btn2 cu" onclick="rpLqRev('${r.id}','${x.id}',true,this)">${I('check', 16, 2.5)}موافق، أضفه</button><button class="btn2 rd" onclick="RP.lqv={id:'${r.id}',rid:'${x.id}',note:''};rpRerender()">${I('x', 15)}رفض</button></div>`;
+    : `<div class="grid2 pdb"><button class="btn2 cu" onclick="rpLqRev('${r.id}','${x.id}',true,this)">${I('check', 16, 2.5)}اعتماد الإضافة</button><button class="btn2 rd" onclick="RP.lqv={id:'${r.id}',rid:'${x.id}',note:''};rpRerender()">${I('x', 15)}رفض</button></div>`;
   return `<li><div class="pt">${esc(x.t)}</div><div class="pm"><b>طلب إضافة عمل لاحق</b> · ${esc(shortName(x.name || ''))} · ${esc(rpTickWhen(x.at))}</div>${x.after ? `<div class="pm">تبدأ بعد: ${esc(x.after)}</div>` : ''}${act}</li>`;
 }
 async function rpLqRev(id, rid, ok, btn) {
@@ -5515,16 +5522,21 @@ async function rpTdSave() {
   else toast('انرسل للمدير العام للاعتماد', () => rpUntick(id, item));
 }
 function rpNowList(r, arr, isAdmin) {
+  const me = !isAdmin && S.empData ? S.empData.id : '';
   return '<ul class="tkl nwl">' + arr.map((x, i) => {
-    const b = !isAdmin && x.req ? `<span class="tkb wt" aria-label="بانتظار الاعتماد">${I('hourglass', 15)}</span>`
+    const b = !isAdmin && (x.req || x.areq) ? `<span class="tkb wt" aria-label="بانتظار الاعتماد">${I('hourglass', 15)}</span>`
       : `<button class="tkb up" onclick="rpNow('${r.id}',${i},this)" aria-label="${isAdmin ? 'نقل إلى الأعمال الحالية' : 'طلب نقل إلى الأعمال الحالية'}">${I('arrow-up', 15, 2.5)}</button>`;
-    return `<li>${b}<span>${esc(x.t)}${rpReqTag(x)}<small>${x.after ? 'تبدأ بعد: ' + esc(x.after) : 'غير مرتبطة بعمل'}</small>${x.def ? `<small class="dfr">مؤجّل ${esc(rpTickWhen(x.def))}${x.why ? ' · ' + esc(x.why) : ''}</small>` : ''}${rpReqLine(x)}</span></li>`;
+    /* الإصدار 123: زر «تغيير» عند الموظف يطلب تغيير «تبدأ بعد»، و«إلغاء الطلب» لطلبه */
+    const ab = isAdmin || x.req ? '' : x.areq ? (x.areq.by === me ? `<button class="aqb" onclick="rpAqUndo('${r.id}',${i},this)">إلغاء الطلب</button>` : '') : `<button class="aqb" onclick="rpAqOpen('${r.id}',${i})">تغيير</button>`;
+    return `<li>${b}<span>${esc(x.t)}${rpReqTag(x)}<small>${rpAftTxt(x.after)}</small>${x.def ? `<small class="dfr">مؤجّل ${esc(rpTickWhen(x.def))}${x.why ? ' · ' + esc(x.why) : ''}</small>` : ''}${rpReqLine(x)}</span>${ab}</li>`;
   }).join('') + `</ul><div class="rhint" style="margin-top:6px">${I('info', 13)}${isAdmin ? 'اضغط السهم لنقل العمل إلى الأعمال الحالية' : 'اضغط السهم لطلب نقل العمل للحالية، وينتقل بعد موافقة المدير العام'}</div>`;
 }
 /* الإصدار 88: حالة طلب النقل على العمل اللاحق */
-function rpReqTag(x) { return x && x.req ? '<span class="tg2 a">بانتظار الاعتماد</span>' : x && x.rej ? '<span class="tg2 r">مرفوض</span>' : ''; }
+function rpReqTag(x) { return x && (x.req || x.areq) ? '<span class="tg2 a">بانتظار الاعتماد</span>' : x && x.rej ? '<span class="tg2 r">مرفوض</span>' : rpArejShow(x) ? `<span class="tg2 r">${x.arej.auto ? 'أُلغي الطلب' : 'مرفوض'}</span>` : ''; }
 function rpReqLine(x) {
   if (!x) return '';
+  if (x.areq) { const mine = BOOT.page === 'emp' && S.empData && x.areq.by === S.empData.id, w = mine ? 'طلبت' : 'طلب ' + esc(shortName(x.areq.name || '')); return `<small class="tkt">${w} ${x.areq.after ? 'أن تبدأ بعد: ' + esc(x.areq.after) : 'فكّ ربطها بأي عمل'} · ${esc(rpTickWhen(x.areq.at))}</small>`; }
+  if (rpArejShow(x) && !x.req && !x.rej) { const a = x.arej; return `<small class="retn">${I('x', 12)}${a.auto ? 'أُلغي طلب تغيير البداية: لم يعد «' + esc(a.after) + '» في الأعمال الحالية' : a.note ? 'ملاحظة المدير العام: ' + esc(a.note) : 'لم يعتمد المدير العام تغيير بدايته'} · ${esc(rpTickWhen(a.at))}</small>`; }
   if (x.req) { const mine = BOOT.page === 'emp' && S.empData && x.req.by === S.empData.id; return `<small class="tkt">${mine ? 'طلبت' : 'طلب ' + esc(shortName(x.req.name || ''))} نقله للحالية · ${esc(rpTickWhen(x.req.at))}</small>`; }
   if (x.rej) return `<small class="retn">${I('x', 12)}${x.rej.note ? 'ملاحظة المدير العام: ' + esc(x.rej.note) : 'لم يعتمد المدير العام نقله للحالية'} · ${esc(rpTickWhen(x.rej.at))}</small>`;
   return '';
@@ -5532,8 +5544,67 @@ function rpReqLine(x) {
 function rpReqItem(r, x) {
   const i = rpArr(r.later).indexOf(x), rv = RP.lrv && RP.lrv.id === r.id && RP.lrv.t === x.t;
   const act = !rpCanTick(r, true) ? '' : rv ? `<div class="rvf"><textarea id="lrv_note" class="rta sm" placeholder="سبب الرفض (اختياري)، يظهر للموظف على العمل" oninput="RP.lrv.note=this.value;rpGrow(this)">${esc(RP.lrv.note || '')}</textarea><div class="grid2"><button class="btn2 rd" onclick="rpLaterRev('${r.id}',${i},false,this)">${I('x', 15)}رفض</button><button class="btn2" onclick="RP.lrv=null;rpRerender()">إلغاء</button></div></div>`
-    : `<div class="grid2 pdb"><button class="btn2 cu" onclick="rpLaterRev('${r.id}',${i},true,this)">${I('check', 16, 2.5)}موافق، انقله</button><button class="btn2 rd" onclick="rpLrvOpen('${r.id}',${i})">${I('x', 15)}رفض</button></div>`;
+    : `<div class="grid2 pdb"><button class="btn2 cu" onclick="rpLaterRev('${r.id}',${i},true,this)">${I('check', 16, 2.5)}اعتماد النقل</button><button class="btn2 rd" onclick="rpLrvOpen('${r.id}',${i})">${I('x', 15)}رفض</button></div>`;
   return `<li><div class="pt">${esc(x.t)}</div><div class="pm"><b>طلب نقل للحالية</b> · ${esc(shortName(x.req.name || ''))} · ${esc(rpTickWhen(x.req.at))}</div>${act}</li>`;
+}
+/* الإصدار 123: طلب تغيير «تبدأ بعد» في بطاقة «بانتظار الاعتماد» عندي */
+function rpAreqItem(r, x) {
+  const i = rpArr(r.later).indexOf(x), rv = RP.aqv && RP.aqv.id === r.id && RP.aqv.t === x.t;
+  const act = !rpCanTick(r, true) ? '' : rv ? `<div class="rvf"><textarea id="aqv_note" class="rta sm" placeholder="سبب الرفض (اختياري)، يظهر للموظف على العمل" oninput="RP.aqv.note=this.value;rpGrow(this)">${esc(RP.aqv.note || '')}</textarea><div class="grid2"><button class="btn2 rd" onclick="rpAqRev('${r.id}',${i},false,this)">${I('x', 15)}رفض</button><button class="btn2" onclick="RP.aqv=null;rpRerender()">إلغاء</button></div></div>`
+    : `<div class="grid2 pdb"><button class="btn2 cu" onclick="rpAqRev('${r.id}',${i},true,this)">${I('check', 16, 2.5)}اعتماد التغيير</button><button class="btn2 rd" onclick="rpAqvOpen('${r.id}',${i})">${I('x', 15)}رفض</button></div>`;
+  return `<li><div class="pt">${esc(x.t)}</div><div class="pm"><b>طلب تغيير بداية العمل</b> · ${esc(shortName(x.areq.name || ''))} · ${esc(rpTickWhen(x.areq.at))}</div><div class="pm">الحالي: ${x.after ? 'تبدأ بعد ' + esc(x.after) : 'غير مرتبطة بعمل'}</div><div class="pm">المطلوب: ${x.areq.after ? 'تبدأ بعد ' + esc(x.areq.after) : 'غير مرتبطة بعمل'}</div>${act}</li>`;
+}
+function rpAqvOpen(id, i) { const r = (RP.reps || []).find(x => x.id === id); if (!r) return; RP.aqv = {id: id, t: (rpArr(r.later)[i] || {}).t, note: ''}; rpRerender(); setTimeout(() => { const t = document.getElementById('aqv_note'); if (t) t.focus(); }, 50); }
+async function rpAqRev(id, i, ok, btn) {
+  if (RP.busy) return;
+  const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
+  const x = rpArr(r.later)[i]; if (!x) return;
+  const note = ok ? '' : String((RP.aqv && RP.aqv.note) || '').trim();
+  RP.busy = true;
+  if (btn) { btn.disabled = true; btn.innerHTML = ok ? 'جاري الاعتماد…' : 'جاري الرفض…'; }
+  try {
+    await call('apiRepAfterReview', id, x.t, ok, note);
+    RP.aqv = null;
+    await rpTickReload();
+    RP.busy = false; rpRerender();
+    toast(ok ? 'تغيّرت بداية العمل، ووصل الموظف إشعار' : 'تم رفض الطلب، ووصل الموظف إشعار');
+  } catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
+/* الإصدار 123: نافذة طلب تغيير البداية عند الموظف: الأعمال الحالية و«غير مرتبطة بعمل» */
+function rpAqOpen(id, i) {
+  const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
+  const x = rpArr(r.later)[i]; if (!x) return;
+  const cur = rpArr(r.cur), cut = s => s.length > 34 ? s.slice(0, 34) + '…' : s, ci = x.after ? cur.indexOf(x.after) : -1;
+  RP.aq = {id: id, t: x.t, after: x.after || ''};
+  ovOpen(`<label class="shh" for="aq_aft">تغيير بداية العمل</label>
+    <div class="sub" style="margin:-6px 0 12px">${esc(x.t)}</div>
+    <div class="field"><span>تبدأ بعد</span><select id="aq_aft"><option value="">غير مرتبطة بعمل</option>${cur.map((c, n) => `<option value="${n}" ${n === ci ? 'selected' : ''}>${esc(cut(c))}</option>`).join('')}</select></div>
+    <div class="sub" style="margin:0 0 12px">يُرسل الطلب إلى المدير العام، ويُطبَّق بعد اعتماده.</div>
+    <div class="err" id="aqerr"></div>
+    <button class="btn2 cu qbig" onclick="rpAqSend()">${I('send', 17)}إرسال الطلب</button>
+    <button class="btn2" style="width:100%;margin-top:8px" onclick="RP.aq=null;ovClose()">إلغاء</button>`);
+}
+async function rpAqSend() {
+  const f = RP.aq; if (!f || RP.busy) return;
+  const r = (RP.reps || []).find(x => x.id === f.id); if (!r) return;
+  const ai = $('#aq_aft').value, aft = ai === '' ? '' : (rpArr(r.cur)[+ai] || '');
+  const er = $('#aqerr');
+  if (aft === f.after) { if (er) er.textContent = 'اختر عملاً مختلفاً عن الربط الحالي'; return; }
+  RP.busy = true; const un = lockBtn('جاري الإرسال…');
+  try {
+    const res = await call('apiRepAfterReq', f.id, f.t, aft, false) || {};
+    RP.aq = null; ovClose(); await rpTickReload(); RP.busy = false; rpRerender();
+    toast(res.dup ? 'الطلب مرسل من قبل، بانتظار الاعتماد' : 'أُرسل الطلب للمدير العام', res.dup ? null : () => rpAqUndo(f.id, rpArr(((RP.reps || []).find(x => x.id === f.id) || {}).later).findIndex(y => y.t === f.t)), res.dup ? 'in' : undefined);
+  } catch (e) { RP.busy = false; if (un) un(); if (er) er.textContent = e; else toastErr(e); }
+}
+async function rpAqUndo(id, i, btn) {
+  if (RP.busy) return;
+  const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
+  const x = rpArr(r.later)[i]; if (!x) return;
+  RP.busy = true;
+  if (btn) { btn.disabled = true; btn.textContent = 'جاري الإلغاء…'; }
+  try { await call('apiRepAfterReq', id, x.t, '', true); await rpTickReload(); RP.busy = false; rpRerender(); toast('أُلغي الطلب'); }
+  catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
 }
 function rpLrvOpen(id, i) { const r = (RP.reps || []).find(x => x.id === id); if (!r) return; RP.lrv = {id: id, t: (rpArr(r.later)[i] || {}).t, note: ''}; rpRerender(); setTimeout(() => { const t = document.getElementById('lrv_note'); if (t) t.focus(); }, 50); }
 async function rpLaterRev(id, i, ok, btn) {
