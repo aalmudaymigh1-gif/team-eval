@@ -1409,6 +1409,18 @@ html:root .ials.it b{color:var(--muted)}
 html:root .ials.it b.ok{color:var(--green)}
 html:root .sheet .btn2.mact{width:100%;justify-content:flex-start;gap:10px;margin-top:8px;padding-inline:18px}
 html:root .sheet .btn2.mact svg{color:var(--acc-dk)}
+/* الإصدار 127: خطوات العمل في «بانتظار الاعتماد» */
+html:root .pdl .pst{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;margin-top:6px;padding:6px 0;border:0;border-top:1px solid var(--line);background:none;font:inherit;font-size:13px;color:var(--acc-dk);text-align:start;cursor:pointer}
+html:root .pdl .pst>span{flex:1;line-height:1.5}
+html:root .pdl .pst>svg{flex:none;color:var(--muted)}
+html:root .pdl .pst .psm{color:var(--red)}
+html:root .pdl .psl{list-style:none;margin:0 0 4px;padding:0}
+html:root .pdl .psl li{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.5}
+html:root .pdl .psl li:last-child{border-bottom:0}
+html:root .pdl .psd{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--green-soft);color:var(--green);font-size:12px;font-weight:600;margin-top:1px}
+html:root .pdl .psl li.no .psd{background:var(--red-soft);color:var(--red)}
+html:root .pdl .psl li.no>span>span{color:var(--red)}
+html:root .pdl .psl small{display:block;font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -1418,9 +1430,9 @@ html:root .sheet .btn2.mact svg{color:var(--acc-dk)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=126"></script>
+<script src="api.js?v=127"></script>
 <script>
-const APP_VER = '126';
+const APP_VER = '127';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -4561,9 +4573,20 @@ function rpPendHtml(r, pend, isAdmin, reqs, lqs, aqs) {
     if (isAdmin && rpCanTick(r, true)) act = rv ? `<div class="rvf"><textarea id="rv_note" class="rta sm" placeholder="سبب الإرجاع، يظهر للموظف على العمل" oninput="RP.rv.note=this.value;rpGrow(this)">${esc(RP.rv.note || '')}</textarea><div class="grid2"><button class="btn2 rd" onclick="rpReview('${r.id}',${i},false,this)">${I('rotate-ccw', 15)}إرجاع للعمل</button><button class="btn2" onclick="RP.rv=null;rpRerender()">إلغاء</button></div></div>`
       : `<div class="grid2 pdb"><button class="btn2 cu" onclick="rpReview('${r.id}',${i},true,this)">${I('check', 16, 2.5)}اعتماد الإنجاز</button><button class="btn2 rd" onclick="rpRvOpen('${r.id}',${i})">${I('rotate-ccw', 15)}إرجاع للعمل</button></div>`;
     else act = `<div class="pw">${I('clock', 13)}بانتظار اعتماد المدير العام</div>`;
-    return `<li><div class="pt">${esc(x)}</div><div class="pm">${esc(who)} · وقت تسجيل الإنجاز: <b>${esc(rpTickWhen(k.at))}</b></div>${rpTickDoc(k)}${rpAlertLine(r, x, isAdmin)}${act}</li>`;
+    return `<li><div class="pt">${esc(x)}</div><div class="pm">${esc(who)} · وقت تسجيل الإنجاز: <b>${esc(rpTickWhen(k.at))}</b></div>${rpTickDoc(k)}${rpPendSteps(r, x)}${rpAlertLine(r, x, isAdmin)}${act}</li>`;
   }).join('')}</ul></div>`;
 }
+/* الإصدار 127: خطوات العمل في «بانتظار الاعتماد» (عندي وعند الموظف): سطر «الخطوات: n من N منجزة» والناقص بالأحمر، والضغط يفتح القائمة ومين أشّر كل خطوة */
+function rpPendSteps(r, x) {
+  const ss = stOf(r, x); if (!ss.length) return '';
+  const n = ss.filter(s => s.done).length, miss = ss.filter(s => !s.done).map(s => s.t);
+  const open = RP.ps === r.id + '|' + x, i = rpArr(r.cur).indexOf(x);
+  const left = !miss.length ? '' : ` · <span class="psm">${miss.length <= 2 ? 'باقي: ' + esc(miss.join('، ')) : `باقي ${miss.length} خطوات`}</span>`;
+  const who = s => s.doneBy === 'admin' ? 'المدير العام' : shortName(s.doneName || '');
+  const list = !open ? '' : `<ul class="psl">${ss.map(s => `<li class="${s.done ? 'ok' : 'no'}"><span class="psd">${s.done ? I('check', 12, 3) : '!'}</span><span><span>${esc(s.t)}</span><small>${s.done ? esc(who(s)) : 'ما انأشرت'}</small></span></li>`).join('')}</ul>`;
+  return `<button class="pst" aria-expanded="${open}" onclick="rpPsTog('${r.id}',${i})"><span><span>الخطوات: ${n} من ${ss.length} منجزة</span>${left}</span>${I(open ? 'chevron-up' : 'chevron-down', 15)}</button>${list}`;
+}
+function rpPsTog(id, i) { const r = (RP.reps || []).find(z => z.id === id); if (!r) return; const k = id + '|' + rpArr(r.cur)[i]; RP.ps = RP.ps === k ? null : k; rpRerender(); }
 function rpRvOpen(id, i) { const r = (RP.reps || []).find(x => x.id === id); if (!r) return; RP.rv = {id: id, t: rpArr(r.cur)[i], note: ''}; rpRerender(); setTimeout(() => { const t = document.getElementById('rv_note'); if (t) t.focus(); }, 50); }
 async function rpReview(id, i, ok, btn) {
   if (RP.busy) return;
