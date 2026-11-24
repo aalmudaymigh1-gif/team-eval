@@ -1430,9 +1430,9 @@ html:root .pdl .psl small{display:block;font-size:12px;color:var(--muted)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=127"></script>
+<script src="api.js?v=128"></script>
 <script>
-const APP_VER = '127';
+const APP_VER = '128';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1453,7 +1453,7 @@ async function checkUpdate(force) {
     const t = await fetchT(location.href.split('#')[0], {cache: 'reload'}, 10000).then(r => r.ok ? r.text() : '');
     const m = /const APP_VER = '([^']+)'/.exec(t);
     if (!m || m[1] === APP_VER) { if (isFinite(lm)) DOC_LM = lm; return false; }
-    toastLoad('فيه تحديث جديد، لحظة…');
+    toastLoad('يوجد تحديث جديد، لحظة…');
     setTimeout(() => location.reload(), 400);
     return true;
   } catch (e) { return false; }
@@ -1473,7 +1473,7 @@ const $ = s => document.querySelector(s);
 const toEn = s => String(s == null ? '' : s).replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x660)).replace(/[\u06F0-\u06F9]/g, d => String(d.charCodeAt(0) - 0x6F0));
 const esc = s => toEn(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 /* الإصدار 111: سطر «ينحفظ: … ريال» تحت خانة المبلغ، بنفس القراءة اللي بينحفظ فيها (API.parseAmt) */
-function amtPvTxt(v) { const n = API.parseAmt(v); return String(v == null ? '' : v).trim() !== '' && n > 0 ? 'ينحفظ: ' + n.toLocaleString('en-US', {maximumFractionDigits: 2}) + ' ريال' : ''; }
+function amtPvTxt(v) { const n = API.parseAmt(v); return String(v == null ? '' : v).trim() !== '' && n > 0 ? 'يُحفظ: ' + n.toLocaleString('en-US', {maximumFractionDigits: 2}) + ' ريال' : ''; }
 function amtPvHtml(v, id) { const t = amtPvTxt(v); return `<div class="amtpv" id="${id}"${t ? '' : ' hidden'}>${t}</div>`; }
 function amtPv(v, id) { const el = document.getElementById(id); if (!el) return; const t = amtPvTxt(v); el.hidden = !t; el.textContent = t; }
 document.addEventListener('input', e => {
@@ -1517,7 +1517,7 @@ function isPdfFile(f) { return !!f && (f.type === 'application/pdf' || /\.pdf$/i
 async function shotFrom(f, w, q) {
   if (!isPdfFile(f)) return w ? resizeImg(f, w, q) : resizeImg(f);
   if (f.size > 20 * 1024 * 1024) throw new Error('حجم الملف أكبر من 20 ميغابايت');
-  if (!f.size) throw new Error('الملف فاضي');
+  if (!f.size) throw new Error('الملف فارغ');
   return {pdf: f, name: String(f.name || 'ملف PDF').slice(0, 80)};
 }
 function pdfTile(name) { return `<div class="pdft">${I('file-text', 22)}<span>${esc(name || 'ملف PDF')}</span></div>`; }
@@ -1557,11 +1557,11 @@ function pushSnoozed() { try { return Date.now() - Number(localStorage.getItem('
 function pushHtml() {
   if (PUSH.ok) {
     if (Notification.permission !== 'default') return '';
-    return `<div class="pushb"><div class="ph1">${I('bell', 20)}<div><b>فعّل الإشعارات</b><p>${BOOT.page === 'admin' ? 'عشان توصلك التقارير والفواتير أول بأول' : 'عشان توصلك التقارير والتنبيهات أول بأول'}</p></div></div>
+    return `<div class="pushb"><div class="ph1">${I('bell', 20)}<div><b>فعّل الإشعارات</b><p>${BOOT.page === 'admin' ? 'لتصلك التقارير والفواتير أولاً بأول' : 'لتصلك التقارير والتنبيهات أولاً بأول'}</p></div></div>
       <button class="bigdo" onclick="enablePush()">${PUSH.busy ? 'لحظة…' : 'فعّلها'}</button></div>`;
   }
   if (!PUSH.ios || PUSH.standalone || pushSnoozed()) return '';
-  return `<div class="pushb"><div class="ph1">${I('bell', 20)}<div><b>عشان توصلك الإشعارات</b><p>من Safari اضغط زر المشاركة، بعدها «إضافة إلى الشاشة الرئيسية»، وافتح التطبيق من الأيقونة.</p></div></div>
+  return `<div class="pushb"><div class="ph1">${I('bell', 20)}<div><b>لتصلك الإشعارات</b><p>من Safari اضغط زر المشاركة، بعدها «إضافة إلى الشاشة الرئيسية»، وافتح التطبيق من الأيقونة.</p></div></div>
     <button class="later" onclick="pushLater()">لاحقاً</button></div>`;
 }
 function b64u(s) {
@@ -1579,7 +1579,7 @@ async function enablePush() {
   PUSH.busy = true;
   try {
     const p = await Notification.requestPermission();
-    if (p !== 'granted') throw new Error('ما انسمح بالإشعارات. تقدر تفعّلها من إعدادات الجوال');
+    if (p !== 'granted') throw new Error('لم يُسمح بالإشعارات. يمكنك تفعيلها من إعدادات الجوال');
     redrawAny();
     await pushSubscribe();
     toast('تفعّلت الإشعارات');
@@ -1609,10 +1609,10 @@ function projOf(ps, id) { return (ps || []).find(p => p.id === id) || null; }
 function isOff(day) { return new Date(day + 'T12:00:00Z').getUTCDay() === 5; }
 
 /* عند الموظف */
-const ATT_STEP = {home: ['طلعت من البيت', 'صوّر الشارع', 'طلوع من البيت'], in: ['وصلت المشروع', 'صوّر المكان', 'وصول المشروع'], out: ['طلعت من المشروع', 'صوّر المكان', 'طلوع من المشروع']};
+const ATT_STEP = {home: ['خرجت من البيت', 'صوّر الشارع', 'الخروج من البيت'], in: ['وصلت المشروع', 'صوّر المكان', 'وصول المشروع'], out: ['خرجت من المشروع', 'صوّر المكان', 'الخروج من المشروع']};
 function attStepsHtml(r, me) {
   const row = (done, cur, t, tm) => `<div class="ast ${done ? 'ok' : cur ? 'cur' : ''}"><span class="dot">${done ? I('check', 12, 3) : ''}</span><span>${t}${tm ? ' ' + tm : ''}</span></div>`;
-  return `<div class="asts">${row(!!(r && r.home), !r, me ? 'طلعت من البيت' : 'طلع من البيت', r && r.home ? t12(r.home) : '')}${row(!!(r && r.in), r && r.home && !r.in, me ? 'وصلت المشروع' : 'وصل المشروع', r && r.in ? t12(r.in) : '')}${row(!!(r && r.out), r && r.in && !r.out, me ? 'طلعت من المشروع' : 'طلع من المشروع', r && r.out ? t12(r.out) : '')}</div>`;
+  return `<div class="asts">${row(!!(r && r.home), !r, me ? 'خرجت من البيت' : 'خرج من البيت', r && r.home ? t12(r.home) : '')}${row(!!(r && r.in), r && r.home && !r.in, me ? 'وصلت المشروع' : 'وصل المشروع', r && r.in ? t12(r.in) : '')}${row(!!(r && r.out), r && r.in && !r.out, me ? 'خرجت من المشروع' : 'خرج من المشروع', r && r.out ? t12(r.out) : '')}</div>`;
 }
 function attBadHtml(d) {
   const lim = addDays(d.today, -30), b = (d.att || []).filter(x => x.bad && !x.badSeen && x.date >= lim), me = BOOT.page === 'emp' && !S.empPreview;
@@ -1642,11 +1642,11 @@ function attCardHtml0(d, isPreview) {
   const r = (d.att || []).find(x => x.date === d.today);
   const p = r ? projOf(d.projects, r.project) : null, pn = p ? p.name : '';
   const btn = (mode, red) => isPreview ? '' : `<button class="attgo ${red ? 'red' : ''}" onclick="openCam('${mode}')">${I('camera', 24)}<b>${ATT_STEP[mode][0]}</b><span>${ATT_STEP[mode][1]} بالكاميرا الخلفية</span></button>`;
-  if (r && r.out) return `<div class="attc done">${attStepsHtml(r, !isPreview)}<div class="r1" style="margin-top:6px"><span>${esc(pn)}</span><span>اشتغلت ${hrs(r.outMs - r.inMs)} ساعة</span></div></div>`;
+  if (r && r.out) return `<div class="attc done">${attStepsHtml(r, !isPreview)}<div class="r1" style="margin-top:6px"><span>${esc(pn)}</span><span>عملت ${hrs(r.outMs - r.inMs)} ساعة</span></div></div>`;
   if (r && r.in) return `<div class="attc">${attStepsHtml(r, !isPreview)}<div class="r1" style="margin-top:6px"><span>${esc(pn)}</span><span>الطريق ${hrs(r.inMs - r.homeMs)}</span></div>
     <div class="el" id="attEl" data-ms="${r.inMs}">${hrs(Date.now() - r.inMs)} ساعة</div>${btn('out', true)}</div>`;
   if (r && r.home) return `<div class="attc">${attStepsHtml(r, !isPreview)}<div class="el" id="attEl" data-ms="${r.homeMs}" style="font-size:17px">${hrs(Date.now() - r.homeMs)} ساعة في الطريق</div>${btn('in')}</div>`;
-  return isPreview ? '<div class="note info" style="margin-top:12px">ما سجّل طلوعه من البيت اليوم</div>' : `<div style="margin-top:12px">${attStepsHtml(null, true)}</div>${btn('home')}`;
+  return isPreview ? '<div class="note info" style="margin-top:12px">لم يسجّل خروجه من البيت اليوم</div>' : `<div style="margin-top:12px">${attStepsHtml(null, true)}</div>${btn('home')}`;
 }
 setInterval(() => { const el = document.getElementById('attEl'); if (el) el.textContent = el.textContent.replace(/^\S+/, hrs(Date.now() - Number(el.dataset.ms))); }, 30000);
 
@@ -1654,11 +1654,11 @@ const CAM = {stream: null, mode: 'in', shot: null, pos: null, posErr: '', posWai
 function camStop() { if (CAM.stream) { CAM.stream.getTracks().forEach(t => t.stop()); CAM.stream = null; } }
 function getPos() {
   CAM.pos = null; CAM.posErr = '';
-  if (!navigator.geolocation) { CAM.posErr = 'الجوال ما يدعم تحديد الموقع'; return; }
+  if (!navigator.geolocation) { CAM.posErr = 'الجوال لا يدعم تحديد الموقع'; return; }
   CAM.posWait = true;
   navigator.geolocation.getCurrentPosition(
     p => { CAM.posWait = false; CAM.pos = {lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy}; camRefresh(); },
-    e => { CAM.posWait = false; CAM.posErr = e.code === 1 ? 'ما سمحت بالموقع' : 'ما قدرنا نحدد الموقع'; camRefresh(); },
+    e => { CAM.posWait = false; CAM.posErr = e.code === 1 ? 'لم تسمح بالوصول إلى الموقع' : 'تعذّر تحديد الموقع'; camRefresh(); },
     {enableHighAccuracy: true, timeout: 20000, maximumAge: 0});
 }
 async function openCam(mode) {
@@ -1676,7 +1676,7 @@ async function openCam(mode) {
     v.srcObject = CAM.stream;
     await v.play().catch(() => {});
   } catch (e) {
-    const el = $('#camerr'); if (el) el.textContent = 'ما انفتحت الكاميرا. اسمح للتطبيق يستخدم الكاميرا من إعدادات الجوال، وافتحه من الأيقونة';
+    const el = $('#camerr'); if (el) el.textContent = 'تعذّر فتح الكاميرا. اسمح للتطبيق باستخدام الكاميرا من إعدادات الجوال، وافتحه من الأيقونة';
     const b = $('#snapb'); if (b) b.disabled = true;
   }
 }
@@ -1696,7 +1696,7 @@ function locText() {
   if (CAM.pos) {
     return 'الموقع: تم ✓';
   }
-  return CAM.posWait ? 'جاري تحديد الموقع…' : (CAM.posErr || 'ما قدرنا نحدد الموقع') + '، وبينسجل بدون موقع';
+  return CAM.posWait ? 'جاري تحديد الموقع…' : (CAM.posErr || 'تعذّر تحديد الموقع') + '، وسيُسجَّل دون موقع';
 }
 function camConfirm() {
   const d = S.empData, ps = d.projects || [];
@@ -1731,7 +1731,7 @@ async function sendAtt() {
     const r = CAM.mode === 'home' ? await callT(120000, 'apiAttHome', BOOT.token, url, CAM.pos)
       : CAM.mode === 'in' ? await callT(120000, 'apiAttIn', BOOT.token, url, CAM.pos, CAM.proj) : await callT(120000, 'apiAttOut', BOOT.token, url, CAM.pos);
     if (CAM.mode === 'in' && CAM.proj) lsSet('att_proj', CAM.proj);
-    ovClose(); renderEmp(r, false); toast(CAM.mode === 'out' ? 'تسجّل طلوعك، يعطيك العافية' : 'تسجّل: ' + ATT_STEP[CAM.mode][0]);
+    ovClose(); renderEmp(r, false); toast(CAM.mode === 'out' ? 'تسجّل طلوعك، يعطيك العافية' : 'سُجّل: ' + ATT_STEP[CAM.mode][0]);
   } catch (e) {
     const el = $('#camerr'); if (el) el.textContent = e;
     if (b) { b.disabled = false; b.textContent = 'جرّب مرة ثانية'; }
@@ -1773,13 +1773,13 @@ function renderAttLog(empId) {
     <h2 style="margin:10px 0 0;font-size:17px">سجل حضور ${esc(shortName(e.name))}</h2>
     <div class="scards" style="margin-top:12px"><div class="sc n"><b>${mon.length}</b><span>يوم حضور ${esc(d.month)}</span></div>
     <div class="sc ${lateN ? 'a' : 'n'}"><b>${lateN}</b><span>مرات تأخير</span></div></div>
-    <div class="sub" style="margin:8px 2px">مجموع الساعات هالشهر: <b>${hrs(tot)}</b>${badN ? ` · <span class="lt">${badN === 1 ? 'يوم واحد' : badN === 2 ? 'يومين' : badN + ' أيام'} غير صحيح، ما تنحسب</span>` : ''}</div>`;
-  if (!list.length) return $('#view').innerHTML = h + emptyHtml('map-pin', 'ما سجّل حضور للحين');
+    <div class="sub" style="margin:8px 2px">مجموع الساعات هذا الشهر: <b>${hrs(tot)}</b>${badN ? ` · <span class="lt">${badN === 1 ? 'يوم واحد' : badN === 2 ? 'يومين' : badN + ' أيام'} غير صحيح، لا تُحتسب</span>` : ''}</div>`;
+  if (!list.length) return $('#view').innerHTML = h + emptyHtml('map-pin', 'لم يسجّل حضوراً بعد');
   h += '<div class="card atl">' + list.map(r => {
     const arm = S.armed === 'att_' + r.id, armU = S.armed === 'attu_' + r.id, p = projOf(d.projects, r.project);
-    return `<div class="atd ${r.bad ? 'bad' : ''}"><div class="hd"><b>${esc(dayLabel(r.date))}</b><span>${r.bad ? '<span class="badge rd">غير صحيح</span>' : r.out ? 'اشتغل ' + hrs(r.outMs - r.inMs) : r.in ? (r.date < d.today ? '<span class="badge a">بدون طلوع</span>' : 'في الشغل') : '<span class="badge a">ما وصل المشروع</span>'}</span></div>
-      <div class="sub">${[p ? esc(p.name) : '', r.in ? 'الطريق ' + hrs(r.inMs - r.homeMs) : '', r.bad ? 'ساعاته ما تنحسب' : ''].filter(Boolean).join(' · ')}${r.late ? ` <span class="badge late">متأخر ${r.late} د</span>` : ''}</div>
-      <div class="at3">${attStepCol('طلع من البيت', r.home, r.homePhoto, r.homeLat, r.homeLng, r.homeAcc)}${attStepCol('وصل المشروع', r.in, r.inPhoto, r.inLat, r.inLng, r.inAcc)}${attStepCol('طلع من المشروع', r.out, r.outPhoto, r.outLat, r.outLng, r.outAcc)}</div>
+    return `<div class="atd ${r.bad ? 'bad' : ''}"><div class="hd"><b>${esc(dayLabel(r.date))}</b><span>${r.bad ? '<span class="badge rd">غير صحيح</span>' : r.out ? 'عمل ' + hrs(r.outMs - r.inMs) : r.in ? (r.date < d.today ? '<span class="badge a">دون خروج</span>' : 'في العمل') : '<span class="badge a">لم يصل إلى المشروع</span>'}</span></div>
+      <div class="sub">${[p ? esc(p.name) : '', r.in ? 'الطريق ' + hrs(r.inMs - r.homeMs) : '', r.bad ? 'لا تُحتسب ساعاته' : ''].filter(Boolean).join(' · ')}${r.late ? ` <span class="badge late">متأخر ${r.late} د</span>` : ''}</div>
+      <div class="at3">${attStepCol('خرج من البيت', r.home, r.homePhoto, r.homeLat, r.homeLng, r.homeAcc)}${attStepCol('وصل المشروع', r.in, r.inPhoto, r.inLat, r.inLng, r.inAcc)}${attStepCol('خرج من المشروع', r.out, r.outPhoto, r.outLat, r.outLng, r.outAcc)}</div>
       ${r.bad ? `<div class="atbad"><b>تسجيل غير صحيح</b>${r.badLog ? ' · الأمانة والمصداقية' : ' · بدون تقصير'}<div>السبب: ${esc(r.badReason)}</div></div>` : ''}
       <div class="atf">${r.bad ? `<button class="btn2 ${armU ? 'arm' : ''}" onclick="attBadUndo('${r.id}')">${armU ? 'تأكيد التراجع' : 'تراجع'}</button>` : `<button class="btn2 rd" onclick="askAttBad('${r.id}')">تسجيل غير صحيح</button>`}<button class="lnk dl ${arm ? 'arm' : ''}" onclick="delAtt('${r.id}')">${arm ? 'تأكيد الحذف' : 'حذف'}</button></div></div>`;
   }).join('') + '</div>';
@@ -1791,9 +1791,9 @@ function askAttBad(id) {
   const e = empById(r.emp), paid = !!e && ((e.sal || {}).months || []).some(m => m.month === r.date.slice(0, 7) && m.closed);
   S.armed = null;
   ovOpen(`<label class="shh" for="abr">تسجيل غير صحيح</label>
-    <div class="sub" style="margin:-6px 0 10px">${esc(dayLabel(r.date))}. اليوم يطلع عليه «غير صحيح» وساعاته ما تنحسب، ويوصل الموظف إشعار بالسبب.</div>
+    <div class="sub" style="margin:-6px 0 10px">${esc(dayLabel(r.date))}. يظهر على اليوم «غير صحيح» ولا تُحتسب ساعاته، ويصل الموظف إشعار بالسبب.</div>
     <input id="abr" placeholder="السبب" maxlength="300" onkeydown="if(event.key==='Enter')doAttBad('${id}')">
-    <div class="sub" style="margin:8px 0 0">${paid ? 'راتب هذا الشهر مصروف ومقفل: تنحط العلامة والسبب بدون تقصير.' : 'ينسجل عليه تقصير «الأمانة والمصداقية». لو مسجل له نفس التقصير بهذا اليوم ما يتكرر.'}</div>
+    <div class="sub" style="margin:8px 0 0">${paid ? 'راتب هذا الشهر مصروف ومقفل: تُوضع العلامة والسبب دون تقصير.' : 'يُسجَّل عليه تقصير «الأمانة والمصداقية». وإذا كان التقصير نفسه مسجّلاً في هذا اليوم فلن يتكرر.'}</div>
     <div class="err" id="aberr"></div>
     <div class="g21"><button class="btn2 arm" onclick="doAttBad('${id}')">سجّله غير صحيح</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
   setTimeout(() => { const i = $('#abr'); if (i) i.focus(); }, 80);
@@ -1805,17 +1805,17 @@ async function doAttBad(id) {
   try {
     S.data = await call('apiAttBad', BOOT.key, id, v); ovClose(); renderAdmin();
     const r = (S.data.attendance || []).find(x => x.id === id);
-    toast(r && r.badLog ? 'انسجل غير صحيح، ومعه تقصير الأمانة' : 'انحطت العلامة بدون تقصير (الشهر مصروف أو متسجل له بنفس اليوم)');
+    toast(r && r.badLog ? 'سُجّل «غير صحيح» مع تقصير الأمانة' : 'وُضعت العلامة دون تقصير (الشهر مصروف أو التقصير مسجّل في اليوم نفسه)');
   } catch (e) { if (un) un(); const x = $('#aberr'); if (x) x.textContent = e; else toastErr(e); }
 }
 async function attBadUndo(id) {
   if (S.armed !== 'attu_' + id) { S.armed = 'attu_' + id; return renderAttLog(S.attLog); }
-  try { S.data = await call('apiAttBadUndo', BOOT.key, id); S.armed = null; renderAdmin(); toast('انشالت العلامة والتقصير'); }
+  try { S.data = await call('apiAttBadUndo', BOOT.key, id); S.armed = null; renderAdmin(); toast('أُزيلت العلامة والتقصير'); }
   catch (e) { S.armed = null; renderAttLog(S.attLog); toastErr(e); }
 }
 async function delAtt(id) {
   if (S.armed !== 'att_' + id) { S.armed = 'att_' + id; return renderAttLog(S.attLog); }
-  try { S.data = await call('apiAttDel', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذف، والتأخير المرتبط فيه انحذف'); }
+  try { S.data = await call('apiAttDel', BOOT.key, id); S.armed = null; renderAdmin(); toast('تم الحذف، وحُذف التأخير المرتبط به'); }
   catch (e) { S.armed = null; toastErr(e); }
 }
 
@@ -1827,24 +1827,24 @@ function attSetCard(d) {
       <div class="field"><span>بداية الدوام</span><input id="at_start" type="time" value="${esc(c.start)}"></div>
       <div class="field"><span>سماح التأخير (دقيقة)</span><input id="at_grace" type="number" inputmode="numeric" value="${c.grace}"></div>
     </div>
-    <div class="trow"><div class="n"><b>التأخير ينحسب تقصير</b><small>يتسجّل «الحضور والمواعيد» تلقائي لو تأخر بعد السماح</small></div><button class="tg ${c.auto ? 'on' : ''}" onclick="toggleAttAuto()" aria-label="التأخير ينحسب تقصير"></button></div>
-    <div class="sub" style="margin:-4px 0 10px">التأخير ينحسب على وقت وصوله للمشروع. الجمعة إجازة. ولو ما سجّل «طلعت من البيت» لين نص ساعة بعد بداية الدوام يجيك إشعار.</div>
+    <div class="trow"><div class="n"><b>التأخير يُحتسب تقصيراً</b><small>يُسجَّل «الحضور والمواعيد» تلقائياً إذا تأخر بعد مدة السماح</small></div><button class="tg ${c.auto ? 'on' : ''}" onclick="toggleAttAuto()" aria-label="التأخير يُحتسب تقصيراً"></button></div>
+    <div class="sub" style="margin:-4px 0 10px">يُحتسب التأخير على وقت وصوله إلى المشروع. الجمعة إجازة. وإذا لم يسجّل «خرجت من البيت» خلال نصف ساعة من بداية الدوام يصلك إشعار.</div>
     <button class="btn2 cu" style="width:100%" onclick="saveAttSet()">${I('check', 16, 2.5)}حفظ</button><div class="err" id="aterr"></div></div>`;
 }
 async function saveAttSet() {
   const c = S.data.attCfg || {auto: true};
-  try { S.data = await call('apiAttSettings', BOOT.key, {start: $('#at_start').value, grace: $('#at_grace').value, auto: c.auto}); renderAdmin(); toast('انحفظ'); }
+  try { S.data = await call('apiAttSettings', BOOT.key, {start: $('#at_start').value, grace: $('#at_grace').value, auto: c.auto}); renderAdmin(); toast('تم الحفظ'); }
   catch (e) { $('#aterr').textContent = e; }
 }
 /* الإصدار 91: مفتاح «التأخير ينحسب تقصير» يحفظ فوراً مثل باقي المفاتيح، واللي مكتوب في خانتي الوقت والسماح يبقى */
 async function toggleAttAuto() {
   const c = S.data.attCfg || {start: '07:00', grace: 15, auto: true}, ks = ($('#at_start') || {}).value, kg = ($('#at_grace') || {}).value;
-  try { S.data = await call('apiAttSettings', BOOT.key, {start: c.start, grace: c.grace, auto: !c.auto}); renderAdmin(); const a = $('#at_start'), b = $('#at_grace'); if (a && ks != null) a.value = ks; if (b && kg != null) b.value = kg; toast(!c.auto ? 'التأخير صار ينحسب تقصير' : 'التأخير ما عاد ينحسب تقصير'); }
+  try { S.data = await call('apiAttSettings', BOOT.key, {start: c.start, grace: c.grace, auto: !c.auto}); renderAdmin(); const a = $('#at_start'), b = $('#at_grace'); if (a && ks != null) a.value = ks; if (b && kg != null) b.value = kg; toast(!c.auto ? 'أصبح التأخير يُحتسب تقصيراً' : 'لم يعد التأخير يُحتسب تقصيراً'); }
   catch (e) { const x = $('#aterr'); if (x) x.textContent = e; }
 }
 async function toggleAtt(id) {
   const e = empById(id);
-  try { S.data = await call('apiAttToggle', BOOT.key, id, !e.attend); renderAdmin(); toast(!e.attend ? 'تفعّل الحضور له' : 'انطفى الحضور له'); }
+  try { S.data = await call('apiAttToggle', BOOT.key, id, !e.attend); renderAdmin(); toast(!e.attend ? 'فُعّل الحضور له' : 'أُوقف الحضور له'); }
   catch (err) { $('#e_' + id).textContent = err; }
 }
 
@@ -1872,7 +1872,7 @@ function callT(ms, fn, ...args) {
     const t = setTimeout(() => {
       if (done) return;
       if (write) { slow = toastLoad('الاتصال بطيء، ما زلت أنتظر الرد…'); return; }
-      fin(); rej('الاتصال تأخر، اسحب الصفحة لتحت أو اضغط ↻');
+      fin(); rej('الاتصال تأخر، اسحب الصفحة للأسفل أو اضغط ↻');
     }, ms);
     if (write) t2 = setTimeout(() => { if (done) return; fin(); rej('لم يصل الرد بعد. أعد المحاولة، ولن يتكرر الحفظ'); }, Math.max(ms, 120000));
     Promise.resolve().then(() => API[fn](...args))
@@ -1972,7 +1972,7 @@ function adminLink() { return BOOT.url; }
 function empById(id) { return S.data.employees.find(x => x.id === id); }
 
 function copy(text) {
-  const done = () => toast('انتسخ الرابط');
+  const done = () => toast('تم نسخ الرابط');
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
   } else fallbackCopy(text, done);
@@ -1996,7 +1996,7 @@ async function adminAuth() {
   if (BOOT.legacy && !BOOT.key) {
     const old = BOOT.legacy; BOOT.legacy = '';
     try { const r = await API.apiAdminLogin(old, devLabel()); setSession(r.session); }
-    catch (e) { return renderLogin('الرابط القديم ما عاد يشتغل. ادخل برمز من جهاز ثاني أو برمز الاسترجاع.'); }
+    catch (e) { return renderLogin('الرابط القديم لم يعد يعمل. ادخل برمز من جهاز آخر أو برمز الاسترجاع.'); }
   }
   BOOT.legacy = '';
   if (!BOOT.key) return renderLogin('');
@@ -2006,7 +2006,7 @@ function renderLogin(msg) {
   const td = document.getElementById('tabsDock'); if (td) td.remove();
   $('#fab').classList.add('hide');
   $('#app').innerHTML = `<div class="login"><div class="ei">${I('lock', 28)}</div><h1>دخول المدير العام</h1>
-    <div class="sub">اكتب رمز الدخول. تطلع رمز جديد من «الإعدادات ← الدخول والأجهزة ← ربط جهاز جديد» في جهاز داخل، أو استخدم رمز الاسترجاع.</div>
+    <div class="sub">اكتب رمز الدخول. يمكنك إنشاء رمز جديد من «الإعدادات ← الدخول والأجهزة ← ربط جهاز جديد» في جهاز مسجّل، أو استخدام رمز الاسترجاع.</div>
     ${msg ? `<div class="err">${esc(msg)}</div>` : ''}
     <input id="lgc" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="رمز الدخول" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="btn" id="lgb" onclick="doLogin()">${I('log-in', 17)}دخول</button><div class="err" id="lge"></div></div>`;
@@ -2030,7 +2030,7 @@ async function loadAdmin() {
     renderAdmin();
     lgAdminContent();
     nfPendingGo();
-  } catch (e) { if (/الرابط غير صالح/.test(String(e))) { setSession(''); return renderLogin('انتهت الجلسة في هالجهاز. ادخل من جديد.'); } const td = document.getElementById('tabsDock'); if (td) td.remove(); $('#app').innerHTML = '<div class="load"><div class="ei">' + I('triangle-alert', 28) + '</div>' + esc(e) + '<br><button class="btn2" style="margin:16px auto 0" onclick="location.reload()">' + I('refresh-cw', 16) + 'حاول مرة ثانية</button></div>'; }
+  } catch (e) { if (/الرابط غير صالح/.test(String(e))) { setSession(''); return renderLogin('انتهت الجلسة في هذا الجهاز. سجّل الدخول من جديد.'); } const td = document.getElementById('tabsDock'); if (td) td.remove(); $('#app').innerHTML = '<div class="load"><div class="ei">' + I('triangle-alert', 28) + '</div>' + esc(e) + '<br><button class="btn2" style="margin:16px auto 0" onclick="location.reload()">' + I('refresh-cw', 16) + 'حاول مرة ثانية</button></div>'; }
 }
 
 function renderAdmin() {
@@ -2040,13 +2040,13 @@ function renderAdmin() {
   let h = '';
   if (false) {
     h += `<div class="card"><b>التطبيق جاهز</b>
-      <div class="sub" style="margin-top:6px">هذا رابطك الخاص كمدير. افتحه الحين، وبعدها أضفه للشاشة الرئيسية من زر المشاركة في Safari. لا ترسله لأحد.</div>
+      <div class="sub" style="margin-top:6px">هذا رابطك الخاص كمدير. افتحه الآن، ثم أضفه إلى الشاشة الرئيسية من زر المشاركة في Safari. لا ترسله لأحد.</div>
       <div class="link">${esc(adminLink(BOOT.key))}</div>
       <div class="grid2"><a class="btn2" href="${esc(adminLink(BOOT.key))}">افتح رابطي</a>
       <button class="btn2" onclick="copyAdmin()">نسخ الرابط</button></div></div>`;
   }
   const tab = (v, ic, t) => `<button class="${S.view===v?'on':''}" onclick="go('${v}')">${I(ic, 16)}${t}</button>`;
-  h = `<div class="top"><div><h1>${({rec:'التقييم',team:'الفريق',task:'الأعمال',fin:'المالية',set:'الإعدادات'})[S.view] || 'إدارة الشغل'}</h1><div class="sub">${esc(dayLabel(d.today))}</div></div><div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div></div>${pushHtml()}
+  h = `<div class="top"><div><h1>${({rec:'التقييم',team:'الفريق',task:'الأعمال',fin:'المالية',set:'الإعدادات'})[S.view] || 'إدارة العمل'}</h1><div class="sub">${esc(dayLabel(d.today))}</div></div><div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div></div>${pushHtml()}
     <div class="tabs">${tab('rec','clipboard-check','تقييم')}${tab('team','users','الفريق')}${tab('task','list-checks','الأعمال')}${tab('fin','wallet','المالية')}${tab('set','settings','الإعدادات')}</div>` + h + `
     <div id="view"></div>`;
   $('#app').innerHTML = h;
@@ -2086,17 +2086,17 @@ function renderRec() {
   let ded = 0;
   S.misses.forEach(c => { ded += heavy(c) ? st.trust : st.miss; });
   const net = (S.star ? st.star : 0) - ded;
-  const label = !S.misses.length && !S.star ? 'كل شي تمام' : 'حفظ التقييم';
+  const label = !S.misses.length && !S.star ? 'لا يوجد تقصير' : 'حفظ التقييم';
   const empSub = e => e.track ? 'متابعة فقط' : 'حافز الشهر ' + M(e.month.bonus, '', 't pos');
   $('#view').innerHTML = `
     <div class="blk"><div class="lab">${I('user', 14)}الموظف</div>
       <div class="emp wr">${d.employees.map(e => `<button class="empc ${S.emp===e.id?'on':''}" onclick="setEmp('${e.id}')">${esc(e.name)}</button>`).join('')}</div>
       ${emp.id ? `<div class="empi">${esc(emp.name)} · ${empSub(emp)}</div>` : ''}</div>
     <div class="blk dline"><div class="lab">${I('calendar', 14)}اليوم</div>
-      ${segc([['today','اليوم'],['yest','أمس'],['other','تاريخ ثاني']], S.dateMode, 'setDate')}
+      ${segc([['today','اليوم'],['yest','أمس'],['other','تاريخ آخر']], S.dateMode, 'setDate')}
       ${S.dateMode==='other' ? `<input type="date" value="${S.date}" max="${d.today}" onchange="S.date=this.value;renderRec()">` : ''}</div>
     ${emp.id && !trk ? daySumHtml(emp, S.date) : ''}
-    <div class="blk"><div class="lab">${I('sparkles', 14)}الأداء — اضغط على اللي قصّر فيه</div><div class="gcard">${perf.map(c => row(c, '')).join('')}</div></div>
+    <div class="blk"><div class="lab">${I('sparkles', 14)}الأداء — اضغط على ما قصّر فيه</div><div class="gcard">${perf.map(c => row(c, '')).join('')}</div></div>
     ${emp.id && S.misses.includes(FOL) ? folHtml(emp) : ''}
     <div class="blk"><div class="lab">${I('users', 14)}السلوك</div><div class="gcard">${beh.map(c => row(c, 'b')).join('')}</div></div>
     ${S.misses.some(c => c !== FOL) ? `<div class="blk"><input placeholder="ملاحظة (اختياري)" value="${esc(S.note)}" oninput="S.note=this.value"></div>` : ''}
@@ -2119,7 +2119,7 @@ function daySum(emp, date) {
   const d = S.data, o = {att: null, ticks: null, inv: 0, invSum: 0};
   if (emp.attend) {
     const a = (d.attendance || []).find(x => x.emp === emp.id && x.date === date);
-    o.att = !a ? {v: 'ما سجّل', c: 'r'} : a.bad ? {v: 'غير صحيح', c: 'r'} : {v: (a.in ? t12(a.in) : a.home ? 'طلع من البيت' : '—') + (a.in ? (a.out ? ' – ' + t12(a.out) : ' · ما طلع') : ''), c: '', s: a.late > 0 ? 'تأخر ' + a.late + ' د' : ''};
+    o.att = !a ? {v: 'لم يسجّل', c: 'r'} : a.bad ? {v: 'غير صحيح', c: 'r'} : {v: (a.in ? t12(a.in) : a.home ? 'خرج من البيت' : '—') + (a.in ? (a.out ? ' – ' + t12(a.out) : ' · لم يخرج') : ''), c: '', s: a.late > 0 ? 'تأخر ' + a.late + ' د' : ''};
   }
   if (RP.reps !== null) {
     o.ticks = 0;
@@ -2134,7 +2134,7 @@ function daySumHtml(emp, date) {
   const o = daySum(emp, date), cell = (v, l, c, s) => `<div class="${c || ''}"><b>${v}</b><span>${l}${s ? ' · ' + s : ''}</span></div>`;
   return `<div class="blk"><div class="lab">${I('clipboard-list', 14)}ملخص اليوم</div><div class="dsum${o.att ? '' : ' n3'}">
     ${o.att ? cell(esc(o.att.v), 'الحضور', 'at ' + o.att.c, o.att.s) : ''}
-    ${cell(o.ticks === null ? (RP.failed ? '—' : '…') : o.ticks, o.ticks === 1 ? 'عمل أشّره' : 'أعمال أشّرها')}
+    ${cell(o.ticks === null ? (RP.failed ? '—' : '…') : o.ticks, o.ticks === 1 ? 'عمل أشّر عليه' : 'أعمال أشّر عليها')}
     ${cell(o.inv, o.inv === 1 ? 'فاتورة' : 'فواتير', '', o.inv ? M(o.invSum, '', 't') : '')}</div></div>`;
 }
 /* الإصدار 121: «متابعة الأعمال الموكلة»: أعماله الحالية من تقارير المشاريع اللي له فيها شغل (نفس تعريف «مشاريعي»)،
@@ -2154,7 +2154,7 @@ function folWorks(emp) {
 function folAlert(r, item, emp) {
   let a = null;
   rpAlertsOf(r, item).forEach(x => { if (x.emp === emp.id && (!a || x.at > a.at)) a = x; });
-  return !a ? ['', 'ما فيه تنبيه'] : a.seen ? ['ok', 'شاف التنبيه ' + rpTickWhen(a.seen)] : ['no', 'أرسلت تنبيه · ما شافه'];
+  return !a ? ['', 'لا يوجد تنبيه'] : a.seen ? ['ok', 'شاهد التنبيه ' + rpTickWhen(a.seen)] : ['no', 'أُرسل تنبيه · لم يشاهده'];
 }
 function folHtml(emp) {
   if (RP.reps === null && !RP.failed && !RP.loading) rpLoad().then(() => { if (S.view === 'rec' && !S.preview && BOOT.page === 'admin') renderRec(); });
@@ -2164,15 +2164,15 @@ function folHtml(emp) {
   if (RP.reps === null) list = `<div class="gcard fwk"><div class="gr"><span class="n">${RP.failed ? 'تعذّر تحميل التقارير. اكتب الملاحظة بنفسك' : 'جاري تحميل أعماله…'}</span></div></div>`;
   else {
     const ws = folWorks(emp);
-    list = !ws.length ? `<div class="gcard fwk"><div class="gr"><span class="n">ما عنده أعمال حالية في التقارير. اكتب الملاحظة بنفسك</span></div></div>`
+    list = !ws.length ? `<div class="gcard fwk"><div class="gr"><span class="n">لا توجد له أعمال حالية في التقارير. اكتب الملاحظة بنفسك</span></div></div>`
       : `<div class="gcard fwk">${ws.map(w => `<div class="fwh">${esc(w.p.name)}</div>${w.items.map(it => {
           const ln = folLine(it, w.p.name), i = S.fl.push(ln) - 1, on = S.fws.includes(ln), st = folAlert(w.r, it, emp);
           return `<button class="gr ${on ? 'off' : ''}" onclick="folTog(${i})"><span class="n">${esc(it)}<small class="${st[0]}">${esc(st[1])}</small></span><span class="mk ${on ? 'no' : 'ok'}">${I(on ? 'circle-x' : 'circle', 24, 2)}</span></button>`;
         }).join('')}`).join('')}</div>`;
   }
-  return `<div class="blk"><div class="lab">${I('list-checks', 14)}أعمال ${esc(shortName(emp.name))} الحالية — اختر اللي ما سواه</div>${list}
+  return `<div class="blk"><div class="lab">${I('list-checks', 14)}أعمال ${esc(shortName(emp.name))} الحالية — اختر ما لم ينجزه</div>${list}
     <textarea class="fnt" rows="2" placeholder="ملاحظة متابعة الأعمال (اختياري)" oninput="S.fnt=this.value">${esc(S.fnt || '')}</textarea>
-    <div class="sub fwn">${had ? 'متسجلة عليه اليوم: الأعمال اللي تختارها تنضاف لملاحظتها بدون خصم جديد' : 'التقصير مو على عمل محدد؟ اكتب الملاحظة بنفسك'}</div></div>`;
+    <div class="sub fwn">${had ? 'مسجّلة عليه اليوم: الأعمال التي تختارها تُضاف إلى ملاحظتها دون خصم جديد' : 'التقصير ليس على عمل محدد؟ اكتب الملاحظة بنفسك'}</div></div>`;
 }
 function folTog(i) {
   const ln = (S.fl || [])[i]; if (!ln) return;
@@ -2197,8 +2197,8 @@ function save() {
   const err = $('#err');
   err.textContent = '';
   if (!S.emp) return err.textContent = 'اختر الموظف';
-  if (!S.misses.length && !S.star) { toast('تمام، ما عليه تقصير'); return; }
-  if (S.star && !S.starNote.trim()) return err.textContent = 'اكتب وش سوّى عشان الموقف المميز';
+  if (!S.misses.length && !S.star) { toast('لم يُحدَّد أي تقصير'); return; }
+  if (S.star && !S.starNote.trim()) return err.textContent = 'اكتب ما قام به في الموقف المميز';
   if (S.busy) return;
   if (!S.misses.length) return doSave();
   const d = S.data, st = d.settings, e = empById(S.emp), had = API.dayMisses(S.emp, S.date);
@@ -2207,7 +2207,7 @@ function save() {
   const crit = S.misses.map(c => {
     const dup = had.includes(c);
     if (!dup) ded += heavy(c) ? st.trust : st.miss;
-    return esc(c) + (dup ? (c === FOL && fnt ? ' <small>(متسجلة اليوم، ينضاف لها)</small>' : ' <small>(متسجل اليوم، ما يتكرر)</small>') : '');
+    return esc(c) + (dup ? (c === FOL && fnt ? ' <small>(مسجّلة اليوم، يُضاف إليها)</small>' : ' <small>(مسجّل اليوم، لا يتكرر)</small>') : '');
   });
   const row = (l, v, cls) => `<div class="cfv"><span>${l}</span><b class="${cls || ''}">${v}</b></div>`;
   ovOpen(`<label class="shh">تأكيد إصدار المخالفة</label>
@@ -2231,7 +2231,7 @@ async function doSave() {
     S.misses = []; S.star = false; S.starNote = ''; S.note = ''; folReset(); S.dateMode = 'today'; S.date = S.data.today;
     S.busy = false;
     renderAdmin();
-    toast((res.appended ? 'انضاف لمخالفة اليوم عند ' + name : 'انحفظ لـ ' + name) + (res.skipped ? ' (' + res.skipped + ' متسجل اليوم من قبل)' : ''), undoLast);
+    toast((res.appended ? 'أُضيف إلى مخالفة اليوم عند ' + name : 'تم الحفظ لـ ' + name) + (res.skipped ? ' (' + res.skipped + ' مسجّل اليوم مسبقاً)' : ''), undoLast);
   } catch (e) {
     S.busy = false; renderRec(); $('#err').textContent = e;
   }
@@ -2243,7 +2243,7 @@ async function undoLast() {
   try {
     if (S.lastNote) { S.data = await call('apiNoteUndo', BOOT.key, S.lastNote); S.lastNote = null; }
     if (S.lastId) { S.data = await call('apiDelete', BOOT.key, S.lastId); S.lastId = null; }
-    renderAdmin(); toast('انحذف');
+    renderAdmin(); toast('تم الحذف');
   }
   catch (e) { toastErr(e); }
 }
@@ -2256,7 +2256,7 @@ function renderTeam() {
   /* الإصدار 96: كل شي يخص الموظف في الفريق: ملفه، وراتبه وعهدته وإعداداته تنفتح من هنا */
   if (S.ssub) return renderSet();
   const addB = `<button onclick="ssub('add')">${I('plus', 16)}إضافة موظف</button>`;
-  if (!d.employees.length) { $('#view').innerHTML = '<div class="card" style="margin-top:16px">' + emptyHtml('users', 'ما فيه موظفين') + `</div><div class="fxt tord tadd">${addB}<span></span></div>`; return; }
+  if (!d.employees.length) { $('#view').innerHTML = '<div class="card" style="margin-top:16px">' + emptyHtml('users', 'لا يوجد موظفون') + `</div><div class="fxt tord tadd">${addB}<span></span></div>`; return; }
   if (S.attLog) return renderAttLog(S.attLog);
   const e = S.tsub && empById(S.tsub.id);
   if (e && (S.tsub.k === 'sal' || S.tsub.k === 'cu')) return renderFinEmp(finCtx(), e.id, S.tsub.k);
@@ -2267,7 +2267,7 @@ function renderTeam() {
   S.tfile = null;
   const es = d.employees;
   if (S.tord && es.length > 1) {
-    $('#view').innerHTML = `<div class="fxt tord"><span>رتّبهم مثل ما تبي، والترتيب يمشي على التطبيق كله</span><button class="dn" onclick="S.tord=false;renderTeam()">تم</button></div>`
+    $('#view').innerHTML = `<div class="fxt tord"><span>رتّبهم كما تريد، ويُطبَّق الترتيب على التطبيق كله</span><button class="dn" onclick="S.tord=false;renderTeam()">تم</button></div>`
       + '<div class="tbl2 fxl2">' + es.map((x, i) => `<div class="tbr ordr"><span class="ic">${I('user-round', 16)}</span><span class="k">${esc(x.name)}</span><span class="ord"><button ${i === 0 ? 'disabled' : ''} onclick="empMove('${x.id}',-1)" aria-label="فوق">${SV_UP}</button><button ${i === es.length - 1 ? 'disabled' : ''} onclick="empMove('${x.id}',1)" aria-label="تحت">${SV_DN}</button></span></div>`).join('') + '</div>';
     return;
   }
@@ -2275,8 +2275,8 @@ function renderTeam() {
   const unpaid = es.reduce((a, x) => a + x.unpaid.filter(dueU).reduce((b, u) => b + lf(u), 0), 0), nUn = es.filter(x => x.unpaid.some(dueU)).length;
   const withC = es.filter(x => ((c.parts[x.id] || {}).c || 0) > 0), cust = withC.reduce((a, x) => a + c.parts[x.id].c, 0);
   let h = `<div class="fxs two tft">
-      ${nUn ? `<button class="due tap ${S.tdue ? 'on' : ''}" onclick="S.tdue=!S.tdue;S.armed=null;renderTeam()" aria-expanded="${!!S.tdue}"><b>رواتب مستحقة</b>${M(unpaid)}<small>${nUn + ' من ' + es.length + (es.length > 10 ? ' موظفاً' : ' موظفين')}</small><span class="chv">${I(S.tdue ? 'x' : 'chevron-left', 14)}</span></button>` : `<div><b>رواتب مستحقة</b>${M(0)}<small>ما فيه متأخر</small></div>`}
-      <div><b>عهد عند الموظفين</b>${M(cust)}<small>${withC.length ? esc(withC.map(x => shortName(x.name)).join('، ')) : 'ما عند أحد عهدة'}</small></div>
+      ${nUn ? `<button class="due tap ${S.tdue ? 'on' : ''}" onclick="S.tdue=!S.tdue;S.armed=null;renderTeam()" aria-expanded="${!!S.tdue}"><b>رواتب مستحقة</b>${M(unpaid)}<small>${nUn + ' من ' + es.length + (es.length > 10 ? ' موظفاً' : ' موظفين')}</small><span class="chv">${I(S.tdue ? 'x' : 'chevron-left', 14)}</span></button>` : `<div><b>رواتب مستحقة</b>${M(0)}<small>لا يوجد متأخر</small></div>`}
+      <div><b>عهد عند الموظفين</b>${M(cust)}<small>${withC.length ? esc(withC.map(x => shortName(x.name)).join('، ')) : 'لا توجد عهدة لدى أي موظف'}</small></div>
     </div>`;
   if (nUn && S.tdue) {
     const rows = [];
@@ -2312,10 +2312,10 @@ function tbRow(icon, k, v, on) {
 function impHtml(m) { return m.improve ? `<div class="imp">${I('triangle-alert', 14)}<div><b>${esc(m.improve.crit)}:</b> ${esc(m.improve.text)}</div></div>` : ''; }
 function teamAttVal(d, e) {
   const r = (d.attendance || []).find(x => x.emp === e.id && x.date === d.today);
-  if (!r) return isOff(d.today) ? 'إجازة' : nowHM() >= addMin((d.attCfg || {}).start || '07:00', 30) ? '<span class="lt">ما طلع من البيت</span>' : 'ما طلع للحين';
+  if (!r) return isOff(d.today) ? 'إجازة' : nowHM() >= addMin((d.attCfg || {}).start || '07:00', 30) ? '<span class="lt">لم يخرج من البيت</span>' : 'لم يخرج بعد';
   if (r.bad) return '<span class="lt">غير صحيح</span>';
-  if (r.out) return 'خلّص · ' + hrs(r.outMs - r.inMs);
-  if (r.in) return '<span class="g">في الشغل</span> · ' + hrs(Date.now() - r.inMs);
+  if (r.out) return 'أنهى · ' + hrs(r.outMs - r.inMs);
+  if (r.in) return '<span class="g">في العمل</span> · ' + hrs(Date.now() - r.inMs);
   return 'في الطريق';
 }
 /* الإصدار 96: حقائق الموظف في مكان واحد (راتبه، عهدته، واللي ينتظر المدير منه)، تقرأ من نفس بيانات الصفحة */
@@ -2327,24 +2327,24 @@ function empFacts(e) {
   const needs = [];
   if (iv.length) needs.push({t: iv.length === 1 ? 'فاتورة تنتظر اعتمادك' : iv.length === 2 ? 'فاتورتين تنتظر اعتمادك' : iv.length + ' فواتير تنتظر اعتمادك', c: iv.length === 1 ? 'فاتورة تنتظر' : iv.length === 2 ? 'فاتورتين تنتظر' : iv.length + ' فواتير تنتظر', s: 'تعتمدها من المالية', a: iv.reduce((a, x) => a + x.amount, 0), b: 'افتح', on: "go('fin');openFinRv()"});
   late.forEach(u => { const k = 'payq_' + e.id + u.month; needs.push({t: 'راتب ' + u.label, c: 'راتب ' + u.label, s: (u.due < d.today ? 'متأخر من ' : 'مستحق ') + dueL(u.due), a: left(u), b: S.armed === k ? 'تأكيد الصرف' : 'اصرف', arm: S.armed === k, r: 1, on: `payQuick('${e.id}','${u.month}')`}); });
-  if (p.c < 0) needs.push({t: 'عهدته بالسالب', c: 'عهدة بالسالب', s: 'صرف أكثر من اللي معه', a: -p.c, b: 'عطيته', r: 1, on: `askGive('${e.id}')`});
-  if (p.o > 0) needs.push({t: 'له عندك من جيبه', c: 'له من جيبه', s: 'فواتير دفعها من جيبه', a: p.o, b: 'سدّدته', on: `askSdad('${e.id}', ${p.o})`});
+  if (p.c < 0) needs.push({t: 'عهدته بالسالب', c: 'عهدة بالسالب', s: 'صرف أكثر من عهدته', a: -p.c, b: 'سلّمته', r: 1, on: `askGive('${e.id}')`});
+  if (p.o > 0) needs.push({t: 'له لديك من حسابه الخاص', c: 'له من حسابه الخاص', s: 'فواتير دفعها من حسابه الخاص', a: p.o, b: 'سدّدته', on: `askSdad('${e.id}', ${p.o})`});
   return {p, un, late, cur, left, needs, lateSum: Math.round(late.reduce((a, u) => a + left(u), 0) * 100) / 100, leftAll: Math.round(un.reduce((a, u) => a + left(u), 0) * 100) / 100};
 }
 function fmN(n) { return (Math.round(n * 100) / 100).toLocaleString('en-US'); }
 function teamEmp(d, e) {
   const m = e.month, f = empFacts(e);
-  const sal = f.cur ? fmN(f.left(f.cur)) + ' · ' + dueL(f.cur.due) : f.late.length ? 'متأخر ' + fmN(f.lateSum) : e.salary ? 'منصرف' : '';
+  const sal = f.cur ? fmN(f.left(f.cur)) + ' · ' + dueL(f.cur.due) : f.late.length ? 'متأخر ' + fmN(f.lateSum) : e.salary ? 'مصروف' : '';
   const chips = f.needs.map(x => `<span class="badge ${x.r ? 'rd' : 'a'}">${esc(x.c)}${x.a != null ? ' ' + fmN(x.a) : ''}</span>`).join('');
   return `<button class="tfc" onclick="openFile('${e.id}')"><div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span><span data-seen="${e.id}">${seenHtml(e.seen, e.left)}</span></div><span class="cv">${I('chevron-left', 18)}</span></div>
-    <div class="ln">${sal ? `<span>الراتب <b>${sal}</b></span>` : ''}${f.p.c ? `<span>العهدة <b class="${f.p.c < 0 ? 'r' : ''}">${(f.p.c < 0 ? '−' : '') + fmN(Math.abs(f.p.c))}</b></span>` : ''}${!sal && !f.p.c ? '<span>ما عنده شي مفتوح</span>' : ''}</div>${chips ? `<div class="chips">${chips}</div>` : ''}</button>`;
+    <div class="ln">${sal ? `<span>الراتب <b>${sal}</b></span>` : ''}${f.p.c ? `<span>العهدة <b class="${f.p.c < 0 ? 'r' : ''}">${(f.p.c < 0 ? '−' : '') + fmN(Math.abs(f.p.c))}</b></span>` : ''}${!sal && !f.p.c ? '<span>لا يوجد عليه شيء مفتوح</span>' : ''}</div>${chips ? `<div class="chips">${chips}</div>` : ''}</button>`;
 }
 /* الإصدار 96: ملف الموظف: ملخص بنظرة، ثم اللي ينتظر المدير، ثم الأزرار السريعة، ثم الفروع وكل فرع قيمته عليه */
 function renderEmpFile(e) {
   const d = S.data, m = e.month, f = empFacts(e), id = e.id, sal = e.sal || {};
   const tile = (k, v, s, cls) => `<div class="${cls || ''}"><b>${k}</b>${v}<small>${s}</small></div>`;
   const tv = t => `<span class="mn tv">${t}</span>`;
-  const st = f.cur ? [M(f.left(f.cur)), 'يستحق ' + dueL(f.cur.due)] : f.late.length ? [M(f.lateSum), 'متأخر'] : e.salary ? [M(0), 'منصرف'] : [tv('—'), 'ما انحط له راتب'];
+  const st = f.cur ? [M(f.left(f.cur)), 'يستحق ' + dueL(f.cur.due)] : f.late.length ? [M(f.lateSum), 'متأخر'] : e.salary ? [M(0), 'مصروف'] : [tv('—'), 'لم يُحدَّد له راتب'];
   const n = f.needs.length;
   let h = `<button class="back" onclick="S.tfile=null;S.form=null;S.armed=null;renderTeam();toTop()">${I('arrow-right', 17)}الفريق</button><h2>${esc(e.name)}</h2><div class="tfile">
     <div class="tbh"><div class="n"><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span><span data-seen="${e.id}">${seenHtml(e.seen, e.left)}</span></div>
@@ -2356,15 +2356,15 @@ function renderEmpFile(e) {
   else if (fm) h += `<div class="card tff">${formHtml(e, fm)}</div>`;
   /* الإصدار 116: الملف فيه أزرار العهدة بس، وكل ما يخص الراتب (دفعة، خصم، سلفة، شهر سابق) في صفحة الراتب. «راتب مقدم» انشال لأن «دفعة» تغني عنه */
   else h += `<div class="fxbt n2">
-      <button onclick="askGive('${id}')">${I('hand-coins', 18)}عطيته</button>
-      <button onclick="askRet('${id}', ${Math.max(0, f.p.c)})">${I('rotate-ccw', 18)}رجّع لي</button></div>`;
+      <button onclick="askGive('${id}')">${I('hand-coins', 18)}سلّمته</button>
+      <button onclick="askRet('${id}', ${Math.max(0, f.p.c)})">${I('rotate-ccw', 18)}أعاد لي</button></div>`;
   const lv = [m.misses ? m.misses + ' تقصير' : '', m.stars ? m.stars + ' مميز' : ''].filter(Boolean).join(' · ');
   const bd = (t, r) => ` <span class="badge ${r ? 'rd' : 'a'}">${t}</span>`;
-  const salV = f.un.length > 1 ? f.un.length + ' شهور · باقي ' + M(f.leftAll, '', 't') + (f.lateSum ? bd('متأخر ' + fmN(f.lateSum), 1) : '') : f.cur ? M(f.left(f.cur), '', 't') + ' · ' + dueL(f.cur.due) : f.late.length ? M(f.lateSum, '', 't') + bd('متأخر', 1) : e.salary ? 'منصرف' : 'ما انحط له راتب';
-  const cuV = f.p.c < 0 ? M(-f.p.c, '−', 'neg') + bd('بالسالب', 1) : f.p.c > 0 ? 'معه ' + M(f.p.c, '', 't') : 'ما معه عهدة';
+  const salV = f.un.length > 1 ? f.un.length + ' شهور · باقي ' + M(f.leftAll, '', 't') + (f.lateSum ? bd('متأخر ' + fmN(f.lateSum), 1) : '') : f.cur ? M(f.left(f.cur), '', 't') + ' · ' + dueL(f.cur.due) : f.late.length ? M(f.lateSum, '', 't') + bd('متأخر', 1) : e.salary ? 'مصروف' : 'لم يُحدَّد له راتب';
+  const cuV = f.p.c < 0 ? M(-f.p.c, '−', 'neg') + bd('بالسالب', 1) : f.p.c > 0 ? 'معه ' + M(f.p.c, '', 't') : 'لا توجد معه عهدة';
   const setV = (e.salary ? 'راتب ' + fmN(e.salary) : 'بدون راتب') + (m.track ? ' · متابعة فقط' : ' · حافز ' + fmN(e.max || 0));
-  h += `<div class="tbh2">الشغل</div><div class="tbl2">${m.track ? tbRow('history', 'المواقف', lv || 'ما فيه', `tsub('${id}','log')`) : tbRow('sparkles', 'الحافز والمواقف', M(m.bonus, '', 'pos') + (lv ? ` <span class="lv">· ${lv}</span>` : ''), `tsub('${id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${id}')`) : ''}</div>
-    <div class="tbh2">الفلوس</div><div class="tbl2">${tbRow('wallet', 'الراتب', salV, `tsub('${id}','sal')`)}${tbRow('hand-coins', 'العهدة', cuV, `tsub('${id}','cu')`)}</div>
+  h += `<div class="tbh2">العمل</div><div class="tbl2">${m.track ? tbRow('history', 'المواقف', lv || 'لا يوجد', `tsub('${id}','log')`) : tbRow('sparkles', 'الحافز والمواقف', M(m.bonus, '', 'pos') + (lv ? ` <span class="lv">· ${lv}</span>` : ''), `tsub('${id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${id}')`) : ''}</div>
+    <div class="tbh2">المالية</div><div class="tbl2">${tbRow('wallet', 'الراتب', salV, `tsub('${id}','sal')`)}${tbRow('hand-coins', 'العهدة', cuV, `tsub('${id}','cu')`)}</div>
     <div class="tbh2">الملف</div><div class="tbl2">${tbRow('settings', 'إعداداته', setV, `openEmpSet('${id}')`)}</div></div>`;
   $('#view').innerHTML = h;
 }
@@ -2380,11 +2380,11 @@ function fineMonth(e) {
 function seenAgo(ms) {
   const m = Math.floor(ms / 60000), h = Math.floor(m / 60);
   if (m < 1) return 'قبل لحظات';
-  if (m < 60) return 'قبل ' + (m === 1 ? 'دقيقة' : m === 2 ? 'دقيقتين' : m <= 10 ? m + ' دقايق' : m + ' دقيقة');
+  if (m < 60) return 'قبل ' + (m === 1 ? 'دقيقة' : m === 2 ? 'دقيقتين' : m <= 10 ? m + ' دقائق' : m + ' دقيقة');
   return 'قبل ' + (h === 1 ? 'ساعة' : h === 2 ? 'ساعتين' : h <= 10 ? h + ' ساعات' : h + ' ساعة');
 }
 function seenHtml(ms, left) {
-  if (!ms) return '<span class="ls">ما فتح التطبيق بعد</span>';
+  if (!ms) return '<span class="ls">لم يفتح التطبيق بعد</span>';
   const now = Date.now() + (S.seenSkew || 0), off = !!left && left >= ms, last = off ? left : ms;
   if (!off && now - ms < 90e3) return '<span class="ls on">متصل الآن</span>';
   if (now - last < 6 * 3600e3) return `<span class="ls">آخر ظهور ${seenAgo(Math.max(0, now - last))}</span>`;
@@ -2403,9 +2403,9 @@ setInterval(seenPoll, 60000);
 function teamSub(d, e, k) {
   const m = e.month, nm = esc(shortName(e.name));
   let h = `<button class="back" onclick="tsub(null)">${I('arrow-right', 17)}${nm}</button>`;
-  if (k === 'bonus') return h + `<h2>حافز ومواقف ${nm}</h2><div class="tsb">${teamBreak(m)}${impHtml(m)}<div class="tbh2">المواقف</div>${e.recent.length ? '<div class="tents">' + e.recent.map(x => entryHtml(x, true, m.track)).join('') + '</div>' : emptyHtml('history', 'ما فيه مواقف مسجلة')}</div>`;
-  if (k === 'log') return h + `<h2>مواقف ${nm}</h2><div class="tsb">${impHtml(m)}${e.recent.length ? '<div class="tents">' + e.recent.map(x => entryHtml(x, true, m.track)).join('') + '</div>' : emptyHtml('history', 'ما فيه مواقف مسجلة')}</div>`;
-  return h + `<h2>رابط ${nm}</h2><div class="tsb"><div class="tbl2">${tbRow('send', 'أرسله واتساب', '', `waEmp('${e.id}')`)}${tbRow('copy', 'انسخ الرابط', '', `copyEmp('${e.id}')`)}${tbRow('eye', 'شوف صفحته', '', `preview('${e.id}')`)}</div></div>`;
+  if (k === 'bonus') return h + `<h2>حافز ومواقف ${nm}</h2><div class="tsb">${teamBreak(m)}${impHtml(m)}<div class="tbh2">المواقف</div>${e.recent.length ? '<div class="tents">' + e.recent.map(x => entryHtml(x, true, m.track)).join('') + '</div>' : emptyHtml('history', 'لا توجد مواقف مسجلة')}</div>`;
+  if (k === 'log') return h + `<h2>مواقف ${nm}</h2><div class="tsb">${impHtml(m)}${e.recent.length ? '<div class="tents">' + e.recent.map(x => entryHtml(x, true, m.track)).join('') + '</div>' : emptyHtml('history', 'لا توجد مواقف مسجلة')}</div>`;
+  return h + `<h2>رابط ${nm}</h2><div class="tsb"><div class="tbl2">${tbRow('send', 'أرسله واتساب', '', `waEmp('${e.id}')`)}${tbRow('copy', 'انسخ الرابط', '', `copyEmp('${e.id}')`)}${tbRow('eye', 'عرض صفحته', '', `preview('${e.id}')`)}</div></div>`;
 }
 
 function bonusTable(m) {
@@ -2418,18 +2418,18 @@ function bonusTable(m) {
   </table>${floorNote(m)}`;
 }
 /* الإصدار 116: لما التقصير يزيد عن الحافز، الحافز يوقف عند صفر والراتب ما ينخصم منه */
-function floorNote(m) { return !m.track && m.base - m.deduct + m.reward + m.clean < 0 ? `<div class="sub flrn">${I('info', 13)}التقصير أكثر من الحافز، فصار الحافز صفر. الراتب نفسه ما ينخصم منه.</div>` : ''; }
+function floorNote(m) { return !m.track && m.base - m.deduct + m.reward + m.clean < 0 ? `<div class="sub flrn">${I('info', 13)}التقصير أكثر من الحافز، فأصبح الحافز صفراً. ولا يُخصم من الراتب نفسه.</div>` : ''; }
 
 function entryHtml(x, canDelete, noAmt) {
   const del = canDelete ? `<button class="del ${S.armed===x.id?'arm':''}" onclick="armLog('${x.id}')">${S.armed===x.id?'تأكيد الحذف':I('trash-2', 15)}</button>` : '';
   return `<div class="ent"><div class="ico ${x.type==='+'?'s':'m'}">${I(x.type==='+' ? 'star' : 'x', 15, 2.5)}</div>
-    <div class="t"><div>${x.type==='+' ? 'موقف مميز' : x.crits.map(esc).join('، ')}${x.note ? ' — ' + esc(x.note).replace(/\n/g, '<br>') : ''}</div><div class="d">${dmy(x.date)}${noAmt ? '' : x.dup ? '<span> · </span><span>مكرر بنفس اليوم</span>' : x.over ? '<span> · </span><span>فوق حد المكافأة</span>' : ''}${x.type === '-' && x.at && BOOT.page === 'admin' && !S.preview ? '<span> · </span>' + (x.seen ? `<span class="sn ok">اطّلع عليها ${esc(t12(x.seen))}</span>` : '<span class="sn no">ما اطّلع</span>') : ''}</div></div>
+    <div class="t"><div>${x.type==='+' ? 'موقف مميز' : x.crits.map(esc).join('، ')}${x.note ? ' — ' + esc(x.note).replace(/\n/g, '<br>') : ''}</div><div class="d">${dmy(x.date)}${noAmt ? '' : x.dup ? '<span> · </span><span>مكرر بنفس اليوم</span>' : x.over ? '<span> · </span><span>فوق حد المكافأة</span>' : ''}${x.type === '-' && x.at && BOOT.page === 'admin' && !S.preview ? '<span> · </span>' + (x.seen ? `<span class="sn ok">اطّلع عليها ${esc(t12(x.seen))}</span>` : '<span class="sn no">لم يطّلع</span>') : ''}</div></div>
     ${noAmt ? '' : `<div class="p">${M(Math.abs(x.pts), x.pts > 0 ? '+' : x.pts < 0 ? '−' : '')}</div>`}${del}</div>`;
 }
 
 async function armLog(id) {
   if (S.armed !== id) { S.armed = id; rerender(); return; }
-  try { S.data = await call('apiDelete', BOOT.key, id); S.armed = null; rerender(); toast('انحذف'); }
+  try { S.data = await call('apiDelete', BOOT.key, id); S.armed = null; rerender(); toast('تم الحذف'); }
   catch (e) { S.armed = null; rerender(); toastErr(e); }
 }
 
@@ -2484,7 +2484,7 @@ async function addProject(from) {
   try {
     const r = await call('apiProjectAdd', BOOT.key, name);
     S.data = r.data;
-    renderAdmin(); toast('انضاف المشروع');
+    renderAdmin(); toast('تمت إضافة المشروع');
   } catch (e) { err.textContent = e; }
 }
 
@@ -2521,13 +2521,13 @@ function wBadge(x) {
   const me = BOOT.page === 'admin' && !S.preview;
   let b = '';
   if (x.kind === 'inv' && x.paidBy === 'card') b = '<span class="cb">' + (me ? 'بطاقتي' : 'المدير العام') + '</span>';
-  else if (x.kind === 'inv' && x.paidBy === 'own') b = '<span class="ob">' + (me ? 'من جيبه' : 'من جيبي') + '</span>';
+  else if (x.kind === 'inv' && x.paidBy === 'own') b = '<span class="ob">' + (me ? 'من حسابه الخاص' : 'من حسابي الخاص') + '</span>';
   else if (me && x.kind === 'inv' && x.emp && (x.paidBy || 'cash') === 'cash') b = '<span class="gb">من العهدة</span>'; /* الإصدار 95 */
   return b + (x.warrantyUntil ? '<span class="wb">ضمان</span>' : '');
 }
 
 function invSt(x, emp) {
-  if (x.kind === 'give') return ['', x.paidBy === 'own' ? (emp ? 'رجعت لك' : 'سداد') : x.paidBy === 'ret' ? (emp ? 'رجّعته للمدير' : 'رجّع الباقي') : (emp ? 'استلمت عهدة' : 'عهدة')];
+  if (x.kind === 'give') return ['', x.paidBy === 'own' ? (emp ? 'أُعيدت إليك' : 'سداد') : x.paidBy === 'ret' ? (emp ? 'أعدته للمدير' : 'إعادة المتبقي') : (emp ? 'استلمت عهدة' : 'عهدة')];
   if (x.status === 'review') return ['a', emp ? 'تنتظر' : 'تنتظر اعتمادك'];
   if (x.status === 'returned') return ['late', 'مرتجعة'];
   return ['', 'معتمدة'];
@@ -2638,10 +2638,10 @@ function invRowHtml(x, showEmp) {
   const meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', give ? '' : esc(x.pname || 'عام'), esc(invCatL(x)), x.vendor ? esc(x.vendor) : '', dmyt(x.ts)].filter(Boolean).join(' · ');
   return `<div class="ivr ${x.status === 'review' ? 'rv' : ''}">
     <div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? 'g' : ''}">${M(x.amount, give ? '+' : '')}</b>${invEditBtn(x, 'r')}</div>
-    <div class="tm">${meta}${x.status !== 'ok' || give ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}${x.taskDeleted ? ' · <span class="tdel">مهمتها انحذفت</span>' : ''}</div>${invFixTag(x)}
+    <div class="tm">${meta}${x.status !== 'ok' || give ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان حتى ' + dmy(x.warrantyUntil) : ''}${x.taskDeleted ? ' · <span class="tdel">حُذفت مهمتها</span>' : ''}</div>${invFixTag(x)}
     ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px">${esc(x.reason)}</div>` : ''}
     ${invPhotosHtml(x, true)}
-    ${x.status === 'review' ? `<div class="grid2" style="margin-top:8px"><button class="btn2 cu" onclick="invApprove('${x.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askInvReturn('${x.id}')">رجّعها</button></div>` : ''}
+    ${x.status === 'review' ? `<div class="grid2" style="margin-top:8px"><button class="btn2 cu" onclick="invApprove('${x.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askInvReturn('${x.id}')">أعدها</button></div>` : ''}
     <div class="ilinks">${give ? '' : `<button class="lnk dl" onclick="askWarranty('${x.id}')">${x.warrantyUntil ? 'عدّل الضمان' : 'أضف ضمان'}</button><button class="lnk dl" onclick="openInvD('${x.id}')">طريقة الدفع</button>`}<button class="lnk dl ${armDel ? 'arm' : ''}" onclick="invDel('${x.id}')">${armDel ? 'تأكيد الحذف' : 'حذف'}</button></div>
   </div>`;
 }
@@ -2680,7 +2680,7 @@ function renderFin() {
   const rv = c.items.filter(x => x.kind === 'inv' && x.status === 'review');
   const cnt = (n, one, two, many, sing) => n === 1 ? one : n === 2 ? two : n + ' ' + (n > 10 && sing ? sing : many);
   let h = `<div class="fxs one mrow">
-      <div><b>مصاريف ${esc(d.month)}</b>${M(exp)}<small>${okM.length ? cnt(okM.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير', 'فاتورة') : 'ما فيه فواتير'}</small></div>
+      <div><b>مصاريف ${esc(d.month)}</b>${M(exp)}<small>${okM.length ? cnt(okM.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير', 'فاتورة') : 'لا توجد فواتير'}</small></div>
     </div>`;
   if (rv.length) h += `<div class="fxa"><button class="r" onclick="openFinRv()"><span class="dt"></span>${cnt(rv.length, 'فاتورة تنتظر', 'فاتورتين تنتظر', 'فواتير تنتظر')} اعتمادك<em>${M(rv.reduce((a, x) => a + x.amount, 0), '', 't')}${I('chevron-left', 15)}</em></button></div>`;
   /* الإصدار 106: مشتريات بطاقتي، للمطابقة مع كشف البنك */
@@ -2700,11 +2700,11 @@ function renderFin() {
       <select aria-label="الموظف" onchange="S.fx.fe=this.value;S.fx.all=false;renderFin()">${opt('', 'كل الموظفين', fe)}${d.employees.map(e => opt(e.id, esc(shortName(e.name)), fe)).join('')}${all.some(x => !x.emp) ? opt('-', 'أنت', fe) : ''}</select>
       <select aria-label="الحالة" onchange="S.fx.fs=this.value;S.fx.all=false;renderFin()">${opt('', 'كل الحالات', fs)}${opt('review', 'تنتظر اعتمادك', fs)}${opt('ok', 'معتمدة', fs)}${opt('returned', 'مرتجعة' + (nRt ? ' (' + nRt + ')' : ''), fs)}</select></div>`;
     h += `<div class="sub fvn">${L.length ? cnt(L.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير', 'فاتورة') + ' · ' + M(Math.round(L.reduce((a, x) => a + x.amount, 0) * 100) / 100, '', 't') : ''}</div>`;
-    h += L.length ? `<div class="fvl">${invDaysHtml(L, true, false, 12, 'كلها')}</div>` : emptyHtml('receipt', fp || fe || fs ? 'ما فيه فواتير بهذا الفلتر' : 'ما فيه فواتير للحين');
+    h += L.length ? `<div class="fvl">${invDaysHtml(L, true, false, 12, 'كلها')}</div>` : emptyHtml('receipt', fp || fe || fs ? 'لا توجد فواتير بهذا الفلتر' : 'لا توجد فواتير بعد');
   } else {
     const act = (d.projects || []).filter(p => !p.archived);
     if (S.fx.ord && act.length > 1) {
-      h += `<div class="fxt"><span>رتّبها مثل ما تبي، والترتيب يمشي على التطبيق كله</span><button class="dn" onclick="S.fx.ord=false;renderFin()">تم</button></div>`
+      h += `<div class="fxt"><span>رتّبها كما تريد، ويُطبَّق الترتيب على التطبيق كله</span><button class="dn" onclick="S.fx.ord=false;renderFin()">تم</button></div>`
         + '<div class="tbl2 fxl2">' + act.map((p, i) => `<div class="tbr ordr"><span class="ic">${I('folder', 16)}</span><span class="k">${esc(p.name)}</span><span class="ord"><button ${i === 0 ? 'disabled' : ''} onclick="projMove('${p.id}',-1)" aria-label="فوق">${SV_UP}</button><button ${i === act.length - 1 ? 'disabled' : ''} onclick="projMove('${p.id}',1)" aria-label="تحت">${SV_DN}</button></span></div>`).join('') + '</div>';
     } else {
       const used = new Set(c.items.filter(x => x.kind === 'inv').map(x => x.project || ''));
@@ -2741,11 +2741,11 @@ function renderFinCard(c) {
   const sum = L => Math.round(L.reduce((a, x) => a + x.amount, 0) * 100) / 100;
   const ok = inM.filter(x => x.matched), no = inM.filter(x => !x.matched), L = (un ? no : inM).slice().sort((a, b) => a.ts < b.ts ? 1 : -1);
   let h = finBackBtn() + `<div class="fxh"><h2>مشتريات بطاقتي</h2><span>${inM.length || ''}</span></div>
-    <div class="fxs"><div><b>المجموع</b>${M(sum(inM))}</div><div><b>طابقتها</b>${M(sum(ok))}<small>${ok.length} من ${inM.length}</small></div><div><b>الباقي</b>${M(sum(no))}<small>${no.length ? no.length + (no.length > 10 ? ' فاتورة' : no.length > 2 ? ' فواتير' : no.length === 2 ? ' فاتورتين' : ' فاتورة') : 'ما بقى شي'}</small></div></div>
+    <div class="fxs"><div><b>المجموع</b>${M(sum(inM))}</div><div><b>طابقتها</b>${M(sum(ok))}<small>${ok.length} من ${inM.length}</small></div><div><b>الباقي</b>${M(sum(no))}<small>${no.length ? no.length + (no.length > 10 ? ' فاتورة' : no.length > 2 ? ' فواتير' : no.length === 2 ? ' فاتورتين' : ' فاتورة') : 'لم يتبقَّ شيء'}</small></div></div>
     <div class="fvf cdfl"><select aria-label="الشهر" onchange="S.fx.cdm=this.value;renderFin()">${months.map(m => `<option value="${m}" ${cm === m ? 'selected' : ''}>${ymName(m)}</option>`).join('')}<option value="all" ${cm === 'all' ? 'selected' : ''}>كل الشهور</option></select>
-      <div class="segc"><button class="${un ? '' : 'on'}" onclick="S.fx.cdf='';renderFin()">الكل</button><button class="${un ? 'on' : ''}" onclick="S.fx.cdf='un';renderFin()">ما طابقتها</button></div></div>
-    <div class="sub cdn">أشّر على كل عملية لقيتها في كشف البنك.</div>`;
-  if (!L.length) return $('#view').innerHTML = h + emptyHtml(un && inM.length ? 'check-check' : 'credit-card', un && inM.length ? 'طابقت كل مشتريات هالفترة' : 'ما فيه مشتريات بالبطاقة في هالفترة');
+      <div class="segc"><button class="${un ? '' : 'on'}" onclick="S.fx.cdf='';renderFin()">الكل</button><button class="${un ? 'on' : ''}" onclick="S.fx.cdf='un';renderFin()">لم تُطابَق</button></div></div>
+    <div class="sub cdn">ضع علامة على كل عملية وجدتها في كشف البنك.</div>`;
+  if (!L.length) return $('#view').innerHTML = h + emptyHtml(un && inM.length ? 'check-check' : 'credit-card', un && inM.length ? 'تمت مطابقة كل مشتريات هذه الفترة' : 'لا توجد مشتريات بالبطاقة في هذه الفترة');
   const days = [], by = {};
   L.forEach(x => { const k = x.ts.slice(0, 10); if (!by[k]) { by[k] = []; days.push(k); } by[k].push(x); });
   h += '<div class="fvl">' + days.map(k => `<div class="dyh"><b>${esc(invDayLabel(k, d.today))}</b><span>${M(sum(by[k]), '', 't')}</span></div><div class="card fxl dyc cdl">${by[k].map(x => `<div class="cdr ${x.matched ? 'on' : ''}"><button class="cdk" aria-pressed="${!!x.matched}" aria-label="${x.matched ? 'طابقتها، اضغط للتراجع' : 'طابقتها'}" onclick="cardMatch('${x.id}',${!x.matched})">${I(x.matched ? 'circle-check' : 'circle', 24, 2)}</button><button class="cdt" onclick="openInvD('${x.id}')"><b>${esc(x.desc)}</b><span class="tm">${[esc(x.ename || 'أنت'), esc(x.pname || 'عام'), t12(x.ts)].filter(Boolean).join(' · ')}</span></button><span class="cda">${M(x.amount, '', 't')}</span></div>`).join('')}</div>`).join('') + '</div>';
@@ -2771,17 +2771,17 @@ function askProjBudget(id) {
   if (!p) return;
   const spent = S.data.inv.items.filter(x => x.kind === 'inv' && x.status === 'ok' && x.project === id).reduce((a, x) => a + x.amount, 0);
   ovOpen(`<label class="shh">ميزانية «${esc(p.name)}»</label>
-    <div class="sub" style="margin-bottom:10px">المصروف المعتمد للحين ${M(spent, '', 't')}. يوصلك تنبيه عند 80% وعند الميزانية كاملة.</div>
+    <div class="sub" style="margin-bottom:10px">المصروف المعتمد حتى الآن ${M(spent, '', 't')}. يصلك تنبيه عند 80% وعند بلوغ الميزانية كاملة.</div>
     <input id="pbv" class="qtt" inputmode="decimal" placeholder="مبلغ الميزانية بالريال" value="${p.budget || ''}">
     <div class="err" id="pberr"></div>
     <button class="btn" onclick="saveProjBudget('${id}')">${I('check', 18, 2.5)}حفظ</button>
-    ${p.budget ? `<button class="btn2 rd" style="margin-top:8px" onclick="saveProjBudget('${id}',true)">شيل الميزانية</button>` : ''}
+    ${p.budget ? `<button class="btn2 rd" style="margin-top:8px" onclick="saveProjBudget('${id}',true)">إزالة الميزانية</button>` : ''}
     <button class="btn2" style="margin-top:8px" onclick="ovClose()">إلغاء</button>`);
 }
 async function saveProjBudget(id, clear) {
   const n = clear ? 0 : API.parseAmt($('#pbv').value), v = clear ? '' : String(n);
   if (!clear && !(n > 0 && n < 1e9)) return $('#pberr').textContent = 'اكتب مبلغ الميزانية بالأرقام';
-  try { S.data = await call('apiProjBudget', BOOT.key, id, v); ovClose(); renderAdmin(); toast(clear ? 'انشالت الميزانية' : 'انحفظت الميزانية'); }
+  try { S.data = await call('apiProjBudget', BOOT.key, id, v); ovClose(); renderAdmin(); toast(clear ? 'أُزيلت الميزانية' : 'تم حفظ الميزانية'); }
   catch (e) { $('#pberr').textContent = e && e.message || e; }
 }
 /* الإصدار 106: تصدير فواتير المشروع المعتمدة ملف CSV يفتح في Excel و Numbers */
@@ -2789,23 +2789,23 @@ function askExport(k) {
   const list = S.data.inv.items.filter(x => x.kind === 'inv' && x.status === 'ok' && (x.project || '') === k), mk = S.data.today.slice(0, 7);
   const nm = list.filter(x => x.ts.slice(0, 7) === mk).length;
   ovOpen(`<label class="shh">تصدير فواتير «${esc(projName(k))}»</label>
-    <div class="sub" style="margin-bottom:12px">ملف يفتح في Excel و Numbers، فيه الفواتير المعتمدة: التاريخ، الوصف، المبلغ، البند، مين دفع، الموظف. الصور ما تدخل الملف.</div>
+    <div class="sub" style="margin-bottom:12px">ملف يُفتح في Excel وNumbers، يتضمن الفواتير المعتمدة: التاريخ، الوصف، المبلغ، البند، الدافع، الموظف. الصور لا تُضاف إلى الملف.</div>
     <button class="btn" ${nm ? '' : 'disabled'} onclick="doExport('${k}','m')">${I('download', 18)}${esc(ymName(mk))} (${nm})</button>
     <button class="btn2" style="margin-top:8px" onclick="doExport('${k}','a')">${I('download', 16)}كل المشروع (${list.length})</button>
     <button class="btn2" style="margin-top:8px" onclick="ovClose()">إلغاء</button>`);
 }
 function csvCell(v) { let s = String(v == null ? '' : v).replace(/\s*[\r\n]+\s*/g, ' '); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; }
 function exportCsv(k, scope) {
-  const mk = S.data.today.slice(0, 7), PB = {card: 'بطاقتي', own: 'من جيبه', cash: 'العهدة'};
+  const mk = S.data.today.slice(0, 7), PB = {card: 'بطاقتي', own: 'من حسابه الخاص', cash: 'العهدة'};
   const list = S.data.inv.items.filter(x => x.kind === 'inv' && x.status === 'ok' && (x.project || '') === k && (scope !== 'm' || x.ts.slice(0, 7) === mk)).sort((a, b) => a.ts < b.ts ? -1 : 1);
-  const rows = [['التاريخ', 'الوقت', 'الوصف', 'المبلغ', 'البند', 'مين دفع', 'الموظف', 'المحل', 'طابقتها مع البنك']];
+  const rows = [['التاريخ', 'الوقت', 'الوصف', 'المبلغ', 'البند', 'الدافع', 'الموظف', 'المحل', 'طابقتها مع البنك']];
   list.forEach(x => rows.push([x.ts.slice(0, 10), x.ts.slice(11, 16), x.desc, x.amount, catName(x.cat), PB[x.paidBy] || '', x.ename || 'المدير العام', x.vendor || '', x.paidBy === 'card' ? (x.matched ? 'نعم' : 'لا') : '']));
   rows.push(['', '', 'المجموع', Math.round(list.reduce((a, x) => a + x.amount, 0) * 100) / 100, '', '', '', '', '']);
   return {n: list.length, name: 'فواتير-' + projName(k).replace(/[\\/:*?"<>|\s]+/g, '-') + '-' + (scope === 'm' ? mk : 'الكل') + '.csv', text: '\uFEFF' + rows.map(r => r.map((v, i) => i === 3 && typeof v === 'number' ? v : csvCell(v)).join(',')).join('\r\n') + '\r\n'};
 }
 async function doExport(k, scope) {
   const x = exportCsv(k, scope);
-  if (!x.n) return toast('ما فيه فواتير للتصدير');
+  if (!x.n) return toast('لا توجد فواتير للتصدير');
   ovClose();
   const blob = new Blob([x.text], {type: 'text/csv;charset=utf-8'});
   try {
@@ -2814,18 +2814,18 @@ async function doExport(k, scope) {
   } catch (e) { if (e && e.name === 'AbortError') return; }
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = x.name; document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
-  toast('نزل الملف: ' + x.n + (x.n > 10 ? ' فاتورة' : ' فواتير'));
+  toast('تم تنزيل الملف: ' + x.n + (x.n > 10 ? ' فاتورة' : ' فواتير'));
 }
 function renderFinRv(c) {
   const rv = c.items.filter(x => x.kind === 'inv' && x.status === 'review');
   $('#view').innerHTML = finBackBtn() + `<div class="fxh"><h2>تنتظر اعتمادك</h2><span>${rv.length || ''}</span></div>`
-    + (rv.length ? rv.map(x => invRowHtml(x, true)).join('') : emptyHtml('check-check', 'ما فيه فواتير تنتظرك'));
+    + (rv.length ? rv.map(x => invRowHtml(x, true)).join('') : emptyHtml('check-check', 'لا توجد فواتير بانتظارك'));
 }
 
 /* الإصدار 99: الحركات مجمّعة حسب اليوم، فالسطر فيه الوقت بس والتاريخ في عنوان المجموعة */
 function finLedger(c, e) {
   const L = [], mine = c.items.filter(x => x.emp === e.id);
-  mine.filter(x => x.kind === 'give').forEach(x => L.push({ts: x.ts, k: 'c', dc: x.paidBy === 'own' ? 0 : x.paidBy === 'ret' ? -x.amount : x.amount, h: `<div class="str"><span><b style="font-weight:600">${x.paidBy === 'own' ? 'سدّدت له' : x.paidBy === 'ret' ? 'رجّع من العهدة' : 'عطيته عهدة'}</b>${x.desc && !['عهدة', 'سداد', 'رجّع الباقي'].includes(x.desc) ? ' · ' + esc(x.desc) : ''}<div class="tm">${t12(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}%%B%%</div></span>
+  mine.filter(x => x.kind === 'give').forEach(x => L.push({ts: x.ts, k: 'c', dc: x.paidBy === 'own' ? 0 : x.paidBy === 'ret' ? -x.amount : x.amount, h: `<div class="str"><span><b style="font-weight:600">${x.paidBy === 'own' ? 'سدّدت له' : x.paidBy === 'ret' ? 'إعادة من العهدة' : 'سلّمته عهدة'}</b>${x.desc && !['عهدة', 'سداد', 'رجّع الباقي', 'إعادة المتبقي'].includes(x.desc) ? ' · ' + esc(x.desc) : ''}<div class="tm">${t12(x.ts)}${x.method ? ' · ' + esc(x.method) : ''}%%B%%</div></span>
       <span style="display:flex;align-items:center;gap:4px"><b class="iva ${x.paidBy === 'ret' ? 'r' : 'g'}">${M(x.amount, x.paidBy === 'ret' ? '−' : '+', x.paidBy === 'ret' ? 'neg' : 'pos')}</b><button class="ed" onclick="askGiveEdit('${x.id}')" aria-label="تعديل">${I('pencil', 16)}</button></span></div>`}));
   mine.filter(x => x.kind === 'inv' && x.status === 'ok').forEach(x => {
     const fromC = (x.paidBy || 'cash') === 'cash';
@@ -2848,14 +2848,14 @@ function renderFinEmp(c, id, mode) {
   let h = `<button class="back" onclick="tsub(null)">${I('arrow-right', 17)}${esc(shortName(e.name))}</button><div class="fxh"><h2>${sal ? 'راتب' : 'عهدة'} ${esc(shortName(e.name))}</h2><span>${esc(d.month)}</span></div>`;
   /* الإصدار 92: الفواتير المرجّعة اللي ما صحّحها الموظف تبان هنا وتنحذف */
   const rt = mine.filter(x => x.kind === 'inv' && x.status === 'returned');
-  if (!sal && rt.length) h += `<button class="dtog" style="padding:6px 2px 10px;color:var(--red)" onclick="S.fx.rt=!S.fx.rt;S.armed=null;renderFin()" aria-expanded="${!!S.fx.rt}">فواتير مرتجعة عنده (${rt.length}) · ${rt.reduce((a, x) => a + x.amount, 0).toLocaleString('en-US')}${S.fx.rt ? ' · إخفاء' : ''}</button>` + (S.fx.rt ? `<div class="sub" style="margin:0 2px 8px">رجّعتها له وما صحّحها. ما تنحسب في العهدة ولا المصاريف. الحذف نهائي.</div>` + rt.map(x => invRowHtml(x, false)).join('') + '<div style="height:12px"></div>' : '');
+  if (!sal && rt.length) h += `<button class="dtog" style="padding:6px 2px 10px;color:var(--red)" onclick="S.fx.rt=!S.fx.rt;S.armed=null;renderFin()" aria-expanded="${!!S.fx.rt}">فواتير مرتجعة لديه (${rt.length}) · ${rt.reduce((a, x) => a + x.amount, 0).toLocaleString('en-US')}${S.fx.rt ? ' · إخفاء' : ''}</button>` + (S.fx.rt ? `<div class="sub" style="margin:0 2px 8px">أعدتها له ولم يصحّحها. لا تُحتسب في العهدة ولا المصاريف. الحذف نهائي.</div>` + rt.map(x => invRowHtml(x, false)).join('') + '<div style="height:12px"></div>' : '');
   if (sal) h += salCardHtml(e, true);
-  if (sal) h += `<div class="card">${f ? formHtml(e, f) + '<div class="hair"></div>' : salActHtml(e)}${e.unpaid.length ? (pm => e.unpaid.map(u => u.month === pm ? payHtml(e, u) : payRowHtml(e, u)).join(''))((e.unpaid.find(u => S.fx.pm === e.id + u.month) || e.unpaid.find(u => S.armed === 'pay_' + e.id + u.month) || e.unpaid[0]).month) : `<div class="row"><b>الراتب</b><span class="badge">${I('check', 12, 3)} كل الرواتب منصرفة</span></div>`}
+  if (sal) h += `<div class="card">${f ? formHtml(e, f) + '<div class="hair"></div>' : salActHtml(e)}${e.unpaid.length ? (pm => e.unpaid.map(u => u.month === pm ? payHtml(e, u) : payRowHtml(e, u)).join(''))((e.unpaid.find(u => S.fx.pm === e.id + u.month) || e.unpaid.find(u => S.armed === 'pay_' + e.id + u.month) || e.unpaid[0]).month) : `<div class="row"><b>الراتب</b><span class="badge">${I('check', 12, 3)} كل الرواتب مصروفة</span></div>`}
     ${e.loans.length ? `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('hand-coins', 14)}السلف</div>
       ${e.loans.map(l => `<div class="row"><span>سلفة ${sar(l.amount)} <span class="sub">· ${dmy(l.date)}</span></span><span class="sub">باقي ${sar(l.remaining)}</span></div>`).join('')}` : ''}</div>`;
   if (!sal) h += `<div class="card"><div class="fxb">
-      <div><b>${p.c < 0 ? 'صرف أكثر من عهدته' : 'معه عهدة'}</b>${M(Math.abs(p.c), p.c < 0 ? '−' : '', p.c < 0 ? 'neg' : '')}<small>عطيته ${M(p.g || 0, '', 't')}${p.rt ? ' · رجّع ' + M(p.rt, '', 't') : ''} · صرف ${M(p.cash || 0, '', 't')}</small></div>
-      <div><b>له عندك من جيبه</b>${M(p.o || 0, '', p.o > 0 ? 'neg' : '')}${p.o > 0 ? `<button class="lnk" onclick="askSdad('${id}', ${p.o})">${I('check', 14, 2.5)} سدّدته</button>` : ''}</div></div></div>`;
+      <div><b>${p.c < 0 ? 'صرف أكثر من عهدته' : 'معه عهدة'}</b>${M(Math.abs(p.c), p.c < 0 ? '−' : '', p.c < 0 ? 'neg' : '')}<small>سلّمته ${M(p.g || 0, '', 't')}${p.rt ? ' · أعاد ' + M(p.rt, '', 't') : ''} · صرف ${M(p.cash || 0, '', 't')}</small></div>
+      <div><b>له لديك من حسابه الخاص</b>${M(p.o || 0, '', p.o > 0 ? 'neg' : '')}${p.o > 0 ? `<button class="lnk" onclick="askSdad('${id}', ${p.o})">${I('check', 14, 2.5)} سدّدته</button>` : ''}</div></div></div>`;
   /* الإصدار 80: فلتر الحركات (الكل · العهدة · الراتب)، و«العهدة» فيها الرصيد بعد كل حركة */
   const lf = ['c', 's'].includes(S.fx.lf) ? S.fx.lf : 'all', LA = finLedger(c, e);
   let bal = 0, bOk = true;
@@ -2865,7 +2865,7 @@ function renderFinEmp(c, id, mode) {
   const L = LA.filter(x => lf === 'all' || (x.k === lf && (lf !== 'c' || x.dc))).map(x => ({ts: x.ts, h: x.h.replace('%%B%%', lf === 'c' && bOk && x.bal !== undefined ? `<span class="rb">معه بعدها ${M(x.bal, x.bal < 0 ? '−' : '', 't')}</span>` : '')}));
   h += `<div class="sech">${lf === 'c' ? 'حركات العهدة' : lf === 's' ? 'حركات الراتب' : 'كل حركاته'}<span>${L.length}</span></div>`;
   h += `<div class="segc fxlf">${[['all', 'الكل'], ['c', 'العهدة'], ['s', 'الراتب']].map(o => `<button class="${lf === o[0] ? 'on' : ''}" onclick="S.fx.lf='${o[0]}';S.fx.all=false;renderFin()">${o[1]}</button>`).join('')}</div>`
-    + (lf === 'c' && LA.some(x => x.k === 'c' && !x.dc) ? '<div class="sub fxln">فواتير «بطاقتي» و«من جيبه» ما تغيّر العهدة، تطلع في «الكل»</div>' : '');
+    + (lf === 'c' && LA.some(x => x.k === 'c' && !x.dc) ? '<div class="sub fxln">فواتير «بطاقتي» و«من حسابه الخاص» لا تغيّر العهدة، وتظهر في «الكل»</div>' : '');
   if (L.length) {
     const days = [], by = {};
     L.forEach(x => { const k = (x.ts || '').slice(0, 10); if (!by[k]) { by[k] = []; days.push(k); } by[k].push(x); });
@@ -2876,7 +2876,7 @@ function renderFinEmp(c, id, mode) {
       g += `<div class="dyh"><b>${k ? esc(invDayLabel(k, d.today)) : 'تاريخ غير محدد'}</b><span>${D.length === 1 ? 'حركة وحدة' : D.length === 2 ? 'حركتين' : D.length + (D.length > 10 ? ' حركة' : ' حركات')}</span></div><div class="card fxl dyc">${D.map(x => x.h).join('')}</div>`;
     }
     h += `<div class="fvl">${g}${more || (S.fx.all && L.length > 12 && days.length > 1) ? `<button class="dtog dya" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كلها (' + L.length + ')'}</button>` : ''}</div>`;
-  } else h += emptyHtml('wallet', 'ما فيه حركات للحين');
+  } else h += emptyHtml('wallet', 'لا توجد حركات بعد');
   $('#view').innerHTML = h;
 }
 
@@ -2884,13 +2884,13 @@ function renderFinProj(c, k) {
   const d = c.d, list = c.items.filter(x => x.kind === 'inv' && x.status === 'ok' && (x.project || '') === k);
   const m = list.filter(x => x.ts.slice(0, 7) === c.mk).reduce((a, x) => a + x.amount, 0), all = list.reduce((a, x) => a + x.amount, 0);
   let h = finBackBtn() + `<div class="fxh"><h2>${esc(projName(k))}</h2><span>${esc(d.month)}</span></div>
-    <div class="fxs"><div><b>هالشهر</b>${M(m)}</div><div><b>الإجمالي</b>${M(all)}</div><div><b>الفواتير</b><span class="mn">${list.length}</span></div></div>`;
-  if (!list.length) return $('#view').innerHTML = h + emptyHtml('receipt', 'ما فيه فواتير على هالمشروع للحين');
+    <div class="fxs"><div><b>هذا الشهر</b>${M(m)}</div><div><b>الإجمالي</b>${M(all)}</div><div><b>الفواتير</b><span class="mn">${list.length}</span></div></div>`;
+  if (!list.length) return $('#view').innerHTML = h + emptyHtml('receipt', 'لا توجد فواتير على هذا المشروع بعد');
   h += budgetHtml(k, all) + catBreak(list);
   h += `<div class="sech xph">الفواتير<button class="xpb" onclick="askExport('${k}')">${I('download', 15)}تصدير</button></div><div class="fvl">${invDaysHtml(list, true, true, 15, 'كل الفواتير')}</div>`;
   const ws = list.filter(x => x.warrantyUntil).sort((a, b) => a.warrantyUntil < b.warrantyUntil ? -1 : 1);
   if (ws.length) {
-    const wrow = x => { const w = wLeft(x.warrantyUntil, d.today); return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b><div class="tm">${esc(x.ename || 'أنت')} · ${dmyt(x.ts)} · لين ${dmy(x.warrantyUntil)}</div></span><span class="wl ${w[0]}">${w[1]}</span></div></button>`; };
+    const wrow = x => { const w = wLeft(x.warrantyUntil, d.today); return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b><div class="tm">${esc(x.ename || 'أنت')} · ${dmyt(x.ts)} · حتى ${dmy(x.warrantyUntil)}</div></span><span class="wl ${w[0]}">${w[1]}</span></div></button>`; };
     h += `<div class="sech">الضمانات<span>${ws.filter(x => x.warrantyUntil >= d.today).length}</span></div><div class="card" style="margin-top:6px;padding-top:2px;padding-bottom:2px">${ws.map(wrow).join('')}</div>`;
   }
   $('#view').innerHTML = h;
@@ -2899,11 +2899,11 @@ function renderFinProj(c, k) {
 /* الإصدار 116: فاتورة «راتب موظف» في التفاصيل: لمين، وكم باقي له، وهل انحسبت */
 function salInvNote(x) {
   const e = empById(x.salEmp), nm = salName(x.salEmp) || 'موظف محذوف', left = e && e.sal ? e.sal.left : null;
-  return `<div class="note info" style="margin-top:10px">${I('wallet', 16)}<div><b>راتب ${esc(nm)}</b><br>${x.status === 'ok' ? 'انحسبت دفعة من راتبه، وتشوفها في صفحة راتبه.' : 'لما تعتمدها تنحسب دفعة من راتبه' + (left != null ? '، والباقي له الحين ' + M(left, '', 't') : '') + '.'}</div></div>`;
+  return `<div class="note info" style="margin-top:10px">${I('wallet', 16)}<div><b>راتب ${esc(nm)}</b><br>${x.status === 'ok' ? 'احتُسبت دفعة من راتبه، وتظهر في صفحة راتبه.' : 'عند اعتمادها تُحتسب دفعة من راتبه' + (left != null ? '، والمتبقي له الآن ' + M(left, '', 't') : '') + '.'}</div></div>`;
 }
 async function invApprove(id) {
   const x = (((S.data || {}).inv || {}).items || []).find(v => v.id === id), sal = x && x.cat === 'sal' && x.salEmp ? salName(x.salEmp) : '';
-  try { S.data = await call('apiInvApprove', BOOT.key, id); renderAdmin(); toast(sal ? 'تم الاعتماد وانحسبت دفعة من راتب ' + sal : 'تم الاعتماد'); }
+  try { S.data = await call('apiInvApprove', BOOT.key, id); renderAdmin(); toast(sal ? 'تم الاعتماد واحتُسبت دفعة من راتب ' + sal : 'تم الاعتماد'); }
   catch (e) { toastErr(e); }
 }
 /* الإصدار 97: تصحيح مبلغ فاتورة معتمدة من المدير، ويبقى عليها «عدّله المدير العام» مع المبلغ القديم */
@@ -2913,7 +2913,7 @@ function askInvFix(id) {
   ovOpen(`<label class="shh" for="ifx">تصحيح مبلغ الفاتورة</label>
     <div class="sub" style="margin:-6px 0 10px">${esc(x.desc)} · المبلغ الحالي ${M(x.amount, '', 't')}</div>
     <input id="ifx" class="qtt" inputmode="decimal" value="${x.amount}" oninput="amtPv(this.value,'apv_ifx')" onkeydown="if(event.key==='Enter')doInvFix('${id}')">${amtPvHtml(x.amount, 'apv_ifx')}
-    <div class="sub" style="margin:8px 0 0">يطلع عليها «عدّله المدير العام» مع المبلغ القديم${x.emp ? '، ويوصل الموظف إشعار' : ''}. العهدة والمصاريف تتغير بالفرق بس.</div>
+    <div class="sub" style="margin:8px 0 0">يظهر عليها «عدّله المدير العام» مع المبلغ القديم${x.emp ? '، ويصل الموظف إشعار' : ''}. تتغير العهدة والمصاريف بمقدار الفرق فقط.</div>
     <div class="err" id="ifxerr"></div>
     <div class="g21"><button class="btn2 cu" onclick="doInvFix('${id}')">${I('check', 16, 2.5)}حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
   setTimeout(() => { const i = $('#ifx'); if (i) { i.focus(); i.select && i.select(); } }, 80);
@@ -2926,22 +2926,22 @@ async function doInvFix(id) {
   catch (e) { if (un) un(); const x = $('#ifxerr'); if (x) x.textContent = e; else toastErr(e); }
 }
 function askInvReturn(id) {
-  ovOpen(`<label class="shh" for="ir">وش الغلط في الفاتورة؟</label>
+  ovOpen(`<label class="shh" for="ir">ما الخطأ في الفاتورة؟</label>
     <input id="ir" placeholder="اكتب سبب الإرجاع" onkeydown="if(event.key==='Enter')doInvReturn('${id}')">
     <div class="err" id="irerr"></div>
-    <div class="g21"><button class="btn2 arm" onclick="doInvReturn('${id}')">رجّعها له</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
+    <div class="g21"><button class="btn2 arm" onclick="doInvReturn('${id}')">أعدها له</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
   setTimeout(() => { const i = $('#ir'); if (i) i.focus(); }, 80);
 }
 async function doInvReturn(id) {
   const r = $('#ir').value.trim();
   if (!r) { $('#irerr').textContent = 'اكتب السبب'; return; }
   const un = lockBtn();
-  try { S.data = await call('apiInvReturn', BOOT.key, id, r); ovClose(); renderAdmin(); toast('رجعت له'); }
+  try { S.data = await call('apiInvReturn', BOOT.key, id, r); ovClose(); renderAdmin(); toast('أُعيدت إليه'); }
   catch (e) { un(); $('#irerr').textContent = e; }
 }
 async function invDel(id) {
   if (S.armed !== 'inv_' + id) { S.armed = 'inv_' + id; renderInv(); return; }
-  try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذفت', () => delRestore(0, id)); }
+  try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('تم الحذف', () => delRestore(0, id)); }
   catch (e) { S.armed = null; renderInv(); toastErr(e); }
 }
 function invDayLabel(dt, today) {
@@ -2950,7 +2950,7 @@ function invDayLabel(dt, today) {
 }
 function invDayRow(x, showEmp, noProj) {
   const st = invSt(x, false), meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', noProj ? '' : esc(x.pname || 'عام'), esc(invCatL(x)), x.vendor ? esc(x.vendor) : '', t12(x.ts)].filter(Boolean).join(' · ');
-  return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${meta}${x.status !== 'ok' ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}${x.taskDeleted ? ' · <span class="tdel">مهمتها انحذفت</span>' : ''}${(x.photos || []).length ? `<span class="ic" aria-label="فيها صورة">${I('image', 13)}</span>` : ''}</div>${invFixTag(x)}${x.status === 'returned' && x.reason ? `<div class="tm rsn">${esc(x.reason)}</div>` : ''}</span><b class="iva">${M(x.amount)} ‹</b></div></button>${x.status === 'review' ? `<div class="rvb"><button class="btn2 cu" onclick="invApprove('${x.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askInvReturn('${x.id}')">رجّعها</button></div>` : ''}`;
+  return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${meta}${x.status !== 'ok' ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان حتى ' + dmy(x.warrantyUntil) : ''}${x.taskDeleted ? ' · <span class="tdel">حُذفت مهمتها</span>' : ''}${(x.photos || []).length ? `<span class="ic" aria-label="فيها صورة">${I('image', 13)}</span>` : ''}</div>${invFixTag(x)}${x.status === 'returned' && x.reason ? `<div class="tm rsn">${esc(x.reason)}</div>` : ''}</span><b class="iva">${M(x.amount)} ‹</b></div></button>${x.status === 'review' ? `<div class="rvb"><button class="btn2 cu" onclick="invApprove('${x.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askInvReturn('${x.id}')">أعدها</button></div>` : ''}`;
 }
 function invDaysHtml(list, showEmp, noProj, lim, allLabel) {
   const d = S.data, L = list.slice().sort((a, b) => a.ts < b.ts ? 1 : a.ts > b.ts ? -1 : 0), days = [], by = {};
@@ -2978,20 +2978,20 @@ function chipOn(b) { [].forEach.call(b.parentNode.children, x => { const on = x 
 /* الإصدار 112: سطر «بترسل» فوق زر الإرسال في فاتورة الموظف */
 function ivSumHtml() {
   const f = S.inv || {}, n = API.parseAmt(f.amount), ps = ((S.empData || {}).projects) || [], p = ps.find(x => x.id === f.project);
-  if (!(n > 0)) return '<span>اكتب المبلغ عشان تقدر ترسل</span>';
-  return `<span>بترسل ${n.toLocaleString('en-US', {maximumFractionDigits: 2})} ريال</span>${f.cat === 'sal' && f.salEmp && salName(f.salEmp) ? ` · <span>راتب ${esc(salName(f.salEmp))}</span>` : ''} · <span>${esc(p ? p.name : 'بدون مشروع')}</span> · <span>${{own: 'من جيبك', card: 'دفعها المدير العام'}[f.paidBy] || 'من العهدة'}</span>`;
+  if (!(n > 0)) return '<span>اكتب المبلغ لتتمكن من الإرسال</span>';
+  return `<span>سترسل ${n.toLocaleString('en-US', {maximumFractionDigits: 2})} ريال</span>${f.cat === 'sal' && f.salEmp && salName(f.salEmp) ? ` · <span>راتب ${esc(salName(f.salEmp))}</span>` : ''} · <span>${esc(p ? p.name : 'بدون مشروع')}</span> · <span>${{own: 'من حسابك الخاص', card: 'دفعها المدير العام'}[f.paidBy] || 'من العهدة'}</span>`;
 }
 function salPickHtml(f) {
   const tm = ((S.empData || {}).team) || [];
-  return `<div class="sub" style="margin:4px 0 -2px">راتب مين؟</div><div class="segc wr isal" role="group" aria-label="راتب مين؟">${tm.map(t => `<button class="${f.salEmp === t.id ? 'on' : ''}" aria-pressed="${f.salEmp === t.id}" onclick="S.inv.salEmp='${t.id}';chipOn(this);ivSum()">${esc(shortName(t.name))}</button>`).join('')}</div>
-    <div class="note info" style="margin:6px 0 0">${I('info', 16)}<div>بعد ما يعتمدها المدير العام تنحسب دفعة من راتبه</div></div>`;
+  return `<div class="sub" style="margin:4px 0 -2px">راتب أي موظف؟</div><div class="segc wr isal" role="group" aria-label="راتب أي موظف؟">${tm.map(t => `<button class="${f.salEmp === t.id ? 'on' : ''}" aria-pressed="${f.salEmp === t.id}" onclick="S.inv.salEmp='${t.id}';chipOn(this);ivSum()">${esc(shortName(t.name))}</button>`).join('')}</div>
+    <div class="note info" style="margin:6px 0 0">${I('info', 16)}<div>بعد اعتماد المدير العام تُحتسب دفعة من راتبه</div></div>`;
 }
 function ivSum() { const el = document.getElementById('ivsum'); if (!el) return; el.innerHTML = ivSumHtml(); el.classList.toggle('bad', !(API.parseAmt((S.inv || {}).amount) > 0)); }
 function catPick(cur, on, lab, sal) {
   return `<div class="sub" style="margin:4px 0 -2px">${lab || 'البند (اختياري)'}</div><div class="segc wr icat">${(sal ? INV_CATS.concat([SAL_CAT]) : INV_CATS).map(o => `<button class="${cur === o[0] ? 'on' : ''}" aria-pressed="${cur === o[0]}" onclick="${on(cur === o[0] ? '' : o[0])}">${o[1]}</button>`).join('')}</div>`;
 }
 async function setInvCat(id, c) {
-  try { S.data = await call('apiInvCat', BOOT.key, id, c); renderAdmin(); openInvD(id); toast(c ? 'البند: ' + catName(c) : 'انشال البند'); }
+  try { S.data = await call('apiInvCat', BOOT.key, id, c); renderAdmin(); openInvD(id); toast(c ? 'البند: ' + catName(c) : 'أُزيل البند'); }
   catch (e) { toastErr(e); }
 }
 function catBreak(list) {
@@ -3015,10 +3015,10 @@ function askInvEdit(id, from) {
     ${x.task ? `<select aria-label="المشروع" disabled>${ps.map(p => `<option value="${p.id}" ${f.project === p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>` : projPick((x.project ? [] : [{id: '', name: 'بدون مشروع'}]).concat(ps), f.project, 'S.ie')}
     ${x.task ? '<div class="sub" style="margin-top:-4px">فاتورة مهمة، مشروعها يتغير من المهمة.</div>' : ''}
     ${catPick(f.cat || '', v => `S.ie.cat='${v}';askInvEdit('${id}')`)}
-    ${x.emp ? `<div class="sub" style="margin:6px 0 4px">دفعها من</div><div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبه'], ['card', 'أنا']].map(o => `<button class="${f.paidBy === o[0] ? 'on' : ''}" onclick="S.ie.paidBy='${o[0]}';askInvEdit('${id}')">${o[1]}</button>`).join('')}</div>` : ''}
-    <div class="sub" style="margin:6px 0 4px">الضمان لين (اختياري)</div>
-    <div class="iewr"><input type="date" aria-label="الضمان لين" value="${esc(f.warranty)}" onchange="S.ie.warranty=this.value">${f.warranty ? `<button class="btn2" onclick="S.ie.warranty='';askInvEdit('${id}')">بدون ضمان</button>` : ''}</div>
-    ${e ? `<div class="sub" style="margin-top:8px">يوصل ${esc(shortName(e.name))} إشعار باللي تغيّر.</div>` : ''}
+    ${x.emp ? `<div class="sub" style="margin:6px 0 4px">دفعها من</div><div class="segc">${[['cash', 'العهدة'], ['own', 'من حسابه الخاص'], ['card', 'أنا']].map(o => `<button class="${f.paidBy === o[0] ? 'on' : ''}" onclick="S.ie.paidBy='${o[0]}';askInvEdit('${id}')">${o[1]}</button>`).join('')}</div>` : ''}
+    <div class="sub" style="margin:6px 0 4px">الضمان حتى (اختياري)</div>
+    <div class="iewr"><input type="date" aria-label="الضمان حتى" value="${esc(f.warranty)}" onchange="S.ie.warranty=this.value">${f.warranty ? `<button class="btn2" onclick="S.ie.warranty='';askInvEdit('${id}')">بدون ضمان</button>` : ''}</div>
+    ${e ? `<div class="sub" style="margin-top:8px">يصل ${esc(shortName(e.name))} إشعار بما تغيّر.</div>` : ''}
     <div class="err" id="ieerr"></div>
     <div class="g21"><button class="btn2 cu" id="iebtn" onclick="doInvEdit()">حفظ التعديل</button><button class="btn2" onclick="invEditBack()">إلغاء</button></div>`);
 }
@@ -3029,16 +3029,16 @@ async function doInvEdit() {
   const x = S.data.inv.items.find(v => v.id === f.id) || {};
   const amt = API.parseAmt(f.amount);
   if (!(amt > 0)) return err('اكتب المبلغ');
-  if (!String(f.desc || '').trim()) return err('اكتب وش انشرى');
+  if (!String(f.desc || '').trim()) return err('اكتب وصف المشتريات');
   if (x.project && !f.project) return err('اختر المشروع');
-  if (amt === x.amount && f.desc.trim() === (x.desc || '') && f.project === (x.project || '') && f.vendor.trim() === (x.vendor || '') && f.cat === (x.cat || '') && (!x.emp || f.paidBy === (x.paidBy || 'cash')) && f.warranty === (x.warrantyUntil || '')) return err('ما تغيّر شي');
+  if (amt === x.amount && f.desc.trim() === (x.desc || '') && f.project === (x.project || '') && f.vendor.trim() === (x.vendor || '') && f.cat === (x.cat || '') && (!x.emp || f.paidBy === (x.paidBy || 'cash')) && f.warranty === (x.warrantyUntil || '')) return err('لم يتغيّر شيء');
   if (b && b.disabled) return;
   if (b) { b.disabled = true; b.textContent = 'جاري الحفظ…'; }
   try {
     S.data = await call('apiInvUpd', BOOT.key, f.id, {amount: f.amount, desc: f.desc, project: f.project, vendor: f.vendor, cat: f.cat, paidBy: f.paidBy, warranty: f.warranty});
     S.ie = null; ovClose(); renderAdmin();
     if (f.from === 'd') openInvD(f.id);
-    toast('انحفظ التعديل');
+    toast('تم حفظ التعديل');
   } catch (e) { err(e && e.message || e); if (b) { b.disabled = false; b.textContent = 'حفظ التعديل'; } }
 }
 function openInvD(id) {
@@ -3048,11 +3048,11 @@ function openInvD(id) {
   S.armed = null;
   ovOpen(`<div class="ivd${invCanEdit(x) ? ' wed' : ''}">${invEditBtn(x, 'd')}<h3>${esc(x.desc)}</h3><div class="amt">${M(x.amount, '', 'big')}</div>${invFixTag(x)}
     <div class="sub">${esc(e ? e.name : 'أنت')} · ${esc(x.pname || 'عام')}${x.vendor ? ' · ' + esc(x.vendor) : ''} · ${dmyt(x.ts)}</div>
-    ${x.warrantyUntil ? `<div class="sub" style="margin-top:4px">ضمان لين ${dmy(x.warrantyUntil)} · ${wLeft(x.warrantyUntil, d.today)[1]}</div>` : ''}
+    ${x.warrantyUntil ? `<div class="sub" style="margin-top:4px">ضمان حتى ${dmy(x.warrantyUntil)} · ${wLeft(x.warrantyUntil, d.today)[1]}</div>` : ''}
     ${x.taskDeleted ? `<div class="note info" style="margin-top:8px">${I('info', 16)}<div>كانت فاتورة مهمة «${esc(x.desc)}»، والمهمة حُذفت. الفاتورة وسجلّها باقيان.</div></div>` : ''}
-    ${x.status === 'review' && x.kind === 'inv' ? `<div class="grid2" style="margin-top:10px"><button class="btn2 cu" onclick="ovClose();invApprove('${id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="ovClose();askInvReturn('${id}')">رجّعها</button></div>` : ''}
+    ${x.status === 'review' && x.kind === 'inv' ? `<div class="grid2" style="margin-top:10px"><button class="btn2 cu" onclick="ovClose();invApprove('${id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="ovClose();askInvReturn('${id}')">أعدها</button></div>` : ''}
     <div class="pgrid" id="ivdph">${x.photos.map(f => `<div class="pph" data-f="${esc(f)}">جاري التحميل…</div>`).join('')}</div>
-    ${x.emp ? `<div class="sub" style="margin:6px 0 4px">دفعها من</div><div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبه'], ['card', 'أنا']].map(o => `<button class="${(x.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="${(x.paidBy || 'cash') === o[0] ? '' : `setPaidBy('${id}','${o[0]}',true)`}">${o[1]}</button>`).join('')}</div>` : '<div class="sub" style="margin:6px 0">دفعتها أنت</div>'}
+    ${x.emp ? `<div class="sub" style="margin:6px 0 4px">دفعها من</div><div class="segc">${[['cash', 'العهدة'], ['own', 'من حسابه الخاص'], ['card', 'أنا']].map(o => `<button class="${(x.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="${(x.paidBy || 'cash') === o[0] ? '' : `setPaidBy('${id}','${o[0]}',true)`}">${o[1]}</button>`).join('')}</div>` : '<div class="sub" style="margin:6px 0">دفعتها أنت</div>'}
     ${x.kind === 'inv' && x.cat === 'sal' && x.salEmp ? salInvNote(x) : x.kind === 'inv' ? catPick(x.cat || '', v => `setInvCat('${id}','${v}')`, 'البند') : ''}
     ${x.status === 'ok' && x.kind === 'inv' ? '<div class="g2b">' : ''}${x.status === 'ok' && x.kind === 'inv' ? `<button class="btn2" onclick="askInvFix('${id}')">${I('pencil', 15)}تصحيح المبلغ</button>` : ''}
     <button class="btn2" onclick="askWarranty('${id}')">${x.warrantyUntil ? 'عدّل الضمان' : 'أضف ضمان'}</button>${x.status === 'ok' && x.kind === 'inv' ? '</div>' : ''}
@@ -3072,29 +3072,29 @@ const DEL_FIN = {pay: 'صرف راتب', part: 'دفعة راتب', adv: 'سلف
 function delAt(s) { s = String(s || ''); return s ? s.slice(8, 10) + '/' + s.slice(5, 7) + ' ' + s.slice(11, 16) : ''; }
 function delRow(z) {
   if (z.tbl === 'proj_ideas') {
-    const act = z.back ? '<span class="gone">رجّعتها</span>' : `<button class="rb" onclick="krUndel('${esc(z.rid)}')">استرجاع</button>`;
-    return `<div class="row delr"><div class="tx"><b>فكرة: ${esc(z.desc)}</b><small>${esc(['الكراسة', z.project, 'انحذفت ' + delAt(z.at)].filter(Boolean).join(' · '))}</small></div>${act}</div>`;
+    const act = z.back ? '<span class="gone">أعدتها</span>' : `<button class="rb" onclick="krUndel('${esc(z.rid)}')">استرجاع</button>`;
+    return `<div class="row delr"><div class="tx"><b>فكرة: ${esc(z.desc)}</b><small>${esc(['الكراسة', z.project, 'حُذفت ' + delAt(z.at)].filter(Boolean).join(' · '))}</small></div>${act}</div>`;
   }
   const inv = z.tbl === 'invoices';
   const t = inv ? (z.kind === 'give' ? 'عهدة' + (z.desc ? ' · ' + z.desc : '') : (z.desc || 'فاتورة')) : (DEL_FIN[z.kind] || 'حركة راتب') + (z.month ? ' ' + monthLbl(z.month).split(' ')[0] : '');
   const st = inv && z.kind !== 'give' ? (z.status === 'ok' ? 'كانت معتمدة' : z.status === 'review' ? 'كانت تنتظر' : 'كانت مرتجعة') : '';
-  const meta = [z.emp || (inv ? 'فاتورتك' : ''), z.project, 'انحذفت ' + delAt(z.at), st].filter(Boolean).join(' · ');
-  const act = !inv ? '<span class="gone">للسجل</span>' : z.back ? '<span class="gone">رجّعتها</span>' : `<button class="rb" onclick="delRestore(${Number(z.id)})">استرجاع</button>`;
+  const meta = [z.emp || (inv ? 'فاتورتك' : ''), z.project, 'حُذفت ' + delAt(z.at), st].filter(Boolean).join(' · ');
+  const act = !inv ? '<span class="gone">للسجل</span>' : z.back ? '<span class="gone">أعدتها</span>' : `<button class="rb" onclick="delRestore(${Number(z.id)})">استرجاع</button>`;
   return `<div class="row delr"><div class="tx"><b>${esc(t)} · ${fmN(z.amount)} ر.س</b><small>${esc(meta)}</small></div>${act}</div>`;
 }
 function delPageHtml() {
   const ds = S.data.deleted || [];
-  return `<div class="card"><div class="sub" style="margin:0 0 8px">أي فاتورة أو عهدة أو حركة راتب أو فكرة من الكراسة تنحذف، تنحفظ هنا. الفاتورة والعهدة ترجعها بنفس حالتها وصورها، والفكرة ترجع لكراستها، وحركات الراتب للسجل بس.</div>
-    ${ds.length ? ds.map(delRow).join('') : '<div class="sub">ما فيه شي محذوف.</div>'}</div>`;
+  return `<div class="card"><div class="sub" style="margin:0 0 8px">تُحفظ هنا أي فاتورة أو عهدة أو حركة راتب أو فكرة من الكراسة عند حذفها. تُستعاد الفاتورة والعهدة بحالتها وصورها، والفكرة إلى كراستها، وحركات الراتب للسجل فقط.</div>
+    ${ds.length ? ds.map(delRow).join('') : '<div class="sub">لا توجد محذوفات.</div>'}</div>`;
 }
 async function delRestore(id, inv) {
-  try { S.data = await call('apiDelRestore', BOOT.key, id ? {id: id} : {inv: inv}); renderAdmin(); toast('رجعت'); }
+  try { S.data = await call('apiDelRestore', BOOT.key, id ? {id: id} : {inv: inv}); renderAdmin(); toast('أُعيدت'); }
   catch (e) { toastErr(e); }
 }
 async function delInvD(id) {
   const b = $('#ivddel');
   if (S.armed !== 'ivd_' + id) { S.armed = 'ivd_' + id; if (b) { b.textContent = 'متأكد؟ اضغط مرة ثانية للحذف'; b.classList.add('arm'); } return; }
-  try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; ovClose(); renderAdmin(); toast('انحذفت', () => delRestore(0, id)); }
+  try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; ovClose(); renderAdmin(); toast('تم الحذف', () => delRestore(0, id)); }
   catch (e) { S.armed = null; toastErr(e); }
 }
 function giveForm(title, x) {
@@ -3112,13 +3112,13 @@ function askGive(empId) {
 }
 async function doGive(empId) {
   const un = lockBtn();
-  try { S.data = await call('apiInvGive', BOOT.key, empId, $('#ga').value, $('#gn').value, S.gm); ovClose(); renderAdmin(); toast('انحفظ'); }
+  try { S.data = await call('apiInvGive', BOOT.key, empId, $('#ga').value, $('#gn').value, S.gm); ovClose(); renderAdmin(); toast('تم الحفظ'); }
   catch (e) { un(); $('#gerr').textContent = e; }
 }
 function askRet(empId, amt) {
   const e = S.data.employees.find(x => x.id === empId);
   S.gm = S.gm || 'تحويل';
-  ovOpen(`<label class="shh" for="ga">كم رجّع لك ${esc(e ? e.name : '')} من العهدة؟</label>
+  ovOpen(`<label class="shh" for="ga">كم أعاد لك ${esc(e ? e.name : '')} من العهدة؟</label>
     <input id="ga" class="qtt" inputmode="decimal" value="${amt > 0 ? esc(amt) : ''}" placeholder="المبلغ" oninput="amtPv(this.value,'apv_ga')">${amtPvHtml(amt > 0 ? amt : '', 'apv_ga')}
     <div class="segc" id="gmseg" style="margin:10px 0">${['تحويل', 'كاش'].map(m => `<button class="${S.gm === m ? 'on' : ''}" onclick="S.gm='${m}';document.querySelectorAll('#gmseg button').forEach(b=>b.classList.toggle('on',b.textContent==='${m}'))">${m}</button>`).join('')}</div>
     <input id="gn" placeholder="ملاحظة (اختياري)">
@@ -3127,7 +3127,7 @@ function askRet(empId, amt) {
 }
 async function doRet(empId) {
   const un = lockBtn();
-  try { S.data = await call('apiInvGive', BOOT.key, empId, $('#ga').value, $('#gn').value, S.gm, false, true); ovClose(); renderAdmin(); toast('تسجّل اللي رجّعه'); }
+  try { S.data = await call('apiInvGive', BOOT.key, empId, $('#ga').value, $('#gn').value, S.gm, false, true); ovClose(); renderAdmin(); toast('سُجّل المبلغ المُعاد'); }
   catch (e) { un(); $('#gerr').textContent = e; }
 }
 function askInvAdd() {
@@ -3140,14 +3140,14 @@ function askInvAdd() {
     <input placeholder="وصف المشتريات" value="${esc(f.desc)}" oninput="S.ai.desc=this.value">
     ${projPick(ps, f.project, 'S.ai')}
     ${catPick(f.cat || '', v => `S.ai.cat='${v}';askInvAdd()`)}
-    <div class="sub" style="margin:6px 0 4px">مين دفع؟</div>
+    <div class="sub" style="margin:6px 0 4px">من الدافع؟</div>
     <div class="segc wr">${[['', 'أنا']].concat(d.employees.map(e => [e.id, 'عهدة ' + shortName(e.name)])).map(o => `<button class="${f.emp === o[0] ? 'on' : ''}" onclick="S.ai.emp='${o[0]}';askInvAdd()">${esc(o[1])}</button>`).join('')}</div>
     <label class="tgl"><span>عليها ضمان؟</span><input type="checkbox" ${f.wOn ? 'checked' : ''} onchange="S.ai.wOn=this.checked;if(this.checked&&!S.ai.w)S.ai.w=12;askInvAdd()"></label>
     ${f.wOn ? `<div class="wchips">${[[6, '6 أشهر'], [12, 'سنة'], [24, 'سنتين']].map(c => `<button class="${!f.wc && f.w === c[0] ? 'on' : ''}" onclick="S.ai.w=${c[0]};S.ai.wc=false;askInvAdd()">${c[1]}</button>`).join('')}<button class="${f.wc ? 'on' : ''}" onclick="S.ai.wc=true;askInvAdd()">غيره</button></div>
       ${f.wc ? `<input inputmode="numeric" placeholder="كم شهر؟" value="${f.w || ''}" oninput="S.ai.w=Number(String(this.value).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)))||0">` : ''}` : ''}
     <div class="shots">${f.shots.map((s, i) => shotTile(s, `S.ai.shots.splice(${i},1);askInvAdd()`)).join('')}
     ${f.shots.length < 3 ? `<label class="madd">${I('paperclip', 20)}إرفاق فاتورة (اختياري)<input type="file" accept="${ACC_INV}" multiple style="display:none" onchange="pickAi(this)"></label>` : ''}</div>
-    <div class="sub">تنحفظ معتمدة على طول${f.emp ? '، وتنخصم من عهدته' : ''}.</div>
+    <div class="sub">تُحفظ معتمدة مباشرة${f.emp ? '، وتُخصم من عهدته' : ''}.</div>
     <div class="err" id="aierr"></div>
     <div class="g21"><button class="btn2 cu" id="aibtn" onclick="doInvAdd()">حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
 }
@@ -3164,13 +3164,13 @@ async function doInvAdd() {
   if (b) { b.disabled = true; b.textContent = 'جاري الحفظ…'; }
   try {
     S.data = await callT(120000, 'apiInvAddAdmin', BOOT.key, {amount: f.amount, vendor: f.vendor, cat: f.cat || '', desc: f.desc, project: f.project, emp: f.emp, warranty: f.wOn ? f.w : 0}, f.shots);
-    S.ai = null; ovClose(); renderAdmin(); toast('انحفظت الفاتورة');
+    S.ai = null; ovClose(); renderAdmin(); toast('تم حفظ الفاتورة');
   } catch (e) { $('#aierr').textContent = e; if (b) { b.disabled = false; b.textContent = 'حفظ'; } }
 }
 function askSdad(empId, amt) {
   const e = S.data.employees.find(x => x.id === empId);
   S.gm = S.gm || 'تحويل';
-  ovOpen(`<label class="shh" for="ga">كم رجّعت لـ ${esc(e ? e.name : '')}؟</label>
+  ovOpen(`<label class="shh" for="ga">كم أعدت لـ ${esc(e ? e.name : '')}؟</label>
     <input id="ga" class="qtt" inputmode="decimal" value="${esc(amt)}" oninput="amtPv(this.value,'apv_ga')">${amtPvHtml(amt, 'apv_ga')}
     <div class="segc" id="gmseg" style="margin:10px 0">${['تحويل', 'كاش'].map(m => `<button class="${S.gm === m ? 'on' : ''}" onclick="S.gm='${m}';document.querySelectorAll('#gmseg button').forEach(b=>b.classList.toggle('on',b.textContent==='${m}'))">${m}</button>`).join('')}</div>
     <input id="gn" placeholder="ملاحظة (اختياري)">
@@ -3190,13 +3190,13 @@ function askGiveEdit(id) {
     <button class="btn2 rd" id="gdel" style="width:100%;margin-top:8px" onclick="delGive('${id}')">حذف المبلغ</button>`);
 }
 async function doGiveEdit(id) {
-  try { S.data = await call('apiInvEdit', BOOT.key, id, {amount: $('#ga').value, note: $('#gn').value, method: S.gm}); ovClose(); renderAdmin(); toast('انحفظ'); }
+  try { S.data = await call('apiInvEdit', BOOT.key, id, {amount: $('#ga').value, note: $('#gn').value, method: S.gm}); ovClose(); renderAdmin(); toast('تم الحفظ'); }
   catch (e) { $('#gerr').textContent = e; }
 }
 async function delGive(id) {
   const b = $('#gdel');
   if (S.armed !== 'give_' + id) { S.armed = 'give_' + id; if (b) { b.textContent = 'متأكد؟ اضغط مرة ثانية للحذف'; b.classList.add('arm'); } return; }
-  try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; ovClose(); renderAdmin(); toast('انحذف', () => delRestore(0, id)); }
+  try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; ovClose(); renderAdmin(); toast('تم الحذف', () => delRestore(0, id)); }
   catch (e) { S.armed = null; $('#gerr').textContent = e; }
 }
 function askWarranty(id) {
@@ -3211,19 +3211,19 @@ function askWarranty(id) {
     <input id="wd" type="date" value="${esc(S.wsel)}" onchange="S.wsel=this.value;document.querySelectorAll('.wchips button').forEach(b=>b.classList.remove('on'))">
     <div class="err" id="werr"></div>
     <div class="g21"><button class="btn2 cu" onclick="doWarranty('${id}', false)">حفظ</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>
-    ${x.warrantyUntil ? `<button class="btn2 rd" style="width:100%;margin-top:8px" onclick="doWarranty('${id}', true)">شيل الضمان</button>` : ''}`);
+    ${x.warrantyUntil ? `<button class="btn2 rd" style="width:100%;margin-top:8px" onclick="doWarranty('${id}', true)">إزالة الضمان</button>` : ''}`);
 }
 async function setPaidBy(id, by, reopen) {
   try {
     S.data = await call('apiInvPaidBy', BOOT.key, id, by); renderAdmin();
     if (reopen) openInvD(id);
-    toast(by === 'card' ? 'صارت عليك، وما تنخصم من العهدة' : by === 'own' ? 'صارت من جيبه، وتنضاف للي له عندك' : 'صارت من العهدة');
+    toast(by === 'card' ? 'أصبحت على حسابك، ولا تُخصم من العهدة' : by === 'own' ? 'أصبحت على حسابه الخاص، وتُضاف إلى مستحقاته لديك' : 'أصبحت من العهدة');
   } catch (e) { toastErr(e); }
 }
 async function doWarranty(id, clear) {
   const u = clear ? '' : ($('#wd').value || S.wsel || '');
   if (!clear && !u) { $('#werr').textContent = 'اختر المدة أو التاريخ'; return; }
-  try { S.data = await call('apiInvWarranty', BOOT.key, id, u); ovClose(); renderAdmin(); toast(clear ? 'انشال الضمان' : 'انحفظ الضمان'); }
+  try { S.data = await call('apiInvWarranty', BOOT.key, id, u); ovClose(); renderAdmin(); toast(clear ? 'أُزيل الضمان' : 'تم حفظ الضمان'); }
   catch (e) { $('#werr').textContent = e; }
 }
 
@@ -3232,14 +3232,14 @@ async function doWarranty(id, clear) {
 /* الإصدار 90: نموذج الصرف يفتح لشهر واحد (الأقدم)، وباقي الشهور سطر ينفتح بالضغط */
 function payRowHtml(e, u) {
   const ds = dueState(u, S.data.today);
-  return `<div class="hair"></div><button class="strb payr" onclick="S.fx.pm='${e.id}${u.month}';S.armed=null;renderFin()"><div class="row"><b>راتب ${esc(u.label)}</b><span>${M(Math.max(0, u.net - (u.credit || 0)))}<span class="badge a">${ds === 'late' ? 'متأخر' : ds === 'today' ? 'مستحق اليوم' : 'ما انصرف'}</span>${I('chevron-left', 16)}</span></div></button>`;
+  return `<div class="hair"></div><button class="strb payr" onclick="S.fx.pm='${e.id}${u.month}';S.armed=null;renderFin()"><div class="row"><b>راتب ${esc(u.label)}</b><span>${M(Math.max(0, u.net - (u.credit || 0)))}<span class="badge a">${ds === 'late' ? 'متأخر' : ds === 'today' ? 'مستحق اليوم' : 'لم يُصرف'}</span>${I('chevron-left', 16)}</span></div></button>`;
 }
 function payHtml(e, u) {
   const armed = S.armed === 'pay_' + e.id + u.month, today = S.data.today, ds = dueState(u, today), cr = u.credit || 0;
   S.pd = S.pd || {};
   const pdk = e.id + u.month, pdv = S.pd[pdk] || today;
   return `<div class="hair"></div>
-    <div class="row" style="margin-bottom:6px"><b>راتب ${esc(u.label)}</b><span class="badge a">${ds === 'late' ? 'متأخر' : ds === 'today' ? 'مستحق اليوم' : 'ما انصرف'}</span></div>
+    <div class="row" style="margin-bottom:6px"><b>راتب ${esc(u.label)}</b><span class="badge a">${ds === 'late' ? 'متأخر' : ds === 'today' ? 'مستحق اليوم' : 'لم يُصرف'}</span></div>
     <div class="row sub" style="margin-bottom:4px"><span>موعد الصرف</span><span>${esc(dueL(u.due, true))}</span></div>
     ${salaryTable(u)}
     ${cr > 0 ? `<div class="row" style="margin-top:6px"><span class="sub">استلم منه بالدفعات</span><span class="pos">${M(cr, '−')}</span></div><div class="row"><b>باقي له</b>${M(Math.max(0, u.net - cr))}</div>` : ''}
@@ -3272,11 +3272,11 @@ function dedFormHtml(f) {
     <div class="field"><span>السبب</span><div class="dedch">
       <button class="${oth || fine ? '' : 'on'}" onclick="S.form.reason='net';renderFin()">باقة انترنت</button>
       <button class="${fine ? 'on' : ''}" onclick="S.form.reason='fine';renderFin()">مخالفة مرورية</button>
-      <button class="${oth ? 'on' : ''}" onclick="S.form.reason='other';renderFin()">سبب ثاني</button></div></div>
+      <button class="${oth ? 'on' : ''}" onclick="S.form.reason='other';renderFin()">سبب آخر</button></div></div>
     ${oth ? `<div class="field"><span>اكتب السبب</span><input id="f_note" value="${esc(f.note || '')}" oninput="S.form.note=this.value"></div>` : ''}
     ${fine ? `<div class="dprops pdate" style="margin:0 0 10px"><label class="dp"><span>تاريخ المخالفة</span><input id="f_fdate" type="date" value="${esc(f.fdate || t)}" max="${t}" onchange="S.form.fdate=this.value"></label></div>
       <div class="field"><span>ملاحظة (اختياري): رقم المخالفة أو مكانها</span><input id="f_fnote" maxlength="150" value="${esc(f.fnote || '')}" oninput="S.form.fnote=this.value"></div>` : ''}
-    <div class="sub" style="margin-bottom:10px">${fine && fe ? 'يُخصم من راتب ' + monthLbl(fineMonth(fe)) + ' (أول شهر لم يُصرف)، ويظهر في حركاته وفي تفاصيل راتبه.' : 'ينخصم من راتب هالشهر، ويشوفه الموظف في صفحته.'}</div>
+    <div class="sub" style="margin-bottom:10px">${fine && fe ? 'يُخصم من راتب ' + monthLbl(fineMonth(fe)) + ' (أول شهر لم يُصرف)، ويظهر في حركاته وفي تفاصيل راتبه.' : 'يُخصم من راتب هذا الشهر، ويظهر للموظف في صفحته.'}</div>
     <div class="grid2"><button class="btn2 cu" onclick="saveFin()">${I('check', 16, 2.5)}حفظ</button><button class="btn2" onclick="S.form=null;renderFin()">إلغاء</button></div>
     <div class="err" id="ferr"></div>`;
 }
@@ -3290,9 +3290,9 @@ function formHtml(e, f) {
       ${loan ? `<div class="field"><span>عدد الأقساط (شهور)</span><input id="f_months" type="number" inputmode="numeric" value="3"></div>` : '<div></div>'}
     </div>
     ${loan ? `<div class="field"><span>يبدأ الخصم من</span><div class="segc">
-      <button class="${f.start==='next'?'on':''}" onclick="S.form.start='next';renderFin()">الشهر الجاي</button>
-      <button class="${f.start==='now'?'on':''}" onclick="S.form.start='now';renderFin()">هالشهر</button></div></div>`
-      : `<div class="sub" style="margin-bottom:10px">ينخصم كامل من راتب هالشهر.</div>`}
+      <button class="${f.start==='next'?'on':''}" onclick="S.form.start='next';renderFin()">الشهر القادم</button>
+      <button class="${f.start==='now'?'on':''}" onclick="S.form.start='now';renderFin()">هذا الشهر</button></div></div>`
+      : `<div class="sub" style="margin-bottom:10px">يُخصم كاملاً من راتب هذا الشهر.</div>`}
     <div class="field"><span>ملاحظة (اختياري)</span><input id="f_note"></div>
     <div class="grid2"><button class="btn2 cu" onclick="saveFin()">${I('check', 16, 2.5)}حفظ</button><button class="btn2" onclick="S.form=null;renderFin()">إلغاء</button></div>
     <div class="err" id="ferr"></div>`;
@@ -3311,7 +3311,7 @@ async function saveFin() {
   if (S.form.kind === 'loan') x.months = $('#f_months').value;
   if (!(API.parseAmt(x.amount) > 0)) return $('#ferr').textContent = 'اكتب المبلغ';
   const un = lockBtn();
-  try { S.data = await call('apiFinAdd', BOOT.key, x); S.form = null; renderAdmin(); toast('انحفظ'); }
+  try { S.data = await call('apiFinAdd', BOOT.key, x); S.form = null; renderAdmin(); toast('تم الحفظ'); }
   catch (e) { un(); $('#ferr').textContent = e; }
 }
 
@@ -3337,7 +3337,7 @@ async function pay(emp, month) {
       <button class="btn2 cu qbig" onclick="payPart()">${I('hand-coins', 17)}سجّلها دفعة</button>
       <div class="sub" style="margin:4px 0 12px">يتسجل ${fm(nv)} دفعة من الراتب، ويبقى له ${fm(need - nv)} والشهر مفتوح.</div>
       <button class="btn2 rd qbig" onclick="payClose()">اصرف ${fm(nv)} وأقفل الشهر</button>
-      <div class="sub" style="margin:4px 0 12px">الشهر يتقفل «منصرف»، والفرق ${fm(need - nv)} ما ينحسب له بعدها.</div>
+      <div class="sub" style="margin:4px 0 12px">يُقفل الشهر بحالة «مصروف»، والفرق ${fm(need - nv)} لا يُحتسب له بعد ذلك.</div>
       <div class="err" id="pqerr"></div>
       <button class="btn2" style="width:100%" onclick="S.payq=null;S.armed=null;ovClose();renderFin()">إلغاء</button>`);
   }
@@ -3352,13 +3352,13 @@ async function payPart() {
   const un = lockBtn('جاري الحفظ…');
   try {
     S.data = await call('apiSalPart', BOOT.key, {emp: q.emp, amount: q.v, date: q.dt, month: q.month, note: ''}); S.payq = null; S.armed = null; if (S.pd) delete S.pd[q.emp + q.month]; if (S.pv) delete S.pv[q.emp + q.month]; ovClose(); renderAdmin();
-    const e = empById(q.emp); toast('انحفظت الدفعة، الباقي ' + ((e && e.sal ? e.sal.left : 0)).toLocaleString('en-US'));
+    const e = empById(q.emp); toast('تم حفظ الدفعة، والمتبقي ' + ((e && e.sal ? e.sal.left : 0)).toLocaleString('en-US'));
   } catch (err) { if (un) un(); const x = $('#pqerr'); if (x) x.textContent = err; else toastErr(err); }
 }
 function payClose() { const q = S.payq; if (!q) return; S.payq = null; ovClose(); S.armed = 'pay_' + q.emp + q.month; pay.force = true; return pay(q.emp, q.month); }
 function txText(t) {
   if (t.kind === 'part') return 'دفعة من الراتب';
-  if (t.kind === 'pay' && t.via) return 'انسدد راتب ' + t.label + ' بالدفعات';
+  if (t.kind === 'pay' && t.via) return 'سُدّد راتب ' + t.label + ' بالدفعات';
   if (t.kind === 'loan') return 'سلفة على ' + t.months + ' ' + (t.months <= 10 ? 'شهور' : 'شهر') + ' · الخصم من ' + t.label;
   if (t.kind === 'ded') return 'خصم من راتب ' + t.label;
   return 'صرف راتب ' + t.label;
@@ -3380,21 +3380,21 @@ function salCardHtml(e, admin) {
   /* الإصدار 90: عند المدير سطر يفصل المتأخر عن الشهر اللي ما حان موعده، والشهور المسددة تنطوي */
   const today = (S.data || {}).today || '', fut = admin ? (e.unpaid || []).filter(u => !(u.due && u.due <= today)).map(u => ({u, v: n(Math.max(0, u.net - (u.credit || 0)))})).filter(x => x.v > 0) : [];
   const late = n(st.left - fut.reduce((a, x) => a + x.v, 0));
-  const nx = fut.length && st.left > 0 && late >= 0 ? `<div class="sub slnx">${late > 0 ? 'المتأخر الحين <b>' + late.toLocaleString('en-US') + '</b> · و' : 'ما فيه متأخر · '}${fut.map(x => x.v.toLocaleString('en-US') + ' راتب ' + esc(x.u.label) + (x.u.due ? ' يستحق ' + esc(dueL(x.u.due)) : '')).join(' و')}</div>` : '';
+  const nx = fut.length && st.left > 0 && late >= 0 ? `<div class="sub slnx">${late > 0 ? 'المتأخر حالياً <b>' + late.toLocaleString('en-US') + '</b> · و' : 'لا يوجد متأخر · '}${fut.map(x => x.v.toLocaleString('en-US') + ' راتب ' + esc(x.u.label) + (x.u.due ? ' يستحق ' + esc(dueL(x.u.due)) : '')).join(' و')}</div>` : '';
   const isCl = m => m.closed || m.left <= 0, nCl = admin ? st.months.filter(isCl).length : 0, fold = nCl > 1 && !S.fx.cm;
   let h = `<div class="card slc">${ctitle('receipt', 'كشف المستحقات والدفعات')}
     <div class="slst"><div><b>إجمالي المستحق</b><div class="v">${M(st.due)}</div></div><div><b>المدفوع</b><div class="v pos">${M(st.paid)}</div></div><div><b>المتبقي</b><div class="v ${st.left > 0 ? 'neg' : 'pos'}">${M(st.left)}</div></div></div>${nx}
     <div class="slms">${nCl > 1 ? `<button class="dtog" style="padding:10px 0 6px" onclick="S.fx.cm=!S.fx.cm;renderFin()" aria-expanded="${!fold}">شهور مسددة (${nCl})${fold ? '' : ' · إخفاء'}</button>` : ''}${st.months.filter(m => !(fold && isCl(m))).map(m => {
       const pc = m.due > 0 ? Math.round(m.paid / m.due * 100) : 100, stc = m.closed || m.left <= 0 ? ['g', m.closed ? 'مسدد' : 'لا شيء'] : m.paid > 0 ? ['a', 'جزئي'] : ['', 'غير مسدد'];
       return `<div class="slm"><div class="h"><b>راتب ${esc(m.label)}</b><span class="sltg ${stc[0]}">${stc[1]}</span></div>
-        <div class="s"><span>مستحق ${M(m.due, '', 't')} · مدفوع ${M(m.paid, '', 't')}</span><span>${m.closed ? (m.via ? 'انسدد بالدفعات' : 'انصرف') + (m.date ? ' ' + dmy(m.date) : '') : 'باقي ' + M(m.left, '', 't')}</span></div>
+        <div class="s"><span>مستحق ${M(m.due, '', 't')} · مدفوع ${M(m.paid, '', 't')}</span><span>${m.closed ? (m.via ? 'سُدّد بالدفعات' : 'صُرف') + (m.date ? ' ' + dmy(m.date) : '') : 'باقي ' + M(m.left, '', 't')}</span></div>
         <div class="slbar"><i class="${!m.closed && m.paid > 0 ? 'p' : ''}" style="width:${pc}%"></i></div></div>`;
     }).join('')}</div>`;
   if (st.parts.length) h += `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('history', 14)}سجل الدفعات<span class="sp">${st.parts.length}</span></div>` + st.parts.map(x => {
-    const al = x.al.map(q => q.done ? `${q.rest ? 'غطّت باقي' : 'غطّت كامل'} راتب ${esc(q.label)} (${n(q.take).toLocaleString('en-US')}) <span class="pos">انسدد</span>` : `${n(q.take).toLocaleString('en-US')} من راتب ${esc(q.label)}${q.rest ? ' (تكملة)' : ''}`).join('<br>');
+    const al = x.al.map(q => q.done ? `${q.rest ? 'غطّت المتبقي من' : 'غطّت كامل'} راتب ${esc(q.label)} (${n(q.take).toLocaleString('en-US')}) <span class="pos">سُدّد</span>` : `${n(q.take).toLocaleString('en-US')} من راتب ${esc(q.label)}${q.rest ? ' (تكملة)' : ''}`).join('<br>');
     const arm = S.armed === 'pt_' + x.id, can = admin && x.id === st.lastPart;
     return `<div class="slp"><div class="h"><b>${M(x.amount)}${x.month ? `<span class="sltg" style="margin-inline-start:6px">لشهر ${esc(MONTHS_AR[+x.month.slice(5, 7) - 1])}</span>` : ''}</b><span class="sub">${x.date ? dmy(x.date) : 'تاريخ غير محدد'}${can ? ` <button class="ed ${arm ? 'arm' : ''}" style="${arm ? 'color:var(--red);font-size:13px' : ''}" onclick="armPart('${x.id}')" aria-label="حذف">${arm ? 'احذف؟' : I('trash-2', 15)}</button>` : ''}</span></div>${x.note ? `<div class="sub">${esc(x.note)}</div>` : ''}
-      <div class="al">${al || 'ما توزعت'}<div class="sub" style="margin-top:3px">الباقي له بعدها ${M(x.after, '', 't')}</div></div></div>`;
+      <div class="al">${al || 'لم تُوزَّع'}<div class="sub" style="margin-top:3px">الباقي له بعدها ${M(x.after, '', 't')}</div></div></div>`;
   }).join('');
   return h + '</div>';
 }
@@ -3407,7 +3407,7 @@ function salActHtml(e) {
       <div class="field" style="margin-top:10px"><span>المبلغ</span><input id="sp_amt" class="qtt" inputmode="decimal" value="${esc(f.amount || '')}" oninput="S.form.amount=this.value;partPrev('${e.id}');amtPv(this.value,'apv_sp')">${amtPvHtml(f.amount || '', 'apv_sp')}</div>
       <div class="dprops pdate" style="margin:0 0 10px"><label class="dp"><span>تخص شهر</span><select id="sp_mon" onchange="S.form.month=this.value;partPrev('${e.id}')"><option value="">الأقدم أولاً</option>${opts}</select></label>
         <label class="dp"><span>تاريخ التسليم</span>${f.nodate ? `<button class="lnk" style="padding:0" onclick="S.form.nodate=false;renderFin()">غير محدد · حدّده</button>` : `<input id="sp_date" type="date" value="${esc(f.date || today)}" max="${today}" onchange="S.form.date=this.value">`}</label></div>
-      ${f.nodate ? '' : `<button class="lnk" style="padding:0 2px 8px" onclick="S.form.nodate=true;renderFin()">ما أعرف التاريخ</button>`}
+      ${f.nodate ? '' : `<button class="lnk" style="padding:0 2px 8px" onclick="S.form.nodate=true;renderFin()">التاريخ غير معروف</button>`}
       <div class="field"><span>ملاحظة (اختياري)</span><input id="sp_note" value="${esc(f.note || '')}" oninput="S.form.note=this.value"></div>
       <div class="slpv" id="sp_prev">${partPrevHtml(e.id)}</div>
       <div class="grid2" style="margin-top:10px"><button class="btn2 cu" onclick="savePart('${e.id}')">${I('check', 16, 2.5)}حفظ الدفعة</button><button class="btn2" onclick="S.form=null;renderFin()">إلغاء</button></div><div class="err" id="sperr"></div><div class="hair"></div>`;
@@ -3416,7 +3416,7 @@ function salActHtml(e) {
     const mv = f.kind === 'move', ms = (mv ? [{month: f.cur, label: monthLbl(f.cur)}] : []).concat(e.prevMonths || [], mv ? (sal.open || []).filter(m => m.month !== f.cur) : []);
     const sel = f.month || (ms[0] || {}).month || '', net = (ms.find(m => m.month === sel) || {}).net;
     return `<div class="ctitle" style="font-size:15px">${I(mv ? 'pencil' : 'calendar', 16)}${mv ? 'تصحيح حركة الصرف' : 'راتب شهر سابق'}</div>
-      ${mv ? '<div class="sub" style="margin-top:4px">نفس الحركة تنتقل للشهر اللي تختاره، بدون حركة ثانية</div>' : ''}
+      ${mv ? '<div class="sub" style="margin-top:4px">تنتقل الحركة نفسها إلى الشهر الذي تختاره، دون حركة جديدة</div>' : ''}
       <div class="dprops pdate" style="margin:10px 0"><label class="dp"><span>شهر الراتب</span><select id="mv_mon" onchange="S.form.month=this.value;if(S.form.kind==='prev')S.form.amount='';renderFin()">${ms.map(m => `<option value="${m.month}" ${sel === m.month ? 'selected' : ''}>${esc(m.label)}</option>`).join('')}</select></label>
         <label class="dp"><span>تاريخ التسليم</span><input id="mv_date" type="date" value="${esc(f.date || today)}" max="${today}" onchange="S.form.date=this.value"></label></div>
       <div class="field"><span>المبلغ</span><input id="mv_amt" class="qtt" inputmode="decimal" value="${esc(f.amount !== '' && f.amount != null ? f.amount : net != null ? Math.max(0, net) : '')}" oninput="S.form.amount=this.value;amtPv(this.value,'apv_mv')">${amtPvHtml('', 'apv_mv')}</div>
@@ -3432,9 +3432,9 @@ function salActHtml(e) {
 function monthLbl(mk) { return mk ? MONTHS_AR[+mk.slice(5, 7) - 1] + ' ' + mk.slice(0, 4) : ''; }
 function partPrevHtml(id) {
   const f = S.form, pv = f && API.salPreview ? API.salPreview(id, f.amount, f.month) : null, n = x => (Math.round(x * 100) / 100).toLocaleString('en-US');
-  if (!pv) return '<span class="sub">اكتب المبلغ وتشوف وين تتوزع قبل الحفظ</span>';
-  return `<b>التوزيع قبل الحفظ</b>` + pv.al.map(q => `<div>${n(q.take)} ← ${q.done ? (q.rest ? 'باقي ' : 'كامل ') + 'راتب ' + esc(q.label) + ' <span class="pos">ينسدد</span>' : 'من راتب ' + esc(q.label)}</div>`).join('')
-    + (pv.extra > 0 ? `<div class="neg">${n(pv.extra)} زيادة عن المتبقي، ما تنحفظ</div>` : '') + `<div class="sub">الباقي له بعدها ${n(pv.after)}</div>`;
+  if (!pv) return '<span class="sub">اكتب المبلغ لترى توزيعه قبل الحفظ</span>';
+  return `<b>التوزيع قبل الحفظ</b>` + pv.al.map(q => `<div>${n(q.take)} ← ${q.done ? (q.rest ? 'باقي ' : 'كامل ') + 'راتب ' + esc(q.label) + ' <span class="pos">يُسدَّد</span>' : 'من راتب ' + esc(q.label)}</div>`).join('')
+    + (pv.extra > 0 ? `<div class="neg">${n(pv.extra)} زيادة عن المتبقي، لا تُحفظ</div>` : '') + `<div class="sub">الباقي له بعدها ${n(pv.after)}</div>`;
 }
 function partPrev(id) { const b = document.getElementById('sp_prev'); if (b) b.innerHTML = partPrevHtml(id); }
 function openMove(emp, id) {
@@ -3445,7 +3445,7 @@ function openMove(emp, id) {
 async function saveMove(emp) {
   const f = S.form; if (!f) return;
   lockBtn('جاري الحفظ…');
-  try { S.data = await call('apiFinMove', BOOT.key, f.id, {month: $('#mv_mon').value, date: $('#mv_date').value, amount: $('#mv_amt').value}); S.form = null; renderAdmin(); toast('انصحّح شهر الحركة'); }
+  try { S.data = await call('apiFinMove', BOOT.key, f.id, {month: $('#mv_mon').value, date: $('#mv_date').value, amount: $('#mv_amt').value}); S.form = null; renderAdmin(); toast('تم تصحيح شهر الحركة'); }
   catch (err) { renderFin(); const x = $('#mverr'); if (x) x.textContent = err; else toastErr(err); }
 }
 async function savePrev(emp) {
@@ -3462,17 +3462,17 @@ async function savePart(id) {
   lockBtn('جاري الحفظ…');
   try {
     S.data = await call('apiSalPart', BOOT.key, {emp: id, amount: amt, date: dt, month: f.month || '', note: nt}); S.form = null; renderAdmin();
-    const e = empById(id); toast('انحفظت الدفعة، الباقي ' + ((e && e.sal ? e.sal.left : 0)).toLocaleString('en-US'));
+    const e = empById(id); toast('تم حفظ الدفعة، والمتبقي ' + ((e && e.sal ? e.sal.left : 0)).toLocaleString('en-US'));
   } catch (err) { renderFin(); const x = $('#sperr'); if (x) x.textContent = err; else toastErr(err); }
 }
 async function armPart(id) {
   if (S.armed !== 'pt_' + id) { S.armed = 'pt_' + id; renderFin(); return; }
-  try { S.data = await call('apiFinDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذفت الدفعة'); }
+  try { S.data = await call('apiFinDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('تم حذف الدفعة'); }
   catch (e) { S.armed = null; renderFin(); toastErr(e); }
 }
 async function armTx(id) {
   if (S.armed !== 'tx_' + id) { S.armed = 'tx_' + id; renderFin(); return; }
-  try { S.data = await call('apiFinDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذف'); }
+  try { S.data = await call('apiFinDelete', BOOT.key, id); S.armed = null; renderAdmin(); toast('تم الحذف'); }
   catch (e) { S.armed = null; renderFin(); toastErr(e); }
 }
 
@@ -3483,23 +3483,23 @@ ICONS['chevron-left'] = '<path d="m15 18-6-6 6-6"/>';
 ICONS['grip-vertical'] = '<circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/>';
 
 /* ---------- التوجيهات: عند المدير ---------- */
-function gDur(s) { return s < 60 ? s + ' ثانية' : Math.round(s / 60) + ' ' + (Math.round(s / 60) <= 10 ? 'دقايق' : 'دقيقة'); }
+function gDur(s) { return s < 60 ? s + ' ثانية' : Math.round(s / 60) + ' ' + (Math.round(s / 60) <= 10 ? 'دقائق' : 'دقيقة'); }
 function gReadLine(r, hasQ) {
-  if (r.done) return `<span class="badge">قراه</span><div class="gst">${dmy(r.done.slice(0, 10))} ${t12(r.done)} · ${gDur(r.secs)}${hasQ ? ' · ' + (r.wrong ? 'جاوب غلط ' + (r.wrong === 1 ? 'مرة' : r.wrong + ' مرات') + ' وبعدين صح' : 'جاوب صح') : ''}</div>`;
-  if (r.opened) return `<span class="badge wait">فتحه وما خلّصه</span><div class="gst">فتحه ${t12(r.opened)}${r.wrong ? ' · جاوب غلط ' + (r.wrong === 1 ? 'مرة' : r.wrong + ' مرات') : ''}</div>`;
-  return `<span class="badge late">ما فتحه</span><div class="gst">انرسل ${dmy(r.sent.slice(0, 10))} ${t12(r.sent)}</div>`;
+  if (r.done) return `<span class="badge">قرأه</span><div class="gst">${dmy(r.done.slice(0, 10))} ${t12(r.done)} · ${gDur(r.secs)}${hasQ ? ' · ' + (r.wrong ? 'أجاب إجابة خاطئة ' + (r.wrong === 1 ? 'مرة' : r.wrong + ' مرات') + ' ثم صحيحة' : 'أجاب إجابة صحيحة') : ''}</div>`;
+  if (r.opened) return `<span class="badge wait">فتحه ولم يُكمله</span><div class="gst">فتحه ${t12(r.opened)}${r.wrong ? ' · أجاب إجابة خاطئة ' + (r.wrong === 1 ? 'مرة' : r.wrong + ' مرات') : ''}</div>`;
+  return `<span class="badge late">لم يفتحه</span><div class="gst">أُرسل ${dmy(r.sent.slice(0, 10))} ${t12(r.sent)}</div>`;
 }
 function guidesHtml(d) {
   const on = d.employees.filter(e => e.guide), gs = d.guides || [];
-  if (!on.length && !gs.length) return '<div class="card" style="margin-top:12px">' + emptyHtml('clipboard-list', 'شغّل «التوجيهات» لموظف من إعداداته في الفريق أول') + '</div>';
+  if (!on.length && !gs.length) return '<div class="card" style="margin-top:12px">' + emptyHtml('clipboard-list', 'فعّل «التوجيهات» لموظف من إعداداته في الفريق أولاً') + '</div>';
   const f = S.gform;
   let h = '<div style="height:10px"></div>';
   if (f) h += gFormHtml(d, on, f);
-  if (!gs.length && !f) return h + '<div class="card">' + emptyHtml('clipboard-list', 'ما فيه توجيهات للحين، اضغط + وأرسل أول توجيه') + '</div>';
+  if (!gs.length && !f) return h + '<div class="card">' + emptyHtml('clipboard-list', 'لا توجد توجيهات بعد، اضغط + لإرسال أول توجيه') + '</div>';
   h += gs.map(g => {
     const arm = S.armed === 'gd_' + g.id;
     return `<div class="card gcard">
-      <div class="gch"><div class="gti"><b>${esc(g.title)}</b><small>${dmy(g.ts.slice(0, 10))} · ${g.points.length} ${g.points.length === 1 ? 'نقطة' : g.points.length === 2 ? 'نقطتين' : 'نقاط'}${g.q ? ' · فيه سؤال' : ''}</small></div>
+      <div class="gch"><div class="gti"><b>${esc(g.title)}</b><small>${dmy(g.ts.slice(0, 10))} · ${g.points.length} ${g.points.length === 1 ? 'نقطة' : g.points.length === 2 ? 'نقطتين' : 'نقاط'}${g.q ? ' · يتضمن سؤالاً' : ''}</small></div>
         <button class="del ${arm ? 'arm' : ''}" onclick="delGuide('${g.id}')">${arm ? 'تأكيد الحذف' : I('trash-2', 15)}</button></div>
       ${g.reads.map(r => `<div class="grd"><div class="grn"><b>${esc(r.name)}</b>${gReadLine(r, !!g.q)}</div></div>`).join('')}
       <details class="gpts"><summary>النقاط${g.q ? ' والسؤال' : ''}</summary><ol>${g.points.map(p => `<li>${esc(p)}</li>`).join('')}</ol>
@@ -3513,13 +3513,13 @@ function gFormHtml(d, on, f) {
     ${ctitle('clipboard-list', 'توجيه جديد')}
     <div class="field" style="margin-top:12px"><span>العنوان</span><input id="g_title" value="${esc(f.title)}" oninput="S.gform.title=this.value" placeholder="عنوان التوجيه"></div>
     <div class="field"><span>النقاط (كل نقطة سطر قصير)</span>
-      ${f.points.map((p, i) => `<div class="gpi"><i>${i + 1}</i><input value="${esc(p)}" oninput="S.gform.points[${i}]=this.value">${f.points.length > 1 ? `<button onclick="gPt(${i})" aria-label="شيل">${I('x', 15)}</button>` : ''}</div>`).join('')}
+      ${f.points.map((p, i) => `<div class="gpi"><i>${i + 1}</i><input value="${esc(p)}" oninput="S.gform.points[${i}]=this.value">${f.points.length > 1 ? `<button onclick="gPt(${i})" aria-label="إزالة">${I('x', 15)}</button>` : ''}</div>`).join('')}
       ${f.points.length < 20 ? `<button class="lnk gadd" onclick="gPt(-1)">${I('plus', 14)}نقطة</button>` : ''}</div>
-    <div class="trow"><div class="n"><b>سؤال في الآخر</b><small>للتوجيهات المهمة، ولازم يجاوب صح</small></div><button class="tg ${f.q ? 'on' : ''}" onclick="S.gform.q=!S.gform.q;renderTasks()" aria-label="سؤال"></button></div>
+    <div class="trow"><div class="n"><b>سؤال في الآخر</b><small>للتوجيهات المهمة، ويجب أن يجيب إجابة صحيحة</small></div><button class="tg ${f.q ? 'on' : ''}" onclick="S.gform.q=!S.gform.q;renderTasks()" aria-label="سؤال"></button></div>
     ${f.q ? `<div class="field"><span>السؤال</span><input value="${esc(f.qt)}" oninput="S.gform.qt=this.value"></div>
-      <div class="field"><span>الخيارات (اضغط الدائرة على الجواب الصح)</span>
-      ${f.opts.map((o, i) => `<div class="gpi go ${f.ok === i ? 'on' : ''}"><button class="gr" onclick="S.gform.ok=${i};renderTasks()" aria-label="الجواب الصح">${f.ok === i ? I('check', 13, 3) : ''}</button><input value="${esc(o)}" oninput="S.gform.opts[${i}]=this.value"></div>`).join('')}</div>` : ''}
-    <div class="field"><span>لمين</span><div class="dedch">${on.map(e => `<button class="${f.emps.indexOf(e.id) >= 0 ? 'on' : ''}" onclick="gEmp('${e.id}')">${esc(e.name)}</button>`).join('')}</div></div>
+      <div class="field"><span>الخيارات (اضغط الدائرة على الإجابة الصحيحة)</span>
+      ${f.opts.map((o, i) => `<div class="gpi go ${f.ok === i ? 'on' : ''}"><button class="gr" onclick="S.gform.ok=${i};renderTasks()" aria-label="الإجابة الصحيحة">${f.ok === i ? I('check', 13, 3) : ''}</button><input value="${esc(o)}" oninput="S.gform.opts[${i}]=this.value"></div>`).join('')}</div>` : ''}
+    <div class="field"><span>لمن</span><div class="dedch">${on.map(e => `<button class="${f.emps.indexOf(e.id) >= 0 ? 'on' : ''}" onclick="gEmp('${e.id}')">${esc(e.name)}</button>`).join('')}</div></div>
     <div class="grid2"><button class="btn2 cu" onclick="sendGuide()">${I('send', 16)}أرسل</button><button class="btn2" onclick="S.gform=null;renderTasks()">إلغاء</button></div>
     <div class="err" id="gerr"></div>
   </div>`;
@@ -3536,14 +3536,14 @@ async function sendGuide() {
   const x = {title: f.title, points: f.points, emps: f.emps, q: f.q ? {text: f.qt, opts: f.opts, ok: f.ok} : null};
   if (!f.title.trim()) return $('#gerr').textContent = 'اكتب عنوان التوجيه';
   if (!f.points.some(p => p.trim())) return $('#gerr').textContent = 'اكتب نقطة وحدة على الأقل';
-  if (f.q && f.ok < 0) return $('#gerr').textContent = 'اضغط الدائرة جنب الجواب الصح';
+  if (f.q && f.ok < 0) return $('#gerr').textContent = 'اضغط الدائرة بجانب الإجابة الصحيحة';
   const un = lockBtn('جاري الإرسال…');
-  try { S.data = await call('apiGuideAdd', BOOT.key, x); S.gform = null; renderAdmin(); toast('انرسل التوجيه'); }
+  try { S.data = await call('apiGuideAdd', BOOT.key, x); S.gform = null; renderAdmin(); toast('تم إرسال التوجيه'); }
   catch (e) { un(); $('#gerr').textContent = e; }
 }
 async function delGuide(id) {
   if (S.armed !== 'gd_' + id) { S.armed = 'gd_' + id; renderTasks(); return; }
-  try { S.data = await call('apiGuideDel', BOOT.key, id); S.armed = null; renderAdmin(); toast('انحذف التوجيه'); }
+  try { S.data = await call('apiGuideDel', BOOT.key, id); S.armed = null; renderAdmin(); toast('تم حذف التوجيه'); }
   catch (e) { S.armed = null; renderTasks(); toastErr(e); }
 }
 function payDue(e, mk) {
@@ -3556,18 +3556,18 @@ async function setPayday(id) {
   const dd = $('#pdd_' + id), dn = $('#pdn_' + id);
   if (!dd || !dn) return;
   dd.disabled = dn.disabled = true;
-  try { S.data = await call('apiEmpPayday', BOOT.key, id, +dd.value, dn.value === '1'); renderAdmin(); toast('انحفظ موعد الصرف'); }
+  try { S.data = await call('apiEmpPayday', BOOT.key, id, +dd.value, dn.value === '1'); renderAdmin(); toast('تم حفظ موعد الصرف'); }
   catch (err) { renderAdmin(); toastErr(err); }
 }
 async function setLang(id, lang, sel) {
   const e = empById(id), old = e.lang || 'ar';
   if (sel) sel.disabled = true;
-  try { S.data = await call('apiEmpLang', BOOT.key, id, lang); renderAdmin(); lgAdminContent(); toast('صفحته صارت بـ' + ((LANGS.find(l => l[0] === lang) || [])[1] || lang)); }
+  try { S.data = await call('apiEmpLang', BOOT.key, id, lang); renderAdmin(); lgAdminContent(); toast('أصبحت صفحته بـ' + ((LANGS.find(l => l[0] === lang) || [])[1] || lang)); }
   catch (err) { if (sel) { sel.value = old; sel.disabled = false; } $('#e_' + id).textContent = err; }
 }
 async function toggleGuide(id) {
   const e = empById(id);
-  try { S.data = await call('apiGuideToggle', BOOT.key, id, !e.guide); renderAdmin(); toast(!e.guide ? 'تفعّلت التوجيهات له' : 'انطفت التوجيهات له'); }
+  try { S.data = await call('apiGuideToggle', BOOT.key, id, !e.guide); renderAdmin(); toast(!e.guide ? 'فُعّلت التوجيهات له' : 'أُوقفت التوجيهات له'); }
   catch (err) { $('#e_' + id).textContent = err; }
 }
 
@@ -3632,13 +3632,13 @@ function nextPoint() {
 function answerGuide(i) { finishGuide(i); }
 async function finishGuide(ans) {
   const r = S.gr;
-  if (S.empPreview) { toast('هذي معاينة، ما ينحفظ شي', null, 'in'); return closeGuide(); }
+  if (S.empPreview) { toast('هذه معاينة، لن يُحفظ شيء', null, 'in'); return closeGuide(); }
   const secs = Math.round((Date.now() - r.t0) / 1000);
   try {
     const res = await call('apiGuideDone', BOOT.token, r.id, secs, ans);
     S.empData = res.data;
     if (res.ok) { S.gr = null; rerenderEmp(); toTop(); toast('تم، يعطيك العافية'); }
-    else { r.i = 0; r.stage = 'points'; r.t0 = Date.now(); renderGuide(); toTop(); toastErr('الجواب غلط، اقرا النقاط مرة ثانية'); }
+    else { r.i = 0; r.stage = 'points'; r.t0 = Date.now(); renderGuide(); toTop(); toastErr('الإجابة غير صحيحة، اقرأ النقاط مرة أخرى'); }
   } catch (e) { toastErr(e); }
 }
 
@@ -3654,11 +3654,11 @@ function renderSet() {
       </div>
       <div class="note info" id="eh_${e.id}"${lateHint(e) ? '' : ' style="display:none"'}>${I('info', 16)}<div>${lateHint(e)}</div></div>
       <div class="trow"><div class="n"><b>متابعة فقط</b><small>يتابع تقييمه بدون حافز</small></div><button class="tg ${e.track?'on':''}" onclick="toggleTrack('${e.id}')" aria-label="متابعة فقط"></button></div>
-      <div class="trow"><div class="n"><b>حضور وانصراف</b><small>يصوّر لما يطلع من البيت ولما يوصل المشروع ولما يطلع منه</small></div><button class="tg ${e.attend?'on':''}" onclick="toggleAtt('${e.id}')" aria-label="حضور وانصراف"></button></div>
-      <div class="trow"><div class="n"><b>التوجيهات</b><small>يوصله توجيهاتك ويقراها نقطة نقطة</small></div><button class="tg ${e.guide?'on':''}" onclick="toggleGuide('${e.id}')" aria-label="التوجيهات"></button></div>
-      <div class="trow"><div class="n"><b>لغة صفحته</b><small>رابطه يفتح على هذي اللغة</small></div><select class="lsel" onchange="setLang('${e.id}', this.value, this)" aria-label="لغة صفحته">${LANGS.map(l => `<option value="${l[0]}" ${(e.lang || 'ar') === l[0] ? 'selected' : ''}>${l[1]}</option>`).join('')}</select></div>
+      <div class="trow"><div class="n"><b>حضور وانصراف</b><small>يصوّر عند خروجه من البيت ووصوله إلى المشروع وخروجه منه</small></div><button class="tg ${e.attend?'on':''}" onclick="toggleAtt('${e.id}')" aria-label="حضور وانصراف"></button></div>
+      <div class="trow"><div class="n"><b>التوجيهات</b><small>تصله توجيهاتك ويقرأها نقطة نقطة</small></div><button class="tg ${e.guide?'on':''}" onclick="toggleGuide('${e.id}')" aria-label="التوجيهات"></button></div>
+      <div class="trow"><div class="n"><b>لغة صفحته</b><small>يفتح رابطه بهذه اللغة</small></div><select class="lsel" onchange="setLang('${e.id}', this.value, this)" aria-label="لغة صفحته">${LANGS.map(l => `<option value="${l[0]}" ${(e.lang || 'ar') === l[0] ? 'selected' : ''}>${l[1]}</option>`).join('')}</select></div>
       <div class="trow" style="border-bottom:0;padding-bottom:4px"><div class="n"><b>موعد صرف راتبه</b><small>راتب ${esc((S.data.month || ''))} يستحق ${esc(dueL(payDue(e, (S.data.today || '').slice(0, 7)), true))}</small></div></div>
-      <div class="psel"><select id="pdd_${e.id}" onchange="setPayday('${e.id}')" aria-label="يوم الصرف">${Array.from({length: 28}, (_, i) => `<option value="${i + 1}" ${(e.payDay || 28) === i + 1 ? 'selected' : ''}>يوم ${i + 1}</option>`).join('')}</select><select id="pdn_${e.id}" onchange="setPayday('${e.id}')" aria-label="من أي شهر"><option value="0" ${e.payNext ? '' : 'selected'}>من نفس الشهر</option><option value="1" ${e.payNext ? 'selected' : ''}>من الشهر اللي بعده</option></select></div>
+      <div class="psel"><select id="pdd_${e.id}" onchange="setPayday('${e.id}')" aria-label="يوم الصرف">${Array.from({length: 28}, (_, i) => `<option value="${i + 1}" ${(e.payDay || 28) === i + 1 ? 'selected' : ''}>يوم ${i + 1}</option>`).join('')}</select><select id="pdn_${e.id}" onchange="setPayday('${e.id}')" aria-label="من أي شهر"><option value="0" ${e.payNext ? '' : 'selected'}>من نفس الشهر</option><option value="1" ${e.payNext ? 'selected' : ''}>من الشهر التالي</option></select></div>
       <div class="grid2"><button class="btn2 ${edDirty(e) ? 'cu' : ''}" id="sv_${e.id}" onclick="saveEmp('${e.id}')">حفظ</button>
       <button class="btn2 ${S.armed==='tok_'+e.id?'arm':''}" onclick="newToken('${e.id}')">${S.armed==='tok_'+e.id?'تأكيد: الرابط القديم يوقف':'رابط جديد له'}</button></div>
       <div class="err" id="e_${e.id}"></div></div>`;
@@ -3673,7 +3673,7 @@ function renderSet() {
         <div class="field"><span>أعلى مكافأة مواقف بالشهر</span><input id="st_starCap" type="number" inputmode="numeric" value="${st.starCap}"></div>
         <div class="field"><span>شهر بدون تقصير</span><input id="st_clean" type="number" inputmode="numeric" value="${st.clean}"></div>
       </div>
-      ${(d.employees || []).some(e => lateMonths(e).length) ? `<div class="note info" style="margin:0 0 10px">${I('info', 16)}<div>فيه شهور متأخرة ما انصرفت. تبقى على المبالغ القديمة، والجديدة تبدأ من ${esc(monthLbl((d.today || '').slice(0, 7)).split(' ')[0])}.</div></div>` : ''}
+      ${(d.employees || []).some(e => lateMonths(e).length) ? `<div class="note info" style="margin:0 0 10px">${I('info', 16)}<div>توجد شهور متأخرة لم تُصرف. تبقى على المبالغ القديمة، والجديدة تبدأ من ${esc(monthLbl((d.today || '').slice(0, 7)).split(' ')[0])}.</div></div>` : ''}
       <button class="btn2 cu" style="width:100%" onclick="saveTarget()">${I('check', 16, 2.5)}حفظ</button>
       <div class="err" id="terr"></div></div>`);
   if (k === 'att') return page('الحضور والانصراف', attSetCard(d).replace(/^<div class="card">\s*<div class="ctitle">.*?<\/div>/s, '<div class="card">'));
@@ -3686,14 +3686,14 @@ function renderSet() {
       </div>
       <button class="btn2 cu" style="width:100%" onclick="saveEmp('')">${I('plus', 16, 2.5)}إضافة</button><div class="err" id="e_new"></div></div>`);
   if (k === 'link') return page('الدخول والأجهزة', `<div class="card">
-      <div class="sub" style="margin:0 0 10px">هالجهاز داخل بجلسة محفوظة، والرابط ما فيه أي رمز. لجهاز جديد أو أيقونة جديدة على الشاشة الرئيسية، اطلع رمز دخول واكتبه هناك.</div>
-      ${S.acode ? `<div class="codebox"><b dir="ltr">${esc(S.acode.code)}</b><small>يصلح مرة وحدة خلال ${S.acode.minutes} دقايق</small><button class="btn2" onclick="copy('${esc(S.acode.code)}')">${I('copy', 16)}نسخ</button></div>` : ''}
+      <div class="sub" style="margin:0 0 10px">هذا الجهاز مسجّل بجلسة محفوظة، والرابط لا يحتوي أي رمز. لجهاز جديد أو أيقونة جديدة على الشاشة الرئيسية، أنشئ رمز دخول واكتبه هناك.</div>
+      ${S.acode ? `<div class="codebox"><b dir="ltr">${esc(S.acode.code)}</b><small>صالح لمرة واحدة خلال ${S.acode.minutes} دقائق</small><button class="btn2" onclick="copy('${esc(S.acode.code)}')">${I('copy', 16)}نسخ</button></div>` : ''}
       <button class="btn2 cu" style="width:100%" onclick="newCode()">${I('smartphone', 16)}ربط جهاز جديد</button></div>
     <div class="card">
-      <div class="sub" style="margin:0 0 10px">أبطل الرابط القديم اللي فيه k=: يوقف أي رابط أو أيقونة قديمة، والأجهزة اللي دخلت تبقى داخلة. يطلع لك رمز استرجاع مرة وحدة، احفظه في مكان آمن.</div>
-      ${S.arec ? `<div class="codebox"><b dir="ltr">${esc(S.arec)}</b><small>رمز الاسترجاع. ما يطلع مرة ثانية</small><button class="btn2" onclick="copy('${esc(S.arec)}')">${I('copy', 16)}نسخ</button></div>` : ''}
+      <div class="sub" style="margin:0 0 10px">أبطل الرابط القديم الذي فيه k=: يوقف أي رابط أو أيقونة قديمة، وتبقى الأجهزة المسجّلة داخلة. يظهر لك رمز استرجاع مرة واحدة، احفظه في مكان آمن.</div>
+      ${S.arec ? `<div class="codebox"><b dir="ltr">${esc(S.arec)}</b><small>رمز الاسترجاع. لن يظهر مرة أخرى</small><button class="btn2" onclick="copy('${esc(S.arec)}')">${I('copy', 16)}نسخ</button></div>` : ''}
       <button class="btn2 ${S.armed==='rot'?'arm':''}" style="width:100%" onclick="rotateKey()">${S.armed==='rot'?'تأكيد: أبطل الرابط القديم':'أبطل الرابط القديم'}</button>
-      <button class="btn2 ${S.armed==='out'?'arm':''}" style="width:100%;margin-top:8px" onclick="logoutHere()">${S.armed==='out'?'تأكيد: اطلع من هالجهاز':'اطلع من هالجهاز'}</button>
+      <button class="btn2 ${S.armed==='out'?'arm':''}" style="width:100%;margin-top:8px" onclick="logoutHere()">${S.armed==='out'?'تأكيد: الخروج من هذا الجهاز':'الخروج من هذا الجهاز'}</button>
       <div class="err" id="lkerr"></div></div>`);
   if (k === 'files') return page('الملفات غير المستخدمة', filesPageHtml());
   if (k === 'del') return page('المحذوفات', delPageHtml());
@@ -3707,14 +3707,14 @@ function renderSet() {
       ${tbRow('circle-dollar-sign', 'حسبة الحافز', 'تقصير ' + st.miss + ' · مميز +' + st.star, "ssub('calc')")}
       ${tbRow('clock', 'الحضور والانصراف', esc(ac.start) + ' · سماح ' + ac.grace + ' د', "ssub('att')")}
     </div></div>
-    <div class="blk"><div class="lab">${I('folder', 14)}الشغل</div><div class="tbl2">
+    <div class="blk"><div class="lab">${I('folder', 14)}العمل</div><div class="tbl2">
       ${tbRow('folder', 'المشاريع', ps === 1 ? 'مشروع واحد' : ps === 2 ? 'مشروعين' : ps + ' مشاريع', "ssub('proj')")}
     </div></div>
     <div class="blk"><div class="lab">${I('lock', 14)}الحساب</div><div class="tbl2">
       ${tbRow('lock', 'الدخول والأجهزة', '', "ssub('link')")}
       ${tbRow('folder-x', 'الملفات غير المستخدمة', S.clean ? (S.clean.count + ' ملف') : '', "ssub('files');loadClean()")}
       ${tbRow('trash-2', 'المحذوفات', (d.deleted || []).length ? String((d.deleted || []).length) : '', "ssub('del')")}
-      ${tbRow('info', 'شرح الحافز', 'يشوفه الموظف', "ssub('rules')")}
+      ${tbRow('info', 'شرح الحافز', 'يراه الموظف', "ssub('rules')")}
     </div></div></div>`;
 }
 function ssub(k) { S.ssub = k; S.armed = null; S.ed = null; renderSet(); toTop(); }
@@ -3722,7 +3722,7 @@ function ssub(k) { S.ssub = k; S.armed = null; S.ed = null; renderSet(); toTop()
 function projectsCard(d) {
   const ps = d.projects || [], act = ps.filter(p => !p.archived), arch = ps.filter(p => p.archived);
   return `<div class="card">${ctitle('folder', 'المشاريع')}
-    <div class="sub" style="margin:4px 0 6px">لما يخلص المشروع أرشفه، يختفي من الاختيار وتقاريره وفواتيره تبقى محفوظة.</div>
+    <div class="sub" style="margin:4px 0 6px">عند انتهاء المشروع أرشفه، فيختفي من الاختيار وتبقى تقاريره وفواتيره محفوظة.</div>
     ${act.map(p => `<div class="prow"><input id="pn_${p.id}" value="${esc(p.name)}">
       <button class="del" onclick="saveProj('${p.id}')">${I('check', 15)}حفظ</button>
       <button class="del" onclick="askProjBudget('${p.id}')">${I('wallet', 15)}${p.budget ? 'الميزانية ✓' : 'الميزانية'}</button>
@@ -3736,19 +3736,19 @@ function projectsCard(d) {
 }
 
 async function saveProj(id) {
-  try { S.data = await call('apiProjectSave', BOOT.key, {id, name: $('#pn_' + id).value}); renderAdmin(); toast('انحفظ'); }
+  try { S.data = await call('apiProjectSave', BOOT.key, {id, name: $('#pn_' + id).value}); renderAdmin(); toast('تم الحفظ'); }
   catch (e) { $('#perr').textContent = e; }
 }
 
 async function archProj(id, a) {
-  try { S.data = await call('apiProjectSave', BOOT.key, {id, archived: a}); renderAdmin(); toast(a ? 'انأرشف المشروع' : 'رجع المشروع'); }
+  try { S.data = await call('apiProjectSave', BOOT.key, {id, archived: a}); renderAdmin(); toast(a ? 'تمت أرشفة المشروع' : 'أُعيد المشروع'); }
   catch (e) { $('#perr').textContent = e; }
 }
 
 async function saveTarget() {
   const x = {};
   ['miss', 'trust', 'star', 'starCap', 'clean'].forEach(k => { x[k] = $('#st_' + k).value; });
-  try { S.data = await call('apiSaveSettings', BOOT.key, x); renderAdmin(); toast('انحفظ'); }
+  try { S.data = await call('apiSaveSettings', BOOT.key, x); renderAdmin(); toast('تم الحفظ'); }
   catch (e) { $('#terr').textContent = e; }
 }
 
@@ -3773,21 +3773,21 @@ async function saveEmp(id) {
   const k = id || 'new';
   const x = {id, name: $('#n_'+k).value, salary: $('#s_'+k).value, max: $('#m_'+k).value};
   const hint = id && empById(id) ? lateHint(empById(id)) : '';
-  try { S.data = await call('apiSaveEmp', BOOT.key, x); if (id && S.ed) delete S.ed[id]; if (!id) S.ssub = null; renderAdmin(); toast(id ? 'انحفظ' : 'انضاف الموظف', null, 'ok', hint); }
+  try { S.data = await call('apiSaveEmp', BOOT.key, x); if (id && S.ed) delete S.ed[id]; if (!id) S.ssub = null; renderAdmin(); toast(id ? 'تم الحفظ' : 'تمت إضافة الموظف', null, 'ok', hint); }
   catch (e) { $('#e_'+k).textContent = e; }
 }
 
 async function toggleTrack(id) {
   const e = empById(id);
   const hint = lateHint(e, true);
-  try { S.data = await call('apiSaveEmp', BOOT.key, {id, name:e.name, salary:e.salary, max:e.max, track: !e.track}); renderAdmin(); toast(!e.track ? 'صار متابعة فقط' : 'رجع له الحافز', null, 'ok', hint); }
+  try { S.data = await call('apiSaveEmp', BOOT.key, {id, name:e.name, salary:e.salary, max:e.max, track: !e.track}); renderAdmin(); toast(!e.track ? 'أصبح «متابعة فقط»' : 'أُعيد له الحافز', null, 'ok', hint); }
   catch (err) { $('#e_'+id).textContent = err; }
 }
 
 async function newToken(id) {
   const e = empById(id);
   if (S.armed !== 'tok_'+id) { S.armed = 'tok_'+id; renderSet(); return; }
-  try { S.data = await call('apiSaveEmp', BOOT.key, {id, name:e.name, salary:e.salary, max:e.max, newToken:true}); S.armed = null; renderAdmin(); toast('انعمل رابط جديد'); }
+  try { S.data = await call('apiSaveEmp', BOOT.key, {id, name:e.name, salary:e.salary, max:e.max, newToken:true}); S.armed = null; renderAdmin(); toast('تم إنشاء رابط جديد'); }
   catch (err) { $('#e_'+id).textContent = err; }
 }
 
@@ -3797,16 +3797,16 @@ async function newCode() {
 }
 async function rotateKey() {
   if (S.armed !== 'rot') { S.armed = 'rot'; renderSet(); return; }
-  try { const r = await call('apiAdminRotate', BOOT.key); S.arec = r.recovery; S.armed = null; renderSet(); toast('انبطل الرابط القديم'); }
+  try { const r = await call('apiAdminRotate', BOOT.key); S.arec = r.recovery; S.armed = null; renderSet(); toast('أُبطل الرابط القديم'); }
   catch (e) { S.armed = null; renderSet(); $('#lkerr').textContent = e; }
 }
 async function logoutHere() {
   if (S.armed !== 'out') { S.armed = 'out'; renderSet(); return; }
   try { await API.apiAdminLogout(BOOT.key); } catch (e) {}
-  setSession(''); S.armed = null; renderLogin('طلعت من هالجهاز.');
+  setSession(''); S.armed = null; renderLogin('تم الخروج من هذا الجهاز.');
 }
 async function loadClean(apply) {
-  try { S.clean = await call('apiCleanup', BOOT.key, !!apply); if (apply) toast('انحذفت ' + (S.clean.deleted || 0) + ' ملف'); }
+  try { S.clean = await call('apiCleanup', BOOT.key, !!apply); if (apply) toast('حُذف ' + (S.clean.deleted || 0) + ' ملف'); }
   catch (e) { S.clean = {error: String(e)}; }
   if (S.view === 'set' && S.ssub === 'files') renderSet();
 }
@@ -3815,7 +3815,7 @@ function filesPageHtml() {
   if (!c) return '<div class="card"><div class="sub">جاري الجلب…</div></div>';
   if (c.error) return `<div class="card"><div class="err">${esc(c.error)}</div></div>`;
   const fs = c.files || [], del = c.mode === 'delete';
-  return `<div class="card"><div class="sub" style="margin:0 0 8px">${fs.length ? fs.length + ' ملف ما يستخدمه أي تقرير ولا فاتورة ولا حضور ولا سعر، وعمره أكثر من يوم.' : 'ما فيه ملفات غير مستخدمة.'} ${del ? 'الحذف مفعّل.' : 'الوضع الحين معاينة بس، وما ينحذف شي.'}</div>
+  return `<div class="card"><div class="sub" style="margin:0 0 8px">${fs.length ? fs.length + ' ملف لا يستخدمه أي تقرير أو فاتورة أو حضور أو سعر، ومضى عليه أكثر من يوم.' : 'لا توجد ملفات غير مستخدمة.'} ${del ? 'الحذف مفعّل.' : 'الوضع الحالي معاينة فقط، ولن يُحذف شيء.'}</div>
     ${fs.slice(0, 60).map(f => `<div class="row"><span dir="ltr" style="font-size:12px">${esc(String(f.path).slice(8, 20))}…</span><span class="sub">${esc(f.kind)} · ${esc(String(f.created_at || '').slice(0, 10))}</span></div>`).join('')}
     ${del && fs.length ? `<button class="btn2 ${S.armed==='clean'?'arm':''}" style="width:100%;margin-top:10px" onclick="if(S.armed!=='clean'){S.armed='clean';renderSet();}else{S.armed=null;loadClean(true);}">${S.armed==='clean'?'تأكيد الحذف':'احذفها'}</button>` : ''}</div>`;
 }
@@ -3825,10 +3825,10 @@ function rulesHtml(st) {
   return `<div style="font-size:14px;margin-top:10px">
     <div>• كل شهر يبدأ الحافز كامل.</div>
     <div>• كل تقصير ينقص ${M(st.miss, '', 't')}، والتقصير في الأمانة ينقص ${M(st.trust, '', 't')}.</div>
-    <div>• نفس التقصير ينحسب مرة وحدة باليوم، واليوم اللي ما فيه تسجيل ينحسب ناجح.</div>
-    <div>• كل موقف مميز فوق الواجب يزيد ${M(st.star, '', 't')}، لين ${M(st.starCap, '', 't')} بالشهر.</div>
-    ${Number(st.clean) > 0 ? `<div>• إذا خلص الشهر بدون ولا تقصير، مكافأة ${M(st.clean, '', 't')}.</div>` : ''}
-    <div>• الحافز ينصرف مع راتب نفس الشهر، والسلف تنخصم من الراتب.</div>
+    <div>• يُحتسب التقصير نفسه مرة واحدة في اليوم، واليوم الذي لا تسجيل فيه يُحتسب ناجحاً.</div>
+    <div>• كل موقف مميز فوق الواجب يزيد ${M(st.star, '', 't')}، حتى ${M(st.starCap, '', 't')} شهرياً.</div>
+    ${Number(st.clean) > 0 ? `<div>• إذا انتهى الشهر دون أي تقصير، مكافأة ${M(st.clean, '', 't')}.</div>` : ''}
+    <div>• يُصرف الحافز مع راتب الشهر نفسه، وتُخصم السلف من الراتب.</div>
     <div class="sub" style="margin-top:8px">الأداء: الحضور والمواعيد، جودة الشغل، إدارة العمال، حل المشاكل، متابعة الأعمال الموكلة، التركيز والانتباه، تأمين المشروع.<br>السلوك: الأمانة والمصداقية، الاحترام وحسن التعامل، الالتزام بالتعليمات، النظافة، الانضباط والمظهر.</div></div>`;
 }
 
@@ -3882,7 +3882,7 @@ function renderEmp(d, isPreview) {
   const rsub = S.etab === 'rep' ? rpEmpSub(d) : '';
   if (rsub) { $('#app').innerHTML = `<div class="top"><div><h1></h1></div></div><div id="view">${rsub}</div>`; rpHead(); rpAfterDetail(); return; }
   $('#app').innerHTML = `
-    ${isPreview ? `<button class="back" onclick="closePreview()">${I('arrow-right', 17)}رجوع للفريق</button><div class="note info">${I('eye', 16)}هذي معاينة، والموظف يشوف نفس الصفحة.</div>` : ''}
+    ${isPreview ? `<button class="back" onclick="closePreview()">${I('arrow-right', 17)}رجوع للفريق</button><div class="note info">${I('eye', 16)}هذه معاينة، ويرى الموظف الصفحة نفسها.</div>` : ''}
     <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>`}</div>${isPreview ? '' : pushHtml()}${mainTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) + violHtml(d) : ''}
     <div class="segc etabs e4 e3"><button class="${S.etab === 'rep' ? 'on' : ''}" onclick="S.etab='rep';RP.sent=null;RP.open=null;RP.hist=null;rerenderEmp()">تقاريري</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري${nRetInv ? '<span class="nb">' + nRetInv + '</span>' : ''}</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">راتبي</button></div>
     ${S.etab === 'inv' ? empInvHtml(d, isPreview) : S.etab === 'rep' ? rpEmpHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
@@ -3901,15 +3901,15 @@ function empPayHtml(d) {
   return `
     <div class="card" style="margin-top:16px">
       <div class="kpis" style="margin-top:0">
-        ${m.track ? `<div class="kpi"><div class="k">${I('x', 13, 2.5)}التقصير هالشهر</div><div class="v">${m.misses}</div></div>
-        <div class="kpi"><div class="k"><span class="gstar">${I('star', 13)}</span>مواقف مميزة</div><div class="v">${m.stars}</div></div>` : `<div class="kpi hero"><div class="k">${I('sparkles', 13)}حافزك الحين</div><div class="v">${M(m.bonus, '', 'big pos')}</div></div>
+        ${m.track ? `<div class="kpi"><div class="k">${I('x', 13, 2.5)}التقصير هذا الشهر</div><div class="v">${m.misses}</div></div>
+        <div class="kpi"><div class="k"><span class="gstar">${I('star', 13)}</span>مواقف مميزة</div><div class="v">${m.stars}</div></div>` : `<div class="kpi hero"><div class="k">${I('sparkles', 13)}حافزك الحالي</div><div class="v">${M(m.bonus, '', 'big pos')}</div></div>
         <div class="kpi"><div class="k">${I('history', 13)}تقصير · مميز</div><div class="v">${m.misses}<small> ✕</small> ${m.stars}<small class="gstar"> ★</small></div></div>`}
       </div>
       ${m.track ? '' : bonusTable(m)}
       ${next}
     </div>
     <div class="card">
-      ${ctitle('banknote', 'راتب ' + esc(f.label), f.paid ? `<span class="stx g">${I('check', 13, 3)}انصرف ${dmy(f.paidDate)}</span>` : `<span class="stx">${f.due ? 'موعد صرفه ' + esc(dueL(f.due)) : 'ما انصرف للحين'}</span>`)}<div style="height:6px"></div>
+      ${ctitle('banknote', 'راتب ' + esc(f.label), f.paid ? `<span class="stx g">${I('check', 13, 3)}صُرف ${dmy(f.paidDate)}</span>` : `<span class="stx">${f.due ? 'موعد صرفه ' + esc(dueL(f.due)) : 'لم يُصرف بعد'}</span>`)}<div style="height:6px"></div>
       ${salaryTable(f)}
       ${f.paid && f.paidAmount !== f.net ? `<div class="sub" style="margin-top:6px">المبلغ المصروف: ${sar(f.paidAmount)}</div>` : ''}
     </div>
@@ -3918,8 +3918,8 @@ function empPayHtml(d) {
       ${m.strength ? `<div class="note good" style="margin-top:0">${I('circle-check', 17)}<div><b>نقطة قوتك — ${esc(m.strength.crit)}</b><br>${esc(m.strength.text)}</div></div>` : ''}
       ${m.improve ? `<div class="imp">${I('triangle-alert', 14)}<div><b>ركّز على ${esc(m.improve.crit)}:</b> ${esc(m.improve.text)}</div></div>` : ''}
     </div>` : ''}
-    <div class="card">${ctitle('history', 'مواقف هالشهر')}<div style="margin-top:6px">
-      ${d.entries.length ? d.entries.map(x => entryHtml(x, false, m.track)).join('') : emptyHtml('inbox', 'ما فيه مواقف مسجلة هالشهر')}
+    <div class="card">${ctitle('history', 'مواقف هذا الشهر')}<div style="margin-top:6px">
+      ${d.entries.length ? d.entries.map(x => entryHtml(x, false, m.track)).join('') : emptyHtml('inbox', 'لا توجد مواقف مسجلة هذا الشهر')}
     </div></div>
     ${d.loans.length ? `<div class="card">${ctitle('hand-coins', 'السلف')}<div style="margin-top:10px">
       ${d.loans.map(l => `<div class="row"><span>سلفة ${sar(l.amount)} <span class="sub">· ${dmy(l.date)}</span></span><span>باقي ${sar(l.remaining)}</span></div><div class="sub">القسط الشهري ${sar(l.per)}</div>`).join('<div class="hair"></div>')}
@@ -3940,15 +3940,15 @@ function empPayHtml(d) {
 
 function empInvHtml(d, isPreview) {
   const iv = d.inv || {balance: 0, o: 0, items: []}, c = iv.c != null ? iv.c : (iv.balance || 0), t = iv.o || 0;
-  let h = `<div class="tbl2 ivb"><div class="tbr ${c < 0 ? 'neg' : ''}"><span class="ic">${I('wallet', 16)}</span><span class="k">${c < 0 ? 'صرفت أكثر من عهدتك' : 'العهدة اللي معك'}</span><span class="v">${M(Math.abs(c), c < 0 ? '−' : '', 'big')}</span></div>${t > 0 ? `<div class="tbr neg"><span class="ic">${I('hand-coins', 16)}</span><span class="k">لك عند المدير العام (من جيبك)</span><span class="v">${M(t, '', 'big')}</span></div>` : ''}</div>`;
+  let h = `<div class="tbl2 ivb"><div class="tbr ${c < 0 ? 'neg' : ''}"><span class="ic">${I('wallet', 16)}</span><span class="k">${c < 0 ? 'صرفت أكثر من عهدتك' : 'العهدة التي معك'}</span><span class="v">${M(Math.abs(c), c < 0 ? '−' : '', 'big')}</span></div>${t > 0 ? `<div class="tbr neg"><span class="ic">${I('hand-coins', 16)}</span><span class="k">لك لدى المدير العام (من حسابك الخاص)</span><span class="v">${M(t, '', 'big')}</span></div>` : ''}</div>`;
   if (!isPreview) h += S.invForm ? invFormHtml(d) : `<button class="btn2 cu ivsend" onclick="S.invForm=true;S.ishots=[];if(S.inv.edit)S.inv={amount:'',desc:'',project:''};rerenderEmp()">${I('receipt', 17)}أرسل فاتورة</button>`;
   const items = iv.items || [];
-  if (!items.length) return h + emptyHtml('receipt', 'ما أرسلت فواتير للحين');
+  if (!items.length) return h + emptyHtml('receipt', 'لم ترسل فواتير بعد');
   /* الإصدار 100: مجمّعة حسب اليوم: عنوان اليوم مرة وحدة، وداخل السطر الوقت بس */
   const row = x => {
     const st = invSt(x, true), give = x.kind === 'give', ph = invPhotosHtml(x, BOOT.page === 'admin');
     return `<div class="ivr"><div class="th"><span class="tt">${esc(x.desc)}${wBadge(x)}</span><b class="iva ${give ? (x.paidBy === 'ret' ? 'r' : 'g') : ''}">${M(x.amount, give ? (x.paidBy === 'ret' ? '−' : '+') : '')}</b></div>
-      <div class="ivrw"><div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · ' + (invCatL(x) ? esc(invCatL(x)) + ' · ' : '')}${t12(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان لين ' + dmy(x.warrantyUntil) : ''}</div>${ph.startsWith('<button class="mbtn"') ? ph : ''}</div>${invFixTag(x)}
+      <div class="ivrw"><div class="tm">${give ? (x.method ? esc(x.method) + ' · ' : '') : esc(x.pname || 'عام') + ' · ' + (invCatL(x) ? esc(invCatL(x)) + ' · ' : '')}${t12(x.ts)} · <span class="badge ${st[0]}">${st[1]}</span>${x.warrantyUntil ? ' · ضمان حتى ' + dmy(x.warrantyUntil) : ''}</div>${ph.startsWith('<button class="mbtn"') ? ph : ''}</div>${invFixTag(x)}
       ${x.status === 'returned' && x.reason ? `<div class="note bad" style="margin-top:6px"><div><b>المدير العام يقول:</b> ${esc(x.reason)}</div></div>` : ''}
       ${!isPreview && x.kind === 'inv' && x.status === 'returned' && !x.task && !(S.invForm && S.inv.edit === x.id) ? `<button class="bigdo" style="border:0;font-family:inherit;cursor:pointer" onclick="invEdit('${x.id}')">${I('pencil', 15, 2.2)}صحّح وأعد الإرسال</button>` : ''}
       ${ph.startsWith('<button class="mbtn"') ? '' : ph}</div>`;
@@ -3989,8 +3989,8 @@ function invFormHtml(d) {
     ${f.cat === 'sal' ? salPickHtml(f) : ''}
     ${projPick(ps, f.project, 'S.inv')}
     <div class="sub" style="margin:4px 0 -2px">دفعت من؟</div>
-    <div class="segc">${[['cash', 'العهدة'], ['own', 'من جيبي'], ['card', 'المدير العام']].map(o => `<button class="${(f.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="S.inv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>
-    <div class="sub" style="margin-top:-4px">${f.paidBy === 'card' ? 'ما تنخصم من عهدتك' : f.paidBy === 'own' ? 'ترجع لك بعد ما يعتمدها المدير العام' : 'تنخصم من العهدة اللي معك'}</div>
+    <div class="segc">${[['cash', 'العهدة'], ['own', 'من حسابي الخاص'], ['card', 'المدير العام']].map(o => `<button class="${(f.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="S.inv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>
+    <div class="sub" style="margin-top:-4px">${f.paidBy === 'card' ? 'لا تُخصم من عهدتك' : f.paidBy === 'own' ? 'تُعاد لك بعد اعتماد المدير العام' : 'تُخصم من العهدة التي معك'}</div>
     ${ed ? '' : `<label class="tgl"><span>عليها ضمان؟</span><input type="checkbox" ${f.wOn ? 'checked' : ''} onchange="S.inv.wOn=this.checked;if(this.checked&&!S.inv.w)S.inv.w=12;rerenderEmp()"></label>`}
     ${!ed && f.wOn ? `<div class="wchips">${[[6, '6 أشهر'], [12, 'سنة'], [24, 'سنتين']].map(c => `<button class="${!f.wc && f.w === c[0] ? 'on' : ''}" onclick="S.inv.w=${c[0]};S.inv.wc=false;rerenderEmp()">${c[1]}</button>`).join('')}<button class="${f.wc ? 'on' : ''}" onclick="S.inv.wc=true;rerenderEmp()">غيره</button></div>
       ${f.wc ? `<input inputmode="numeric" placeholder="كم شهر؟" value="${f.w || ''}" oninput="S.inv.w=Number(String(this.value).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)))||0">` : ''}` : ''}
@@ -4015,9 +4015,9 @@ async function sendInv() {
   const f = S.inv, err = () => $('#ierr');
   if (!S.ishots.length && !(f.edit && (f.keep || []).length)) { err().textContent = 'صوّر الفاتورة'; return; }
   if (!(API.parseAmt(f.amount) > 0)) { err().textContent = 'اكتب المبلغ'; return; }
-  if (!f.desc.trim()) { err().textContent = 'اكتب وش اشتريت'; return; }
+  if (!f.desc.trim()) { err().textContent = 'اكتب وصف المشتريات'; return; }
   if (!f.edit && f.wOn && !(f.w >= 1 && f.w <= 120)) { err().textContent = 'اكتب مدة الضمان بالأشهر'; return; }
-  if (f.cat === 'sal' && !f.salEmp) { err().textContent = 'اختر الموظف اللي سلّمته الراتب'; return; }
+  if (f.cat === 'sal' && !f.salEmp) { err().textContent = 'اختر الموظف الذي سلّمته الراتب'; return; }
   if (S.busy) return;
   S.busy = true; rerenderEmp();
   if (f.edit) {
@@ -4033,7 +4033,7 @@ async function sendInv() {
   try {
     const d = await callT(120000, 'apiInvAdd', BOOT.token, {cid: f.cid || '', amount: f.amount, desc: f.desc, project: f.project, vendor: f.vendor || '', cat: f.cat || '', salEmp: f.salEmp || '', warranty: f.wOn ? f.w : 0, paidBy: f.paidBy || 'cash'}, S.ishots);
     S.busy = false; S.invForm = false; S.ishots = []; S.inv = {amount: '', desc: '', project: f.project};
-    renderEmp(d, false); toast('انرسلت الفاتورة');
+    renderEmp(d, false); toast('تم إرسال الفاتورة');
   } catch (e) {
     S.busy = false; rerenderEmp(); const el = $('#ierr'); if (el) el.textContent = e;
   }
@@ -4053,7 +4053,7 @@ function resizeImg(file, maxD, q) {
       URL.revokeObjectURL(url);
       res(c.toDataURL('image/jpeg', q || 0.72));
     };
-    img.onerror = () => { URL.revokeObjectURL(url); rej('ما قدرت أقرأ الصورة، جرّب صورة ثانية'); };
+    img.onerror = () => { URL.revokeObjectURL(url); rej('تعذّرت قراءة الصورة، جرّب صورة أخرى'); };
     img.src = url;
   });
 }
@@ -4086,10 +4086,10 @@ async function refresh(silent) {
   if (refreshing && Date.now() - refreshing < 45000) return;
   /* الإصدار 87: وقت الإرسال السحب للتحديث كان ما يسوي شي بصمت. الحين رسالة، ويتحدّث لحاله أول ما يخلص */
   if (S.busy) {
-    if (!silent) { toast('انتظر لين يخلص الإرسال، وبعدها يتحدّث لحاله', null, 'in'); if (!refresh.wait) { const t0 = Date.now(); refresh.wait = setInterval(() => { if (!S.busy || Date.now() - t0 > 300000) { clearInterval(refresh.wait); refresh.wait = 0; if (!S.busy) refresh(true); } }, 1500); } }
+    if (!silent) { toast('انتظر حتى ينتهي الإرسال، ثم يتحدّث تلقائياً', null, 'in'); if (!refresh.wait) { const t0 = Date.now(); refresh.wait = setInterval(() => { if (!S.busy || Date.now() - t0 > 300000) { clearInterval(refresh.wait); refresh.wait = 0; if (!S.busy) refresh(true); } }, 1500); } }
     return;
   }
-  if (S.upN) { if (!silent) toast('انتظر لين يخلص الرفع', null, 'in'); return; }
+  if (S.upN) { if (!silent) toast('انتظر حتى ينتهي الرفع', null, 'in'); return; }
   if (S.gr) return;
   if (silent && (S.invForm || S.form || S.gform || S.ret || S.sheet || /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || ''))) return;
   if (await checkUpdate(!silent)) return;
@@ -4112,7 +4112,7 @@ async function refresh(silent) {
     if (!silent) toast('تحدّثت');
   } catch (e) {
     RF.fail = true; rfBar();
-    if (!silent) toastErr('ما قدرت أحدّث، تأكد من النت');
+    if (!silent) toastErr('تعذّر التحديث، تأكد من الإنترنت');
   } finally {
     refreshing = 0;
     document.querySelectorAll('.rf').forEach(b => b.classList.remove('spin'));
@@ -4130,7 +4130,7 @@ async function refresh(silent) {
     pulled = e.touches[0].clientY - y0;
     if (pulled > 0) {
       ind.style.height = Math.min(pulled * 0.45, 56) + 'px';
-      ind.textContent = pulled > 110 ? 'اترك عشان تحدّث' : 'اسحب للتحديث';
+      ind.textContent = pulled > 110 ? 'اترك للتحديث' : 'اسحب للتحديث';
     }
   }, {passive: true});
   window.addEventListener('touchend', () => {
@@ -4216,7 +4216,7 @@ async function refresh(silent) {
     if (document.visibilityState === 'visible') { if (Date.now() - lastLoad > 60000) refresh(true); else checkUpdate(); seenPing(true); seenPoll(); }
     if (document.visibilityState === 'hidden') seenBye();
   });
-  window.addEventListener('error', () => toastErr('صار خطأ، اسحب الصفحة لتحت عشان تحدّث'));
+  window.addEventListener('error', () => toastErr('حدث خطأ، اسحب الصفحة للأسفل للتحديث'));
 })();
 
 /* الإصدار 62: تقارير تقدم الأعمال */
@@ -4380,7 +4380,7 @@ function rpCloseHist() { RP.hist = null; rpRerender(); toTop(); }
 function krOf(p, st) { return (S.data.ideas || []).filter(x => x.proj === p && (!st || x.status === st)); }
 function krCnt(n) { return n === 1 ? 'فكرة وحدة' : n === 2 ? 'فكرتين' : n <= 10 ? n + ' أفكار' : n + ' فكرة'; }
 function krDate(ms) { const d = new Date(ms + 3 * 36e5); return d.getUTCDate() + ' ' + MONTHS_AR[d.getUTCMonth()]; }
-function krRow(p) { const n = krOf(p, 'open').length; return tbRow('lightbulb', 'الكراسة', n ? krCnt(n) : '<span class="lv">فاضية</span>', `krOpenBook('${p}')`); }
+function krRow(p) { const n = krOf(p, 'open').length; return tbRow('lightbulb', 'الكراسة', n ? krCnt(n) : '<span class="lv">فارغة</span>', `krOpenBook('${p}')`); }
 function krOpenBook(p) { Object.assign(RP, {book: p, kd: '', ks: null, ke: null, ka: null, kf: false}); rpRerender(); toTop(); }
 function krCloseBook() { RP.book = null; RP.ks = RP.ke = RP.ka = null; rpRerender(); toTop(); }
 function krLine(x) {
@@ -4390,7 +4390,7 @@ function krLine(x) {
   const meta = ar ? (x.out === 'y' ? `<span class="ko y">${I('check', 12, 2.5)}اعتمدتها</span>` : `<span class="ko n">${I('x', 12, 2.5)}استبعدتها</span>`) + krDate(x.archAt || x.ts) : krDate(x.ts);
   let h = `<li class="${on ? 'on' : ''}" onclick="krSel('${x.id}')"><span class="kt">${esc(x.text)}</span><span class="kd">${meta}</span>`;
   if (on) h += `<div class="kops" onclick="event.stopPropagation()">${ar
-    ? `<button onclick="krReopen('${x.id}')">${I('rotate-ccw', 14)}رجّعها للدراسة</button>`
+    ? `<button onclick="krReopen('${x.id}')">${I('rotate-ccw', 14)}إعادتها للدراسة</button>`
     : `<button onclick="krOut('${x.id}','y')">${I('check', 14, 2.5)}اعتمدتها</button><button onclick="krOut('${x.id}','n')">${I('x', 14, 2.5)}استبعدتها</button><button onclick="krEd('${x.id}')">${I('pencil', 14)}تعديل</button>`}<button class="dl ${RP.ka === x.id ? 'arm' : ''}" onclick="krDel('${x.id}')">${RP.ka === x.id ? 'متأكد؟ اضغط مرة ثانية' : 'حذف'}</button></div>`;
   return h + '</li>';
 }
@@ -4400,8 +4400,8 @@ function krPageHtml() {
     <div class="rpmeta">${I('lightbulb', 15)}<span>${esc(projName(p))} · أفكارك للدراسة</span></div>
     <div class="rpcard krc"><div class="rch"><span class="ci">${I('lightbulb', 16)}</span>الأفكار${op.length ? `<span class="cn">${op.length}</span>` : ''}</div>
     <div class="ladd one rca"><input id="kr_n" placeholder="اكتب فكرة" maxlength="300" value="${esc(RP.kd || '')}" oninput="RP.kd=this.value" onkeydown="if(event.key==='Enter')krAdd()"><button class="btn2 cu" onclick="krAdd()">${I('plus', 16)}إضافة</button></div>`;
-  h += op.length ? `<ul class="tkl">${op.map(krLine).join('')}</ul>` : `<div class="kempty">الكراسة فاضية. اكتب أول فكرة لمشروع ${esc(projName(p))}.</div>`;
-  h += `<div class="rhint" style="margin-top:6px">${I('lock', 14)}لك بس، الموظف ما يشوفها. اضغط الفكرة لتعتمدها أو تستبعدها أو تعدّلها، وما تصير مهمة أو عمل.</div></div>`;
+  h += op.length ? `<ul class="tkl">${op.map(krLine).join('')}</ul>` : `<div class="kempty">الكراسة فارغة. اكتب أول فكرة لمشروع ${esc(projName(p))}.</div>`;
+  h += `<div class="rhint" style="margin-top:6px">${I('lock', 14)}لك فقط، ولا يراها الموظف. اضغط الفكرة لاعتمادها أو استبعادها أو تعديلها، ولا تتحول إلى مهمة أو عمل.</div></div>`;
   if (ar.length) {
     h += `<button class="rpfold kfold" aria-expanded="${!!RP.kf}" onclick="RP.kf=!RP.kf;rpRerender()"><span class="ic">${I('archive', 16)}</span><span class="k">المؤرشفة</span><span class="v">${ar.length}<span class="cv2 ${RP.kf ? 'on' : ''}">${I('chevron-left', 16)}</span></span></button>`;
     if (RP.kf) h += `<div class="rpcard krc"><ul class="tkl">${ar.map(krLine).join('')}</ul></div>`;
@@ -4422,15 +4422,15 @@ async function krAdd() {
 }
 function krSel(id) { RP.ks = RP.ks === id ? null : id; RP.ke = RP.ka = null; rpRerender(); }
 function krEd(id) { const x = krOf(RP.book).find(y => y.id === id); RP.ke = id; RP.kt = x ? x.text : ''; rpRerender(); const i = $('#kr_e'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }
-async function krEdSave() { const v = String(RP.kt || '').trim(); if (!v) return; const id = RP.ke; if (await krDo('apiIdeaUpd', [id, v], 'انحفظت')) RP.ke = null, rpRerender(); }
+async function krEdSave() { const v = String(RP.kt || '').trim(); if (!v) return; const id = RP.ke; if (await krDo('apiIdeaUpd', [id, v], 'تم الحفظ')) RP.ke = null, rpRerender(); }
 async function krOut(id, o) { RP.ks = null; await krDo('apiIdeaOut', [id, o], o === 'y' ? 'اعتمدتها وانتقلت للمؤرشفة' : 'استبعدتها وانتقلت للمؤرشفة', () => krReopen(id, true)); }
-async function krReopen(id, quiet) { RP.ks = null; await krDo('apiIdeaOpen', [id], quiet ? 'رجعت' : 'رجعت للدراسة'); }
+async function krReopen(id, quiet) { RP.ks = null; await krDo('apiIdeaOpen', [id], quiet ? 'أُعيدت' : 'أُعيدت للدراسة'); }
 async function krDel(id) {
   if (RP.ka !== id) { RP.ka = id; rpRerender(); return; }
-  RP.ka = RP.ks = null; await krDo('apiIdeaDel', [id], 'انحذفت', () => krUndel(id));
+  RP.ka = RP.ks = null; await krDo('apiIdeaDel', [id], 'تم الحذف', () => krUndel(id));
 }
 async function krUndel(id) {
-  try { S.data = await call('apiIdeaUndel', BOOT.key, id); if (S.view === 'set') renderAdmin(); else rpRerender(); toast('رجعت'); } catch (e) { toastErr(e); }
+  try { S.data = await call('apiIdeaUndel', BOOT.key, id); if (S.view === 'set') renderAdmin(); else rpRerender(); toast('أُعيدت'); } catch (e) { toastErr(e); }
 }
 
 function rpItems(arr, tags, cls, r, isAdmin) {
@@ -4492,7 +4492,7 @@ async function rpUndone(btn) {
   try {
     await call('apiRepUndone', id, item);
     await rpTickReload();
-    RP.busy = false; RP.unArm = null; rpRerender(); toast('رجع إلى الأعمال الحالية');
+    RP.busy = false; RP.unArm = null; rpRerender(); toast('أُعيد إلى الأعمال الحالية');
   } catch (e) { RP.busy = false; RP.unArm = null; rpRerender(); toastErr(e); }
 }
 function rpFilesHtml(fs) {
@@ -4583,7 +4583,7 @@ function rpPendSteps(r, x) {
   const open = RP.ps === r.id + '|' + x, i = rpArr(r.cur).indexOf(x);
   const left = !miss.length ? '' : ` · <span class="psm">${miss.length <= 2 ? 'باقي: ' + esc(miss.join('، ')) : `باقي ${miss.length} خطوات`}</span>`;
   const who = s => s.doneBy === 'admin' ? 'المدير العام' : shortName(s.doneName || '');
-  const list = !open ? '' : `<ul class="psl">${ss.map(s => `<li class="${s.done ? 'ok' : 'no'}"><span class="psd">${s.done ? I('check', 12, 3) : '!'}</span><span><span>${esc(s.t)}</span><small>${s.done ? esc(who(s)) : 'ما انأشرت'}</small></span></li>`).join('')}</ul>`;
+  const list = !open ? '' : `<ul class="psl">${ss.map(s => `<li class="${s.done ? 'ok' : 'no'}"><span class="psd">${s.done ? I('check', 12, 3) : '!'}</span><span><span>${esc(s.t)}</span><small>${s.done ? esc(who(s)) : 'غير منجزة'}</small></span></li>`).join('')}</ul>`;
   return `<button class="pst" aria-expanded="${open}" onclick="rpPsTog('${r.id}',${i})"><span><span>الخطوات: ${n} من ${ss.length} منجزة</span>${left}</span>${I(open ? 'chevron-up' : 'chevron-down', 15)}</button>${list}`;
 }
 function rpPsTog(id, i) { const r = (RP.reps || []).find(z => z.id === id); if (!r) return; const k = id + '|' + rpArr(r.cur)[i]; RP.ps = RP.ps === k ? null : k; rpRerender(); }
@@ -4611,7 +4611,7 @@ function rpAlertLine(r, item, isAdmin) {
   if (!as.length) return '';
   if (isAdmin) {
     const last = {}; as.forEach(a => { if (!last[a.emp] || last[a.emp].at < a.at) last[a.emp] = a; });
-    if (item) return Object.values(last).map(a => `<div class="ials it">${I('bell-ring', 13)}<span>${esc(shortName(a.name || ''))} ${a.seen ? `<b class="ok">شاف التنبيه <span class="nw2">${esc(rpTickWhen(a.seen))}</span></b>` : `<b>أُرسل له التنبيه <span class="nw2">${esc(rpTickWhen(a.at))}</span>، ما شافه</b>`}</span></div>`).join(''); /* v124 */
+    if (item) return Object.values(last).map(a => `<div class="ials it">${I('bell-ring', 13)}<span>${esc(shortName(a.name || ''))} ${a.seen ? `<b class="ok">شاهد التنبيه <span class="nw2">${esc(rpTickWhen(a.seen))}</span></b>` : `<b>أُرسل له التنبيه <span class="nw2">${esc(rpTickWhen(a.at))}</span>، لم يشاهده</b>`}</span></div>`).join(''); /* v124 */
     return `<div class="ials">${I('bell-ring', 13)}<span>تنبيه التقرير: ${Object.values(last).map(a => `${esc(shortName(a.name || ''))}: ${a.seen ? `<b class="ok">تمت المشاهدة ${esc(rpTickWhen(a.seen))}</b>` : `<b>تم الإرسال ${esc(rpTickWhen(a.at))}</b>`}`).join(' · ')}</span></div>`;
   }
   const a = as[0];
@@ -4892,7 +4892,7 @@ function rpEditMerge(f, r) {
   rpArr(r.cur).filter(t => !o.cur.includes(t)).forEach(t => { if (o.later.includes(t)) f.later = f.later.filter(x => x.t !== t); if (!has(t)) { f.cur.push({t: t, o: t}); add.push(t); } });
   rpArr(r.later).filter(x => !o.later.includes(x.t) && !has(x.t)).forEach(x => { f.later.push({t: x.t, after: x.after || ''}); add.push(x.t); });
   f.rev = r.rev; f.orig = rpEditSnap(r);
-  f.warn = add.length ? 'تغيّر التقرير بعد ما فتحت التعديل. انضاف هنا: ' + add.join('، ') + '. راجع واحفظ.' : 'تغيّر التقرير بعد ما فتحت التعديل. راجع واحفظ.';
+  f.warn = add.length ? 'تغيّر التقرير بعد فتحك للتعديل. أُضيف: ' + add.join('، ') + '. راجع واحفظ.' : 'تغيّر التقرير بعد فتحك للتعديل. راجع واحفظ.';
 }
 function rpEditAfter(a) {
   if (!a) return 'غير مرتبطة بعمل';
@@ -5235,7 +5235,7 @@ async function rpLqRev(id, rid, ok, btn) {
     RP.lqv = null;
     await rpTickReload();
     RP.busy = false; rpRerender();
-    toast(!ok ? 'تم رفض الطلب، ووصل الموظف إشعار' : res.to === 'cur' ? 'انضاف للأعمال الحالية لأن العمل الذي يبدأ بعده أُنجز' : 'انضاف للأعمال اللاحقة، ووصل الموظف إشعار');
+    toast(!ok ? 'تم رفض الطلب، ووصل الموظف إشعار' : res.to === 'cur' ? 'أُضيف إلى الأعمال الحالية لأن العمل الذي يبدأ بعده أُنجز' : 'أُضيف إلى الأعمال اللاحقة، ووصل الموظف إشعار');
   } catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
 }
 /* الإصدار 101: أسعار الموردين والفنيين تحت العمل الحالي. العامل يضيف السعر، والمدير العام يختار واحداً ويعتمده */
@@ -5337,7 +5337,7 @@ async function rqSave() {
   if (RP.qf === d) { RP.qf = null; ovClose(); }
   try { await rpTickReload(); } catch (e) { RP.need = true; }
   rpRerender();
-  toast(BOOT.page === 'emp' ? 'انرسل السعر للمدير العام' : 'انضاف السعر');
+  toast(BOOT.page === 'emp' ? 'أُرسل السعر إلى المدير العام' : 'تمت إضافة السعر');
 }
 async function rqOk(id, j, btn) {
   if (RP.busy) return;
@@ -5352,7 +5352,7 @@ async function rqOk(id, j, btn) {
 async function rqUndo(qid) {
   if (RP.busy) return;
   RP.busy = true;
-  try { await call('apiRepQuoteOk', qid, true); await rpTickReload(); RP.busy = false; rpRerender(); toast('رجع السعر بانتظار قرارك'); }
+  try { await call('apiRepQuoteOk', qid, true); await rpTickReload(); RP.busy = false; rpRerender(); toast('أُعيد السعر بانتظار قرارك'); }
   catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
 }
 let rqArmT;
@@ -5360,7 +5360,7 @@ async function rqDel(qid) {
   if (RP.qarm !== qid) { RP.qarm = qid; rpRerender(); clearTimeout(rqArmT); rqArmT = setTimeout(() => { if (RP.qarm === qid) { RP.qarm = null; rpRerender(); } }, 4000); return; }
   if (RP.busy) return;
   RP.busy = true; RP.qarm = null;
-  try { await call('apiRepQuoteDel', qid); await rpTickReload(); RP.busy = false; rpRerender(); toast('انحذف السعر'); }
+  try { await call('apiRepQuoteDel', qid); await rpTickReload(); RP.busy = false; rpRerender(); toast('تم حذف السعر'); }
   catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
 }
 /* الإصدار 97: إضافة عمل حالي من صفحة التقرير، للمدير وللموظف مباشرة مثل النموذج */
@@ -5373,7 +5373,7 @@ async function rpCurAdd(id) {
   const t = String((RP.ca && RP.ca.id === id ? RP.ca.t : (document.getElementById('rca_t') || {}).value) || '').trim();
   if (!t) return toast('اكتب العمل أولاً', null, 'er');
   RP.busy = true;
-  try { await call('apiRepCurAdd', id, t); RP.ca = null; await rpTickReload(); RP.busy = false; rpRerender(); toast('انضاف للأعمال الحالية'); }
+  try { await call('apiRepCurAdd', id, t); RP.ca = null; await rpTickReload(); RP.busy = false; rpRerender(); toast('أُضيف إلى الأعمال الحالية'); }
   catch (e) { RP.busy = false; toastErr(e); }
 }
 function rpLaterAddHtml(r, isAdmin) {
@@ -5391,7 +5391,7 @@ async function rpLaterAdd(id) {
   if (!t) return toast('اكتب العمل اللاحق أولاً', null, 'er');
   const cur = rpArr(r.cur), aft = st.a !== '' && st.a != null ? cur[+st.a] || '' : '';
   RP.busy = true;
-  try { const res = await call('apiRepLaterAdd', id, t, aft) || {}; RP.la = null; await rpTickReload(); RP.busy = false; rpRerender(); toast(res.dup ? 'الطلب مرسل من قبل، بانتظار الاعتماد' : res.req ? 'أُرسل للمدير العام للاعتماد' : 'انضاف للأعمال اللاحقة', null, res.dup ? 'in' : undefined); }
+  try { const res = await call('apiRepLaterAdd', id, t, aft) || {}; RP.la = null; await rpTickReload(); RP.busy = false; rpRerender(); toast(res.dup ? 'الطلب مرسل من قبل، بانتظار الاعتماد' : res.req ? 'أُرسل للمدير العام للاعتماد' : 'أُضيف إلى الأعمال اللاحقة', null, res.dup ? 'in' : undefined); }
   catch (e) { RP.busy = false; toastErr(e); }
 }
 function rpOrdStart(id) { const r = (RP.reps || []).find(x => x.id === id); if (!r) return; RP.ord = {id: id, items: rpArr(r.cur).slice(), o0: rpArr(r.cur).join('\n')}; rpRerender(); }
@@ -5404,7 +5404,7 @@ async function rpOrdDone() {
   const o = RP.ord; if (!o || RP.busy) return;
   if (o.items.join('\n') === o.o0) { RP.ord = null; return rpRerender(); }
   RP.busy = true;
-  try { await call('apiRepCurOrder', o.id, o.items); await rpTickReload(); RP.ord = null; RP.busy = false; rpRerender(); toast('انحفظ الترتيب'); }
+  try { await call('apiRepCurOrder', o.id, o.items); await rpTickReload(); RP.ord = null; RP.busy = false; rpRerender(); toast('تم حفظ الترتيب'); }
   catch (e) { RP.busy = false; toastErr(e); }
 }
 /* السحب من المسكة: يشتغل باللمس على الآيفون (pointer events) */
@@ -5440,9 +5440,9 @@ function stMe() { return BOOT.page === 'admin' ? 'admin' : (S.empData ? S.empDat
 function stNowHtml(ss) {
   const n = ss.filter(s => s.done).length, c = ss.find(s => !s.done);
   /* الإصدار 126: الخطوات كلها منجزة والعمل لسا في الحالية (مثل خطوة «اعتماد السعر» لحالها): الباقي إنجاز العمل نفسه، مو «خلصت الخطوات كلها» */
-  if (!c) return `<small class="snow"><span>${n} من ${ss.length} منجزة</span> · <span>الحين:</span> <b>إنجاز العمل</b></small>`;
+  if (!c) return `<small class="snow"><span>${n} من ${ss.length} منجزة</span> · <span>الآن:</span> <b>إنجاز العمل</b></small>`;
   /* الإصدار 124: سطر واحد. «n من N منجزة» بدل «الخطوة n+1 من N» (كان يوهم إن الحين رقمها n+1)، والتقدم في الحلقة مكان الدائرة */
-  return `<small class="snow"><span>${n} من ${ss.length} منجزة</span> · <span>الحين:</span> <b>${esc(c.t)}</b></small>`;
+  return `<small class="snow"><span>${n} من ${ss.length} منجزة</span> · <span>الآن:</span> <b>${esc(c.t)}</b></small>`;
 }
 function stPanelHtml(r, x, j, ss, isAdmin) {
   const me = stMe(), left = ss.filter(s => !s.done).length, c = ss.find(s => !s.done);
@@ -5455,7 +5455,7 @@ function stPanelHtml(r, x, j, ss, isAdmin) {
     const meta = s.done ? (s.doneBy === 'admin' ? 'المدير العام' : shortName(s.doneName || '')) + ' · ' + rpTickWhen(s.done) : s.by !== 'admin' ? 'أضافها ' + shortName(s.name || '') : '';
     return `<li class="${s.done ? 'ok' : s === c ? 'cur' : 'nx'}">${bt}<span>${esc(s.t)}${s.pay ? `<span class="spay">${I('banknote', 12)}دفعة</span>` : ''}${meta ? `<small>${esc(meta)}</small>` : ''}</span>${canDel ? `<button class="sdel${arm ? ' arm' : ''}" onclick="rpStDel('${s.id}')" aria-label="حذف الخطوة">${arm ? 'حذف؟' : I('x', 14, 2.5)}</button>` : ''}</li>`;
   }).join('') + '</ul>' : '';
-  if (left === 1) h += `<div class="rhint">${I('info', 13)}${isAdmin ? 'آخر خطوة تنهي العمل وتنقله للأعمال المنجزة' : 'آخر خطوة تنهي العمل، وتنرسل للمدير العام للاعتماد'}</div>`;
+  if (left === 1) h += `<div class="rhint">${I('info', 13)}${isAdmin ? 'آخر خطوة تنهي العمل وتنقله للأعمال المنجزة' : 'آخر خطوة تُنهي العمل، ويُرسل إلى المدير العام للاعتماد'}</div>`;
   return h + `<div class="sadd"><input id="st_new" placeholder="خطوة جديدة" maxlength="200" value="${esc(RP.sd || '')}" oninput="RP.sd=this.value" onkeydown="if(event.key==='Enter')rpStAdd('${r.id}',${j})"><button onclick="rpStAdd('${r.id}',${j})">${I('plus', 14)}إضافة</button></div>`;
 }
 function rpStToggle(id, j) {
@@ -5477,7 +5477,7 @@ async function rpStAdd(id, j) {
     await call('apiRepStepAdd', id, item, t);
     RP.sd = ''; RP.sopen = stKey(r, item);
     await rpTickReload();
-    RP.busy = false; rpRerender(); toast('انضافت الخطوة');
+    RP.busy = false; rpRerender(); toast('تمت إضافة الخطوة');
     setTimeout(() => { const i = document.getElementById('st_new'); if (i) i.focus(); }, 50);
   } catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
 }
@@ -5488,14 +5488,14 @@ async function rpStTick(sid, undo) {
     await call('apiRepStepTick', sid, !!undo);
     await rpTickReload();
     RP.busy = false; rpRerender();
-    toast(undo ? 'رجعت الخطوة' : 'تمت الخطوة', undo ? null : () => rpStTick(sid, true));
+    toast(undo ? 'أُعيدت الخطوة' : 'تمت الخطوة', undo ? null : () => rpStTick(sid, true));
   } catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
 }
 async function rpStDel(sid) {
   if (RP.busy) return;
   if (RP.sarm !== sid) { RP.sarm = sid; rpRerender(); return; }
   RP.busy = true; RP.sarm = null;
-  try { await call('apiRepStepDel', sid); await rpTickReload(); RP.busy = false; rpRerender(); toast('انحذفت الخطوة'); }
+  try { await call('apiRepStepDel', sid); await rpTickReload(); RP.busy = false; rpRerender(); toast('تم حذف الخطوة'); }
   catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
 }
 async function rpTickReload() { rpApply(await callT(20000, 'apiRepList')); RP.stale = false; rfBar(); }
@@ -5527,13 +5527,13 @@ async function rpTickGo() {
 async function rpTickBack(id, item, pos) {
   if (RP.busy) return;
   RP.busy = true;
-  try { await call('apiRepTickBack', id, item, pos); await rpTickReload(); RP.busy = false; rpRerender(); toast('رجع إلى الأعمال الحالية'); }
+  try { await call('apiRepTickBack', id, item, pos); await rpTickReload(); RP.busy = false; rpRerender(); toast('أُعيد إلى الأعمال الحالية'); }
   catch (e) { RP.busy = false; toastErr(e); }
 }
 async function rpUntick(id, item) {
   if (RP.busy) return;
   RP.busy = true;
-  try { const res = await call('apiRepTick', id, item, true); await rpTickReload(); RP.busy = false; rpRerender(); toast(res && res.cancel ? 'سُحب طلب الاعتماد' : 'رجع إلى الأعمال الحالية'); }
+  try { const res = await call('apiRepTick', id, item, true); await rpTickReload(); RP.busy = false; rpRerender(); toast(res && res.cancel ? 'سُحب طلب الاعتماد' : 'أُعيد إلى الأعمال الحالية'); }
   catch (e) { RP.busy = false; toastErr(e); }
 }
 const RP_TD_ACC = 'image/' + '*,video/' + '*';
@@ -5602,7 +5602,7 @@ async function rpTdSave() {
   const id = d.id, item = d.item, res = d.res || {};
   if (res.dup && res.done) toast('العمل معتمد من قبل', null, 'in');
   else if (res.dup) toast('الطلب مرسل من قبل، بانتظار الاعتماد', null, 'in');
-  else toast('انرسل للمدير العام للاعتماد', () => rpUntick(id, item));
+  else toast('أُرسل إلى المدير العام للاعتماد', () => rpUntick(id, item));
 }
 function rpNowList(r, arr, isAdmin) {
   const me = !isAdmin && S.empData ? S.empData.id : '';
@@ -5715,7 +5715,7 @@ function rpDefOpen(id, i) {
     <div class="sub" style="margin:-6px 0 12px">${esc(item)}</div>
     <div class="field"><span>سبب التأجيل (اختياري)</span><input id="df_why" maxlength="150" onkeydown="if(event.key==='Enter')rpDefSave()"></div>
     <div class="field"><span>يبدأ بعد (اختياري)</span><select id="df_aft"><option value="">غير مرتبط بعمل</option>${cur.map((x, n) => `<option value="${n}">${esc(cut(x))}</option>`).join('')}</select></div>
-    <div class="sub" style="margin:0 0 12px">ينتقل إلى الأعمال اللاحقة، ويوصل الموظف إشعار بالسبب.</div>
+    <div class="sub" style="margin:0 0 12px">ينتقل إلى الأعمال اللاحقة، ويصل الموظف إشعار بالسبب.</div>
     <div class="err" id="dferr"></div>
     <button class="btn2 cu qbig" onclick="rpDefSave()">${I('clock', 17)}أجّل العمل</button>
     <button class="btn2" style="width:100%;margin-top:8px" onclick="RP.df=null;ovClose()">إلغاء</button>`);
@@ -5733,14 +5733,14 @@ async function rpDefSave() {
 }
 async function rpDefUndo(id, t) {
   if (RP.busy) return; RP.busy = true;
-  try { await call('apiRepNow', id, t, false); await rpTickReload(); RP.busy = false; rpRerender(); toast('رجع إلى الأعمال الحالية'); }
+  try { await call('apiRepNow', id, t, false); await rpTickReload(); RP.busy = false; rpRerender(); toast('أُعيد إلى الأعمال الحالية'); }
   catch (e) { RP.busy = false; toastErr(e); }
 }
 async function rpNoteDel(id, at) {
   if (RP.narm !== at) { RP.narm = at; rpRerender(); setTimeout(() => { if (RP.narm === at) { RP.narm = null; rpRerender(); } }, 4000); return; }
   if (RP.busy) return; RP.busy = true;
   const r = (RP.reps || []).find(x => x.id === id), n = r && rpArr(r.notes).find(x => x.at === at);
-  try { await call('apiRepNoteDel', id, at, n ? n.text : ''); RP.narm = null; await rpTickReload(); RP.busy = false; rpRerender(); toast('انحذفت الملاحظة'); }
+  try { await call('apiRepNoteDel', id, at, n ? n.text : ''); RP.narm = null; await rpTickReload(); RP.busy = false; rpRerender(); toast('تم حذف الملاحظة'); }
   catch (e) { RP.busy = false; RP.narm = null; rpRerender(); toastErr(e); }
 }
 async function rpNow(id, i, btn) {
@@ -5761,7 +5761,7 @@ async function rpNow(id, i, btn) {
 async function rpUnnow(id, item, req) {
   if (RP.busy) return;
   RP.busy = true;
-  try { await call('apiRepNow', id, item, true); await rpTickReload(); RP.busy = false; rpRerender(); toast(req ? 'أُلغي طلب النقل' : 'رجع إلى الأعمال اللاحقة'); }
+  try { await call('apiRepNow', id, item, true); await rpTickReload(); RP.busy = false; rpRerender(); toast(req ? 'أُلغي طلب النقل' : 'أُعيد إلى الأعمال اللاحقة'); }
   catch (e) { RP.busy = false; toastErr(e); }
 }
 function rpDecList(r, dec) {
@@ -5785,7 +5785,7 @@ function subHead() {
   const h1 = top.querySelector('h1');
   top.querySelectorAll('.back').forEach(b => b.remove());
   top.classList.remove('subp');
-  h1.textContent = ({rec:'التقييم', team:'الفريق', task:'الأعمال', fin:'المالية', set:'الإعدادات'})[S.view] || 'إدارة الشغل';
+  h1.textContent = ({rec:'التقييم', team:'الفريق', task:'الأعمال', fin:'المالية', set:'الإعدادات'})[S.view] || 'إدارة العمل';
   const back = v.querySelector(':scope > .back');
   if (!back) return;
   const h2 = v.querySelector(':scope > .fxh h2, :scope > h2');
@@ -5803,7 +5803,7 @@ let SHD = 0;
 
 if (BOOT.page === 'admin') loadAdmin();
 else if (BOOT.page === 'emp') loadEmp();
-else $('#app').innerHTML = '<div class="load"><div class="ei">' + I('link', 28) + '</div><b style="color:var(--text);font-size:17px">الرابط غير صالح</b><br>تأكد من الرابط اللي وصلك، أو اطلب رابط جديد.</div>';
+else $('#app').innerHTML = '<div class="load"><div class="ei">' + I('link', 28) + '</div><b style="color:var(--text);font-size:17px">الرابط غير صالح</b><br>تأكد من الرابط الذي وصلك، أو اطلب رابطاً جديداً.</div>';
 </script>
 </body>
 </html>

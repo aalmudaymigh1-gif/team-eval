@@ -53,8 +53,8 @@
   }
   function friendly(e) {
     const m = String((e && e.message) || e || '');
-    if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'ما فيه اتصال، تأكد من النت وجرّب مرة ثانية';
-    return m || 'صار خطأ، جرّب مرة ثانية';
+    if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return 'لا يوجد اتصال، تأكد من الإنترنت وحاول مرة أخرى';
+    return m || 'حدث خطأ، حاول مرة أخرى';
   }
   /* الإصدار 74: كل عملية تطلع برقم طلب (rid). لو وصلت السيرفر مرتين ينحفظ أول وحدة بس، والإعادة بعد فشل الاتصال تستخدم نفس الرقم */
   const RID = {};
@@ -110,7 +110,7 @@
     if (!m) throw new Error('الصورة غير صالحة');
     const bin = atob(m[2]), u = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
-    if (u.length > 8 * 1024 * 1024) throw new Error('الصورة كبيرة، جرّب وحدة ثانية');
+    if (u.length > 8 * 1024 * 1024) throw new Error('الصورة كبيرة، جرّب صورة أخرى');
     return new Blob([u], { type: m[1] });
   }
   function put(path, blob, type, onProgress) {
@@ -123,7 +123,7 @@
       x.setRequestHeader('x-upsert', 'false');
       x.setRequestHeader('cache-control', 'max-age=31536000');
       /* الإصدار 87: لو ما تقدّم الرفع 45 ثانية (نت ضعيف أو مقطوع) يتوقف ويطلع خطأ واضح، بدل ما يعلّق بدون نهاية */
-      let wd; const kick = () => { clearTimeout(wd); wd = setTimeout(() => { try { x.abort(); } catch (e) {} rej(new Error('تعذّر رفع الملف لأن الاتصال ضعيف. اللي ارتفع محفوظ، وأعد المحاولة يكمل الباقي')); }, 45000); };
+      let wd; const kick = () => { clearTimeout(wd); wd = setTimeout(() => { try { x.abort(); } catch (e) {} rej(new Error('تعذّر رفع الملف لضعف الاتصال. ما رُفع محفوظ، وإعادة المحاولة تُكمل الباقي')); }, 45000); };
       if (x.upload) x.upload.onprogress = ev => { kick(); if (onProgress && ev.lengthComputable) onProgress(ev.loaded / ev.total); };
       x.onloadend = () => clearTimeout(wd);
       kick();
@@ -131,9 +131,9 @@
         clearTimeout(wd);
         if (x.status >= 200 && x.status < 300) return res(path);
         let m = ''; try { m = JSON.parse(x.responseText).message || ''; } catch (e) {}
-        rej(new Error(m || 'ما ارتفع الملف، جرّب مرة ثانية'));
+        rej(new Error(m || 'تعذّر رفع الملف، حاول مرة أخرى'));
       };
-      x.onerror = () => { clearTimeout(wd); rej(new Error('ما فيه اتصال، تأكد من النت وجرّب مرة ثانية')); };
+      x.onerror = () => { clearTimeout(wd); rej(new Error('لا يوجد اتصال، تأكد من الإنترنت وحاول مرة أخرى')); };
       x.ontimeout = () => rej(new Error('الاتصال تأخر، جرّب مرة ثانية'));
       x.send(blob);
     });
@@ -178,7 +178,7 @@
         const r = await fetch(FILES_URL, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify(Object.assign({ op: 'sign', paths: part }, CRED)) });
         j = await r.json().catch(() => null);
-        if (!r.ok) throw new Error((j && j.error) || 'ما قدرت أفتح الملف');
+        if (!r.ok) throw new Error((j && j.error) || 'تعذّر فتح الملف');
       } catch (e) { throw new Error(friendly(e)); }
       const x = Date.now() + KEEP, urls = (j && j.urls) || {};
       part.forEach(p => { if (urls[p]) UC[p] = { u: urls[p], x: x }; });
@@ -188,17 +188,17 @@
   /* الإصدار 109: رابط الملف من الذاكرة لو ما قرب ينتهي، وإلا فاضي */
   const cachedUrl = p => (p && fresh(p) && UC[p].u) || '';
   async function fileUrl(path) {
-    if (!path) throw new Error('ما فيه صورة');
+    if (!path) throw new Error('لا توجد صورة');
     await signMany([path]);
-    if (!UC[path] || !UC[path].u) throw new Error('ما قدرت أفتح الملف');
+    if (!UC[path] || !UC[path].u) throw new Error('تعذّر فتح الملف');
     return UC[path].u;
   }
   async function imgUrl(path) {
-    if (!path) throw new Error('ما فيه صورة');
+    if (!path) throw new Error('لا توجد صورة');
     const t = thumbOf(path);
     await signMany(t ? [path, t] : [path]);
     if (t && UC[t] && UC[t].u) return UC[t].u;
-    if (!UC[path] || !UC[path].u) throw new Error('ما قدرت أفتح الملف');
+    if (!UC[path] || !UC[path].u) throw new Error('تعذّر فتح الملف');
     return UC[path].u;
   }
   async function prefetch(paths) {
@@ -447,7 +447,7 @@
     order.forEach(g => { const x = map[g]; if (x.unseen) x.seen = ''; delete x.unseen; delete x.notes; });
     return order.map(g => map[g]).reverse().sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
   }
-  /* العهدة: c باقي معه، o له عندك من جيبه، t كل اللي له عندك */
+  /* العهدة: c باقي معه، o له لديك من حسابه الخاص، t كل اللي له عندك */
   function invParts_(rows, empId) {
     let g = 0, rt = 0, sd = 0, cash = 0, own = 0;
     rows.forEach(x => {
@@ -621,7 +621,7 @@
       }
       if (UPD.has(d)) return UPD.get(d);
       const blob = dataUrlBlob(d);
-      if (blob.size > 5 * 1024 * 1024) throw new Error('الصورة كبيرة، جرّب وحدة ثانية');
+      if (blob.size > 5 * 1024 * 1024) throw new Error('الصورة كبيرة، جرّب صورة أخرى');
       const r = await eexec(token, 'ticket', {});
       const p = await putImg(r.path, blob, v => { pr[i] = Math.min(v, 0.99); tell(); });
       UPD.set(d, p); pr[i] = 1; tell();
@@ -637,10 +637,10 @@
       if (!RAW || CRED.k !== k) await loadAdmin(k);
       if (!RAW.employees.some(e => e.id === x.emp)) throw new Error('اختر الموظف');
       if (!/^\d{4}-\d{2}-\d{2}$/.test(String(x.date || ''))) throw new Error('التاريخ غير صحيح');
-      if (isPaid_(RAW.fin, x.emp, x.date.slice(0, 7))) throw new Error('راتب هالشهر انصرف وتقفل، ما ينفع تسجل فيه');
+      if (isPaid_(RAW.fin, x.emp, x.date.slice(0, 7))) throw new Error('راتب هذا الشهر مصروف ومقفل، لا يمكن التسجيل فيه');
       let misses = (x.misses || []).filter((c, i, a) => a.indexOf(c) === i && CRITERIA.some(k2 => k2.n === c));
       const starNote = x.star ? String(x.star.note || '').trim().slice(0, 300) : '';
-      if (x.star && !starNote) throw new Error('اكتب وش سوّى عشان الموقف المميز');
+      if (x.star && !starNote) throw new Error('اكتب ما قام به في الموقف المميز');
       /* الإصدار 121: ملاحظة لكل معيار (x.notes)، واللي ما له ملاحظة ياخذ العامة */
       const notes = x.notes && typeof x.notes === 'object' ? x.notes : {};
       const gen = String(x.note || '').trim().slice(0, 300);
@@ -658,7 +658,7 @@
       const before = misses.length;
       misses = misses.filter(c => sameDay.indexOf(c) < 0);
       const skipped = before - misses.length - (append ? 1 : 0);
-      if (!misses.length && !starNote && !append) throw new Error(skipped ? 'هالتقصير متسجل له بنفس اليوم' : 'كل شي تمام، ما فيه شي تسجله');
+      if (!misses.length && !starNote && !append) throw new Error(skipped ? 'هذا التقصير مسجّل له في اليوم نفسه' : 'لا يوجد ما يُسجَّل');
       let out = null, grp = null;
       if (append) out = await adminDo(k, 'log_note_add', append);
       if (misses.length || starNote) {
@@ -682,7 +682,7 @@
     async apiDelete(k, group) {
       if (!RAW || CRED.k !== k) await loadAdmin(k);
       const l = RAW.logs.filter(v => v.group === group)[0];
-      if (l && isPaid_(RAW.fin, l.emp, l.date.slice(0, 7))) throw new Error('راتب هالشهر انصرف وتقفل');
+      if (l && isPaid_(RAW.fin, l.emp, l.date.slice(0, 7))) throw new Error('راتب هذا الشهر مصروف ومقفل');
       return adminDo(k, 'log_del', { grp: group });
     },
 
@@ -700,7 +700,7 @@
       const out = {};
       Object.keys(map).forEach(key => {
         const v = Math.round(Number(x[key]));
-        if (!isFinite(v) || v < 0 || v > 100000) throw new Error('فيه رقم غير صحيح');
+        if (!isFinite(v) || v < 0 || v > 100000) throw new Error('يوجد رقم غير صحيح');
         out[map[key]] = String(v);
       });
       return adminDo(k, 'settings_save', out);
@@ -713,7 +713,7 @@
     async apiCleanup(k, apply) {
       const r = await fetch(FILES_URL, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ op: 'cleanup', k: k, apply: !!apply }) });
       const j = await r.json().catch(() => null);
-      if (!r.ok) throw new Error((j && j.error) || 'ما قدرت أجيب الملفات');
+      if (!r.ok) throw new Error((j && j.error) || 'تعذّر جلب الملفات');
       return j;
     },
 
@@ -757,7 +757,7 @@
       if (!emp) throw new Error('الموظف غير موجود');
       const mk = String(x.month || '');
       if (!/^\d{4}-\d{2}$/.test(mk) || mk > nowMonth()) throw new Error('الشهر غير صحيح');
-      if (isPaid_(RAW.fin, emp.id, mk)) throw new Error('هالشهر انصرف من قبل');
+      if (isPaid_(RAW.fin, emp.id, mk)) throw new Error('هذا الشهر مصروف مسبقاً');
       const st = salSt_(emp, RAW.fin, RAW.logs, nowMonth());
       const f = st.open.filter(m => m.month === mk)[0] || finMonth_(emp, RAW.fin, RAW.logs, mk);
       const cr = f.credit || 0;
@@ -777,13 +777,13 @@
       const fin = RAW.fin;
       const r = fin.filter(f => f.id === id)[0];
       if (!r) throw new Error('الحركة غير موجودة');
-      if ((r.kind === 'adv' || r.kind === 'ded') && isPaid_(fin, r.emp, r.month)) throw new Error('الشهر انصرف، احذف الصرف أول');
+      if ((r.kind === 'adv' || r.kind === 'ded') && isPaid_(fin, r.emp, r.month)) throw new Error('الشهر مصروف، احذف الصرف أولاً');
       if (r.kind === 'loan' && fin.some(f => f.kind === 'pay' && f.emp === r.emp && f.details && f.details.loanParts && f.details.loanParts[r.id])) {
-        throw new Error('فيه أقساط من هالسلفة انخصمت، احذف الصرف أول');
+        throw new Error('خُصمت أقساط من هذه السلفة، احذف الصرف أولاً');
       }
-      if (r.kind === 'pay' && r.details && r.details.part) throw new Error('هذا الشهر انسدد بدفعة، احذف الدفعة نفسها');
-      if (r.kind === 'pay' && fin.some(f => f.kind === 'pay' && f.emp === r.emp && f.month > r.month)) throw new Error('احذف صرف الشهور اللي بعده أول');
-      if (r.kind === 'part' && fin.some(f => f.kind === 'part' && f.emp === r.emp && f.ts > r.ts)) throw new Error('احذف الدفعات اللي بعدها أول');
+      if (r.kind === 'pay' && r.details && r.details.part) throw new Error('هذا الشهر سُدّد بدفعة، احذف الدفعة نفسها');
+      if (r.kind === 'pay' && fin.some(f => f.kind === 'pay' && f.emp === r.emp && f.month > r.month)) throw new Error('احذف صرف الشهور التي بعده أولاً');
+      if (r.kind === 'part' && fin.some(f => f.kind === 'part' && f.emp === r.emp && f.ts > r.ts)) throw new Error('احذف الدفعات التي بعدها أولاً');
       return adminDo(k, 'fin_del', { id: id });
     },
 
@@ -812,13 +812,13 @@
       await loadAdmin(k);
       const r = RAW.fin.filter(f => f.id === id)[0];
       if (!r || r.kind !== 'pay') throw new Error('الحركة غير موجودة');
-      if (r.details && r.details.part) throw new Error('هذا الشهر انسدد بالدفعات، عدّل الدفعات نفسها');
-      if (fromP_(r) > 0) throw new Error('فيه دفعات محسوبة على هذا الصرف، احذف الصرف وسجّله من جديد');
+      if (r.details && r.details.part) throw new Error('هذا الشهر سُدّد بالدفعات، عدّل الدفعات نفسها');
+      if (fromP_(r) > 0) throw new Error('توجد دفعات محسوبة على هذا الصرف، احذف الصرف وسجّله من جديد');
       const emp = empById(r.emp);
       if (!emp) throw new Error('الموظف غير موجود');
       const mk = String(x.month || '');
       if (!/^\d{4}-\d{2}$/.test(mk) || mk > nowMonth()) throw new Error('الشهر غير صحيح');
-      if (mk !== r.month && isPaid_(RAW.fin, r.emp, mk)) throw new Error('راتب ' + monthLabel_(mk) + ' مسجّل من قبل');
+      if (mk !== r.month && isPaid_(RAW.fin, r.emp, mk)) throw new Error('راتب ' + monthLabel_(mk) + ' مسجّل مسبقاً');
       const date = /^\d{4}-\d{2}-\d{2}$/.test(x.date || '') ? x.date : r.date;
       if (date > RAW.today) throw new Error('تاريخ التسليم بعد اليوم');
       if (date < mk + '-01') throw new Error('تاريخ التسليم قبل شهر الراتب');
@@ -851,12 +851,12 @@
     },
 
     async apiEmpOrder(k, ids) {
-      if (!Array.isArray(ids) || !ids.length) throw new Error('ما فيه ترتيب');
+      if (!Array.isArray(ids) || !ids.length) throw new Error('لا يوجد ترتيب');
       await rpc('emp_order', { k: k, ids: ids.map(String) });
       return reloadAdmin(k);
     },
     async apiProjOrder(k, ids) {
-      if (!Array.isArray(ids) || !ids.length) throw new Error('ما فيه ترتيب');
+      if (!Array.isArray(ids) || !ids.length) throw new Error('لا يوجد ترتيب');
       return adminDo(k, 'proj_order', { ids: ids.map(String) });
     },
 
@@ -914,9 +914,9 @@
       x = x || {};
       const amount = cleanAmount_(x.amount);
       const desc = String(x.desc || '').trim().slice(0, 200);
-      if (!desc) throw new Error('اكتب وش اشتريت');
+      if (!desc) throw new Error('اكتب وصف المشتريات');
       if (!String(x.project || '')) throw new Error('اختر المشروع');
-      if (x.cat === 'sal' && !x.salEmp) throw new Error('اختر الموظف اللي سلّمته الراتب');
+      if (x.cat === 'sal' && !x.salEmp) throw new Error('اختر الموظف الذي سلّمته الراتب');
       const paths = await empUpload(token, dataUrls, 3);
       if (!paths.length) throw new Error('صوّر الفاتورة');
       const w = Math.round(Number(x.warranty) || 0);
@@ -927,12 +927,12 @@
       x = x || {};
       const amount = cleanAmount_(x.amount);
       const desc = String(x.desc || '').trim().slice(0, 200);
-      if (!desc) throw new Error('اكتب وش اشتريت');
+      if (!desc) throw new Error('اكتب وصف المشتريات');
       if (!String(x.project || '')) throw new Error('اختر المشروع');
       const old = (keep || []).filter(Boolean).slice(0, 3);
       const paths = old.concat(await empUpload(token, dataUrls || [], Math.max(0, 3 - old.length)));
       if (!paths.length) throw new Error('صوّر الفاتورة');
-      if (x.cat === 'sal' && !x.salEmp) throw new Error('اختر الموظف اللي سلّمته الراتب');
+      if (x.cat === 'sal' && !x.salEmp) throw new Error('اختر الموظف الذي سلّمته الراتب');
       return empDo(token, 'inv_resend', { id: String(id), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), salEmp: x.cat === 'sal' ? String(x.salEmp || '') : '', project: String(x.project || ''), photos: paths, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
     },
 
@@ -942,10 +942,10 @@
       const x = RAW.invoices.filter(v => v.id === id)[0], a = { id: id };
       if (x && x.cat === 'sal' && x.salEmp) {
         const emp = empById(x.salEmp);
-        if (!emp) throw new Error('الموظف اللي انصرف له الراتب غير موجود');
+        if (!emp) throw new Error('الموظف الذي صُرف له الراتب غير موجود');
         const amount = rr2(Number(x.amount) || 0);
         const st = salSt_(emp, RAW.fin, RAW.logs, nowMonth(), { amount: amount, month: '', date: String(x.ts || '').slice(0, 10) });
-        if (st.preview.extra > 0.001) throw new Error('المبلغ أكثر من الباقي لـ' + emp.name + ' (' + rr2(amount - st.preview.extra).toLocaleString('en-US') + ')، صحّح المبلغ أو رجّعها');
+        if (st.preview.extra > 0.001) throw new Error('المبلغ أكثر من الباقي لـ' + emp.name + ' (' + rr2(amount - st.preview.extra).toLocaleString('en-US') + ')، صحّح المبلغ أو أعدها');
         a.sal = { close: closeParts_(st) };
       }
       return adminDo(k, 'inv_approve', a);
@@ -970,7 +970,7 @@
     async apiInvAddAdmin(k, x, dataUrls) {
       const amount = cleanAmount_(x.amount);
       const desc = String(x.desc || '').trim().slice(0, 200);
-      if (!desc) throw new Error('اكتب وش انشرى');
+      if (!desc) throw new Error('اكتب وصف المشتريات');
       if (!String(x.project || '')) throw new Error('اختر المشروع');
       const list = (dataUrls || []).slice(0, 3), paths = [];
       for (const d of list) paths.push(d && d.pdf ? await pdfUp_(k, '', d.pdf) : await API.apiUploadImg(k, d));
@@ -985,7 +985,7 @@
     async apiInvUpd(k, id, x) {
       x = x || {};
       const desc = String(x.desc || '').trim().slice(0, 200);
-      if (!desc) throw new Error('اكتب وش انشرى');
+      if (!desc) throw new Error('اكتب وصف المشتريات');
       return adminDo(k, 'inv_upd', { id: String(id), amount: String(cleanAmount_(x.amount)), desc: desc, project: String(x.project || ''), vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''),
         paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash', warranty: /^\d{4}-\d{2}-\d{2}$/.test(String(x.warranty || '')) ? x.warranty : '' });
     },
@@ -1001,7 +1001,7 @@
     async pushKey() {
       const r = await fetch(FN_URL, { headers: { apikey: SB_KEY } });
       const j = await r.json().catch(() => ({}));
-      if (!j.pub) throw new Error('خدمة الإشعارات ما ردّت، جرّب بعدين');
+      if (!j.pub) throw new Error('خدمة الإشعارات لا تستجيب، حاول لاحقاً');
       return j.pub;
     },
 
@@ -1027,7 +1027,7 @@
         const ok = Number(x.q.ok);
         if (!text) throw new Error('اكتب السؤال');
         if (opts.filter(Boolean).length < 2) throw new Error('اكتب خيارين على الأقل');
-        if (!(ok >= 0) || !opts[ok]) throw new Error('حدد الجواب الصح');
+        if (!(ok >= 0) || !opts[ok]) throw new Error('حدّد الإجابة الصحيحة');
         const keep = opts.map((t, i) => ({ t: t, i: i })).filter(o => o.t);
         q = { text: text, opts: keep.map(o => o.t), ok: String(keep.findIndex(o => o.i === ok)) };
       }
