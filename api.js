@@ -1019,7 +1019,7 @@
       const title = String(x.title || '').trim().slice(0, 120);
       if (!title) throw new Error('اكتب عنوان التوجيه');
       const points = (x.points || []).map(t => String(t || '').trim().slice(0, 400)).filter(Boolean).slice(0, 20);
-      if (!points.length) throw new Error('اكتب نقطة وحدة على الأقل');
+      if (!points.length) throw new Error('اكتب نقطة واحدة على الأقل');
       let q = null;
       if (x.q) {
         const text = String(x.q.text || '').trim().slice(0, 200);

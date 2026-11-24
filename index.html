@@ -1430,9 +1430,9 @@ html:root .pdl .psl small{display:block;font-size:12px;color:var(--muted)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=128"></script>
+<script src="api.js?v=129"></script>
 <script>
-const APP_VER = '128';
+const APP_VER = '129';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -2680,7 +2680,7 @@ function renderFin() {
   const rv = c.items.filter(x => x.kind === 'inv' && x.status === 'review');
   const cnt = (n, one, two, many, sing) => n === 1 ? one : n === 2 ? two : n + ' ' + (n > 10 && sing ? sing : many);
   let h = `<div class="fxs one mrow">
-      <div><b>مصاريف ${esc(d.month)}</b>${M(exp)}<small>${okM.length ? cnt(okM.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير', 'فاتورة') : 'لا توجد فواتير'}</small></div>
+      <div><b>مصاريف ${esc(d.month)}</b>${M(exp)}<small>${okM.length ? cnt(okM.length, 'فاتورة واحدة', 'فاتورتين', 'فواتير', 'فاتورة') : 'لا توجد فواتير'}</small></div>
     </div>`;
   if (rv.length) h += `<div class="fxa"><button class="r" onclick="openFinRv()"><span class="dt"></span>${cnt(rv.length, 'فاتورة تنتظر', 'فاتورتين تنتظر', 'فواتير تنتظر')} اعتمادك<em>${M(rv.reduce((a, x) => a + x.amount, 0), '', 't')}${I('chevron-left', 15)}</em></button></div>`;
   /* الإصدار 106: مشتريات بطاقتي، للمطابقة مع كشف البنك */
@@ -2699,7 +2699,7 @@ function renderFin() {
     h += `<div class="fvf"><select aria-label="المشروع" onchange="S.fx.fp=this.value;S.fx.all=false;renderFin()">${opt('', 'كل المشاريع', fp)}${(d.projects || []).filter(p => !p.archived || usedP.has(p.id)).map(p => opt(p.id, esc(p.name), fp)).join('')}${usedP.has('') ? opt('-', 'بدون مشروع', fp) : ''}</select>
       <select aria-label="الموظف" onchange="S.fx.fe=this.value;S.fx.all=false;renderFin()">${opt('', 'كل الموظفين', fe)}${d.employees.map(e => opt(e.id, esc(shortName(e.name)), fe)).join('')}${all.some(x => !x.emp) ? opt('-', 'أنت', fe) : ''}</select>
       <select aria-label="الحالة" onchange="S.fx.fs=this.value;S.fx.all=false;renderFin()">${opt('', 'كل الحالات', fs)}${opt('review', 'تنتظر اعتمادك', fs)}${opt('ok', 'معتمدة', fs)}${opt('returned', 'مرتجعة' + (nRt ? ' (' + nRt + ')' : ''), fs)}</select></div>`;
-    h += `<div class="sub fvn">${L.length ? cnt(L.length, 'فاتورة وحدة', 'فاتورتين', 'فواتير', 'فاتورة') + ' · ' + M(Math.round(L.reduce((a, x) => a + x.amount, 0) * 100) / 100, '', 't') : ''}</div>`;
+    h += `<div class="sub fvn">${L.length ? cnt(L.length, 'فاتورة واحدة', 'فاتورتين', 'فواتير', 'فاتورة') + ' · ' + M(Math.round(L.reduce((a, x) => a + x.amount, 0) * 100) / 100, '', 't') : ''}</div>`;
     h += L.length ? `<div class="fvl">${invDaysHtml(L, true, false, 12, 'كلها')}</div>` : emptyHtml('receipt', fp || fe || fs ? 'لا توجد فواتير بهذا الفلتر' : 'لا توجد فواتير بعد');
   } else {
     const act = (d.projects || []).filter(p => !p.archived);
@@ -2873,7 +2873,7 @@ function renderFinEmp(c, id, mode) {
     for (const k of days) {
       if (!S.fx.all && n >= 12) { more = true; break; }
       const D = by[k]; n += D.length;
-      g += `<div class="dyh"><b>${k ? esc(invDayLabel(k, d.today)) : 'تاريخ غير محدد'}</b><span>${D.length === 1 ? 'حركة وحدة' : D.length === 2 ? 'حركتين' : D.length + (D.length > 10 ? ' حركة' : ' حركات')}</span></div><div class="card fxl dyc">${D.map(x => x.h).join('')}</div>`;
+      g += `<div class="dyh"><b>${k ? esc(invDayLabel(k, d.today)) : 'تاريخ غير محدد'}</b><span>${D.length === 1 ? 'حركة واحدة' : D.length === 2 ? 'حركتين' : D.length + (D.length > 10 ? ' حركة' : ' حركات')}</span></div><div class="card fxl dyc">${D.map(x => x.h).join('')}</div>`;
     }
     h += `<div class="fvl">${g}${more || (S.fx.all && L.length > 12 && days.length > 1) ? `<button class="dtog dya" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كلها (' + L.length + ')'}</button>` : ''}</div>`;
   } else h += emptyHtml('wallet', 'لا توجد حركات بعد');
@@ -2959,7 +2959,7 @@ function invDaysHtml(list, showEmp, noProj, lim, allLabel) {
   for (const k of days) {
     if (!S.fx.all && n >= lim) { more = true; break; }
     const D = by[k]; n += D.length;
-    h += `<div class="dyh"><b>${esc(invDayLabel(k, d.today))}</b><span>${D.length === 1 ? 'فاتورة وحدة' : D.length === 2 ? 'فاتورتين' : D.length + (D.length > 10 ? ' فاتورة' : ' فواتير')} · ${M(Math.round(D.reduce((a, x) => a + x.amount, 0) * 100) / 100, '', 't')}</span></div><div class="card fxl dyc">${D.map(x => invDayRow(x, showEmp, noProj)).join('')}</div>`;
+    h += `<div class="dyh"><b>${esc(invDayLabel(k, d.today))}</b><span>${D.length === 1 ? 'فاتورة واحدة' : D.length === 2 ? 'فاتورتين' : D.length + (D.length > 10 ? ' فاتورة' : ' فواتير')} · ${M(Math.round(D.reduce((a, x) => a + x.amount, 0) * 100) / 100, '', 't')}</span></div><div class="card fxl dyc">${D.map(x => invDayRow(x, showEmp, noProj)).join('')}</div>`;
   }
   return h + (more || (S.fx.all && L.length > lim && days.length > 1) ? `<button class="dtog dya" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : allLabel + ' (' + L.length + ')'}</button>` : '');
 }
@@ -3535,7 +3535,7 @@ async function sendGuide() {
   const f = S.gform;
   const x = {title: f.title, points: f.points, emps: f.emps, q: f.q ? {text: f.qt, opts: f.opts, ok: f.ok} : null};
   if (!f.title.trim()) return $('#gerr').textContent = 'اكتب عنوان التوجيه';
-  if (!f.points.some(p => p.trim())) return $('#gerr').textContent = 'اكتب نقطة وحدة على الأقل';
+  if (!f.points.some(p => p.trim())) return $('#gerr').textContent = 'اكتب نقطة واحدة على الأقل';
   if (f.q && f.ok < 0) return $('#gerr').textContent = 'اضغط الدائرة بجانب الإجابة الصحيحة';
   const un = lockBtn('جاري الإرسال…');
   try { S.data = await call('apiGuideAdd', BOOT.key, x); S.gform = null; renderAdmin(); toast('تم إرسال التوجيه'); }
@@ -4378,7 +4378,7 @@ function rpCloseHist() { RP.hist = null; rpRerender(); toTop(); }
 /* الإصدار 110: الكراسة. سطر تحت «الأعمال المنجزة» في صفحة المشروع (عندي بس)، يفتح صفحة فيها أفكاري للمشروع سطور.
    الفكرة ما لها موظف ولا موعد ولا دائرة إنجاز، وما تتحول لمهمة أو عمل. القرار «اعتمدتها» أو «استبعدتها» ينقلها للمؤرشفة بس */
 function krOf(p, st) { return (S.data.ideas || []).filter(x => x.proj === p && (!st || x.status === st)); }
-function krCnt(n) { return n === 1 ? 'فكرة وحدة' : n === 2 ? 'فكرتين' : n <= 10 ? n + ' أفكار' : n + ' فكرة'; }
+function krCnt(n) { return n === 1 ? 'فكرة واحدة' : n === 2 ? 'فكرتين' : n <= 10 ? n + ' أفكار' : n + ' فكرة'; }
 function krDate(ms) { const d = new Date(ms + 3 * 36e5); return d.getUTCDate() + ' ' + MONTHS_AR[d.getUTCMonth()]; }
 function krRow(p) { const n = krOf(p, 'open').length; return tbRow('lightbulb', 'الكراسة', n ? krCnt(n) : '<span class="lv">فارغة</span>', `krOpenBook('${p}')`); }
 function krOpenBook(p) { Object.assign(RP, {book: p, kd: '', ks: null, ke: null, ka: null, kf: false}); rpRerender(); toTop(); }
@@ -4996,7 +4996,7 @@ function nfDay(ms) { return new Intl.DateTimeFormat('en-CA', {timeZone: 'Asia/Ri
 function nfTime(ms) { const p = new Intl.DateTimeFormat('en-GB', {timeZone: 'Asia/Riyadh', hour: '2-digit', minute: '2-digit', hour12: false}).format(new Date(ms)).split(':'); return hm12(+p[0], p[1]); }
 function nfIcon(t) {
   if (window.LG && LG.on) t = LG.untr(t);
-  return /تقرير/.test(t) ? 'file-text' : /إثبات/.test(t) ? 'check-check' : /فاتور/.test(t) ? 'receipt' : /وصل|طلع|البيت|الدوام/.test(t) ? 'map-pin'
+  return /تقرير/.test(t) ? 'file-text' : /إثبات/.test(t) ? 'check-check' : /فاتور/.test(t) ? 'receipt' : /وصل|طلع|خرج|البيت|الدوام/.test(t) ? 'map-pin'
     : /اعتمد|انعتمد|اعتُمد/.test(t) ? 'circle-check' : /توجيه/.test(t) ? 'clipboard-list' : /مهم|شرح/.test(t) ? 'list-checks' : /رد/.test(t) ? 'message-circle' : 'bell';
 }
 function nfRow(x) {
