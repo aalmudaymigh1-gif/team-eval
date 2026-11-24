@@ -1418,9 +1418,9 @@ html:root .sheet .btn2.mact svg{color:var(--acc-dk)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=125"></script>
+<script src="api.js?v=126"></script>
 <script>
-const APP_VER = '125';
+const APP_VER = '126';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -5416,14 +5416,16 @@ function stKey(r, item) { return r.id + '|' + item; }
 function stMe() { return BOOT.page === 'admin' ? 'admin' : (S.empData ? S.empData.id : ''); }
 function stNowHtml(ss) {
   const n = ss.filter(s => s.done).length, c = ss.find(s => !s.done);
-  if (!c) return `<small class="snow">${I('check', 12, 2.5)}<span>خلصت الخطوات كلها</span></small>`;
+  /* الإصدار 126: الخطوات كلها منجزة والعمل لسا في الحالية (مثل خطوة «اعتماد السعر» لحالها): الباقي إنجاز العمل نفسه، مو «خلصت الخطوات كلها» */
+  if (!c) return `<small class="snow"><span>${n} من ${ss.length} منجزة</span> · <span>الحين:</span> <b>إنجاز العمل</b></small>`;
   /* الإصدار 124: سطر واحد. «n من N منجزة» بدل «الخطوة n+1 من N» (كان يوهم إن الحين رقمها n+1)، والتقدم في الحلقة مكان الدائرة */
   return `<small class="snow"><span>${n} من ${ss.length} منجزة</span> · <span>الحين:</span> <b>${esc(c.t)}</b></small>`;
 }
 function stPanelHtml(r, x, j, ss, isAdmin) {
   const me = stMe(), left = ss.filter(s => !s.done).length, c = ss.find(s => !s.done);
   let h = ss.length ? '<ul class="sst">' + ss.map(s => {
-    const last = !s.done && left === 1, canUn = s.done && (isAdmin || s.doneBy === me), canDel = isAdmin || (!s.done && s.by === me), arm = RP.sarm === s.id;
+    /* الإصدار 126: خطوة «اعتماد السعر» (رقمها يبدأ بـ q) تتغير من السعر نفسه («تراجع عن الاعتماد»)، فما لها تراجع ولا حذف هنا */
+    const qs = /^q/.test(String(s.id || '')), last = !s.done && left === 1, canUn = !qs && s.done && (isAdmin || s.doneBy === me), canDel = !qs && (isAdmin || (!s.done && s.by === me)), arm = RP.sarm === s.id;
     const bt = s.done
       ? `<button class="sk" ${canUn ? `onclick="rpStTick('${s.id}',true)" aria-label="تراجع عن الخطوة"` : 'disabled aria-label="خطوة منجزة"'}>${I('check', 14, 2.5)}</button>`
       : `<button class="sk" onclick="${last ? `rpTick('${r.id}',${j},this)` : `rpStTick('${s.id}',false)`}" aria-label="${last ? 'تم الإنجاز' : 'تمت الخطوة'}"></button>`;
