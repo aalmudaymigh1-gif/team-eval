@@ -945,7 +945,7 @@
         if (!emp) throw new Error('الموظف الذي صُرف له الراتب غير موجود');
         const amount = rr2(Number(x.amount) || 0);
         const st = salSt_(emp, RAW.fin, RAW.logs, nowMonth(), { amount: amount, month: '', date: String(x.ts || '').slice(0, 10) });
-        if (st.preview.extra > 0.001) throw new Error('المبلغ أكثر من الباقي لـ' + emp.name + ' (' + rr2(amount - st.preview.extra).toLocaleString('en-US') + ')، صحّح المبلغ أو أعدها');
+        if (st.preview.extra > 0.001) throw new Error('المبلغ أكثر من المتبقي لـ' + emp.name + ' (' + rr2(amount - st.preview.extra).toLocaleString('en-US') + ')، صحّح المبلغ أو أعدها');
         a.sal = { close: closeParts_(st) };
       }
       return adminDo(k, 'inv_approve', a);
