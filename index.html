@@ -1468,6 +1468,48 @@ html:root .slpay{padding-bottom:12px;border-bottom:1px solid var(--line)}
 html:root .slpay .tbl{margin-top:2px}
 html:root .slac .salact{margin-bottom:0}
 html:root .lbl.slrh{margin-top:18px}
+/* الإصدار 132: المالية (بطاقة المصاريف، طريقة الدفع كلمة، الأيام القديمة مطوية)، كشف بطاقتي (الملخص ثابت فوق)، سجل الحضور (كل يوم سطر)، الفريق، المشاريع، إعدادات الموظف */
+html:root .fxtop{background:var(--surface);border:1px solid var(--line);border-radius:18px;margin-bottom:14px;overflow:hidden}
+html:root .fxtop .fxs{margin:0}
+html:root .fxtop .fxs div{border:0;border-radius:0!important;background:none!important}
+html:root .fxtop .r{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;font:inherit;font-size:14px;color:var(--text);background:none;border:0;border-top:1px solid var(--line);text-align:start;cursor:pointer;min-height:48px}
+html:root .fxtop .r em{margin-inline-start:auto;font-style:normal;color:var(--muted);display:flex;align-items:center;gap:6px}
+html:root .pwd.g{color:var(--green)}
+html:root .fxs.ln{gap:0;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:2px 0}
+html:root .fxs.ln div{border:0;border-radius:0!important;background:none!important;padding:10px 12px}
+html:root .fxs.ln div+div{border-inline-start:1px solid var(--line)}
+html:root .rpcard.fvd{margin-top:10px}
+html:root .rpcard.fvd .fob .fxl.dyc{border:0;box-shadow:none;padding:0;margin:0;background:none}
+html:root .cdtop{position:sticky;top:env(safe-area-inset-top);z-index:4;background:#fff;margin:0 -18px;padding:10px 18px 4px;border-bottom:1px solid var(--line)}
+html:root .cdpg{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
+html:root .cdpg b{font-size:15px;font-weight:600;color:var(--text)}
+html:root .cdpg small{font-size:12px;color:var(--muted)}
+html:root .slbar.cdbar{margin:6px 0 8px}
+html:root .cdtop .fvf{margin-bottom:6px}
+html:root .cdn b{font-weight:600;color:var(--text)}
+html:root .cdall{color:var(--green)}
+html:root .atd .ath{display:block;width:100%;background:none;border:0;font:inherit;color:inherit;text-align:start;cursor:pointer;padding:0 0 0 28px;position:relative;min-height:44px}
+html:root .atd .attm{margin-top:2px}
+html:root .atd .atv{position:absolute;left:0;top:50%;transform:translateY(-50%);color:var(--muted);display:flex}
+html:root .atd.cl{padding:12px 0}
+html:root .atd.on .at3{margin-top:10px}
+html:root .tfc .nm{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+html:root .tfc .nm b{display:inline}
+html:root .tfc .tyc{font-size:12px;line-height:1.5;padding:2px 9px;border-radius:999px;background:var(--fill);color:var(--muted)}
+html:root .tfc .tnd{margin:8px 2px 0;font-size:13px;line-height:1.5}
+html:root .tfc .tnd b{font-weight:600}
+html:root .tfc .tnd.r{color:var(--red)}
+html:root .tfc .tnd.a{color:#7D6236}
+html:root .prow.pjr{width:100%;background:none;border-inline:0;border-bottom:0;font:inherit;color:inherit;text-align:start;cursor:pointer;min-height:52px;padding:4px 2px}
+html:root .prow .pjn{flex:1;font-size:15px}
+html:root .prow .pjb{font-size:12px;color:var(--muted)}
+html:root .prow .pjm{display:flex;align-items:center;justify-content:center;width:44px;height:44px;color:var(--muted);flex:none}
+html:root .prow .pjx{display:flex;align-items:center;justify-content:center;width:44px;height:44px;background:none;border:0;color:var(--muted);cursor:pointer;flex:none;margin-inline-start:auto}
+html:root .ssp .lbl.esl{margin:18px 2px 6px}
+html:root .ssp .card.esc{margin-top:0}
+html:root .ssp .esv{width:100%;margin-top:14px}
+html:root .etkc .etk{width:100%}
+html:root .etkc .sub{margin-top:8px}
 </style>
 </head>
 <body>
@@ -1477,9 +1519,9 @@ html:root .lbl.slrh{margin-top:18px}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=131"></script>
+<script src="api.js?v=132"></script>
 <script>
-const APP_VER = '131';
+const APP_VER = '132';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1810,7 +1852,8 @@ function teamBreak(m) {
     <div class="tot"><span>الحافز</span><b>${M(m.bonus, '', 'pos')}</b></div>
   </div>${floorNote(m)}`;
 }
-function openAttLog(id) { S.attLog = id; S.tfile = id; S.armed = null; S.form = null; renderTeam(); toTop(); }
+function openAttLog(id) { S.attLog = id; S.tfile = id; S.armed = null; S.form = null; S.ato = {}; renderTeam(); toTop(); }
+function attTog(id) { S.ato = S.ato || {}; S.ato[id] = !S.ato[id]; S.armed = null; renderTeam(); }
 /* الإصدار 97: كل خطوة صورتها فوق وتحتها وقتها وموقعها ودقته، و«تسجيل غير صحيح» على اليوم */
 function attStepCol(lab, at, photo, lat, lng, acc) {
   return `<div class="s"><div class="ph">${photo ? attPhotoHtml(photo) : `<div class="nop">${I('camera', 20)}</div>`}</div><b>${lab}</b><div class="tm">${at ? t12(at) : '—'}</div>${!at ? '' : lat != null ? `<a class="lk" href="${mapUrl(lat, lng)}" target="_blank" rel="noopener">${I('map-pin', 13)}<span>الموقع${acc != null && acc !== '' ? ' · دقة ' + Math.round(acc) + ' م' : ''}</span></a>` : '<span class="lk no">بدون موقع</span>'}</div>`;
@@ -1828,11 +1871,14 @@ function renderAttLog(empId) {
   if (!list.length) return $('#view').innerHTML = h + emptyHtml('map-pin', 'لم يسجّل حضوراً بعد');
   h += '<div class="card atl">' + list.map(r => {
     const arm = S.armed === 'att_' + r.id, armU = S.armed === 'attu_' + r.id, p = projOf(d.projects, r.project);
-    return `<div class="atd ${r.bad ? 'bad' : ''}"><div class="hd"><b>${esc(dayLabel(r.date))}</b><span>${r.bad ? '<span class="badge rd">غير صحيح</span>' : r.out ? 'عمل ' + hrs(r.outMs - r.inMs) : r.in ? (r.date < d.today ? '<span class="badge a">دون خروج</span>' : 'في العمل') : '<span class="badge a">لم يصل إلى المشروع</span>'}</span></div>
+    /* الإصدار 132: كل يوم سطر (التاريخ، المشروع، الأوقات، ساعات العمل)، والضغط يفتح الصور والمواقع والأزرار */
+    const op = !!(S.ato || {})[r.id], tms = [r.home, r.in, r.out].filter(Boolean).map(t12).join(' ← ');
+    return `<div class="atd ${r.bad ? 'bad' : ''} ${op ? 'on' : 'cl'}"><button class="ath" aria-expanded="${op}" onclick="attTog('${r.id}')"><div class="hd"><b>${esc(dayLabel(r.date))}</b><span>${r.bad ? '<span class="badge rd">غير صحيح</span>' : r.out ? 'عمل ' + hrs(r.outMs - r.inMs) : r.in ? (r.date < d.today ? '<span class="badge a">دون خروج</span>' : 'في العمل') : '<span class="badge a">لم يصل إلى المشروع</span>'}</span></div>
       <div class="sub">${[p ? esc(p.name) : '', r.in ? 'الطريق ' + hrs(r.inMs - r.homeMs) : '', r.bad ? 'لا تُحتسب ساعاته' : ''].filter(Boolean).join(' · ')}${r.late ? ` <span class="badge late">متأخر ${r.late} د</span>` : ''}</div>
-      <div class="at3">${attStepCol('خرج من البيت', r.home, r.homePhoto, r.homeLat, r.homeLng, r.homeAcc)}${attStepCol('وصل المشروع', r.in, r.inPhoto, r.inLat, r.inLng, r.inAcc)}${attStepCol('خرج من المشروع', r.out, r.outPhoto, r.outLat, r.outLng, r.outAcc)}</div>
+      ${tms ? `<div class="sub attm">${tms}</div>` : ''}<span class="atv">${I(op ? 'chevron-up' : 'chevron-down', 16)}</span></button>
+      ${op ? `<div class="at3">${attStepCol('خرج من البيت', r.home, r.homePhoto, r.homeLat, r.homeLng, r.homeAcc)}${attStepCol('وصل المشروع', r.in, r.inPhoto, r.inLat, r.inLng, r.inAcc)}${attStepCol('خرج من المشروع', r.out, r.outPhoto, r.outLat, r.outLng, r.outAcc)}</div>
       ${r.bad ? `<div class="atbad"><b>تسجيل غير صحيح</b>${r.badLog ? ' · الأمانة والمصداقية' : ' · بدون تقصير'}<div>السبب: ${esc(r.badReason)}</div></div>` : ''}
-      <div class="atf">${r.bad ? `<button class="btn2 ${armU ? 'arm' : ''}" onclick="attBadUndo('${r.id}')">${armU ? 'تأكيد التراجع' : 'تراجع'}</button>` : `<button class="btn2 rd" onclick="askAttBad('${r.id}')">تسجيل غير صحيح</button>`}<button class="lnk dl ${arm ? 'arm' : ''}" onclick="delAtt('${r.id}')">${arm ? 'تأكيد الحذف' : 'حذف'}</button></div></div>`;
+      <div class="atf">${r.bad ? `<button class="btn2 ${armU ? 'arm' : ''}" onclick="attBadUndo('${r.id}')">${armU ? 'تأكيد التراجع' : 'تراجع'}</button>` : `<button class="btn2 rd" onclick="askAttBad('${r.id}')">تسجيل غير صحيح</button>`}<button class="lnk dl ${arm ? 'arm' : ''}" onclick="delAtt('${r.id}')">${arm ? 'تأكيد الحذف' : 'حذف'}</button></div>` : ''}</div>`;
   }).join('') + '</div>';
   $('#view').innerHTML = h;
   loadAttPhotos();
@@ -2391,9 +2437,11 @@ function fmN(n) { return (Math.round(n * 100) / 100).toLocaleString('en-US'); }
 function teamEmp(d, e) {
   const m = e.month, f = empFacts(e);
   const sal = f.cur ? fmN(f.left(f.cur)) + ' · ' + dueL(f.cur.due) : f.late.length ? 'متأخر ' + fmN(f.lateSum) : e.salary ? 'مصروف' : '';
-  const chips = f.needs.map(x => `<span class="badge ${x.r ? 'rd' : 'a'}">${esc(x.c)}${x.a != null ? ' ' + fmN(x.a) : ''}</span>`).join('');
-  return `<button class="tfc" onclick="openFile('${e.id}')"><div class="tbh"><div class="n"><b>${esc(e.name)}</b><span>${m.track ? 'متابعة فقط' : 'حافز شهري'}</span><span data-seen="${e.id}">${seenHtml(e.seen, e.left)}</span></div><span class="cv">${I('chevron-left', 18)}</span></div>
-    <div class="ln">${sal ? `<span>الراتب <b>${sal}</b></span>` : ''}${f.p.c ? `<span>العهدة <b class="${f.p.c < 0 ? 'r' : ''}">${(f.p.c < 0 ? '−' : '') + fmN(Math.abs(f.p.c))}</b></span>` : ''}${!sal && !f.p.c ? '<span>لا يوجد عليه شيء مفتوح</span>' : ''}</div>${chips ? `<div class="chips">${chips}</div>` : ''}</button>`;
+  /* الإصدار 132: نوع الموظف شريحة جنب الاسم، واللي ينتظرك سطر واحد (الأحمر: الرواتب والعهدة بالسالب) بدل شرائح تحت البطاقة */
+  const nd = r => f.needs.filter(x => !!x.r === r).map(x => esc(x.c) + (x.a != null ? ' <b>' + fmN(x.a) + '</b>' : '')).join(' · ');
+  const chips = (nd(true) ? `<div class="tnd r">${nd(true)}</div>` : '') + (nd(false) ? `<div class="tnd a">${nd(false)}</div>` : '');
+  return `<button class="tfc" onclick="openFile('${e.id}')"><div class="tbh"><div class="n"><div class="nm"><b>${esc(e.name)}</b><span class="tyc">${m.track ? 'متابعة فقط' : 'حافز شهري'}</span></div><span data-seen="${e.id}">${seenHtml(e.seen, e.left)}</span></div><span class="cv">${I('chevron-left', 18)}</span></div>
+    <div class="ln">${sal ? `<span>الراتب <b>${sal}</b></span>` : ''}${f.p.c ? `<span>العهدة <b class="${f.p.c < 0 ? 'r' : ''}">${(f.p.c < 0 ? '−' : '') + fmN(Math.abs(f.p.c))}</b></span>` : ''}${!sal && !f.p.c ? '<span>لا يوجد عليه شيء مفتوح</span>' : ''}</div>${chips}</button>`;
 }
 /* الإصدار 96: ملف الموظف: ملخص بنظرة، ثم اللي ينتظر المدير، ثم الأزرار السريعة، ثم الفروع وكل فرع قيمته عليه */
 function renderEmpFile(e) {
@@ -2735,13 +2783,13 @@ function renderFin() {
   const exp = okM.reduce((a, x) => a + x.amount, 0);
   const rv = c.items.filter(x => x.kind === 'inv' && x.status === 'review');
   const cnt = (n, one, two, many, sing) => n === 1 ? one : n === 2 ? two : n + ' ' + (n > 10 && sing ? sing : many);
-  let h = `<div class="fxs one mrow">
+  /* الإصدار 132: مصاريف الشهر و«مشتريات بطاقتي» بطاقة واحدة، و«تنتظر اعتمادك» تحتها */
+  const cdAll = cardInv(c), cdUn = cdAll.filter(x => !x.matched).length;
+  let h = `<div class="fxtop"><div class="fxs one mrow">
       <div><b>مصاريف ${esc(d.month)}</b>${M(exp)}<small>${okM.length ? cnt(okM.length, 'فاتورة واحدة', 'فاتورتين', 'فواتير', 'فاتورة') : 'لا توجد فواتير'}</small></div>
-    </div>`;
+    </div>${cdAll.length ? `<button class="r cdb" onclick="openFinCard()"><span class="ci">${I('credit-card', 16)}</span>مشتريات بطاقتي<em>${cdUn ? cdUn + ' بانتظار المطابقة' : 'كلها مطابقة'}${I('chevron-left', 15)}</em></button>` : ''}</div>`;
   if (rv.length) h += `<div class="fxa"><button class="r" onclick="openFinRv()"><span class="dt"></span>${cnt(rv.length, 'فاتورة تنتظر', 'فاتورتين تنتظر', 'فواتير تنتظر')} اعتمادك<em>${M(rv.reduce((a, x) => a + x.amount, 0), '', 't')}${I('chevron-left', 15)}</em></button></div>`;
-  /* الإصدار 106: مشتريات بطاقتي، للمطابقة مع كشف البنك */
-  const cdAll = cardInv(c);
-  if (cdAll.length) { const un = cdAll.filter(x => !x.matched).length; h += `<div class="fxa"><button class="r cdb" onclick="openFinCard()"><span class="ci">${I('credit-card', 16)}</span>مشتريات بطاقتي<em>${un ? un + ' بانتظار المطابقة' : 'كلها مطابقة'}${I('chevron-left', 15)}</em></button></div>`; }
+  /* الإصدار 106: مشتريات بطاقتي، للمطابقة مع كشف البنك (من 132 داخل بطاقة المصاريف فوق) */
   const nAct = (d.projects || []).filter(p => !p.archived).length;
   /* الإصدار 97: «الفواتير | المشاريع». الفواتير أول، من الأحدث، بفلتر المشروع والموظف والحالة */
   const seg = S.fx.seg === 'p' ? 'p' : 'i';
@@ -2796,15 +2844,22 @@ function renderFinCard(c) {
   const inM = all.filter(x => cm === 'all' || x.ts.slice(0, 7) === cm), un = S.fx.cdf === 'un';
   const sum = L => Math.round(L.reduce((a, x) => a + x.amount, 0) * 100) / 100;
   const ok = inM.filter(x => x.matched), no = inM.filter(x => !x.matched), L = (un ? no : inM).slice().sort((a, b) => a.ts < b.ts ? 1 : -1);
+  /* الإصدار 132: الملخص (طابقتها، المتبقي) والفلتر ثابتين فوق وانت تنزل. المجموع في السطر تحت */
+  const pc = inM.length ? Math.round(ok.length / inM.length * 100) : 0;
+  const nInv = n => n + (n > 10 ? ' فاتورة' : n > 2 ? ' فواتير' : n === 2 ? ' فاتورتين' : ' فاتورة');
   let h = finBackBtn() + `<div class="fxh"><h2>مشتريات بطاقتي</h2><span>${inM.length || ''}</span></div>
-    <div class="fxs"><div><b>المجموع</b>${M(sum(inM))}</div><div><b>طابقتها</b>${M(sum(ok))}<small>${ok.length} من ${inM.length}</small></div><div><b>المتبقي</b>${M(sum(no))}<small>${no.length ? no.length + (no.length > 10 ? ' فاتورة' : no.length > 2 ? ' فواتير' : no.length === 2 ? ' فاتورتين' : ' فاتورة') : 'لم يتبقَّ شيء'}</small></div></div>
+    <div class="cdtop"><div class="cdpg"><span>طابقتها <b>${M(sum(ok), '', 't')}</b> <small>${ok.length} من ${inM.length}</small></span><span>المتبقي <b>${M(sum(no), '', 't')}</b> <small>${no.length ? nInv(no.length) : 'لم يتبقَّ شيء'}</small></span></div>
+    <div class="slbar cdbar"><i style="width:${pc}%"></i></div>
     <div class="fvf cdfl"><select aria-label="الشهر" onchange="S.fx.cdm=this.value;renderFin()">${months.map(m => `<option value="${m}" ${cm === m ? 'selected' : ''}>${ymName(m)}</option>`).join('')}<option value="all" ${cm === 'all' ? 'selected' : ''}>كل الشهور</option></select>
-      <div class="segc"><button class="${un ? '' : 'on'}" onclick="S.fx.cdf='';renderFin()">الكل</button><button class="${un ? 'on' : ''}" onclick="S.fx.cdf='un';renderFin()">لم تُطابَق</button></div></div>
-    <div class="sub cdn">ضع علامة على كل عملية وجدتها في كشف البنك.</div>`;
+      <div class="segc"><button class="${un ? '' : 'on'}" onclick="S.fx.cdf='';renderFin()">الكل</button><button class="${un ? 'on' : ''}" onclick="S.fx.cdf='un';renderFin()">لم تُطابَق</button></div></div></div>
+    <div class="sub cdn">المجموع <b>${M(sum(inM), '', 't')}</b>${inM.length ? ' · ' + nInv(inM.length) : ''}<br>ضع علامة على كل عملية وجدتها في كشف البنك.</div>`;
   if (!L.length) return $('#view').innerHTML = h + emptyHtml(un && inM.length ? 'check-check' : 'credit-card', un && inM.length ? 'تمت مطابقة كل مشتريات هذه الفترة' : 'لا توجد مشتريات بالبطاقة في هذه الفترة');
   const days = [], by = {};
   L.forEach(x => { const k = x.ts.slice(0, 10); if (!by[k]) { by[k] = []; days.push(k); } by[k].push(x); });
-  h += '<div class="fvl">' + days.map(k => `<div class="dyh"><b>${esc(invDayLabel(k, d.today))}</b><span>${M(sum(by[k]), '', 't')}</span></div><div class="card fxl dyc cdl">${by[k].map(x => `<div class="cdr ${x.matched ? 'on' : ''}"><button class="cdk" aria-pressed="${!!x.matched}" aria-label="${x.matched ? 'طابقتها، اضغط للتراجع' : 'طابقتها'}" onclick="cardMatch('${x.id}',${!x.matched})">${I(x.matched ? 'circle-check' : 'circle', 24, 2)}</button><button class="cdt" onclick="openInvD('${x.id}')"><b>${esc(x.desc)}</b><span class="tm">${[esc(x.ename || 'أنت'), esc(x.pname || 'عام'), t12(x.ts)].filter(Boolean).join(' · ')}</span></button><span class="cda">${M(x.amount, '', 't')}</span></div>`).join('')}</div>`).join('') + '</div>';
+  const cdRow = x => `<div class="cdr ${x.matched ? 'on' : ''}"><button class="cdk" aria-pressed="${!!x.matched}" aria-label="${x.matched ? 'طابقتها، اضغط للتراجع' : 'طابقتها'}" onclick="cardMatch('${x.id}',${!x.matched})">${I(x.matched ? 'circle-check' : 'circle', 24, 2)}</button><button class="cdt" onclick="openInvD('${x.id}')"><b>${esc(x.desc)}</b><span class="tm">${[esc(x.ename || 'أنت'), esc(x.pname || 'عام'), t12(x.ts)].filter(Boolean).join(' · ')}</span></button><span class="cda">${M(x.amount, '', 't')}</span></div>`;
+  /* الإصدار 132: أحدث يوم مفتوح والأقدم مطوي بعدده ومجموعه */
+  h += '<div class="fvl">' + days.map((k, i) => i === 0 ? `<div class="dyh"><b>${esc(invDayLabel(k, d.today))}</b><span>${M(sum(by[k]), '', 't')}</span></div><div class="card fxl dyc cdl">${by[k].map(cdRow).join('')}</div>`
+    : foldCard('cdd' + k, '', esc(invDayLabel(k, d.today)), (by[k].length === 1 ? 'فاتورة واحدة' : by[k].length === 2 ? 'فاتورتين' : nInv(by[k].length)) + ' · ' + M(sum(by[k]), '', 't') + (by[k].every(x => x.matched) ? ' · <span class="cdall">طابقتها كلها</span>' : ''), `<div class="fxl dyc cdl">${by[k].map(cdRow).join('')}</div>`, false, 'dayf fvd')).join('') + '</div>';
   $('#view').innerHTML = h;
 }
 async function cardMatch(id, on) {
@@ -2945,10 +3000,10 @@ function renderFinProj(c, k) {
   const d = c.d, list = c.items.filter(x => x.kind === 'inv' && x.status === 'ok' && (x.project || '') === k);
   const m = list.filter(x => x.ts.slice(0, 7) === c.mk).reduce((a, x) => a + x.amount, 0), all = list.reduce((a, x) => a + x.amount, 0);
   let h = finBackBtn() + `<div class="fxh"><h2>${esc(projName(k))}</h2><span>${esc(d.month)}</span></div>
-    <div class="fxs"><div><b>هذا الشهر</b>${M(m)}</div><div><b>الإجمالي</b>${M(all)}</div><div><b>الفواتير</b><span class="mn">${list.length}</span></div></div>`;
+    <div class="fxs ln"><div><b>هذا الشهر</b>${M(m)}</div><div><b>الإجمالي</b>${M(all)}</div><div><b>الفواتير</b><span class="mn">${list.length}</span></div></div>`; /* الإصدار 132: الأرقام الثلاثة بطاقة واحدة */
   if (!list.length) return $('#view').innerHTML = h + emptyHtml('receipt', 'لا توجد فواتير على هذا المشروع بعد');
   h += budgetHtml(k, all) + catBreak(list);
-  h += `<div class="sech xph">الفواتير<button class="xpb" onclick="askExport('${k}')">${I('download', 15)}تصدير</button></div><div class="fvl">${invDaysHtml(list, true, true, 15, 'كل الفواتير')}</div>`;
+  h += `<div class="sech xph">الفواتير<button class="xpb" onclick="askExport('${k}')">${I('download', 15)}تصدير</button></div><div class="fvl">${invDaysHtml(list, true, true, 15, 'كل الفواتير', 'fpd' + k)}</div>`;
   const ws = list.filter(x => x.warrantyUntil).sort((a, b) => a.warrantyUntil < b.warrantyUntil ? -1 : 1);
   if (ws.length) {
     const wrow = x => { const w = wLeft(x.warrantyUntil, d.today); return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b><div class="tm">${esc(x.ename || 'أنت')} · ${dmyt(x.ts)} · حتى ${dmy(x.warrantyUntil)}</div></span><span class="wl ${w[0]}">${w[1]}</span></div></button>`; };
@@ -3009,18 +3064,30 @@ function invDayLabel(dt, today) {
   const l = dayLabel(dt).replace(new RegExp(' ' + today.slice(0, 4) + '$'), '');
   return dt === today ? 'اليوم · ' + l : dt === addDays(today, -1) ? 'أمس · ' + l : l;
 }
+/* الإصدار 132: طريقة الدفع كلمة ملونة في سطر التفاصيل بدل الشريحة جنب الاسم (الضمان في السطر نفسه «ضمان حتى») */
+function payWord(x) {
+  if (x.kind !== 'inv') return '';
+  const me = BOOT.page === 'admin' && !S.preview;
+  if (x.paidBy === 'card') return ` · <span class="pwd c">${me ? 'بطاقتي' : 'المدير العام'}</span>`;
+  if (x.paidBy === 'own') return ` · <span class="pwd o">${me ? 'من حسابه الخاص' : 'من حسابي الخاص'}</span>`;
+  if (me && x.emp && (x.paidBy || 'cash') === 'cash') return ' · <span class="pwd g">من العهدة</span>';
+  return '';
+}
 function invDayRow(x, showEmp, noProj) {
   const st = invSt(x, false), meta = [showEmp ? esc(x.ename || (x.emp ? '' : 'أنت')) : '', noProj ? '' : esc(x.pname || 'عام'), esc(invCatL(x)), x.vendor ? esc(x.vendor) : '', t12(x.ts)].filter(Boolean).join(' · ');
-  return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b>${wBadge(x)}<div class="tm">${meta}${x.status !== 'ok' ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان حتى ' + dmy(x.warrantyUntil) : ''}${x.taskDeleted ? ' · <span class="tdel">حُذفت مهمتها</span>' : ''}${(x.photos || []).length ? `<span class="ic" aria-label="فيها صورة">${I('image', 13)}</span>` : ''}</div>${invFixTag(x)}${x.status === 'returned' && x.reason ? `<div class="tm rsn">${esc(x.reason)}</div>` : ''}</span><b class="iva">${M(x.amount)} ‹</b></div></button>${x.status === 'review' ? `<div class="rvb"><button class="btn2 cu" onclick="invApprove('${x.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askInvReturn('${x.id}')">أعدها</button></div>` : ''}`;
+  return `<button class="strb" onclick="openInvD('${x.id}')"><div class="str"><span><b style="font-weight:600">${esc(x.desc)}</b><div class="tm">${meta}${payWord(x)}${x.status !== 'ok' ? ' · <span class="badge ' + st[0] + '">' + st[1] + '</span>' : ''}${x.warrantyUntil ? ' · ضمان حتى ' + dmy(x.warrantyUntil) : ''}${x.taskDeleted ? ' · <span class="tdel">حُذفت مهمتها</span>' : ''}${(x.photos || []).length ? `<span class="ic" aria-label="فيها صورة">${I('image', 13)}</span>` : ''}</div>${invFixTag(x)}${x.status === 'returned' && x.reason ? `<div class="tm rsn">${esc(x.reason)}</div>` : ''}</span><b class="iva">${M(x.amount)} ‹</b></div></button>${x.status === 'review' ? `<div class="rvb"><button class="btn2 cu" onclick="invApprove('${x.id}')">${I('check', 16, 2.5)}اعتمدها</button><button class="btn2 rd" onclick="askInvReturn('${x.id}')">أعدها</button></div>` : ''}`;
 }
-function invDaysHtml(list, showEmp, noProj, lim, allLabel) {
+function invDaysHtml(list, showEmp, noProj, lim, allLabel, fold) {
   const d = S.data, L = list.slice().sort((a, b) => a.ts < b.ts ? 1 : a.ts > b.ts ? -1 : 0), days = [], by = {};
   L.forEach(x => { const k = x.ts.slice(0, 10); if (!by[k]) { by[k] = []; days.push(k); } by[k].push(x); });
   let n = 0, h = '', more = false;
   for (const k of days) {
     if (!S.fx.all && n >= lim) { more = true; break; }
     const D = by[k]; n += D.length;
-    h += `<div class="dyh"><b>${esc(invDayLabel(k, d.today))}</b><span>${D.length === 1 ? 'فاتورة واحدة' : D.length === 2 ? 'فاتورتين' : D.length + (D.length > 10 ? ' فاتورة' : ' فواتير')} · ${M(Math.round(D.reduce((a, x) => a + x.amount, 0) * 100) / 100, '', 't')}</span></div><div class="card fxl dyc">${D.map(x => invDayRow(x, showEmp, noProj)).join('')}</div>`;
+    const dmeta = `${D.length === 1 ? 'فاتورة واحدة' : D.length === 2 ? 'فاتورتين' : D.length + (D.length > 10 ? ' فاتورة' : ' فواتير')} · ${M(Math.round(D.reduce((a, x) => a + x.amount, 0) * 100) / 100, '', 't')}`;
+    /* الإصدار 132: في صفحة المشروع أحدث يوم مفتوح والأقدم مطوي بعدده ومجموعه */
+    if (fold && h) h += foldCard(fold + k, '', esc(invDayLabel(k, d.today)), dmeta, `<div class="fxl dyc">${D.map(x => invDayRow(x, showEmp, noProj)).join('')}</div>`, false, 'dayf fvd');
+    else h += `<div class="dyh"><b>${esc(invDayLabel(k, d.today))}</b><span>${dmeta}</span></div><div class="card fxl dyc">${D.map(x => invDayRow(x, showEmp, noProj)).join('')}</div>`;
   }
   return h + (more || (S.fx.all && L.length > lim && days.length > 1) ? `<button class="dtog dya" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : allLabel + ' (' + L.length + ')'}</button>` : '');
 }
@@ -3753,22 +3820,26 @@ function renderSet() {
   const d = S.data, k = S.ssub || '', inT = S.view === 'team';
   /* الإصدار 96: إعدادات الموظف وإضافة موظف تنفتح من «الفريق» */
   if (inT && !(k === 'add' || (k.indexOf('emp:') === 0 && empById(k.slice(4))))) { S.ssub = null; return renderTeam(); }
-  const form = (e) => `<div class="card">
+  /* الإصدار 132: مجموعتين «البيانات والراتب» و«الصلاحيات»، و«حفظ» تحتهم بعرض الصفحة، و«رابط جديد له» بقسم لحاله تحت بلون التحذير */
+  const form = (e) => `<div class="lbl esl">البيانات والراتب</div><div class="card esc">
       <div class="field"><span>الاسم</span><input id="n_${e.id}" value="${esc(edV(e, 'n'))}" oninput="edIn('${e.id}','n',this.value)"></div>
       <div class="grid2">
         <div class="field"><span>الراتب الأساسي (ريال)</span><input id="s_${e.id}" type="number" inputmode="numeric" value="${esc(edV(e, 's'))}" oninput="edIn('${e.id}','s',this.value)"></div>
         <div class="field"><span>الحافز الأساسي (ريال)</span><input id="m_${e.id}" type="number" inputmode="numeric" value="${esc(edV(e, 'm'))}" oninput="edIn('${e.id}','m',this.value)"></div>
       </div>
       <div class="note info" id="eh_${e.id}"${lateHint(e) ? '' : ' style="display:none"'}>${I('info', 16)}<div>${lateHint(e)}</div></div>
+      <div class="trow"><div class="n"><b>موعد صرف راتبه</b><small>راتب ${esc((S.data.month || ''))} يستحق ${esc(dueL(payDue(e, (S.data.today || '').slice(0, 7)), true))}</small></div></div>
+      <div class="psel"><select id="pdd_${e.id}" onchange="setPayday('${e.id}')" aria-label="يوم الصرف">${Array.from({length: 28}, (_, i) => `<option value="${i + 1}" ${(e.payDay || 28) === i + 1 ? 'selected' : ''}>يوم ${i + 1}</option>`).join('')}</select><select id="pdn_${e.id}" onchange="setPayday('${e.id}')" aria-label="من أي شهر"><option value="0" ${e.payNext ? '' : 'selected'}>من نفس الشهر</option><option value="1" ${e.payNext ? 'selected' : ''}>من الشهر التالي</option></select></div>
+      </div>
+      <div class="lbl esl">الصلاحيات</div><div class="card esc">
       <div class="trow"><div class="n"><b>متابعة فقط</b><small>يتابع تقييمه بدون حافز</small></div><button class="tg ${e.track?'on':''}" onclick="toggleTrack('${e.id}')" aria-label="متابعة فقط"></button></div>
       <div class="trow"><div class="n"><b>حضور وانصراف</b><small>يصوّر عند خروجه من البيت ووصوله إلى المشروع وخروجه منه</small></div><button class="tg ${e.attend?'on':''}" onclick="toggleAtt('${e.id}')" aria-label="حضور وانصراف"></button></div>
       <div class="trow"><div class="n"><b>التوجيهات</b><small>تصله توجيهاتك ويقرأها نقطة نقطة</small></div><button class="tg ${e.guide?'on':''}" onclick="toggleGuide('${e.id}')" aria-label="التوجيهات"></button></div>
-      <div class="trow"><div class="n"><b>لغة صفحته</b><small>يفتح رابطه بهذه اللغة</small></div><select class="lsel" onchange="setLang('${e.id}', this.value, this)" aria-label="لغة صفحته">${LANGS.map(l => `<option value="${l[0]}" ${(e.lang || 'ar') === l[0] ? 'selected' : ''}>${l[1]}</option>`).join('')}</select></div>
-      <div class="trow" style="border-bottom:0;padding-bottom:4px"><div class="n"><b>موعد صرف راتبه</b><small>راتب ${esc((S.data.month || ''))} يستحق ${esc(dueL(payDue(e, (S.data.today || '').slice(0, 7)), true))}</small></div></div>
-      <div class="psel"><select id="pdd_${e.id}" onchange="setPayday('${e.id}')" aria-label="يوم الصرف">${Array.from({length: 28}, (_, i) => `<option value="${i + 1}" ${(e.payDay || 28) === i + 1 ? 'selected' : ''}>يوم ${i + 1}</option>`).join('')}</select><select id="pdn_${e.id}" onchange="setPayday('${e.id}')" aria-label="من أي شهر"><option value="0" ${e.payNext ? '' : 'selected'}>من نفس الشهر</option><option value="1" ${e.payNext ? 'selected' : ''}>من الشهر التالي</option></select></div>
-      <div class="grid2"><button class="btn2 ${edDirty(e) ? 'cu' : ''}" id="sv_${e.id}" onclick="saveEmp('${e.id}')">حفظ</button>
-      <button class="btn2 ${S.armed==='tok_'+e.id?'arm':''}" onclick="newToken('${e.id}')">${S.armed==='tok_'+e.id?'تأكيد: الرابط القديم يوقف':'رابط جديد له'}</button></div>
-      <div class="err" id="e_${e.id}"></div></div>`;
+      <div class="trow" style="border-bottom:0"><div class="n"><b>لغة صفحته</b><small>يفتح رابطه بهذه اللغة</small></div><select class="lsel" onchange="setLang('${e.id}', this.value, this)" aria-label="لغة صفحته">${LANGS.map(l => `<option value="${l[0]}" ${(e.lang || 'ar') === l[0] ? 'selected' : ''}>${l[1]}</option>`).join('')}</select></div>
+      </div>
+      <button class="btn2 esv ${edDirty(e) ? 'cu' : ''}" id="sv_${e.id}" onclick="saveEmp('${e.id}')">حفظ</button>
+      <div class="err" id="e_${e.id}"></div>
+      <div class="lbl esl">رابط الدخول</div><div class="card esc etkc"><button class="btn2 rd etk ${S.armed==='tok_'+e.id?'arm':''}" onclick="newToken('${e.id}')">${S.armed==='tok_'+e.id?'تأكيد: الرابط القديم يوقف':'رابط جديد له'}</button><div class="sub">يُنشأ له رابط جديد، ويتوقف الرابط القديم بعد التأكيد.</div></div>`;
   const back = `<button class="back" onclick="ssub(null)">${I('arrow-right', 17)}${inT ? (k === 'add' ? 'الفريق' : esc(shortName(empById(k.slice(4)).name))) : 'الإعدادات'}</button>`;
   const page = (title, body) => { $('#view').innerHTML = `${back}<h2>${title}</h2><div class="ssp">${body}</div>`; };
   const st = d.settings, ac = d.attCfg || {start: '07:00', grace: 15};
@@ -3830,10 +3901,12 @@ function projectsCard(d) {
   const ps = d.projects || [], act = ps.filter(p => !p.archived), arch = ps.filter(p => p.archived);
   return `<div class="card">${ctitle('folder', 'المشاريع')}
     <div class="sub" style="margin:4px 0 6px">عند انتهاء المشروع أرشفه، فيختفي من الاختيار وتبقى تقاريره وفواتيره محفوظة.</div>
-    ${act.map(p => `<div class="prow"><input id="pn_${p.id}" value="${esc(p.name)}">
+    ${act.map(p => S.pjo !== p.id ? `<button class="prow pjr" onclick="S.pjo='${p.id}';renderAdmin()" aria-label="تعديل ${esc(p.name)}"><span class="pjn">${esc(p.name)}</span>${p.budget ? '<span class="pjb">الميزانية ✓</span>' : ''}<span class="pjm">${I('ellipsis', 18, 2.6)}</span></button>` /* الإصدار 132: كل مشروع سطر، و⋯ يفتح الاسم والأزرار */
+      : `<div class="prow pjo"><input id="pn_${p.id}" value="${esc(p.name)}">
       <button class="del" onclick="saveProj('${p.id}')">${I('check', 15)}حفظ</button>
       <button class="del" onclick="askProjBudget('${p.id}')">${I('wallet', 15)}${p.budget ? 'الميزانية ✓' : 'الميزانية'}</button>
-      <button class="del" onclick="archProj('${p.id}', true)">${I('archive', 15)}أرشفة</button></div>
+      <button class="del" onclick="archProj('${p.id}', true)">${I('archive', 15)}أرشفة</button>
+      <button class="pjx" onclick="S.pjo=null;renderAdmin()" aria-label="إغلاق">${I('chevron-up', 18)}</button></div>
 `).join('')}
     <div class="inrow"><input id="pn_new" placeholder="اسم مشروع جديد" onkeydown="if(event.key==='Enter')addProject('set')"><button class="btn2 cu" onclick="addProject('set')">${I('plus', 16, 2.5)}إضافة</button></div>
     <div class="err" id="perr"></div>
@@ -4004,7 +4077,7 @@ function foldCard(key, icon, title, meta, body, def, cls) {
 function foTog(k, def) {
   S.fo = S.fo || {}; S.fo[k] = !(k in S.fo ? S.fo[k] : !!def);
   /* الإصدار 131: صفحات المدير ترسم الجزء نفسه بس عشان ما يرجع التمرير فوق */
-  if (BOOT.page === 'admin' && !S.preview && !NF.open) { if (S.view === 'rec') return renderRec(); if (S.view === 'task' && RP.open) return rpRerender(); if (S.view === 'team') return renderTeam(); }
+  if (BOOT.page === 'admin' && !S.preview && !NF.open) { if (S.view === 'rec') return renderRec(); if (S.view === 'task' && RP.open) return rpRerender(); if (S.view === 'team') return renderTeam(); if (S.view === 'fin') return renderFin(); }
   redrawAny();
 }
 function empPayHtml(d) {
