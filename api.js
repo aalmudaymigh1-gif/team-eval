@@ -1089,6 +1089,11 @@
     /* الإصدار 86: اعتماد الإنجاز أو إرجاعه، والتنبيه على عمل محدد، وتسجيل مشاهدة التنبيه */
     async apiRepReview(id, item, ok, note) { const r = await rpc('rep_review', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), ok: !!ok, note: String(note || '') }); flush(); return r; },
     async apiRepAlert(id, item, emps, msg, rid) { const r = await rpc('rep_alert', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), emps: emps || [], msg: String(msg || ''), rid: String(rid || '') }); flush(); return r; },
+    /* الإصدار 133: موعد إنجاز العمل: التحديد والإلغاء مني، وطلب التمديد من الموظف المسؤول، واعتماده أو رفضه */
+    async apiDueSet(id, item, emp, due, rid) { const r = await rpc('rep_due_set', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), emp: String(emp || ''), due: String(due || ''), rid: String(rid || '') }); flush(); return r; },
+    async apiDueDel(did) { const r = await rpc('rep_due_del', { k: CRED.k || '', did: String(did || '') }); flush(); return r; },
+    async apiDueReq(did, due, note, undo) { const r = await rpc('rep_due_req', { t: CRED.t || '', did: String(did || ''), due: String(due || ''), note: String(note || ''), undo: !!undo }); if (!undo) flush(); return r; },
+    async apiDueRev(did, ok, note) { const r = await rpc('rep_due_rev', { k: CRED.k || '', did: String(did || ''), ok: !!ok, note: String(note || '') }); flush(); return r; },
     async apiAlertSeen(id) { const r = await rpc('alert_seen', { t: CRED.t || '', id: String(id || '') }); flush(); return r; },
     async apiRepDecDel(id, item) { return rpc('rep_dec_del', { k: CRED.k || '', id: String(id || ''), item: String(item || '') }); },
     async trGet(texts, lang) { return rpc('tr_get', { k: CRED.k || '', t: CRED.t || '', texts: texts, tl: lang }); },

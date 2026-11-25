@@ -1510,6 +1510,33 @@ html:root .ssp .card.esc{margin-top:0}
 html:root .ssp .esv{width:100%;margin-top:14px}
 html:root .etkc .etk{width:100%}
 html:root .etkc .sub{margin-top:8px}
+/* الإصدار 133: موعد إنجاز العمل (سطر الموعد تحت العمل، نافذة التحديد وطلب التمديد، «مواعيد اليوم») */
+html:root .dul{display:flex;gap:5px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:5px;line-height:1.5}
+html:root .dul svg{flex:none;margin-top:3px;color:var(--acc-dk)}
+html:root .dul.g{color:#85642B;background:var(--amber-soft);border-radius:10px;padding:5px 8px}
+html:root .dul.g svg{color:var(--amber)}
+html:root .dul.r{color:#7E3F39;background:var(--red-soft);border-radius:10px;padding:5px 8px}
+html:root .dul.r svg{color:var(--red)}
+html:root .dul.ok{color:var(--green)}
+html:root .dul.ok svg{color:var(--green)}
+html:root .dul.q svg{color:var(--amber)}
+html:root .dul .qlnk{min-height:0;padding:0 2px;font-size:13px;position:relative;text-decoration:underline;text-underline-offset:3px}
+html:root .dul .qlnk::after{content:"";position:absolute;inset:-12px -4px}
+html:root .dutx{color:#7E3F39}
+html:root .sheet .dui{width:100%;min-height:48px;border:1.5px solid var(--line2);border-radius:14px;padding:0 14px;background:var(--surface);color:var(--text);margin-top:8px}
+html:root .dupv{background:var(--acc-soft);border-radius:14px;padding:10px 12px;margin:12px 0 4px;font-size:14px;line-height:1.6}
+html:root .dupv small{display:block;font-size:12px;color:var(--muted);margin-top:3px}
+html:root .dtd .dtl{list-style:none;margin:0;padding:0}
+html:root .dtd .dtl li{display:flex;align-items:center;gap:10px;padding:10px 2px;border-top:1px solid var(--line);cursor:pointer;min-height:48px}
+html:root .dtd .dtl li:first-child{border-top:0}
+html:root .dtd .dtl li>b{flex:none;font-size:14px;font-weight:600;min-width:62px}
+html:root .dtd .dtl li>span{flex:1;min-width:0;display:flex;flex-direction:column}
+html:root .dtd .dtl .dtt{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html:root .dtd .dtl li>span small{font-size:12px;color:var(--muted)}
+html:root .dtd .dts{flex:none;font-size:12px;color:var(--muted)}
+html:root .dtd .r{color:var(--red)}
+html:root .dtd .g{color:#85642B}
+html:root .dtd .ok{color:var(--green)}
 </style>
 </head>
 <body>
@@ -1519,9 +1546,9 @@ html:root .etkc .sub{margin-top:8px}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=132"></script>
+<script src="api.js?v=133"></script>
 <script>
-const APP_VER = '132';
+const APP_VER = '133';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -4458,7 +4485,7 @@ function rpLreqShow(r) { const n = Date.now(); return rpArr(r && r.lreq).filter(
 /* الإصدار 124: «حان وقته» يطلع يومين من دخول العمل للحالية (upAt من القاعدة). اللي ما له وقت ما يطلع عليه */
 function rpUpFresh(r, x) { const t = Number(((r && r.upAt) || {})[x]) || 0; return t > 0 && Date.now() - t < 2 * 864e5; }
 function rpNowOf(r, t) { const a = rpArr(r && r.nows); for (let i = a.length - 1; i >= 0; i--) if (a[i].t === t) return a[i]; return null; }
-function rpNPend() { return rpProjs().filter(p => { const r = rpLast(p.id); return rpPend(r) || rpPendL(r).length || rpReqL(r).length || rpAreqL(r).length || rpLreqP(r).length || rqPendN(r); }).length; }
+function rpNPend() { return rpProjs().filter(p => { const r = rpLast(p.id); return rpPend(r) || rpPendL(r).length || rpReqL(r).length || rpAreqL(r).length || rpLreqP(r).length || rqPendN(r) || duReqL(r).length; }).length; }
 function rpUpdBy(r) { return r.updBy ? (r.updBy === 'المدير العام' ? r.updBy : shortName(r.updBy)) : rpBy(r); }
 function rpBy(r) { return r.by === 'admin' ? 'المدير العام' : shortName(r.byName || ''); }
 function rpDay(s) { const d = new Date(s + 'T12:00:00'); return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS_AR[d.getMonth()]; }
@@ -4542,9 +4569,9 @@ function rpAgeDays(r) { const t = rpToday(), u = rpUpdMs(r); if (!t || !u) retur
 function rpSummaryHtml() {
   const ps = rpProjs(), withR = ps.filter(p => rpLast(p.id)), none = ps.filter(p => !rpLast(p.id));
   rpSeedSeen();
-  const rank = r => rpPend(r) || rpPendL(r).length || rpReqL(r).length || rpAreqL(r).length || rpLreqP(r).length ? 2 : rpIsNew(r) ? 1 : 0;
+  const rank = r => rpPend(r) || rpPendL(r).length || rpReqL(r).length || rpAreqL(r).length || rpLreqP(r).length || duReqL(r).length ? 2 : rpIsNew(r) ? 1 : 0;
   withR.sort((a, b) => { const ra = rpLast(a.id), rb = rpLast(b.id); return rank(rb) - rank(ra) || (rb.upd || 0) - (ra.upd || 0); });
-  let h = withR.length ? '<div class="rpl">' + withR.map(p => rpCardHtml(rpLast(p.id))).join('') + '</div>' : emptyHtml('file-text', 'لا توجد تقارير بعد. التقارير التي يرسلها الموظفون تظهر هنا');
+  let h = duTodayHtml() + (withR.length ? '<div class="rpl">' + withR.map(p => rpCardHtml(rpLast(p.id))).join('') + '</div>' : emptyHtml('file-text', 'لا توجد تقارير بعد. التقارير التي يرسلها الموظفون تظهر هنا'));
   if (none.length && withR.length) {
     h += `<button class="rpfold" aria-expanded="${!!RP.noneOpen}" onclick="RP.noneOpen=!RP.noneOpen;rpRerender()"><span class="ic">${I('folder', 16)}</span><span class="k">مشاريع بلا تقارير</span><span class="v">${none.length}<span class="cv2 ${RP.noneOpen ? 'on' : ''}">${I('chevron-left', 16)}</span></span></button>`;
     if (RP.noneOpen) h += `<div class="tbl2" style="margin-top:8px">${none.map(p => tbRow('folder', esc(p.name), '<span class="lv">إضافة تقرير</span>', `rpOpenForm('${p.id}',true)`)).join('')}</div>`;
@@ -4556,7 +4583,7 @@ function rpCardHtml(r, o) {
   const dec = rpArr(r.decide), up = rpArr(r.up), cur = rpArr(r.cur), ord = up.filter(x => cur.includes(x)).concat(cur.filter(x => !up.includes(x)));
   const nc = cur.length, nl = rpArr(r.later).length, nd = rpArr(r.done).length, age = rpAgeDays(r), me = (o.d || {}).id;
   const notes = rpArr(r.notes), last = notes[notes.length - 1];
-  const npd = rpPendL(r).length + rpReqL(r).length + rpAreqL(r).length + rpLreqP(r).length + rqPendN(r), nret = o.emp ? rpArr(r.cur).filter(x => { const k = rpTk(r, x); return rpSt(k) === 'ret' && k.by === me; }).length : 0;
+  const npd = rpPendL(r).length + rpReqL(r).length + rpAreqL(r).length + rpLreqP(r).length + rqPendN(r) + duReqL(r).length, nret = o.emp ? rpArr(r.cur).filter(x => { const k = rpTk(r, x); return rpSt(k) === 'ret' && k.by === me; }).length : 0;
   const chip = o.share ? '<span class="rchip new">تنبيه</span>' : !o.emp && npd ? `<span class="rchip dec">بانتظار اعتمادك (${npd})</span>` : nret ? '<span class="rchip old">أُعيد إليك عمل</span>' : rpPend(r) ? `<span class="rchip dec">${o.emp ? 'بانتظار المدير العام' : 'بانتظار قرارك'}</span>` : rpIsNew(r, me) ? '<span class="rchip new">تحديث جديد</span>' : age > 3 ? `<span class="rchip old">بدون تحديث من ${age} ${age <= 10 ? 'أيام' : 'يوماً'}</span>` : '';
   const st = [nc ? `<span><i></i>${nc === 1 ? 'عمل حالي واحد' : nc === 2 ? 'عملان حاليان' : nc + ' حالية'}</span>` : '',
     nl ? `<span><i class="l"></i>${nl === 1 ? 'عمل لاحق واحد' : nl === 2 ? 'عملان لاحقان' : nl + ' لاحقة'}</span>` : '',
@@ -4638,7 +4665,7 @@ async function krUndel(id) {
 
 function rpItems(arr, tags, cls, r, isAdmin) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
-  return '<ul class="rpi ' + (cls || '') + '">' + arr.map((x, i) => { const qb = r ? rqBlock(r, x, rpArr(r.cur).indexOf(x), isAdmin) : ''; const ss = r && cls === 'cur' ? stOf(r, x) : []; return `<li>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${r ? rqTag(r, x, isAdmin) : ''}${ss.length ? stNowHtml(ss) : ''}${r ? rqOkLines(r, x, rpArr(r.cur).indexOf(x), isAdmin) : ''}${qb ? `<div class="qsub">${qb}</div>` : ''}</li>`; }).join('') + '</ul>';
+  return '<ul class="rpi ' + (cls || '') + '">' + arr.map((x, i) => { const qb = r ? rqBlock(r, x, rpArr(r.cur).indexOf(x), isAdmin) : ''; const ss = r && cls === 'cur' ? stOf(r, x) : []; return `<li>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${r ? rqTag(r, x, isAdmin) : ''}${r && cls === 'cur' ? duLine(r, x, isAdmin) : ''}${ss.length ? stNowHtml(ss) : ''}${r ? rqOkLines(r, x, rpArr(r.cur).indexOf(x), isAdmin) : ''}${qb ? `<div class="qsub">${qb}</div>` : ''}</li>`; }).join('') + '</ul>';
 }
 function rpLaterHtml(arr) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
@@ -4764,7 +4791,7 @@ function rpDetailHtml(isAdmin) {
   const lat = rpArr(r.later), nh = rpHistOf(r.proj).reduce((a, g) => a + g.items.length, 0);
   const canOrd = isAdmin && rpCanTick(r, true) && cur.length > 1, ordm = canOrd && RP.ord && RP.ord.id === r.id;
   if (r.ord && cur.length > 1 && !tags[0]) tags[0] = ['الأهم', 'tgtop'];
-  const pendH = rpPendHtml(r, pend, isAdmin, isAdmin ? rpReqL(r) : [], isAdmin ? rpLreqP(r) : [], isAdmin ? rpAreqL(r) : []);
+  const pendH = rpPendHtml(r, pend, isAdmin, isAdmin ? rpReqL(r) : [], isAdmin ? rpLreqP(r) : [], isAdmin ? rpAreqL(r) : [], isAdmin ? duReqL(r) : []);
   if (isAdmin) h += pendH; /* الإصدار 130: عند الموظف تنزل بعد الأعمال الحالية ومطوية */
   h += `<div class="rpcard now"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${rpCanTick(r, isAdmin) && cur.length && !ordm ? `<button class="rchb rhi ${RP.hint ? 'on' : ''}" onclick="RP.hint=!RP.hint;rpRerender()" aria-label="طريقة الاستخدام" aria-expanded="${!!RP.hint}">${I('info', 16)}</button>` : ''}${canOrd ? (ordm ? `<button class="rchb dn fl" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur', (rpLast(r.proj) || {}).id === r.id ? r : null, isAdmin)}${rpCanTick(r, isAdmin) && !ordm ? rpCurAddHtml(r) + (cur.length ? rqAddBtn(r) : '') : ''}</div>`;
   if (!isAdmin) h += pendH;
@@ -4778,20 +4805,20 @@ function rpDetailHtml(isAdmin) {
   return h;
 }
 /* الإصدار 86: بطاقة «بانتظار الاعتماد». للمدير العام زرّين: اعتماد الإنجاز، أو إرجاع للعمل مع ملاحظة تظهر للموظف */
-function rpPendHtml(r, pend, isAdmin, reqs, lqs, aqs) {
-  reqs = reqs || []; lqs = lqs || []; aqs = aqs || [];
-  if (!pend.length && !reqs.length && !lqs.length && !aqs.length) return '';
+function rpPendHtml(r, pend, isAdmin, reqs, lqs, aqs, dqs) {
+  reqs = reqs || []; lqs = lqs || []; aqs = aqs || []; dqs = dqs || [];
+  if (!pend.length && !reqs.length && !lqs.length && !aqs.length && !dqs.length) return '';
   const all = rpArr(r.cur);
-  const pdo = isAdmin || RP.pdOpen === r.id, nP = pend.length + reqs.length + lqs.length + aqs.length; /* الإصدار 130: عند الموظف للاطلاع، مطوية بعددها */
+  const pdo = isAdmin || RP.pdOpen === r.id, nP = pend.length + reqs.length + lqs.length + aqs.length + dqs.length; /* الإصدار 130: عند الموظف للاطلاع، مطوية بعددها */
   if (!pdo) return `<div class="rpcard pd cl"><div class="rch rchx" role="button" tabindex="0" aria-expanded="false" onclick="RP.pdOpen='${r.id}';rpRerender()"><span class="ci">${I('hourglass', 16)}</span><span class="fot"><span>بانتظار الاعتماد</span><small class="fom">أُرسلت إلى المدير العام</small></span><span class="cn">${nP}</span><span class="rchv">${I('chevron-down', 16)}</span></div></div>`;
-  return `<div class="rpcard pd"><div class="rch${isAdmin ? '' : ' rchx'}"${isAdmin ? '' : ` role="button" tabindex="0" aria-expanded="true" onclick="RP.pdOpen=null;rpRerender()"`}><span class="ci">${I('hourglass', 16)}</span>بانتظار الاعتماد<span class="cn">${nP}</span>${isAdmin ? '' : `<span class="rchv">${I('chevron-up', 16)}</span>`}</div><ul class="pdl">${lqs.map(x => rpLreqItem(r, x)).join('')}${reqs.map(x => rpReqItem(r, x)).join('')}${aqs.map(x => rpAreqItem(r, x)).join('')}${pend.map(x => {
+  return `<div class="rpcard pd"><div class="rch${isAdmin ? '' : ' rchx'}"${isAdmin ? '' : ` role="button" tabindex="0" aria-expanded="true" onclick="RP.pdOpen=null;rpRerender()"`}><span class="ci">${I('hourglass', 16)}</span>بانتظار الاعتماد<span class="cn">${nP}</span>${isAdmin ? '' : `<span class="rchv">${I('chevron-up', 16)}</span>`}</div><ul class="pdl">${lqs.map(x => rpLreqItem(r, x)).join('')}${reqs.map(x => rpReqItem(r, x)).join('')}${aqs.map(x => rpAreqItem(r, x)).join('')}${dqs.map(d => duReqItem(r, d)).join('')}${pend.map(x => {
     const k = rpTk(r, x), i = all.indexOf(x), rv = RP.rv && RP.rv.id === r.id && RP.rv.t === x;
     const who = k.by === 'admin' ? 'المدير العام' : shortName(k.name || '');
     let act = '';
     if (isAdmin && rpCanTick(r, true)) act = rv ? `<div class="rvf"><textarea id="rv_note" class="rta sm" placeholder="سبب الإرجاع، يظهر للموظف على العمل" oninput="RP.rv.note=this.value;rpGrow(this)">${esc(RP.rv.note || '')}</textarea><div class="grid2"><button class="btn2 rd" onclick="rpReview('${r.id}',${i},false,this)">${I('rotate-ccw', 15)}إرجاع للعمل</button><button class="btn2" onclick="RP.rv=null;rpRerender()">إلغاء</button></div></div>`
       : `<div class="grid2 pdb"><button class="btn2 cu" onclick="rpReview('${r.id}',${i},true,this)">${I('check', 16, 2.5)}اعتماد الإنجاز</button><button class="btn2 rd" onclick="rpRvOpen('${r.id}',${i})">${I('rotate-ccw', 15)}إرجاع للعمل</button></div>`;
     else act = `<div class="pw">${I('clock', 13)}بانتظار اعتماد المدير العام</div>`;
-    return `<li><div class="pt">${esc(x)}</div><div class="pm">${esc(who)} · وقت تسجيل الإنجاز: <b>${esc(rpTickWhen(k.at))}</b></div>${rpTickDoc(k)}${rpPendSteps(r, x)}${rpAlertLine(r, x, isAdmin)}${act}</li>`;
+    return `<li><div class="pt">${esc(x)}</div><div class="pm">${esc(who)} · وقت تسجيل الإنجاز: <b>${esc(rpTickWhen(k.at))}</b></div>${rpTickDoc(k)}${rpPendSteps(r, x)}${duLine(r, x, isAdmin)}${rpAlertLine(r, x, isAdmin)}${act}</li>`;
   }).join('')}</ul></div>`;
 }
 /* الإصدار 127: خطوات العمل في «بانتظار الاعتماد» (عندي وعند الموظف): سطر «الخطوات: n من N منجزة» والناقص بالأحمر، والضغط يفتح القائمة ومين أشّر كل خطوة */
@@ -5410,12 +5437,12 @@ function rpCanTick(r, isAdmin) {
    (تنفتح من الحلقة أو الاسم)، والسعر المعتمد سطور تحت الاسم، وعندي زر ⋯ (rpMoreOpen) بدل الساعة والجرس */
 function rpTickList(r, cur, tags, isAdmin) {
   const all = rpArr(r.cur);
-  const hint = `<div class="rhint cwh">${I('info', 13)}<span><span>${isAdmin ? 'الدائرة: أُنجز' : 'الدائرة: أنجزته ويُرسل للمدير العام للاعتماد'}</span> · <span>الرقم أو الاسم: الخطوات</span>${isAdmin ? ` · <span class="nw2">${I('ellipsis', 13, 2.6)}: تنبيه وتأجيل</span>` : ''}</span></div>`;
+  const hint = `<div class="rhint cwh">${I('info', 13)}<span><span>${isAdmin ? 'الدائرة: أُنجز' : 'الدائرة: أنجزته ويُرسل للمدير العام للاعتماد'}</span> · <span>الرقم أو الاسم: الخطوات</span>${isAdmin ? ` · <span class="nw2">${I('ellipsis', 13, 2.6)}: تنبيه وموعد وتأجيل</span>` : ''}</span></div>`;
   return (RP.hint ? hint : '') + '<ul class="tkl">' + cur.map((x, i) => {
     const j = all.indexOf(x), k = rpTk(r, x), ret = rpSt(k) === 'ret', qb = rqBlock(r, x, j, isAdmin);
     const ss = stOf(r, x), sl = ss.filter(s => !s.done).length, so = RP.sopen === stKey(r, x), lc = [qb ? 'hq' : '', ss.length ? 'stp' : '', so ? 'so' : ''].filter(Boolean).join(' ');
     const lead = ss.length && sl ? `<button class="spc" style="--p:${Math.round((ss.length - sl) / ss.length * 100)}" onclick="rpStToggle('${r.id}',${j})" aria-label="الخطوات" aria-expanded="${so}"><span>${ss.length - sl}/${ss.length}</span></button>` : `<button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button>`;
-    return `<li${lc ? ` class="${lc}"` : ''}>${lead}<span><span class="wtx" onclick="rpStToggle('${r.id}',${j})">${esc(x)}</span>${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${rqTag(r, x, isAdmin)}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}` : ''}${ss.length ? stNowHtml(ss) : ''}${rqOkLines(r, x, j, isAdmin)}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell imore" onclick="rpMoreOpen('${r.id}',${j})" aria-label="إجراءات العمل">${I('ellipsis', 18, 2.6)}</button>` : ''}</li>${so ? `<li class="sli"><div class="spn">${stPanelHtml(r, x, j, ss, isAdmin)}</div></li>` : ''}${qb ? `<li class="qli"><div class="qsub">${qb}</div></li>` : ''}`;
+    return `<li${lc ? ` class="${lc}"` : ''}>${lead}<span><span class="wtx" onclick="rpStToggle('${r.id}',${j})">${esc(x)}</span>${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${rqTag(r, x, isAdmin)}${duLine(r, x, isAdmin)}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}` : ''}${ss.length ? stNowHtml(ss) : ''}${rqOkLines(r, x, j, isAdmin)}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell imore" onclick="rpMoreOpen('${r.id}',${j})" aria-label="إجراءات العمل">${I('ellipsis', 18, 2.6)}</button>` : ''}</li>${so ? `<li class="sli"><div class="spn">${stPanelHtml(r, x, j, ss, isAdmin)}</div></li>` : ''}${qb ? `<li class="qli"><div class="qsub">${qb}</div></li>` : ''}`;
   }).join('') + '</ul>';
 }
 /* الإصدار 124: نافذة ⋯ عندي: نفس الإجراءات بكلام. التنبيه والتأجيل يفتحون نوافذهم الحالية */
@@ -5424,9 +5451,195 @@ function rpMoreOpen(id, j) {
   const item = rpArr(r.cur)[j]; if (item == null) return;
   ovOpen(`<label class="shh">${esc(item)}</label><div class="sub" style="margin:-6px 0 8px">إجراءات العمل</div>
     <button class="btn2 mact" onclick="rpShareOpen('${id}',${j})">${I('bell', 17)}تنبيه الموظف على هذا العمل</button>
+    <button class="btn2 mact" onclick="duOpen('${id}',${j})">${I('alarm-clock', 17)}${(duOf(r, item) || {}).st === 'on' ? 'تعديل موعد الإنجاز' : 'تحديد موعد الإنجاز'}</button>
     <button class="btn2 mact" onclick="rpDefOpen('${id}',${j})">${I('clock', 17)}تأجيل إلى الأعمال اللاحقة</button>
     <button class="btn2 mact" onclick="ovClose();rpStToggle('${id}',${j})">${I('list-checks', 17)}الخطوات</button>
     <button class="btn2" style="width:100%;margin-top:8px" onclick="ovClose()">إلغاء</button>`);
+}
+/* الإصدار 133: موعد إنجاز العمل. أحدده من ⋯ مع الموظف المسؤول، وسطر الموعد تحت العمل عندي وعند الموظف (ذهبي قبله بساعة، أحمر لما يفوت).
+   التذكير والتنبيه الأخير والمخالفة من القاعدة (rep_due_tick كل 5 دقايق). الموظف المسؤول يطلب تمديد، وأنا أعتمده أو أرفضه من «بانتظار الاعتماد».
+   النصوص اللي تتغيّر (اليوم، الوقت، المتبقي) كل وحدة بعنصر لحالها عشان الترجمة تلقطها */
+ICONS['alarm-clock'] = '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/>';
+function duOf(r, item) { const a = rpArr(r && r.dues).filter(d => d.item === item); return a.find(d => d.st === 'on') || a.find(d => d.st === 'miss') || null; }
+function duReqL(r) { return rpArr(r && r.dues).filter(d => d.st === 'on' && d.req); }
+function duMe() { return BOOT.page === 'emp' && S.empData ? S.empData.id : ''; }
+function duDayAdd(d, n) { return new Date(Date.parse(d + 'T12:00:00Z') + n * 864e5).toISOString().slice(0, 10); }
+function duHM(ms) { return new Date(ms + 3 * 36e5).toISOString().slice(11, 16); }
+function duMs(day, hm) { if (!/^\d{4}-\d{2}-\d{2}$/.test(day || '') || !/^\d{2}:\d{2}$/.test(hm || '')) return 0; const v = Date.parse(day + 'T' + hm + ':00+03:00'); return isFinite(v) ? v : 0; }
+function duDayW(ms) { const d = nfDay(ms), t = nfDay(Date.now()); return d === t ? 'اليوم' : d === duDayAdd(t, 1) ? 'غداً' : rpDay(d); }
+function duWhen(ms) { return duDayW(ms) + ' ' + nfTime(ms); }
+function duWhenH(ms) { return `<span>${duDayW(ms)}</span> <span class="nw2">${nfTime(ms)}</span>`; }
+function duLeft(ms) {
+  const m = Math.ceil((ms - Date.now()) / 6e4);
+  if (m <= 0) return '';
+  if (m < 60) return 'المتبقي ' + (m === 1 ? 'دقيقة' : m === 2 ? 'دقيقتان' : m <= 10 ? m + ' دقائق' : m + ' دقيقة');
+  const h = Math.floor(m / 60);
+  if (h < 24) return 'المتبقي ' + (h === 1 ? 'ساعة' : h === 2 ? 'ساعتان' : h <= 10 ? h + ' ساعات' : h + ' ساعة');
+  const d = Math.floor(h / 24);
+  return 'المتبقي ' + (d === 1 ? 'يوم واحد' : d === 2 ? 'يومان' : d <= 10 ? d + ' أيام' : d + ' يوماً');
+}
+/* نفس due_warn_at في القاعدة: قبل الموعد بساعة، ولو طاحت برا الدوام (7 ص إلى 9 م، والجمعة إجازة) تنتقل 9 م اليوم اللي قبله */
+function duWarnAt(due) {
+  let t = due - 36e5;
+  for (let i = 0; i < 6; i++) {
+    const l = new Date(t + 3 * 36e5), mins = l.getUTCHours() * 60 + l.getUTCMinutes() + l.getUTCSeconds() / 60, day = l.toISOString().slice(0, 10);
+    if (l.getUTCDay() === 5 || mins < 420) t = Date.parse(duDayAdd(day, -1) + 'T21:00:00+03:00');
+    else if (mins > 1260) t = Date.parse(day + 'T21:00:00+03:00');
+    else break;
+  }
+  return Math.max(t, Date.now());
+}
+function duLine(r, item, isAdmin) {
+  const d = duOf(r, item); if (!d) return '';
+  const mine = !isAdmin && d.emp === duMe(), k = rpTk(r, item), sep = ' · ';
+  const who = mine ? '' : `${sep}<span>المسؤول:</span> <span>${esc(shortName(d.name || ''))}</span>`;
+  if (d.st === 'miss') return `<small class="dul r">${I('alarm-clock', 13)}<span><span>فات الموعد</span> (${duWhenH(d.due)})${d.viol ? sep + `<span>${mine ? 'سُجّلت عليك مخالفة' : 'سُجّلت مخالفة'}</span>` : ''}${who}</span></small>`;
+  const pend = rpSt(k) === 'pend' && (k.at || 0) <= d.due, left = d.due - Date.now(), late = left <= 0;
+  const cls = pend ? 'ok' : late ? 'r' : left <= 36e5 ? 'g' : '';
+  const can = mine && !d.req && !pend && !late && !S.empPreview;
+  let h = `<small class="dul ${cls}">${I('alarm-clock', 13)}<span><span>الموعد:</span> ${duWhenH(d.due)}${sep}<span>${pend ? 'أُنجز قبل الموعد' : late ? 'فات الموعد' : duLeft(d.due)}</span>${who}${can ? `${sep}<button class="qlnk" onclick="duReqOpen('${r.id}','${d.id}')">طلب تمديد</button>` : ''}</span></small>`;
+  if (mine && !pend && !late && !d.req) h += '<small class="tkt dutx">إذا لم تُنجزه قبل الموعد تُسجَّل عليك مخالفة</small>';
+  if (d.req) h += `<small class="dul q">${I('hourglass', 12)}<span><span>${mine ? 'طلبت التمديد إلى:' : 'طلب تمديد إلى:'}</span> ${duWhenH(d.req.due)}${sep}<span>${isAdmin ? 'بانتظار قرارك' : 'بانتظار الاعتماد'}</span>${mine && !S.empPreview ? `${sep}<button class="qlnk" onclick="duReqUndo('${d.id}',this)">إلغاء الطلب</button>` : ''}</span></small>`;
+  else if (d.rej && (mine || isAdmin) && Date.now() - (d.rej.at || 0) < 3 * 864e5) h += `<small class="retn">${I('x', 12)}<span><span>لم يُعتمد التمديد</span>${d.rej.note ? ': <span data-notr>' + esc(d.rej.note) + '</span>' : ''}</span></small>`;
+  return h;
+}
+function duEmpDef(r, item) {
+  const k = rpTk(r, item), es = (S.data.employees || []).map(e => e.id);
+  if (k && k.by && k.by !== 'admin' && es.includes(k.by)) return k.by;
+  return rpShareDefault(r, item).filter(id => id !== 'admin' && es.includes(id))[0] || '';
+}
+function duRid() { return (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)); }
+function duOpen(id, j) {
+  const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
+  const item = rpArr(r.cur)[j]; if (item == null) return;
+  const d0 = duOf(r, item), on = d0 && d0.st === 'on' ? d0 : null;
+  let day, time;
+  if (on) { day = nfDay(on.due); time = duHM(on.due); }
+  else { const n = Date.now(), h = +duHM(n).slice(0, 2) + 3 + (duHM(n).slice(3) !== '00' ? 1 : 0); if (h <= 20) { day = nfDay(n); time = String(h).padStart(2, '0') + ':00'; } else { day = duDayAdd(nfDay(n), 1); time = '12:00'; } }
+  RP.du = {id: id, item: item, did: on ? on.id : '', emp0: on ? on.emp : '', day: day, time: time, dx: false, emp: on ? on.emp : duEmpDef(r, item), err: '', busy: false, arm: false, rid: duRid()};
+  duDraw();
+}
+function duSet(k, v) { const f = RP.du; if (!f || f.busy) return; f[k] = v; f.err = ''; f.arm = false; f.rid = duRid(); duDraw(); }
+function duDayChips(f, set) {
+  const t = nfDay(Date.now()), days = [[t, 'اليوم'], [duDayAdd(t, 1), 'غداً'], [duDayAdd(t, 2), 'بعد غد']], oth = f.dx || !days.some(x => x[0] === f.day);
+  return `<div class="qch">${days.map(x => `<button class="${!oth && f.day === x[0] ? 'on' : ''}" onclick="${set}('dx',false);${set}('day','${x[0]}')">${x[1]}</button>`).join('')}<button class="${oth ? 'on' : ''}" onclick="${set}('dx',true)">تاريخ آخر</button></div>
+    ${oth ? `<input type="date" class="dui" value="${esc(f.day)}" min="${t}" max="${duDayAdd(t, 90)}" onchange="${set}('day',this.value)" aria-label="التاريخ">` : ''}
+    <div class="qlab">${I('clock', 14)}الساعة</div>
+    <input type="time" class="dui" value="${esc(f.time)}" onchange="${set}('time',this.value)" aria-label="الساعة">`;
+}
+function duDraw() {
+  const f = RP.du, r = f && (RP.reps || []).find(x => x.id === f.id);
+  if (!f || !r) return;
+  const es = S.data.employees || [], ms = duMs(f.day, f.time), nm = id => shortName((es.find(e => e.id === id) || {}).name || '');
+  const wa = ms ? duWarnAt(ms) : 0, ok = ms > Date.now() + 5 * 6e4 && f.emp;
+  const pv = !ok ? '' : `<div class="dupv"><div><b>${esc(nm(f.emp))}</b>: <span>${esc(duWhen(ms))}</span></div>
+    <small>${wa > Date.now() + 6e4 ? `يصله تذكير كل 3 ساعات وقت الدوام، وتنبيه أخير ${esc(duWhen(wa))}` : 'يصله التنبيه الأخير الآن'}، ويصلك إشعار معه</small>
+    <small>إذا ما أنجزه قبل الموعد تنزل عليه مخالفة «متابعة الأعمال الموكلة» تلقائياً، وتقدر تتراجع عنها من صفحة التقييم</small>
+    ${f.did && f.emp !== f.emp0 ? `<small>ينلغي الموعد عن ${esc(nm(f.emp0))} ويصله إشعار</small>` : ''}</div>`;
+  ovOpen(`<label class="shh">${f.did ? 'تعديل موعد الإنجاز' : 'تحديد موعد الإنجاز'}</label>
+    <div class="sub" style="margin:-6px 0 8px">${esc(f.item)} · ${esc(rpPName(r.proj))}</div>
+    <div class="qlab">${I('calendar', 14)}اليوم</div>
+    ${duDayChips(f, 'duSet')}
+    <div class="qlab">${I('user', 14)}الموظف المسؤول</div>
+    <div class="qch">${es.map(e => `<button class="${f.emp === e.id ? 'on' : ''}" onclick="duSet('emp','${e.id}')">${esc(shortName(e.name))}</button>`).join('')}</div>
+    ${pv}
+    <div class="err">${esc(f.err)}</div>
+    <button class="btn2 cu qbig" ${f.busy ? 'disabled' : ''} onclick="duSave()">${f.busy && !f.arm ? 'جاري الحفظ…' : I('alarm-clock', 17) + (f.did ? 'حفظ الموعد' : 'تحديد الموعد')}</button>
+    ${f.did ? `<button class="btn2 rd" style="width:100%;margin-top:8px" ${f.busy ? 'disabled' : ''} onclick="duDel()">${I('x', 15)}${f.arm ? 'اضغط مرة ثانية لإلغاء الموعد' : 'إلغاء الموعد'}</button>` : ''}
+    <button class="btn2" style="width:100%;margin-top:8px" onclick="RP.du=null;ovClose()">إغلاق</button>`);
+}
+async function duSave() {
+  const f = RP.du; if (!f || f.busy) return;
+  const ms = duMs(f.day, f.time);
+  f.err = !ms ? 'اختر اليوم والساعة' : ms <= Date.now() + 5 * 6e4 ? 'اختر موعداً بعد الوقت الحالي' : ms > Date.now() + 90 * 864e5 ? 'اختر موعداً خلال 90 يوماً' : !f.emp ? 'اختر الموظف' : '';
+  if (f.err) return duDraw();
+  f.busy = true; f.arm = false; duDraw();
+  let res;
+  try { res = await call('apiDueSet', f.id, f.item, f.emp, f.day + ' ' + f.time, f.rid) || {}; }
+  catch (e) { f.busy = false; f.err = String(e); if (RP.du === f) duDraw(); else toastErr(e); return; }
+  RP.du = null; ovClose();
+  try { await rpTickReload(); } catch (e) {}
+  rpRerender();
+  const nm = shortName(((S.data.employees || []).find(e => e.id === f.emp) || {}).name || '');
+  toast(res.same ? 'الموعد نفسه، ما تغيّر شي' : res.dup ? 'تم حفظ الموعد' : (res.ext ? 'تغيّر الموعد، ووصل ' : 'تحدّد الموعد، ووصل ') + nm + ' إشعار');
+}
+async function duDel() {
+  const f = RP.du; if (!f || f.busy || !f.did) return;
+  if (!f.arm) { f.arm = true; duDraw(); setTimeout(() => { if (RP.du === f && f.arm && !f.busy) { f.arm = false; duDraw(); } }, 4000); return; }
+  f.busy = true; duDraw();
+  try { await call('apiDueDel', f.did); }
+  catch (e) { f.busy = false; f.arm = false; f.err = String(e); if (RP.du === f) duDraw(); else toastErr(e); return; }
+  RP.du = null; ovClose();
+  try { await rpTickReload(); } catch (e) {}
+  rpRerender(); toast('أُلغي الموعد، ووصل الموظف إشعار');
+}
+/* طلب التمديد من الموظف المسؤول */
+function duReqOpen(id, did) {
+  const r = (RP.reps || []).find(x => x.id === id), d = r && rpArr(r.dues).find(x => x.id === did);
+  if (!d) return;
+  RP.dq = {id: id, did: did, item: d.item, due: d.due, day: duDayAdd(nfDay(d.due), 1), time: duHM(d.due), dx: false, note: '', err: '', busy: false};
+  duReqDraw();
+}
+function duqSet(k, v) { const f = RP.dq; if (!f || f.busy) return; f[k] = v; f.err = ''; duReqDraw(); }
+function duReqDraw() {
+  const f = RP.dq; if (!f) return;
+  ovOpen(`<label class="shh">طلب تمديد الموعد</label>
+    <div class="sub" style="margin:-6px 0 8px">${esc(f.item)}</div>
+    <div class="dupv"><div><span>الموعد الحالي:</span> ${duWhenH(f.due)}</div></div>
+    <div class="qlab">${I('calendar', 14)}الموعد الجديد</div>
+    ${duDayChips(f, 'duqSet')}
+    <div class="qlab">${I('message-circle', 14)}السبب (اختياري)</div>
+    <textarea id="dq_note" class="rta sm" maxlength="300" oninput="RP.dq.note=this.value;rpGrow(this)">${esc(f.note)}</textarea>
+    <div class="rhint">${I('info', 13)}يُرسل للمدير العام، والموعد الحالي يبقى حتى يعتمد الطلب</div>
+    <div class="err">${esc(f.err)}</div>
+    <button class="btn2 cu qbig" ${f.busy ? 'disabled' : ''} onclick="duReqSend()">${f.busy ? 'جاري الإرسال…' : I('send', 17) + 'إرسال الطلب'}</button>
+    <button class="btn2" style="width:100%;margin-top:8px" onclick="RP.dq=null;ovClose()">إلغاء</button>`);
+}
+async function duReqSend() {
+  const f = RP.dq; if (!f || f.busy) return;
+  const ms = duMs(f.day, f.time);
+  f.err = !ms ? 'اختر اليوم والساعة' : ms <= f.due ? 'اختر موعداً بعد الموعد الحالي' : ms > Date.now() + 90 * 864e5 ? 'اختر موعداً خلال 90 يوماً' : '';
+  if (f.err) return duReqDraw();
+  f.busy = true; duReqDraw();
+  let res;
+  try { res = await call('apiDueReq', f.did, f.day + ' ' + f.time, String(f.note || '').trim(), false) || {}; }
+  catch (e) { f.busy = false; f.err = String(e); if (RP.dq === f) duReqDraw(); else toastErr(e); return; }
+  RP.dq = null; ovClose();
+  try { await rpTickReload(); } catch (e) {}
+  rerenderEmp();
+  toast(res.dup ? 'الطلب مرسل من قبل، بانتظار الاعتماد' : 'أُرسل الطلب للمدير العام', null, res.dup ? 'in' : undefined);
+}
+async function duReqUndo(did, btn) {
+  if (RP.busy) return; RP.busy = true;
+  if (btn) btn.disabled = true;
+  try { await call('apiDueReq', did, '', '', true); try { await rpTickReload(); } catch (e) {} RP.busy = false; rerenderEmp(); toast('أُلغي الطلب'); }
+  catch (e) { RP.busy = false; if (btn) btn.disabled = false; toastErr(e); }
+}
+/* طلب التمديد في «بانتظار الاعتماد» عندي */
+function duReqItem(r, d) {
+  const rv = RP.duv && RP.duv.did === d.id;
+  const act = !rpCanTick(r, true) ? '' : rv ? `<div class="rvf"><textarea id="duv_note" class="rta sm" placeholder="سبب الرفض (اختياري)، يظهر للموظف" oninput="RP.duv.note=this.value;rpGrow(this)">${esc(RP.duv.note || '')}</textarea><div class="grid2"><button class="btn2 rd" onclick="duRev('${d.id}',false,this)">${I('x', 15)}رفض</button><button class="btn2" onclick="RP.duv=null;rpRerender()">إلغاء</button></div></div>`
+    : `<div class="grid2 pdb"><button class="btn2 cu" onclick="duRev('${d.id}',true,this)">${I('check', 16, 2.5)}اعتماد التمديد</button><button class="btn2 rd" onclick="RP.duv={did:'${d.id}',note:''};rpRerender();setTimeout(()=>{const t=document.getElementById('duv_note');if(t)t.focus()},50)">${I('x', 15)}رفض</button></div>`;
+  return `<li><div class="pt">${esc(d.item)}</div><div class="pm"><b>طلب تمديد الموعد</b> · ${esc(shortName(d.name || ''))} · ${esc(rpTickWhen(d.req.at))}</div><div class="pm">الحالي: ${esc(duWhen(d.due))}</div><div class="pm">المطلوب: <b>${esc(duWhen(d.req.due))}</b></div>${d.req.note ? `<div class="pm">السبب: ${esc(d.req.note)}</div>` : ''}${act}</li>`;
+}
+async function duRev(did, ok, btn) {
+  if (RP.busy) return;
+  const note = ok ? '' : String((RP.duv && RP.duv.note) || '').trim();
+  RP.busy = true;
+  if (btn) { btn.disabled = true; btn.innerHTML = ok ? 'جاري الاعتماد…' : 'جاري الرفض…'; }
+  try { await call('apiDueRev', did, ok, note); RP.duv = null; try { await rpTickReload(); } catch (e) {} RP.busy = false; rpRerender(); toast(ok ? 'اعتُمد التمديد، ووصل الموظف إشعار' : 'رُفض الطلب، ووصل الموظف إشعار'); }
+  catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
+/* «مواعيد اليوم» أول صفحة التقارير عندي: مواعيد اليوم كلها، والضغط على الموعد يفتح تقريره */
+function duTodayHtml() {
+  const t = nfDay(Date.now()), a = [];
+  rpProjs().forEach(p => { const r = rpLast(p.id); rpArr(r && r.dues).forEach(d => { if ((d.st === 'on' && nfDay(d.due) === t) || (d.st === 'miss' && nfDay(d.due) === t && rpArr(r.cur).includes(d.item))) a.push([r, d]); }); });
+  if (!a.length) return '';
+  a.sort((x, y) => x[1].due - y[1].due);
+  const now = Date.now(), nx = a.find(x => x[1].st === 'on' && x[1].due > now), nl = a.filter(x => x[1].st === 'miss' || x[1].due <= now).length;
+  const meta = [a.length === 1 ? 'موعد واحد' : a.length === 2 ? 'موعدان' : a.length + ' مواعيد', nx ? 'الأقرب ' + nfTime(nx[1].due) : '', nl ? (nl === 1 ? 'فات واحد' : 'فات ' + nl) : ''].filter(Boolean).join(' · ');
+  const st = (r, d) => { const k = rpTk(r, d.item); return d.st === 'miss' ? ['r', d.viol ? 'فات · سُجّلت مخالفة' : 'فات الموعد'] : rpSt(k) === 'pend' && (k.at || 0) <= d.due ? ['ok', 'بانتظار اعتمادك'] : d.due <= now ? ['r', 'فات الموعد'] : d.req ? ['g', 'طلب تمديد'] : [d.due - now <= 36e5 ? 'g' : '', duLeft(d.due)]; };
+  return foldCard('dtd', 'alarm-clock', 'مواعيد اليوم', meta, `<ul class="dtl">${a.map(([r, d]) => { const s = st(r, d); return `<li role="button" tabindex="0" onclick="rpOpen('${r.id}')"><b class="nw2 ${s[0]}">${nfTime(d.due)}</b><span><span class="dtt">${esc(d.item)}</span><small>${esc(rpPName(r.proj))} · ${esc(shortName(d.name || ''))}</small></span><small class="dts ${s[0]}">${esc(s[1])}</small></li>`; }).join('')}</ul>`, false, 'dtd');
 }
 function rpLreqRows(r) {
   const a = rpLreqShow(r);
