@@ -1450,6 +1450,24 @@ html:root .pwd.o{color:var(--acc-dk)}
 html:root .empv .rpns .note.rpn{font-size:13px;padding:6px 10px;margin:6px 0;line-height:1.5}
 html:root .rchb.rhi{min-width:36px;min-height:36px;padding:0;justify-content:center;color:var(--muted)!important}
 html:root .rchb.rhi.on{color:var(--acc-dk)!important;background:var(--acc-soft);border-radius:999px}
+/* الإصدار 131: صفحات المدير: ملخص اليوم سطر، وتقرير المشروع (ملاحظاتك مطوية)، وزر حفظ التقرير ثابت، وصفحة الراتب (قائمة شهور وحدة والسجل مطوي) */
+html:root .rpcard.dsf{margin-top:14px}
+html:root .rpcard.dsf .fom .dsr{color:var(--red)}
+html:root .rpcard.dsf .fob .dsum{margin-top:2px}
+html:root .sheet .sfoot{position:sticky;bottom:calc(-20px - env(safe-area-inset-bottom));z-index:3;margin:0 -20px calc(-20px - env(safe-area-inset-bottom));padding:12px 20px calc(16px + env(safe-area-inset-bottom));background:#fff;box-shadow:0 -10px 16px -6px rgba(255,255,255,.95);border-top:1px solid var(--line)}
+html:root .sheet .sfoot .err:empty{display:none}
+html:root .sheet .sfoot .err{margin:0 0 8px}
+html:root .rpcard.rpnf .fom{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html:root .rpcard.rpnf .ncmp{margin-top:8px}
+html:root .slms2 .slm .h{justify-content:flex-start}
+html:root .slms2 .slm .h b{margin-inline-end:auto}
+html:root .sltg.w{background:#F6E8E6;color:var(--red)}
+html:root .slm.slmb{display:block;width:100%;background:none;border:0;border-bottom:1px solid var(--line);text-align:start;font:inherit;color:inherit;cursor:pointer;min-height:44px}
+html:root .slm.on{border-bottom:0;padding-bottom:4px}
+html:root .slpay{padding-bottom:12px;border-bottom:1px solid var(--line)}
+html:root .slpay .tbl{margin-top:2px}
+html:root .slac .salact{margin-bottom:0}
+html:root .lbl.slrh{margin-top:18px}
 </style>
 </head>
 <body>
@@ -1459,9 +1477,9 @@ html:root .rchb.rhi.on{color:var(--acc-dk)!important;background:var(--acc-soft);
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=130"></script>
+<script src="api.js?v=131"></script>
 <script>
-const APP_VER = '130';
+const APP_VER = '131';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -2165,10 +2183,15 @@ function daySum(emp, date) {
 function daySumHtml(emp, date) {
   if (RP.reps === null && !RP.failed && !RP.loading) rpLoad().then(() => { if (S.view === 'rec' && !S.preview && BOOT.page === 'admin') renderRec(); });
   const o = daySum(emp, date), cell = (v, l, c, s) => `<div class="${c || ''}"><b>${v}</b><span>${l}${s ? ' · ' + s : ''}</span></div>`;
-  return `<div class="blk"><div class="lab">${I('clipboard-list', 14)}ملخص اليوم</div><div class="dsum${o.att ? '' : ' n3'}">
+  const grid = `<div class="dsum${o.att ? '' : ' n3'}">
     ${o.att ? cell(esc(o.att.v), 'الحضور', 'at ' + o.att.c, o.att.s) : ''}
     ${cell(o.ticks === null ? (RP.failed ? '—' : '…') : o.ticks, o.ticks === 1 ? 'عمل أشّر عليه' : 'أعمال أشّر عليها')}
-    ${cell(o.inv, o.inv === 1 ? 'فاتورة' : 'فواتير', '', o.inv ? M(o.invSum, '', 't') : '')}</div></div>`;
+    ${cell(o.inv, o.inv === 1 ? 'فاتورة' : 'فواتير', '', o.inv ? M(o.invSum, '', 't') : '')}</div>`;
+  /* الإصدار 131: «ملخص اليوم» سطر واحد بأرقامه، والضغط يفتح البطاقات نفسها */
+  const tk = o.ticks === null ? (RP.failed ? '—' : '…') : o.ticks === 1 ? 'عمل واحد' : o.ticks === 2 ? 'عملان' : o.ticks + (o.ticks === 0 || (o.ticks >= 3 && o.ticks <= 10) ? ' أعمال' : ' عمل');
+  const iv = o.inv === 1 ? 'فاتورة واحدة' : o.inv === 2 ? 'فاتورتان' : o.inv + (o.inv === 0 || (o.inv >= 3 && o.inv <= 10) ? ' فواتير' : ' فاتورة');
+  const meta = (o.att ? `<span class="${o.att.c === 'r' ? 'dsr' : ''}">الحضور: ${esc(o.att.v)}</span> · ` : '') + `<span>${tk}</span> · <span>${iv}</span>`;
+  return foldCard('dsum', 'clipboard-list', 'ملخص اليوم', meta, grid, false, 'dsf');
 }
 /* الإصدار 121: «متابعة الأعمال الموكلة»: أعماله الحالية من تقارير المشاريع اللي له فيها شغل (نفس تعريف «مشاريعي»)،
    مجمعة بالمشروع مع حالة التنبيه. اختيار العمل يكتب سطره في الملاحظة، والملاحظة تنعدل */
@@ -2882,10 +2905,7 @@ function renderFinEmp(c, id, mode) {
   /* الإصدار 92: الفواتير المرجّعة اللي ما صحّحها الموظف تبان هنا وتنحذف */
   const rt = mine.filter(x => x.kind === 'inv' && x.status === 'returned');
   if (!sal && rt.length) h += `<button class="dtog" style="padding:6px 2px 10px;color:var(--red)" onclick="S.fx.rt=!S.fx.rt;S.armed=null;renderFin()" aria-expanded="${!!S.fx.rt}">فواتير مرتجعة لديه (${rt.length}) · ${rt.reduce((a, x) => a + x.amount, 0).toLocaleString('en-US')}${S.fx.rt ? ' · إخفاء' : ''}</button>` + (S.fx.rt ? `<div class="sub" style="margin:0 2px 8px">أعدتها له ولم يصحّحها. لا تُحتسب في العهدة ولا المصاريف. الحذف نهائي.</div>` + rt.map(x => invRowHtml(x, false)).join('') + '<div style="height:12px"></div>' : '');
-  if (sal) h += salCardHtml(e, true);
-  if (sal) h += `<div class="card">${f ? formHtml(e, f) + '<div class="hair"></div>' : salActHtml(e)}${e.unpaid.length ? (pm => e.unpaid.map(u => u.month === pm ? payHtml(e, u) : payRowHtml(e, u)).join(''))((e.unpaid.find(u => S.fx.pm === e.id + u.month) || e.unpaid.find(u => S.armed === 'pay_' + e.id + u.month) || e.unpaid[0]).month) : `<div class="row"><b>الراتب</b><span class="badge">${I('check', 12, 3)} كل الرواتب مصروفة</span></div>`}
-    ${e.loans.length ? `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('hand-coins', 14)}السلف</div>
-      ${e.loans.map(l => `<div class="row"><span>سلفة ${sar(l.amount)} <span class="sub">· ${dmy(l.date)}</span></span><span class="sub">المتبقي ${sar(l.remaining)}</span></div>`).join('')}` : ''}</div>`;
+  if (sal) h += salAdminHtml(e, f);
   if (!sal) h += `<div class="card"><div class="fxb">
       <div><b>${p.c < 0 ? 'صرف أكثر من عهدته' : 'معه عهدة'}</b>${M(Math.abs(p.c), p.c < 0 ? '−' : '', p.c < 0 ? 'neg' : '')}<small>سلّمته ${M(p.g || 0, '', 't')}${p.rt ? ' · أعاد ' + M(p.rt, '', 't') : ''} · صرف ${M(p.cash || 0, '', 't')}</small></div>
       <div><b>له لديك من حسابه الخاص</b>${M(p.o || 0, '', p.o > 0 ? 'neg' : '')}${p.o > 0 ? `<button class="lnk" onclick="askSdad('${id}', ${p.o})">${I('check', 14, 2.5)} سدّدته</button>` : ''}</div></div></div>`;
@@ -2896,7 +2916,9 @@ function renderFinEmp(c, id, mode) {
   if (Math.abs(bal - (p.c || 0)) > 0.01) bOk = false;
   /* الإصدار 82: «العهدة» فيها بس اللي يغيّر العهدة (عطيته، رجّع، فواتير العهدة). فواتير «أنا» و«من جيبه» والسداد تطلع في «الكل» */
   const L = LA.filter(x => lf === 'all' || (x.k === lf && (lf !== 'c' || x.dc))).map(x => ({ts: x.ts, h: x.h.replace('%%B%%', lf === 'c' && bOk && x.bal !== undefined ? `<span class="rb">معه بعدها ${M(x.bal, x.bal < 0 ? '−' : '', 't')}</span>` : '')}));
-  h += `<div class="sech">${lf === 'c' ? 'حركات العهدة' : lf === 's' ? 'حركات الراتب' : 'كل حركاته'}<span>${L.length}</span></div>`;
+  const lgT = lf === 'c' ? 'حركات العهدة' : lf === 's' ? 'حركات الراتب' : 'كل حركاته', h0 = h;
+  if (!sal) h += `<div class="sech">${lgT}<span>${L.length}</span></div>`;
+  else h = '';
   h += `<div class="segc fxlf">${[['all', 'الكل'], ['c', 'العهدة'], ['s', 'الراتب']].map(o => `<button class="${lf === o[0] ? 'on' : ''}" onclick="S.fx.lf='${o[0]}';S.fx.all=false;renderFin()">${o[1]}</button>`).join('')}</div>`
     + (lf === 'c' && LA.some(x => x.k === 'c' && !x.dc) ? '<div class="sub fxln">فواتير «بطاقتي» و«من حسابه الخاص» لا تغيّر العهدة، وتظهر في «الكل»</div>' : '');
   if (L.length) {
@@ -2910,6 +2932,12 @@ function renderFinEmp(c, id, mode) {
     }
     h += `<div class="fvl">${g}${more || (S.fx.all && L.length > 12 && days.length > 1) ? `<button class="dtog dya" onclick="S.fx.all=!S.fx.all;renderFin()">${S.fx.all ? 'أقل' : 'كلها (' + L.length + ')'}</button>` : ''}</div>`;
   } else h += emptyHtml('wallet', 'لا توجد حركات بعد');
+  if (sal) { /* الإصدار 131: «السجل» في صفحة الراتب: سجل الدفعات والحركات قسمين مطويين */
+    const st = e.sal || {}, pt = st.parts || [], lp = pt[0];
+    h = h0 + `<div class="lbl slrh">${I('history', 14)}السجل</div>`
+      + (pt.length ? foldCard('slp' + id, 'hand-coins', 'سجل الدفعات', pt.length + ' · <span>آخرها</span> ' + M(lp.amount, '', 't') + (lp.date ? ' · ' + dmy(lp.date) : ''), salPartsHtml(st, true)) : '')
+      + foldCard('slx' + id, 'receipt', lgT, String(L.length), h);
+  }
   $('#view').innerHTML = h;
 }
 
@@ -3267,12 +3295,12 @@ function payRowHtml(e, u) {
   const ds = dueState(u, S.data.today);
   return `<div class="hair"></div><button class="strb payr" onclick="S.fx.pm='${e.id}${u.month}';S.armed=null;renderFin()"><div class="row"><b>راتب ${esc(u.label)}</b><span>${M(Math.max(0, u.net - (u.credit || 0)))}<span class="badge a">${ds === 'late' ? 'متأخر' : ds === 'today' ? 'مستحق اليوم' : 'لم يُصرف'}</span>${I('chevron-left', 16)}</span></div></button>`;
 }
-function payHtml(e, u) {
+function payHtml(e, u, bare) {
   const armed = S.armed === 'pay_' + e.id + u.month, today = S.data.today, ds = dueState(u, today), cr = u.credit || 0;
   S.pd = S.pd || {};
   const pdk = e.id + u.month, pdv = S.pd[pdk] || today;
-  return `<div class="hair"></div>
-    <div class="row" style="margin-bottom:6px"><b>راتب ${esc(u.label)}</b><span class="badge a">${ds === 'late' ? 'متأخر' : ds === 'today' ? 'مستحق اليوم' : 'لم يُصرف'}</span></div>
+  return `${bare ? '' : `<div class="hair"></div>
+    <div class="row" style="margin-bottom:6px"><b>راتب ${esc(u.label)}</b><span class="badge a">${ds === 'late' ? 'متأخر' : ds === 'today' ? 'مستحق اليوم' : 'لم يُصرف'}</span></div>`}
     <div class="row sub" style="margin-bottom:4px"><span>موعد الصرف</span><span>${esc(dueL(u.due, true))}</span></div>
     ${salaryTable(u)}
     ${cr > 0 ? `<div class="row" style="margin-top:6px"><span class="sub">استلم منه بالدفعات</span><span class="pos">${M(cr, '−')}</span></div><div class="row"><b>المتبقي له</b>${M(Math.max(0, u.net - cr))}</div>` : ''}
@@ -3405,6 +3433,47 @@ function txHtml(t, canDelete) {
     <div class="p amt ${t.kind === 'ded' ? 'neg' : ''}">${t.kind === 'ded' ? sarS(t.amount, '−') : sar(t.amount)}</div>${del}</div>`;
 }
 
+/* الإصدار 131: صفحة الراتب عندي: الملخص، وتحته الأزرار مباشرة، وقائمة شهور وحدة (كل شهر سطر بحالته وشريطه، والمختار مفتوح بتفاصيله و«تم الصرف»)،
+   والشهور المسددة مطوية، والسلف. «سجل الدفعات» و«حركات الراتب» تحت «السجل» مطويين (حركات الراتب في renderFinEmp) */
+function salAdminHtml(e, f) {
+  const st = e.sal || {}, n = x => Math.round(x * 100) / 100, today = S.data.today, unp = e.unpaid || [];
+  let h = '';
+  if (st.show) {
+    const fut = unp.filter(u => !(u.due && u.due <= today)).map(u => ({u, v: n(Math.max(0, u.net - (u.credit || 0)))})).filter(x => x.v > 0);
+    const late = n(st.left - fut.reduce((a, x) => a + x.v, 0));
+    const nx = fut.length && st.left > 0 && late >= 0 ? `<div class="sub slnx">${late > 0 ? 'المتأخر حالياً <b>' + late.toLocaleString('en-US') + '</b> · و' : 'لا يوجد متأخر · '}${fut.map(x => x.v.toLocaleString('en-US') + ' راتب ' + esc(x.u.label) + (x.u.due ? ' يستحق ' + esc(dueL(x.u.due)) : '')).join('، ')}</div>` : '';
+    h += `<div class="card slc">${ctitle('receipt', 'كشف المستحقات والدفعات')}
+    <div class="slst"><div><b>إجمالي المستحق</b><div class="v">${M(st.due)}</div></div><div><b>المدفوع</b><div class="v pos">${M(st.paid)}</div></div><div><b>المتبقي</b><div class="v ${st.left > 0 ? 'neg' : 'pos'}">${M(st.left)}</div></div></div>${nx}</div>`;
+  }
+  const act = f ? formHtml(e, f) : salActHtml(e).replace(/<div class="hair"><\/div>$/, '');
+  if (act) h += `<div class="card slac">${act}</div>`;
+  const uBy = {}; unp.forEach(u => { uBy[u.month] = u; });
+  const pmU = unp.length ? (unp.find(u => S.fx.pm === e.id + u.month) || unp.find(u => S.armed === 'pay_' + e.id + u.month) || unp[0]) : null;
+  const ms = st.show ? st.months.slice() : [];
+  unp.forEach(u => { if (!ms.some(m => m.month === u.month)) ms.push({month: u.month, label: u.label, due: Math.max(0, u.net), paid: u.credit || 0, left: n(Math.max(0, u.net - (u.credit || 0))), closed: false}); });
+  ms.sort((a, b) => a.month < b.month ? -1 : a.month > b.month ? 1 : 0);
+  const isCl = m => m.closed || (!uBy[m.month] && m.left <= 0);
+  const head = m => {
+    const u = uBy[m.month], ds = u ? dueState(u, today) : '', pc = m.due > 0 ? Math.round(m.paid / m.due * 100) : 100;
+    const stc = m.closed || m.left <= 0 ? ['g', m.closed ? 'مسدد' : 'لا شيء'] : m.paid > 0 ? ['a', 'جزئي'] : ['', 'غير مسدد'];
+    return `<div class="h"><b>راتب ${esc(m.label)}</b>${u ? `<span class="sltg ${ds === 'late' ? 'w' : ds === 'today' ? 'a' : ''}">${ds === 'late' ? 'متأخر' : ds === 'today' ? 'مستحق اليوم' : 'لم يُصرف'}</span>` : ''}<span class="sltg ${stc[0]}">${stc[1]}</span></div>
+        <div class="s"><span>مستحق ${M(m.due, '', 't')} · مدفوع ${M(m.paid, '', 't')}</span><span>${m.closed ? (m.via ? 'سُدّد بالدفعات' : 'صُرف') + (m.date ? ' ' + dmy(m.date) : '') : 'المتبقي ' + M(m.left, '', 't')}</span></div>
+        <div class="slbar"><i class="${!m.closed && m.paid > 0 ? 'p' : ''}" style="width:${pc}%"></i></div>`;
+  };
+  const row = m => {
+    const u = uBy[m.month];
+    if (u && pmU && u.month === pmU.month) return `<div class="slm on">${head(m)}</div><div class="slpay">${payHtml(e, u, true)}</div>`;
+    if (u) return `<button class="slm slmb" onclick="S.fx.pm='${e.id}${u.month}';S.armed=null;renderFin()" aria-label="راتب ${esc(m.label)}">${head(m)}</button>`;
+    return `<div class="slm">${head(m)}</div>`;
+  };
+  const op = ms.filter(m => !isCl(m)), cl = ms.filter(isCl), fold = cl.length > 1 && !S.fx.cm;
+  h += `<div class="card slms2">${ctitle('calendar', 'الشهور')}
+    ${op.map(row).join('')}${!unp.length ? `<div class="row" style="margin-top:8px"><b>الراتب</b><span class="badge">${I('check', 12, 3)} كل الرواتب مصروفة</span></div>` : ''}
+    ${cl.length > 1 ? `<button class="dtog" style="padding:10px 0 6px" onclick="S.fx.cm=!S.fx.cm;renderFin()" aria-expanded="${!fold}">شهور مسددة (${cl.length})${fold ? '' : ' · إخفاء'}</button>` : ''}${fold ? '' : cl.map(row).join('')}
+    ${e.loans.length ? `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('hand-coins', 14)}السلف</div>
+      ${e.loans.map(l => `<div class="row"><span>سلفة ${sar(l.amount)} <span class="sub">· ${dmy(l.date)}</span></span><span class="sub">المتبقي ${sar(l.remaining)}</span></div>`).join('')}` : ''}</div>`;
+  return h;
+}
 /* الإصدار 83: كشف المستحقات والدفعات. للمدير: تسجيل دفعة وحذف آخر دفعة. للموظف: عرض بس */
 function salCardHtml(e, admin) {
   const st = e.sal;
@@ -3423,13 +3492,18 @@ function salCardHtml(e, admin) {
         <div class="s"><span>مستحق ${M(m.due, '', 't')} · مدفوع ${M(m.paid, '', 't')}</span><span>${m.closed ? (m.via ? 'سُدّد بالدفعات' : 'صُرف') + (m.date ? ' ' + dmy(m.date) : '') : 'المتبقي ' + M(m.left, '', 't')}</span></div>
         <div class="slbar"><i class="${!m.closed && m.paid > 0 ? 'p' : ''}" style="width:${pc}%"></i></div></div>`;
     }).join('')}</div>`;
-  if (st.parts.length) h += `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('history', 14)}سجل الدفعات<span class="sp">${st.parts.length}</span></div>` + st.parts.map(x => {
+  if (st.parts.length) h += `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('history', 14)}سجل الدفعات<span class="sp">${st.parts.length}</span></div>` + salPartsHtml(st, admin);
+  return h + '</div>';
+}
+/* الإصدار 131: سجل الدفعات صار دالة لحاله: يطلع في الكشف عند الموظف، وقسم مطوي في صفحة الراتب عندي */
+function salPartsHtml(st, admin) {
+  const n = x => Math.round(x * 100) / 100;
+  return st.parts.map(x => {
     const al = x.al.map(q => q.done ? `${q.rest ? 'غطّت المتبقي من' : 'غطّت كامل'} راتب ${esc(q.label)} (${n(q.take).toLocaleString('en-US')}) <span class="pos">سُدّد</span>` : `${n(q.take).toLocaleString('en-US')} من راتب ${esc(q.label)}${q.rest ? ' (تكملة)' : ''}`).join('<br>');
     const arm = S.armed === 'pt_' + x.id, can = admin && x.id === st.lastPart;
     return `<div class="slp"><div class="h"><b>${M(x.amount)}${x.month ? `<span class="sltg" style="margin-inline-start:6px">لشهر ${esc(MONTHS_AR[+x.month.slice(5, 7) - 1])}</span>` : ''}</b><span class="sub">${x.date ? dmy(x.date) : 'تاريخ غير محدد'}${can ? ` <button class="ed ${arm ? 'arm' : ''}" style="${arm ? 'color:var(--red);font-size:13px' : ''}" onclick="armPart('${x.id}')" aria-label="حذف">${arm ? 'احذف؟' : I('trash-2', 15)}</button>` : ''}</span></div>${x.note ? `<div class="sub">${esc(x.note)}</div>` : ''}
       <div class="al">${al || 'لم تُوزَّع'}<div class="sub" style="margin-top:3px">المتبقي له بعدها ${M(x.after, '', 't')}</div></div></div>`;
   }).join('');
-  return h + '</div>';
 }
 /* الإصدار 85: أزرار الراتب: «دفعة راتب» (جزء من الراتب، تتوزع وتنعرض قبل الحفظ) و«راتب شهر سابق» (شهر قبل بداية الحساب) وتصحيح شهر حركة صرف */
 function salActHtml(e) {
@@ -3927,7 +4001,12 @@ function foldCard(key, icon, title, meta, body, def, cls) {
   const op = S.fo && key in S.fo ? S.fo[key] : !!def;
   return `<div class="rpcard fo ${cls || ''} ${op ? '' : 'cl'}"><div class="rch rchx" role="button" tabindex="0" aria-expanded="${op}" onclick="foTog('${key}',${def ? 1 : 0})">${icon ? `<span class="ci">${I(icon, 16)}</span>` : ''}<span class="fot"><span>${title}</span>${meta ? `<small class="fom">${meta}</small>` : ''}</span><span class="rchv">${I(op ? 'chevron-up' : 'chevron-down', 16)}</span></div>${op ? `<div class="fob">${body}</div>` : ''}</div>`;
 }
-function foTog(k, def) { S.fo = S.fo || {}; S.fo[k] = !(k in S.fo ? S.fo[k] : !!def); redrawAny(); }
+function foTog(k, def) {
+  S.fo = S.fo || {}; S.fo[k] = !(k in S.fo ? S.fo[k] : !!def);
+  /* الإصدار 131: صفحات المدير ترسم الجزء نفسه بس عشان ما يرجع التمرير فوق */
+  if (BOOT.page === 'admin' && !S.preview && !NF.open) { if (S.view === 'rec') return renderRec(); if (S.view === 'task' && RP.open) return rpRerender(); if (S.view === 'team') return renderTeam(); }
+  redrawAny();
+}
 function empPayHtml(d) {
   const m = d.month, f = d.fin;
   const st = m.settings;
@@ -4597,8 +4676,10 @@ function rpDetailHtml(isAdmin) {
   /* الإصدار 94: الملاحظات أول الصفحة (كانت آخرها)، والمدير يحذف الملاحظة بضغطتين */
   const decWait = isAdmin && dec.length && !r.reply;
   const nRow = n => `<div class="note good rpn">${I('message-circle', 16)}<div style="flex:1;min-width:0"><b>المدير العام:</b> ${esc(n.text)}</div>${isAdmin ? `<button class="ndel ${RP.narm === n.at ? 'arm' : ''}" onclick="rpNoteDel('${r.id}',${Number(n.at) || 0})" aria-label="حذف الملاحظة">${RP.narm === n.at ? 'تأكيد الحذف' : I('x', 14, 2.5)}</button>` : ''}</div>`;
-  if (isAdmin) h += `<div class="lbl">ملاحظاتك</div>${notes.map(nRow).join('')}${decWait ? '' : `<div class="ncmp"><textarea id="rnote" class="dnote" rows="1" placeholder="اكتب ملاحظة على التقرير" oninput="RP.draft=this.value;rpGrow(this)">${esc(RP.draft || '')}</textarea><button class="btn2 cu" onclick="rpReply('${r.id}','note')" aria-label="إرسال الملاحظة">${I('send', 16)}</button></div>`}`;
-  else if (notes.length) h += `<div class="lbl">ملاحظات المدير العام</div><div class="rpns">${notes.map(nRow).join('')}</div>`; /* الإصدار 130: أصغر عند الموظف */
+  /* الإصدار 131: «ملاحظاتك» عندي قسم مطوي بعدها وآخرها، وينزل بعد الأعمال الحالية */
+  const lastN = notes.length ? String(notes[notes.length - 1].text || '') : '';
+  const notesH = !isAdmin ? '' : foldCard('rpn' + r.id, 'message-circle', 'ملاحظاتك', notes.length ? notes.length + ' · <span>آخرها:</span> ' + esc(lastN.length > 40 ? lastN.slice(0, 40) + '…' : lastN) : 'لا توجد ملاحظات', `${notes.map(nRow).join('')}${decWait ? '' : `<div class="ncmp"><textarea id="rnote" class="dnote" rows="1" placeholder="اكتب ملاحظة على التقرير" oninput="RP.draft=this.value;rpGrow(this)">${esc(RP.draft || '')}</textarea><button class="btn2 cu" onclick="rpReply('${r.id}','note')" aria-label="إرسال الملاحظة">${I('send', 16)}</button></div>`}`, false, 'rpnf');
+  if (!isAdmin && notes.length) h += `<div class="lbl">ملاحظات المدير العام</div><div class="rpns">${notes.map(nRow).join('')}</div>`; /* الإصدار 130: أصغر عند الموظف */
   let decNote = false; /* الإصدار 90: خانة الملاحظة داخل بطاقة القرار لما القرار ينتظر */
   if (dec.length) {
     h += `<div class="rpdec ${r.reply ? 'done' : ''}"><div class="rplab">${I(r.reply ? 'circle-check' : 'triangle-alert', 15)}القرارات والاعتمادات المطلوبة</div>${isAdmin ? rpDecList(r, dec) : rpItems(dec)}`;
@@ -4612,14 +4693,15 @@ function rpDetailHtml(isAdmin) {
   if (r.ord && cur.length > 1 && !tags[0]) tags[0] = ['الأهم', 'tgtop'];
   const pendH = rpPendHtml(r, pend, isAdmin, isAdmin ? rpReqL(r) : [], isAdmin ? rpLreqP(r) : [], isAdmin ? rpAreqL(r) : []);
   if (isAdmin) h += pendH; /* الإصدار 130: عند الموظف تنزل بعد الأعمال الحالية ومطوية */
-  h += `<div class="rpcard now"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${!isAdmin && rpCanTick(r, false) && cur.length ? `<button class="rchb rhi ${RP.hint ? 'on' : ''}" onclick="RP.hint=!RP.hint;rpRerender()" aria-label="طريقة الاستخدام" aria-expanded="${!!RP.hint}">${I('info', 16)}</button>` : ''}${canOrd ? (ordm ? `<button class="rchb dn fl" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur', (rpLast(r.proj) || {}).id === r.id ? r : null, isAdmin)}${rpCanTick(r, isAdmin) && !ordm ? rpCurAddHtml(r) + (cur.length ? rqAddBtn(r) : '') : ''}</div>`;
+  h += `<div class="rpcard now"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${rpCanTick(r, isAdmin) && cur.length && !ordm ? `<button class="rchb rhi ${RP.hint ? 'on' : ''}" onclick="RP.hint=!RP.hint;rpRerender()" aria-label="طريقة الاستخدام" aria-expanded="${!!RP.hint}">${I('info', 16)}</button>` : ''}${canOrd ? (ordm ? `<button class="rchb dn fl" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur', (rpLast(r.proj) || {}).id === r.id ? r : null, isAdmin)}${rpCanTick(r, isAdmin) && !ordm ? rpCurAddHtml(r) + (cur.length ? rqAddBtn(r) : '') : ''}</div>`;
   if (!isAdmin) h += pendH;
+  h += notesH;
   /* الإصدار 94: بطاقة الأعمال اللاحقة مطوية، تنفتح بالضغط على عنوانها */
   const ltOpen = RP.ltOpen === r.id;
   h += `<div class="rpcard lt ${ltOpen ? '' : 'cl'}"><div class="rch rchx" role="button" tabindex="0" aria-expanded="${ltOpen}" onclick="RP.ltOpen=RP.ltOpen==='${r.id}'?null:'${r.id}';rpRerender()"><span class="ci">${I('history', 16)}</span>الأعمال اللاحقة<span class="cn">${lat.length}</span><span class="rchv">${I(ltOpen ? 'chevron-up' : 'chevron-down', 16)}</span></div>${!ltOpen ? '' : `${rpCanTick(r, isAdmin) && lat.length ? rpNowList(r, lat, isAdmin) : lat.length || !rpLreqShow(r).length ? rpLaterHtml(lat) : ''}${rpLreqRows(r)}${rpCanTick(r, isAdmin) && !ordm ? rpLaterAddHtml(r, isAdmin) : ''}`}</div>`;
   h += `<div class="tbl2 rphr">${tbRow('check-check', 'الأعمال المنجزة', nh === 1 ? 'عمل واحد' : nh === 2 ? 'عملان' : nh + ' منجزة', `rpOpenHist('${r.proj}')`)}${isAdmin && !S.preview ? krRow(r.proj) : ''}</div>`;
   if (rpArr(r.removed).length) h += `<div class="rpgone rm">${I('x', 14, 2.5)}<div><b>حُذفت دون إنجاز:</b> ${esc(r.removed.join('، '))}</div></div>`;
-  if (rpArr(r.files).length) h += isAdmin ? `<div class="lbl">المرفقات</div>${rpFilesHtml(r.files)}` : foldCard('rpf' + r.id, 'paperclip', 'المرفقات', rpFilesMeta(r.files), rpFilesHtml(r.files)); /* الإصدار 130: مطوية عند الموظف */
+  if (rpArr(r.files).length) h += foldCard('rpf' + r.id, 'paperclip', 'المرفقات', rpFilesMeta(r.files), rpFilesHtml(r.files)); /* الإصدار 130: مطوية عند الموظف، ومن 131 عندي بعد */
   return h;
 }
 /* الإصدار 86: بطاقة «بانتظار الاعتماد». للمدير العام زرّين: اعتماد الإنجاز، أو إرجاع للعمل مع ملاحظة تظهر للموظف */
@@ -4861,8 +4943,8 @@ function rpDraw() {
     <div class="qlab">${I('paperclip', 14)}المرفقات</div>
     <div class="rfl">${f.files.map((x, i) => x.t === 'i' ? `<div class="mi"><img src="${x.d}" alt=""><button class="mx" onclick="rpRmFile(${i})" aria-label="حذف">${I('x', 12, 3)}</button></div>` : `<div class="mi doc"><span>${I(x.t === 'v' ? 'play' : 'file-text', 18)}<br>${esc(x.n.slice(0, 14))}</span><button class="mx" onclick="rpRmFile(${i})" aria-label="حذف">${I('x', 12, 3)}</button></div>`).join('')}
       ${f.files.length < 10 ? `<label class="vrec qadd">${I('camera', 18)}صورة أو فيديو أو ملف<input type="file" multiple accept="${RP_ACC}" style="display:none" onchange="rpPick(this)"></label>` : ''}</div>
-    <div class="err" id="f_err">${esc(f.err)}</div>
-    <button class="btn2 cu qbig" id="f_send" ${f.busy ? 'disabled' : ''} onclick="rpSend()">${f.busy ? esc(f.prog || 'جاري الإرسال…') : I('send', 17) + 'حفظ التقرير'}</button>`);
+    <div class="sfoot"><div class="err" id="f_err">${esc(f.err)}</div>
+    <button class="btn2 cu qbig" id="f_send" ${f.busy ? 'disabled' : ''} onclick="rpSend()">${f.busy ? esc(f.prog || 'جاري الإرسال…') : I('send', 17) + 'حفظ التقرير'}</button></div>`); /* الإصدار 131: زر الحفظ ثابت تحت النموذج */
   rpGrowAll();
 }
 function rpGrow(el) { el.style.height = 'auto'; el.style.height = (el.scrollHeight + 3) + 'px'; }
@@ -4981,8 +5063,8 @@ function rpEditDraw() {
     <label class="qlab" for="e_dec">${I('triangle-alert', 14)}القرارات والاعتمادات المطلوبة</label>
     <textarea id="e_dec" class="rta sm" placeholder="لا توجد قرارات" oninput="RP.edit.decide=this.value;rpGrow(this)">${esc(f.decide)}</textarea>
     ${f.by !== 'admin' ? `<div class="rhint">${I('info', 13)}يرى الموظف علامة «عدّله المدير العام» على التقرير</div>` : ''}
-    <div class="err">${esc(f.err)}</div>
-    <button class="btn2 cu qbig" ${f.busy ? 'disabled' : ''} onclick="rpEditSave()">${f.busy ? 'جاري الحفظ…' : I('check', 17, 2.5) + 'حفظ التعديل'}</button>`);
+    <div class="sfoot"><div class="err">${esc(f.err)}</div>
+    <button class="btn2 cu qbig" ${f.busy ? 'disabled' : ''} onclick="rpEditSave()">${f.busy ? 'جاري الحفظ…' : I('check', 17, 2.5) + 'حفظ التعديل'}</button></div>`); /* الإصدار 131: زر الحفظ ثابت تحت النموذج */
   rpGrowAll();
 }
 function rpEditAddLater() {
@@ -5256,7 +5338,7 @@ function rpCanTick(r, isAdmin) {
 function rpTickList(r, cur, tags, isAdmin) {
   const all = rpArr(r.cur);
   const hint = `<div class="rhint cwh">${I('info', 13)}<span><span>${isAdmin ? 'الدائرة: أُنجز' : 'الدائرة: أنجزته ويُرسل للمدير العام للاعتماد'}</span> · <span>الرقم أو الاسم: الخطوات</span>${isAdmin ? ` · <span class="nw2">${I('ellipsis', 13, 2.6)}: تنبيه وتأجيل</span>` : ''}</span></div>`;
-  return (isAdmin || RP.hint ? hint : '') + '<ul class="tkl">' + cur.map((x, i) => {
+  return (RP.hint ? hint : '') + '<ul class="tkl">' + cur.map((x, i) => {
     const j = all.indexOf(x), k = rpTk(r, x), ret = rpSt(k) === 'ret', qb = rqBlock(r, x, j, isAdmin);
     const ss = stOf(r, x), sl = ss.filter(s => !s.done).length, so = RP.sopen === stKey(r, x), lc = [qb ? 'hq' : '', ss.length ? 'stp' : '', so ? 'so' : ''].filter(Boolean).join(' ');
     const lead = ss.length && sl ? `<button class="spc" style="--p:${Math.round((ss.length - sl) / ss.length * 100)}" onclick="rpStToggle('${r.id}',${j})" aria-label="الخطوات" aria-expanded="${so}"><span>${ss.length - sl}/${ss.length}</span></button>` : `<button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button>`;
