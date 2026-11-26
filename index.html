@@ -620,7 +620,7 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .qdx.arm{color:var(--red);background:var(--red-soft);padding:0 8px}
 .qact{display:flex;gap:8px;margin:6px 0 2px;flex-wrap:wrap;align-items:center}.qact .btn2{min-height:44px;font-size:13px;width:auto;padding-inline:12px}
 .qlnk{background:none;border:0;color:var(--acc-dk);font-size:13px;min-height:44px;padding:0 4px;cursor:pointer}
-.rqa{width:100%;min-height:44px;margin-top:8px;font-size:13px}.rqf .grid2{align-items:start}
+.rqa{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:44px;margin-top:4px;font-size:13px;font-family:inherit;background:none;border:0;color:var(--acc-dk);cursor:pointer}.rqf .grid2{align-items:start}
 .fvf{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:10px 0 6px}
 .fvf select{min-height:44px;font:inherit;font-size:13px;min-width:0;width:100%;border:1px solid var(--line2);border-radius:12px;background:var(--surface);padding:0 8px;color:var(--text)}
 .fvn{margin:0 2px 6px;min-height:18px}.fseg .segc button{min-height:44px}.fvl{padding-top:2px;padding-bottom:2px}
@@ -822,7 +822,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .rpf img{cursor:zoom-in}
 /* الإصدار 64: أزرار التعديل */
 .edl{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--acc-dk);background:none;border:0;padding:6px 0;font-family:inherit;cursor:pointer;min-height:34px}
-.rpmeta .edl{margin-inline-start:auto;flex:none}
+.rpacts .edl{flex:none}
 .rpmeta>span{min-width:0}
 .edt{color:var(--acc-dk);font-size:12px}
 
@@ -859,7 +859,6 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .rpi.cur li:before{background:var(--green);width:7px;height:7px;top:19px;right:1px;animation:livep 2s infinite}
 @keyframes livep{0%{box-shadow:0 0 0 0 rgba(47,133,90,.45)}70%{box-shadow:0 0 0 6px rgba(47,133,90,0)}100%{box-shadow:0 0 0 0 rgba(47,133,90,0)}}
 @media (prefers-reduced-motion:reduce){.rpi.cur li:before{animation:none}}
-.rpmeta .edl+.edl{margin-inline-start:12px}
 .edl.ok{color:var(--green)}
 #ov .sheet:has(#shm)>*{flex-shrink:0}
 /* الإصدار 67 */
@@ -914,7 +913,7 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .tg2.r{color:var(--red);background:var(--red-soft)}
 .tg2.a{color:#85642B;background:var(--amber-soft)}
 .tkl li>.tkb.wt{flex:none;background:var(--amber-soft);color:#85642B;border:0;cursor:default}
-.retn{display:flex;gap:5px;align-items:flex-start;font-size:13px;color:#7E3F39;background:var(--red-soft);border-radius:10px;padding:5px 8px;margin-top:5px;line-height:1.5}
+.retn{display:flex;gap:5px;align-items:flex-start;font-size:13px;color:var(--red);margin-top:5px;line-height:1.5}
 .retn svg{flex:none;margin-top:3px}
 .tkt{display:block;font-size:12px;color:var(--muted);margin-top:2px}
 .ials{display:flex;gap:5px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:5px;line-height:1.5}
@@ -1175,8 +1174,8 @@ html:root .tg.on{background:var(--acc)}
 /* ===== متفرقات ===== */
 html:root .etabs.e4 button .nb{background:var(--fill2);color:var(--text)}
 html:root .etabs.e4 button.on .nb{background:var(--acc-soft)!important;color:var(--acc-dk)!important}
-html:root .rpmeta button,html:root .ndel,html:root .str .ed,html:root .slp .ed{position:relative}
-html:root .rpmeta button::after,html:root .ndel::after{content:"";position:absolute;inset:-10px -6px}
+html:root .rpacts button,html:root .ndel,html:root .str .ed,html:root .slp .ed{position:relative}
+html:root .rpacts button::after,html:root .ndel::after{content:"";position:absolute;inset:-10px -6px}
 html:root .login .ei{color:var(--acc)}
 html:root .tro{color:var(--acc-dk)}
 html:root .pushb{background:var(--acc-soft);border-radius:24px;padding:14px 16px}html:root .pushb .ph1{color:var(--acc-dk)}html:root .pushb p{color:var(--muted)}html:root .pushb .later{min-height:44px}
@@ -1305,8 +1304,8 @@ html:root .tgl input[type=checkbox]:focus-visible{box-shadow:0 0 0 3px var(--acc
 html:root .rpmeta{flex-wrap:wrap;row-gap:8px}
 html:root .rpmeta>span{flex:1 1 calc(100% - 30px)}
 html:root .rpmeta>svg{flex:none}
-html:root .rpmeta .edl,html:root .rpmeta .edl+.edl{margin-inline-start:0!important;background:var(--acc-soft)!important;color:var(--acc-dk)!important;border:0!important;border-radius:999px!important;padding:6px 12px!important;font-size:13px!important;font-weight:500!important;min-height:32px;display:inline-flex;align-items:center;gap:4px}
-html:root .rpmeta .edl.ok{background:var(--fill)!important;color:var(--green)!important}
+html:root .rpacts .edl{margin-inline-start:0!important;background:var(--acc-soft)!important;color:var(--acc-dk)!important;border:0!important;border-radius:999px!important;padding:6px 12px!important;font-size:13px!important;font-weight:500!important;min-height:32px;display:inline-flex;align-items:center;gap:4px}
+html:root .rpacts .edl.ok{background:var(--fill)!important;color:var(--green)!important}
 html:root .tkl .ibell{background:transparent!important}
 /* التقييم: الموظفين بسطر، واليوم جنب عنوانه، وملخص اليوم بطاقة وحدة */
 html:root .emp.wr{gap:6px!important}
@@ -1364,9 +1363,9 @@ html:root .tkl li.stp{align-items:flex-start}
 html:root .spc{flex:none;width:44px;height:44px;margin:-7px;border-radius:999px;border:0;padding:0;direction:ltr;background:conic-gradient(var(--acc) calc(var(--p, 0) * 1%), var(--acc-soft) 0);color:var(--acc-dk);font:inherit;font-size:12px;font-weight:600;display:grid;place-items:center;position:relative;cursor:pointer}
 html:root .spc span{width:36px;height:36px;border-radius:999px;background:var(--surface);display:grid;place-items:center} /* v124: حلقة التقدم */
 html:root .wtx{cursor:pointer}
-html:root .snow{display:block;font-size:13px;color:var(--muted);margin-top:2px;line-height:1.6}
+html:root .snow{display:flex;gap:5px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:5px;line-height:1.5}
 html:root .snow b{font-weight:500;color:var(--acc-dk)}
-html:root .snow svg{vertical-align:-2px;color:var(--green);margin-inline-end:4px}
+html:root .snow>svg{flex:none;margin-top:3px}
 html:root .tkl li.so{border-bottom:0;padding-bottom:2px}
 html:root .tkl li.sli{display:block;padding:0 0 10px}
 html:root .spn{padding-inline-start:40px}
@@ -1399,9 +1398,10 @@ html:root .rhint.cwh svg{flex:none;margin-top:2px}
 html:root .nw2{white-space:nowrap}
 html:root .nw2 svg{vertical-align:-2px}
 html:root .tg2.tgtop{background:var(--acc-soft);color:var(--acc-dk);font-weight:600}
-html:root .tkl .qln{display:block;font-size:13px;color:var(--muted);line-height:1.6;margin-top:2px}
+html:root .tkl .qln{display:flex;gap:5px;align-items:flex-start;font-size:13px;color:var(--muted);line-height:1.5;margin-top:5px}
 html:root .tkl .qln .qok{color:var(--green);font-weight:500}
-html:root .tkl .qln .qok svg{vertical-align:-2px;margin-inline-end:3px}
+html:root .tkl .qln>svg{flex:none;margin-top:3px}
+html:root .tkl .qln.ok>svg{color:var(--green)}
 html:root .tkl .qln .qlnk{min-height:0;padding:0 2px;font-size:13px;position:relative;text-decoration:underline;text-underline-offset:3px}
 html:root .tkl .qln .qlnk::after{content:"";position:absolute;inset:-12px -4px}
 html:root .tkl .qln+.qimg{margin-top:6px}
@@ -1537,6 +1537,16 @@ html:root .dtd .dts{flex:none;font-size:12px;color:var(--muted)}
 html:root .dtd .r{color:var(--red)}
 html:root .dtd .g{color:#85642B}
 html:root .dtd .ok{color:var(--green)}
+/* الإصدار 134: صفحة التقرير أهدأ. أزرار التعديل والتنبيه سطر لحالها، ورأس «الأعمال الحالية» شريط فاتح بخط تحته وسطر ملخص، ومسافة أكبر بين الأعمال */
+html:root .rpacts{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 2px}
+html:root .rpmeta:has(+.ials){margin-bottom:4px}
+html:root .rpmeta+.ials{margin-top:0}
+html:root .rpcard.now>.rchw{margin:-12px -14px 4px;padding:12px 14px 10px;background:var(--acc-soft);border-bottom:2px solid var(--acc-ring);border-radius:23px 23px 0 0}
+html:root .rchw .rch{margin-bottom:0}
+html:root .rchw .rch .ci,html:root .rchw .rch .cn{background:#fff}
+html:root .rsum{font-size:13px;color:var(--acc-dk);line-height:1.5;margin-top:4px}
+html:root .rpcard.now .tkl>li:not(.sli):not(.qli){padding-top:12px}
+html:root .rpcard.now .tkl>li:not(.sli):not(.qli):not(.hq):not(.so){padding-bottom:12px}
 </style>
 </head>
 <body>
@@ -1546,9 +1556,9 @@ html:root .dtd .ok{color:var(--green)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=133"></script>
+<script src="api.js?v=134"></script>
 <script>
-const APP_VER = '133';
+const APP_VER = '134';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -4771,8 +4781,10 @@ function rpDetailHtml(isAdmin) {
   const tags = cur.map(x => { const nw = rpNowOf(r, x); if (nw && nw.apr && rpSt(rpTk(r, x)) !== 'ret' && Date.now() - nw.apr < 3 * 864e5) return ['معتمد', 'g', `<small class="tkt">اعتُمد نقله للحالية · ${esc(rpTickWhen(nw.apr))}</small>`]; return up.includes(x) && rpUpFresh(r, x) ? ['حان وقته', 'g'] : rpSt(rpTk(r, x)) === 'ret' ? ['أُعيد للعمل', 'r'] : null; });
   const notes = rpArr(r.notes);
   let h = `<button class="back" onclick="rpClose()">${I('arrow-right', 17)}${isAdmin ? 'التقارير' : 'تقاريري'}</button><h2>${esc(rpPName(r.proj))}</h2>
-    <div class="rpmeta">${I('file-text', 15)}<span>آخر تحديث: ${esc(rpUpdBy(r))} · ${esc(rpTickWhen(r.upd || r.ts * 1000))}${r.edited && rpUpdBy(r) !== 'المدير العام' ? ' · <span class="edt">عدّله المدير العام</span>' : ''}</span>${isAdmin ? `<button class="edl" onclick="rpOpenEdit('${r.id}')">${I('pencil', 15)}تعديل</button>${RP.pinged === r.id ? `<button class="edl ok">${I('check', 15, 2.5)}أُرسل التنبيه</button>` : `<button class="edl" onclick="rpShareOpen('${r.id}')">${I('bell-ring', 15)}تنبيه</button>`}` : ''}</div>`;
+    <div class="rpmeta">${I('file-text', 15)}<span>آخر تحديث: ${esc(rpUpdBy(r))} · ${esc(rpTickWhen(r.upd || r.ts * 1000))}${r.edited && rpUpdBy(r) !== 'المدير العام' ? ' · <span class="edt">عدّله المدير العام</span>' : ''}</span></div>`;
+  /* الإصدار 134: تنبيه التقرير تحت «آخر تحديث» مباشرة، وأزرار التعديل والتنبيه في سطر لحالها تحتهم */
   h += rpAlertLine(r, null, isAdmin);
+  if (isAdmin) h += `<div class="rpacts"><button class="edl" onclick="rpOpenEdit('${r.id}')">${I('pencil', 15)}تعديل</button>${RP.pinged === r.id ? `<button class="edl ok">${I('check', 15, 2.5)}أُرسل التنبيه</button>` : `<button class="edl" onclick="rpShareOpen('${r.id}')">${I('bell-ring', 15)}تنبيه</button>`}</div>`;
   /* الإصدار 94: الملاحظات أول الصفحة (كانت آخرها)، والمدير يحذف الملاحظة بضغطتين */
   const decWait = isAdmin && dec.length && !r.reply;
   const nRow = n => `<div class="note good rpn">${I('message-circle', 16)}<div style="flex:1;min-width:0"><b>المدير العام:</b> ${esc(n.text)}</div>${isAdmin ? `<button class="ndel ${RP.narm === n.at ? 'arm' : ''}" onclick="rpNoteDel('${r.id}',${Number(n.at) || 0})" aria-label="حذف الملاحظة">${RP.narm === n.at ? 'تأكيد الحذف' : I('x', 14, 2.5)}</button>` : ''}</div>`;
@@ -4793,7 +4805,10 @@ function rpDetailHtml(isAdmin) {
   if (r.ord && cur.length > 1 && !tags[0]) tags[0] = ['الأهم', 'tgtop'];
   const pendH = rpPendHtml(r, pend, isAdmin, isAdmin ? rpReqL(r) : [], isAdmin ? rpLreqP(r) : [], isAdmin ? rpAreqL(r) : [], isAdmin ? duReqL(r) : []);
   if (isAdmin) h += pendH; /* الإصدار 130: عند الموظف تنزل بعد الأعمال الحالية ومطوية */
-  h += `<div class="rpcard now"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${rpCanTick(r, isAdmin) && cur.length && !ordm ? `<button class="rchb rhi ${RP.hint ? 'on' : ''}" onclick="RP.hint=!RP.hint;rpRerender()" aria-label="طريقة الاستخدام" aria-expanded="${!!RP.hint}">${I('info', 16)}</button>` : ''}${canOrd ? (ordm ? `<button class="rchb dn fl" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur', (rpLast(r.proj) || {}).id === r.id ? r : null, isAdmin)}${rpCanTick(r, isAdmin) && !ordm ? rpCurAddHtml(r) + (cur.length ? rqAddBtn(r) : '') : ''}</div>`;
+  /* الإصدار 134: رأس «الأعمال الحالية» شريط فاتح بخط تحته عشان يبان إنه راس القائمة، وتحته سطر ملخص بالأعداد (اللي فوق صفر بس) */
+  const sumP = ordm ? [] : [[cur.filter(x => rpSt(rpTk(r, x)) === 'ret').length, 'أُعيد للعمل'], [cur.filter(x => stOf(r, x).length).length, 'لها خطوات'], [cur.filter(x => rqOf(r, x).some(q => q.st === 'ok')).length, 'بسعر معتمد']].filter(a => a[0]);
+  const sumH = sumP.length ? `<div class="rsum">${sumP.map(a => `<span>${a[0]} ${a[1]}</span>`).join(' · ')}</div>` : '';
+  h += `<div class="rpcard now"><div class="rchw"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${rpCanTick(r, isAdmin) && cur.length && !ordm ? `<button class="rchb rhi ${RP.hint ? 'on' : ''}" onclick="RP.hint=!RP.hint;rpRerender()" aria-label="طريقة الاستخدام" aria-expanded="${!!RP.hint}">${I('info', 16)}</button>` : ''}${canOrd ? (ordm ? `<button class="rchb dn fl" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${sumH}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur', (rpLast(r.proj) || {}).id === r.id ? r : null, isAdmin)}${rpCanTick(r, isAdmin) && !ordm ? rpCurAddHtml(r) + (cur.length ? rqAddBtn(r) : '') : ''}</div>`;
   if (!isAdmin) h += pendH;
   h += notesH;
   /* الإصدار 94: بطاقة الأعمال اللاحقة مطوية، تنفتح بالضغط على عنوانها */
@@ -5682,7 +5697,8 @@ function rqOkLines(r, item, j, isAdmin) {
   const who = okq.by !== 'admin' && okq.by !== me && okq.name ? esc(shortName(okq.name)) : '';
   const acts = [rest.length ? `<button class="qlnk" onclick="rqTog('${r.id}',${j})">${open ? 'إخفاء العروض الأخرى' : 'عروض أخرى (' + rest.length + ')'}</button>` : '', isAdmin && can ? `<button class="qlnk" onclick="rqUndo('${okq.id}')">تراجع عن الاعتماد</button>` : ''].filter(Boolean);
   const l3 = [who].filter(Boolean).concat(acts).join(' · ');
-  return `<small class="qln"><span class="qok">${I('check', 12, 2.5)}السعر المعتمد</span> ${M(okq.price, '', 't')}</small><small class="qln">${esc(okq.sup)} · <span>${esc(okq.unit)}</span> · ${esc(okq.dur)}</small>${l3 ? `<small class="qln">${l3}</small>` : ''}${rqImg(okq)}`;
+  /* الإصدار 134: سطرين بأيقونات بدل ثلاثة: السعر، وبعده المورد والوحدة والمدة ومن أضافه والإجراءات */
+  return `<small class="qln ok">${I('check', 13, 2.5)}<span><span class="qok">السعر المعتمد</span> ${M(okq.price, '', 't')}</span></small><small class="qln">${I('receipt', 13)}<span>${esc(okq.sup)} · <span>${esc(okq.unit)}</span> · ${esc(okq.dur)}${l3 ? ' · ' + l3 : ''}</span></small>${rqImg(okq)}`;
 }
 function rqTag(r, item, isAdmin) {
   const a = rqOf(r, item);
@@ -5712,7 +5728,7 @@ function rqBlock(r, item, j, isAdmin) {
     + (pick ? `<div class="qact"><button class="btn2 cu" onclick="rqOk('${r.id}',${j},this)">${I('check', 16, 2.5)}${a.length === 1 ? 'اعتمد السعر' : 'اعتمد المختار'}</button><button class="btn2" onclick="rqOpen('${r.id}',${j})">${I('plus', 15)}سعر آخر</button></div>`
       : `${can ? `<div class="qact"><button class="btn2" onclick="rqOpen('${r.id}',${j})">${I('plus', 15)}سعر آخر</button></div>` : ''}`);
 }
-function rqAddBtn(r) { return `<button class="btn2 rqa" onclick="rqOpen('${r.id}',-1)">${I('receipt', 16)}إضافة سعر لعمل حالي</button>`; }
+function rqAddBtn(r) { return `<button class="rqa" onclick="rqOpen('${r.id}',-1)">${I('receipt', 16)}إضافة سعر لعمل حالي</button>`; }
 function rqItem(id, j) { const r = (RP.reps || []).find(x => x.id === id); return r ? rpArr(r.cur)[j] || '' : ''; }
 function rqSel(id, j, qid) { RP.qs = {k: id + '|' + rqItem(id, j), id: qid}; rpRerender(); }
 function rqTog(id, j) { const k = id + '|' + rqItem(id, j); RP.qx = RP.qx === k ? null : k; rpRerender(); }
@@ -5871,9 +5887,9 @@ function stMe() { return BOOT.page === 'admin' ? 'admin' : (S.empData ? S.empDat
 function stNowHtml(ss) {
   const n = ss.filter(s => s.done).length, c = ss.find(s => !s.done);
   /* الإصدار 126: الخطوات كلها منجزة والعمل لسا في الحالية (مثل خطوة «اعتماد السعر» لحالها): الباقي إنجاز العمل نفسه، مو «خلصت الخطوات كلها» */
-  if (!c) return `<small class="snow"><span>${n} من ${ss.length} منجزة</span> · <span>الآن:</span> <b>إنجاز العمل</b></small>`;
+  if (!c) return `<small class="snow">${I('list-checks', 13)}<span><span>${n} من ${ss.length} منجزة</span> · <span>الآن:</span> <b>إنجاز العمل</b></span></small>`;
   /* الإصدار 124: سطر واحد. «n من N منجزة» بدل «الخطوة n+1 من N» (كان يوهم إن الحين رقمها n+1)، والتقدم في الحلقة مكان الدائرة */
-  return `<small class="snow"><span>${n} من ${ss.length} منجزة</span> · <span>الآن:</span> <b>${esc(c.t)}</b></small>`;
+  return `<small class="snow">${I('list-checks', 13)}<span><span>${n} من ${ss.length} منجزة</span> · <span>الآن:</span> <b>${esc(c.t)}</b></span></small>`;
 }
 function stPanelHtml(r, x, j, ss, isAdmin) {
   const me = stMe(), left = ss.filter(s => !s.done).length, c = ss.find(s => !s.done);
