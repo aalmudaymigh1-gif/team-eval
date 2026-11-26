@@ -1560,6 +1560,18 @@ html:root .sfin .sk:before{content:"";position:absolute;inset:-9px}
 html:root .sfin.on{background:var(--green-soft);border-radius:14px;margin:6px -8px 0;padding:8px;border-top:0}
 html:root .sfin.off .sk{border-style:dashed;border-color:var(--line2);cursor:default}
 html:root .sfin.off b{color:var(--muted)}
+/* الإصدار 136: السعر المعتمد سطر واحد ينفتح للتفاصيل */
+html:root .qtap{width:100%;border:0;background:none;padding:0;font-family:inherit;text-align:start;cursor:pointer;position:relative}
+html:root .qtap::before{content:"";position:absolute;inset:-12px 0}
+html:root .qtap>span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html:root .tkl .qtap>svg:last-child,html:root .qtap>svg:last-child{color:var(--acc-dk);margin-top:3px}
+html:root .qdet{margin:6px 0 2px;background:var(--fill);border-radius:14px;padding:6px 12px;font-size:13px;line-height:1.6}
+html:root .qdet>div{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
+html:root .qdet>div>span{color:var(--muted)}
+html:root .qdet b{font-weight:500;color:var(--text)}
+html:root .qdet>.qimg{margin:6px 0 2px}
+html:root .qdet>.qacts{justify-content:flex-start;gap:16px;flex-wrap:wrap}
+html:root .qdet .qacts .qlnk{min-height:44px;padding:0;text-decoration:underline;text-underline-offset:3px}
 </style>
 </head>
 <body>
@@ -1569,9 +1581,9 @@ html:root .sfin.off b{color:var(--muted)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=135"></script>
+<script src="api.js?v=136"></script>
 <script>
-const APP_VER = '135';
+const APP_VER = '136';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -4825,8 +4837,9 @@ function rpDetailHtml(isAdmin) {
   if (r.ord && cur.length > 1 && !tags[0]) tags[0] = ['الأهم', 'tgtop'];
   const pendH = rpPendHtml(r, pend, isAdmin, isAdmin ? rpReqL(r) : [], isAdmin ? rpLreqP(r) : [], isAdmin ? rpAreqL(r) : [], isAdmin ? duReqL(r) : []);
   if (isAdmin) h += pendH; /* الإصدار 130: عند الموظف تنزل بعد الأعمال الحالية ومطوية */
+  /* الإصدار 136: «لها خطوات» ما يحسب العمل اللي خطوته الوحيدة «اعتماد السعر» (نفس عدد الحلقات) */
   /* الإصدار 134: رأس «الأعمال الحالية» شريط فاتح بخط تحته عشان يبان إنه راس القائمة، وتحته سطر ملخص بالأعداد (اللي فوق صفر بس) */
-  const sumP = ordm ? [] : [[cur.filter(x => rpSt(rpTk(r, x)) === 'ret').length, 'أُعيد للعمل'], [cur.filter(x => stOf(r, x).length).length, 'لها خطوات'], [cur.filter(x => rqOf(r, x).some(q => q.st === 'ok')).length, 'بسعر معتمد']].filter(a => a[0]);
+  const sumP = ordm ? [] : [[cur.filter(x => rpSt(rpTk(r, x)) === 'ret').length, 'أُعيد للعمل'], [cur.filter(x => stOf(r, x).some(s => !/^q/.test(String(s.id || '')))).length, 'لها خطوات'], [cur.filter(x => rqOf(r, x).some(q => q.st === 'ok')).length, 'بسعر معتمد']].filter(a => a[0]);
   const sumH = sumP.length ? `<div class="rsum">${sumP.map(a => `<span>${a[0]} ${a[1]}</span>`).join(' · ')}</div>` : '';
   h += `<div class="rpcard now"><div class="rchw"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${rpCanTick(r, isAdmin) && cur.length && !ordm ? `<button class="rchb rhi ${RP.hint ? 'on' : ''}" onclick="RP.hint=!RP.hint;rpRerender()" aria-label="طريقة الاستخدام" aria-expanded="${!!RP.hint}">${I('info', 16)}</button>` : ''}${canOrd ? (ordm ? `<button class="rchb dn fl" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${sumH}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur', (rpLast(r.proj) || {}).id === r.id ? r : null, isAdmin)}${rpCanTick(r, isAdmin) && !ordm ? rpCurAddHtml(r) + (cur.length ? rqAddBtn(r) : '') : ''}</div>`;
   if (!isAdmin) h += pendH;
@@ -5470,6 +5483,9 @@ function rpCanTick(r, isAdmin) {
 }
 /* الإصدار 124: ترتيب «الأعمال الحالية» (نفس الوظائف): الشرح سطر تحت العنوان، والخطوات حلقة تقدّم (.spc) مكان الدائرة وسطر واحد بدون شريط وبدون زر «الخطوات»
    (تنفتح من الحلقة أو الاسم)، والسعر المعتمد سطور تحت الاسم، وعندي زر ⋯ (rpMoreOpen) بدل الساعة والجرس */
+/* الإصدار 136: القائمة اللي فيها دوائر بدون سطر «n من N · الآن» (العدد في الدائرة والخطوات تنفتح منها، قراري).
+   لما تخلص الخطوات (غير خطوة اعتماد السعر) سطر قصير يقول إن العمل جاهز. القائمة اللي بدون دوائر (rpItems) يبقى فيها stNowHtml */
+function stDoneLine(ss, k) { return ss.length && !ss.some(s => !s.done) && ss.some(s => !/^q/.test(String(s.id || ''))) && rpSt(k) !== 'pend' ? `<small class="snow">${I('list-checks', 13)}<span><span>الخطوات منجزة</span> · <b>بانتظار إنجاز العمل</b></span></small>` : ''; }
 function rpTickList(r, cur, tags, isAdmin) {
   const all = rpArr(r.cur);
   const hint = `<div class="rhint cwh">${I('info', 13)}<span><span>${isAdmin ? 'الدائرة: أُنجز' : 'الدائرة: أنجزته ويُرسل للمدير العام للاعتماد'}</span> · <span>الرقم أو الاسم: الخطوات</span>${isAdmin ? ` · <span class="nw2">${I('ellipsis', 13, 2.6)}: تنبيه وموعد وتأجيل</span>` : ''}</span></div>`;
@@ -5477,7 +5493,7 @@ function rpTickList(r, cur, tags, isAdmin) {
     const j = all.indexOf(x), k = rpTk(r, x), ret = rpSt(k) === 'ret', qb = rqBlock(r, x, j, isAdmin);
     const ss = stOf(r, x), sl = ss.filter(s => !s.done).length, so = RP.sopen === stKey(r, x), lc = [qb ? 'hq' : '', ss.length ? 'stp' : '', so ? 'so' : ''].filter(Boolean).join(' ');
     const lead = ss.length && sl ? `<button class="spc" style="--p:${Math.round((ss.length - sl) / ss.length * 100)}" onclick="rpStToggle('${r.id}',${j})" aria-label="الخطوات" aria-expanded="${so}"><span>${ss.length - sl}/${ss.length}</span></button>` : `<button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button>`;
-    return `<li${lc ? ` class="${lc}"` : ''}>${lead}<span><span class="wtx" onclick="rpStToggle('${r.id}',${j})">${esc(x)}</span>${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${rqTag(r, x, isAdmin)}${duLine(r, x, isAdmin)}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}` : ''}${ss.length ? stNowHtml(ss) : ''}${rqOkLines(r, x, j, isAdmin)}${rpAddLine(r, x)}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell imore" onclick="rpMoreOpen('${r.id}',${j})" aria-label="إجراءات العمل">${I('ellipsis', 18, 2.6)}</button>` : ''}</li>${so ? `<li class="sli"><div class="spn">${stPanelHtml(r, x, j, ss, isAdmin)}</div></li>` : ''}${qb ? `<li class="qli"><div class="qsub">${qb}</div></li>` : ''}`;
+    return `<li${lc ? ` class="${lc}"` : ''}>${lead}<span><span class="wtx" onclick="rpStToggle('${r.id}',${j})">${esc(x)}</span>${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${rqTag(r, x, isAdmin)}${duLine(r, x, isAdmin)}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}` : ''}${stDoneLine(ss, k)}${rqOkLines(r, x, j, isAdmin)}${rpAddLine(r, x)}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell imore" onclick="rpMoreOpen('${r.id}',${j})" aria-label="إجراءات العمل">${I('ellipsis', 18, 2.6)}</button>` : ''}</li>${so ? `<li class="sli"><div class="spn">${stPanelHtml(r, x, j, ss, isAdmin)}</div></li>` : ''}${qb ? `<li class="qli"><div class="qsub">${qb}</div></li>` : ''}`;
   }).join('') + '</ul>';
 }
 /* الإصدار 124: نافذة ⋯ عندي: نفس الإجراءات بكلام. التنبيه والتأجيل يفتحون نوافذهم الحالية */
@@ -5713,13 +5729,14 @@ function rqCount(n) { return n === 1 ? 'سعر واحد' : n === 2 ? 'سعران
 function rqOkLines(r, item, j, isAdmin) {
   const a = rqOf(r, item), okq = a.find(q => q.st === 'ok');
   if (!okq) return '';
-  const can = rpCanTick(r, isAdmin), me = BOOT.page === 'emp' && S.empData ? S.empData.id : '', rest = a.filter(q => q !== okq), open = RP.qx === r.id + '|' + item;
+  const can = rpCanTick(r, isAdmin), me = BOOT.page === 'emp' && S.empData ? S.empData.id : '', rest = a.filter(q => q !== okq), key = r.id + '|' + item, open = RP.qx === key, dOpen = open || RP.qd === key;
   const who = okq.by !== 'admin' && okq.by !== me && okq.name ? esc(shortName(okq.name)) : '';
   const acts = [rest.length ? `<button class="qlnk" onclick="rqTog('${r.id}',${j})">${open ? 'إخفاء العروض الأخرى' : 'عروض أخرى (' + rest.length + ')'}</button>` : '', isAdmin && can ? `<button class="qlnk" onclick="rqUndo('${okq.id}')">تراجع عن الاعتماد</button>` : ''].filter(Boolean);
-  const l3 = [who].filter(Boolean).concat(acts).join(' · ');
-  /* الإصدار 134: سطرين بأيقونات بدل ثلاثة: السعر، وبعده المورد والوحدة والمدة ومن أضافه والإجراءات */
-  return `<small class="qln ok">${I('check', 13, 2.5)}<span><span class="qok">السعر المعتمد</span> ${M(okq.price, '', 't')}</span></small><small class="qln">${I('receipt', 13)}<span>${esc(okq.sup)} · <span>${esc(okq.unit)}</span> · ${esc(okq.dur)}${l3 ? ' · ' + l3 : ''}</span></small>${rqImg(okq)}`;
+  /* الإصدار 136: سطر واحد «✓ المبلغ · المورد»، والضغط عليه يفتح تحته الوحدة والمدة ومين أضافه والصورة و«عروض أخرى» و«تراجع عن الاعتماد» (قراري) */
+  return `<button class="qln ok qtap" onclick="rqDet('${r.id}',${j})" aria-expanded="${dOpen}" aria-label="تفاصيل السعر المعتمد">${I('check', 13, 2.5)}<span>${M(okq.price, '', 't')} · ${esc(okq.sup)}</span>${I(dOpen ? 'chevron-up' : 'chevron-down', 14)}</button>`
+    + (dOpen ? `<div class="qdet"><div><span>الوحدة</span><b>${esc(okq.unit)}</b></div><div><span>المدة</span><b>${esc(okq.dur)}</b></div>${who ? `<div><span>أضافه</span><b>${who}</b></div>` : ''}${rqImg(okq)}${acts.length ? `<div class="qacts">${acts.join('')}</div>` : ''}</div>` : '');
 }
+function rqDet(id, j) { const k = id + '|' + rqItem(id, j); const on = RP.qd === k || RP.qx === k; RP.qd = on ? null : k; if (on && RP.qx === k) RP.qx = null; rpRerender(); }
 function rqTag(r, item, isAdmin) {
   const a = rqOf(r, item);
   if (!a.length) return '';
