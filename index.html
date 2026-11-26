@@ -812,9 +812,6 @@ b,strong,th,h2,h3,h4{font-weight:600}
 .rpi.dn li svg{position:absolute;right:0;top:9px;color:var(--green)}
 .rpgone.rm svg{color:var(--red)}
 
-.hday{margin-top:14px;padding-bottom:6px;border-bottom:1px solid var(--line)}
-.hdh{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
-.hdh span{font-weight:400;color:var(--muted)}
 #ov .sheet:has(#f_cur)>*{flex-shrink:0}
 a.rdoc{text-decoration:none;color:var(--text)}
 .rpf img{cursor:zoom-in}
@@ -928,11 +925,6 @@ a.rdoc{text-decoration:none;color:var(--text)}
 .rfbar span{flex:1;min-width:0}
 .rfbar button{flex:none;border:0;border-radius:10px;background:#fff;color:#2A2A28;font:inherit;font-size:13px;font-weight:600;padding:7px 10px;cursor:pointer}
 .rphr{margin-top:12px}
-.rpi.dn li.hx{display:flex;align-items:flex-start;gap:8px}
-.rpi.dn li.hx>.tx{flex:1;min-width:0}
-.rpi.dn li .unb svg{position:static;color:inherit}
-.unb{flex:none;display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line2);background:#fff;border-radius:999px;padding:4px 10px;font:inherit;font-size:12px;color:var(--muted);cursor:pointer;margin-top:2px}
-.unb.arm{background:var(--red);border-color:var(--red);color:#fff}
 .rpi li.decx>span{flex:1;min-width:0}
 .dx{min-width:30px;height:30px;border-radius:999px;border:0;background:rgba(0,0,0,.06);color:#85642B;display:flex;align-items:center;justify-content:center;padding:0 8px;font:inherit;font-size:12px;cursor:pointer;flex:none}
 .dx.arm{background:var(--red);color:#fff}
@@ -1583,6 +1575,14 @@ html:root ul.sst .sed input{flex:1;min-width:0;height:44px;border:0;border-radiu
 html:root ul.sst li.cur .sed input{background:#fff}
 html:root ul.sst .sedb{flex:none;min-height:44px;padding:0 14px;border:0;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px var(--acc-ring);color:var(--acc-dk);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer}
 html:root ul.sst .sedc{flex:none;min-height:44px;padding:0 4px;border:0;background:none;color:var(--muted);font-family:inherit;font-size:13px;cursor:pointer}
+/* الإصدار 139: صفحة «الأعمال المنجزة»: كل يوم بطاقة تنطوي، وسطر العمل مثل الأعمال الحالية (دائرة خضراء، والتفاصيل سطور بأيقونات، و⋯) */
+html:root .hrs{margin-top:4px}
+html:root .hrw{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+html:root .hrw:last-child{border-bottom:0;padding-bottom:2px}
+html:root .hrw .hck{flex:none;width:26px;height:26px;border-radius:999px;display:grid;place-items:center;background:var(--green-soft);color:var(--green);margin-top:1px}
+html:root .hrw .hbd{flex:1;min-width:0;font-size:15px;font-weight:400;line-height:1.6;overflow-wrap:anywhere}
+html:root .hrw .snow{margin-top:3px}
+html:root .hrw .ibell{flex:none;margin-top:-8px}
 </style>
 </head>
 <body>
@@ -1592,9 +1592,9 @@ html:root ul.sst .sedc{flex:none;min-height:44px;padding:0 4px;border:0;backgrou
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=138"></script>
+<script src="api.js?v=139"></script>
 <script>
-const APP_VER = '138';
+const APP_VER = '139';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -4152,7 +4152,7 @@ function foldCard(key, icon, title, meta, body, def, cls) {
 function foTog(k, def) {
   S.fo = S.fo || {}; S.fo[k] = !(k in S.fo ? S.fo[k] : !!def);
   /* الإصدار 131: صفحات المدير ترسم الجزء نفسه بس عشان ما يرجع التمرير فوق */
-  if (BOOT.page === 'admin' && !S.preview && !NF.open) { if (S.view === 'rec') return renderRec(); if (S.view === 'task' && RP.open) return rpRerender(); if (S.view === 'team') return renderTeam(); if (S.view === 'fin') return renderFin(); }
+  if (BOOT.page === 'admin' && !S.preview && !NF.open) { if (S.view === 'rec') return renderRec(); if (S.view === 'task' && (RP.open || RP.hist)) return rpRerender(); if (S.view === 'team') return renderTeam(); if (S.view === 'fin') return renderFin(); }
   redrawAny();
 }
 function empPayHtml(d) {
@@ -4742,7 +4742,8 @@ function rpTickDoc(k) {
 }
 function rpTickWhen(ms) { const d = nfDay(ms), t = rpToday(); return (d === t ? 'اليوم' : rpDay(d)) + ' ' + nfTime(ms); }
 function rpHistOf(p) {
-  const gs = [], add = (date, by, it, rid) => { let g = gs.find(x => x.date === date && x.by === by); if (!g) { g = {date: date, by: by, items: [], rids: []}; gs.push(g); } g.items.push(it); g.rids.push(rid); };
+  /* الإصدار 139: اليوم الواحد مجموعة وحدة (كان يتكرر لكل شخص)، واسم اللي أنجز مع كل عمل */
+  const gs = [], add = (date, by, it, rid) => { let g = gs.find(x => x.date === date); if (!g) { g = {date: date, items: [], rids: [], bys: []}; gs.push(g); } g.items.push(it); g.rids.push(rid); g.bys.push(by); };
   rpOf(p).forEach(r => {
     /* الإصدار 91: العمل اللي له أكثر من سجل إنجاز يطلع مرة وحدة بآخر سجل */
     const tk0 = rpArr(r.ticks).filter(x => rpSt(x) === 'ok'), tk = tk0.filter(x => !tk0.some(y => y !== x && y.t === x.t && (y.at > x.at || (y.at === x.at && tk0.indexOf(y) > tk0.indexOf(x))))), tt = tk.map(x => x.t);
@@ -4756,27 +4757,40 @@ function rpHistHtml(isAdmin) {
   let h = `<button class="back" onclick="rpCloseHist()">${I('arrow-right', 17)}${RP.open ? 'التقرير' : isAdmin ? 'التقارير' : 'تقاريري'}</button><h2>الأعمال المنجزة</h2>
     <div class="rpmeta">${I('check-check', 15)}${esc(rpPName(p))} · ${rpNDone(n)}</div>`;
   const atk = rpOf(p).flatMap(r => rpArr(r.ticks)).filter(x => rpSt(x) === 'ok');
-  if (isAdmin && gs.length) h += `<div class="rhint" style="margin:8px 0 0">${I('info', 13)}اضغط «إرجاع» لإعادة العمل إلى الأعمال الحالية</div>`;
-  h += gs.length ? gs.map(g => `<div class="hday"><div class="hdh">${esc(dayLabel(g.date))}<span>${esc(g.by)}</span></div>${isAdmin ? rpHistAdmin(g, atk) : rpDoneHtml(g.items, atk, true)}</div>`).join('') : emptyHtml('check-check', 'لا توجد أعمال منجزة بعد');
+  /* الإصدار 139 (المقترح الثاني): كل يوم بطاقة تنطوي بعدد أعماله ومين أنجزها، آخر يوم مفتوح، و«إرجاع» من ⋯ (قراري) */
+  if (isAdmin && gs.length) h += `<div class="rhint" style="margin:8px 0 0">${I('info', 13)}⋯: إرجاع العمل إلى الأعمال الحالية</div>`;
+  h += gs.length ? gs.map((g, gi) => {
+    const nn = g.items.length, who = [...new Set(g.bys)].join('، ');
+    const rows = g.items.map((x, i) => rpHistRow(g, i, atk.filter(y => y.t === x).pop(), isAdmin)).join('');
+    return foldCard('hd' + p + g.date, 'calendar', esc(rpDay(g.date)), `<span>${nn === 1 ? 'عمل واحد' : nn === 2 ? 'عملان' : nn <= 10 ? nn + ' أعمال' : nn + ' عملاً'}</span> · <span>${esc(who)}</span>`, `<div class="hrs">${rows}</div>`, gi === 0, 'hdc');
+  }).join('') : emptyHtml('check-check', 'لا توجد أعمال منجزة بعد');
   return h;
 }
-/* الإصدار 77: إرجاع أي عمل منجز إلى الأعمال الحالية في آخر تقرير، للمدير العام بس، بضغطتين */
-function rpHistAdmin(g, atk) {
-  return '<ul class="rpi dn">' + g.items.map((x, i) => {
-    const k = g.rids[i] + '|' + x, arm = RP.unArm === k, tk = atk.filter(y => y.t === x).pop();
-    return `<li class="hx">${I('check', 13, 3)}<span class="tx">${esc(x)}${rpTkTimes(tk)}${tk ? rpTickDoc(tk) : ''}</span><button class="unb ${arm ? 'arm' : ''}" data-r="${esc(g.rids[i])}" data-t="${esc(x)}" onclick="rpUndone(this)">${arm ? 'تأكيد الإرجاع' : I('rotate-ccw', 13) + 'إرجاع'}</button></li>`;
-  }).join('') + '</ul>';
+/* الإصدار 139: سطر العمل المنجز: الاسم، وتحته مين وأوقات الإنجاز والاعتماد بسطر واحد، والصور والملاحظة. الوقت بدون اليوم لو نفس يوم المجموعة */
+function rpHistRow(g, i, tk, isAdmin) {
+  const x = g.items[i], when = ms => nfDay(ms) === g.date ? nfTime(ms) : rpTickWhen(ms), ap = tk && tk.okAt && tk.by !== 'admin';
+  /* كل جزء بعنصر لحاله عشان الترجمة تلقط «أُنجز» و«اعتُمد» */
+  const ln = `<span>${esc(g.bys[i])}</span>` + (tk ? ' · ' + (ap ? '<span>أُنجز</span> ' : '') + `<span>${esc(when(tk.at))}</span>` + (ap ? ` · <span>اعتُمد</span> <span>${esc(when(tk.okAt))}</span>` : '') : '');
+  const doc = tk ? rpTickDoc(Object.assign({}, tk, {note: ''})) : '';
+  return `<div class="hrw"><span class="hck">${I('check', 14, 2.5)}</span><div class="hbd">${esc(x)}<div class="snow">${I('user-round', 13)}<span>${ln}</span></div>${tk && tk.note ? `<div class="snow">${I('message-circle', 13)}<span>${esc(tk.note)}</span></div>` : ''}${doc}</div>${isAdmin ? `<button class="ibell imore" data-r="${esc(g.rids[i])}" data-t="${esc(x)}" onclick="rpHistMore(this)" aria-label="إجراءات العمل">${I('ellipsis', 18, 2.6)}</button>` : ''}</div>`;
+}
+/* الإصدار 77 ثم 139: إرجاع أي عمل منجز إلى الأعمال الحالية في آخر تقرير، للمدير العام بس، من ⋯ */
+function rpHistMore(btn) {
+  const id = btn.dataset.r, item = btn.dataset.t;
+  RP.unArm = {id: id, item: item};
+  ovOpen(`<label class="shh">${esc(item)}</label><div class="sub" style="margin:-6px 0 8px">إجراءات العمل</div>
+    <button class="btn2 mact" onclick="rpUndone(this)">${I('rotate-ccw', 17)}إرجاع إلى الأعمال الحالية</button>
+    <button class="btn2" style="width:100%;margin-top:8px" onclick="RP.unArm=null;ovClose()">إلغاء</button>`);
 }
 async function rpUndone(btn) {
-  const id = btn.dataset.r, item = btn.dataset.t, k = id + '|' + item;
-  if (RP.busy) return;
-  if (RP.unArm !== k) { RP.unArm = k; return rpRerender(); }
+  const a = RP.unArm; if (!a || RP.busy) return;
   RP.busy = true; btn.disabled = true; btn.textContent = 'جاري الإرجاع…';
   try {
-    await call('apiRepUndone', id, item);
+    await call('apiRepUndone', a.id, a.item);
+    ovClose();
     await rpTickReload();
     RP.busy = false; RP.unArm = null; rpRerender(); toast('أُعيد إلى الأعمال الحالية');
-  } catch (e) { RP.busy = false; RP.unArm = null; rpRerender(); toastErr(e); }
+  } catch (e) { RP.busy = false; RP.unArm = null; ovClose(); rpRerender(); toastErr(e); }
 }
 function rpFilesHtml(fs) {
   const img = fs.filter(f => f.t === 'i'), vid = fs.filter(f => f.t === 'v'), doc = fs.filter(f => f.t === 'f');
