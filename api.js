@@ -838,6 +838,7 @@
     /* الإصدار 114: خطوات تحت العمل الحالي */
     async apiRepStepAdd(id, item, txt) { const r = await rpc('rep_step_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), txt: String(txt || '') }); flush(); return r; },
     async apiRepStepTick(sid, undo) { return rpc('rep_step_tick', { k: CRED.k || '', t: CRED.t || '', sid: String(sid || ''), undo: !!undo }); },
+    async apiRepStepEdit(sid, txt) { return rpc('rep_step_edit', { k: CRED.k || '', t: CRED.t || '', sid: String(sid || ''), txt: String(txt || '') }); }, /* v138: تعديل نص الخطوة */
     async apiRepStepDel(sid) { return rpc('rep_step_del', { k: CRED.k || '', t: CRED.t || '', sid: String(sid || '') }); },
     async apiRepRetSeen(id, at) { const r = await rpc('rep_ret_seen', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), rat: Number(at) || 0 }); return r; }, /* v137: «فهمت» على «أُعيد للعمل» */
     async apiRepCurAdd(id, item) { const r = await rpc('rep_cur_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || '') }); flush(); return r; }, /* v117 */

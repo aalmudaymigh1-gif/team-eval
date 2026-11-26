@@ -1575,6 +1575,14 @@ html:root .ackb{background:#fff;color:var(--acc-dk);box-shadow:inset 0 0 0 1px v
 html:root .ackb.r,html:root .note.bad .ackb{color:var(--red);box-shadow:inset 0 0 0 1px rgba(156,80,72,.25)}
 html:root .ackb:disabled{opacity:.5;cursor:default}
 html:root .clsb{background:var(--fill);color:var(--muted)}
+/* الإصدار 138: تعديل نص الخطوة: قلم صغير جنب النص، والضغط يحوّله لخانة فيها «حفظ» و«إلغاء» */
+html:root ul.sst li>span.stt{cursor:pointer}
+html:root ul.sst .stpen{display:inline-flex;vertical-align:middle;margin-inline-start:6px;color:var(--muted);font-style:normal}
+html:root ul.sst li>span.sed{display:flex;align-items:center;gap:8px}
+html:root ul.sst .sed input{flex:1;min-width:0;height:44px;border:0;border-radius:16px;background:var(--fill);padding:0 12px}
+html:root ul.sst li.cur .sed input{background:#fff}
+html:root ul.sst .sedb{flex:none;min-height:44px;padding:0 14px;border:0;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px var(--acc-ring);color:var(--acc-dk);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer}
+html:root ul.sst .sedc{flex:none;min-height:44px;padding:0 4px;border:0;background:none;color:var(--muted);font-family:inherit;font-size:13px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -1584,9 +1592,9 @@ html:root .clsb{background:var(--fill);color:var(--muted)}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=137"></script>
+<script src="api.js?v=138"></script>
 <script>
-const APP_VER = '137';
+const APP_VER = '138';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -5944,7 +5952,7 @@ function stNowHtml(ss) {
   return `<small class="snow">${I('list-checks', 13)}<span><span>${n} من ${ss.length} منجزة</span> · <span>الآن:</span> <b>${esc(c.t)}</b></span></small>`;
 }
 function stPanelHtml(r, x, j, ss, isAdmin) {
-  const me = stMe(), left = ss.filter(s => !s.done).length, c = ss.find(s => !s.done);
+  const me = stMe(), left = ss.filter(s => !s.done).length, c = ss.find(s => !s.done), pnd = !isAdmin && rpSt(rpTk(r, x)) === 'pend';
   let h = ss.length ? '<ul class="sst">' + ss.map(s => {
     /* الإصدار 126: خطوة «اعتماد السعر» (رقمها يبدأ بـ q) تتغير من السعر نفسه («تراجع عن الاعتماد»)، فما لها تراجع ولا حذف هنا */
     const qs = /^q/.test(String(s.id || '')), canUn = !qs && s.done && (isAdmin || s.doneBy === me), canDel = !qs && (isAdmin || (!s.done && s.by === me)), arm = RP.sarm === s.id;
@@ -5952,7 +5960,10 @@ function stPanelHtml(r, x, j, ss, isAdmin) {
       ? `<button class="sk" ${canUn ? `onclick="rpStTick('${s.id}',true)" aria-label="تراجع عن الخطوة"` : 'disabled aria-label="خطوة منجزة"'}>${I('check', 14, 2.5)}</button>`
       : `<button class="sk" onclick="rpStTick('${s.id}',false)" aria-label="تمت الخطوة"></button>`;
     const meta = s.done ? (s.doneBy === 'admin' ? 'المدير العام' : shortName(s.doneName || '')) + ' · ' + rpTickWhen(s.done) : s.by !== 'admin' ? 'أضافها ' + shortName(s.name || '') : '';
-    return `<li class="${s.done ? 'ok' : s === c ? 'cur' : 'nx'}">${bt}<span>${esc(s.t)}${s.pay ? `<span class="spay">${I('banknote', 12)}دفعة</span>` : ''}${meta ? `<small>${esc(meta)}</small>` : ''}</span>${canDel ? `<button class="sdel${arm ? ' arm' : ''}" onclick="rpStDel('${s.id}')" aria-label="حذف الخطوة">${arm ? 'حذف؟' : I('x', 14, 2.5)}</button>` : ''}</li>`;
+    /* الإصدار 138: تعديل نص الخطوة بالضغط عليه (قراري): أنا أي خطوة حتى المنجزة، والموظف خطواته اللي ما خلصت وما ينتظر العمل الاعتماد، وخطوة السعر لا */
+    const canEd = !qs && (isAdmin || (!s.done && s.by === me && !pnd));
+    if (canEd && RP.sed === s.id) return `<li class="${s.done ? 'ok' : s === c ? 'cur' : 'nx'} sedl">${bt}<span class="sed"><input id="st_ed" maxlength="200" value="${esc(RP.sev == null ? s.t : RP.sev)}" aria-label="تعديل الخطوة" oninput="RP.sev=this.value" onkeydown="if(event.key==='Enter')rpStEdSave('${s.id}');else if(event.key==='Escape')rpStEdCancel()"><button class="sedb" onclick="rpStEdSave('${s.id}')">حفظ</button><button class="sedc" onclick="rpStEdCancel()">إلغاء</button></span></li>`;
+    return `<li class="${s.done ? 'ok' : s === c ? 'cur' : 'nx'}">${bt}<span${canEd ? ` class="stt" role="button" tabindex="0" aria-label="تعديل الخطوة" onclick="rpStEdOpen('${s.id}')"` : ''}>${esc(s.t)}${canEd ? `<i class="stpen">${I('pencil', 13)}</i>` : ''}${s.pay ? `<span class="spay">${I('banknote', 12)}دفعة</span>` : ''}${meta ? `<small>${esc(meta)}</small>` : ''}</span>${canDel ? `<button class="sdel${arm ? ' arm' : ''}" onclick="rpStDel('${s.id}')" aria-label="حذف الخطوة">${arm ? 'حذف؟' : I('x', 14, 2.5)}</button>` : ''}</li>`;
   }).join('') + '</ul>' : '';
   /* الإصدار 135: آخر خطوة خطوة عادية، و«إنجاز العمل» سطر لحاله تحت الخطوات يتفعل بعد ما تخلص (قراري) */
   if (ss.length) { const pd = !isAdmin && rpSt(rpTk(r, x)) === 'pend';
@@ -5963,7 +5974,7 @@ function rpStToggle(id, j) {
   const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
   const item = rpArr(r.cur)[j]; if (item == null) return;
   const k = stKey(r, item);
-  RP.sopen = RP.sopen === k ? null : k; RP.sd = ''; RP.sarm = null;
+  RP.sopen = RP.sopen === k ? null : k; RP.sd = ''; RP.sarm = null; RP.sed = null; RP.sev = null;
   rpRerender();
   if (RP.sopen && !stOf(r, item).length) setTimeout(() => { const i = document.getElementById('st_new'); if (i) i.focus(); }, 50);
 }
@@ -5980,6 +5991,24 @@ async function rpStAdd(id, j) {
     await rpTickReload();
     RP.busy = false; rpRerender(); toast('تمت إضافة الخطوة');
     setTimeout(() => { const i = document.getElementById('st_new'); if (i) i.focus(); }, 50);
+  } catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
+function rpStEdOpen(sid) {
+  if (RP.busy) return;
+  RP.sed = sid; RP.sev = null; RP.sarm = null; rpRerender();
+  setTimeout(() => { const i = document.getElementById('st_ed'); if (i) { i.focus(); const n = i.value.length; try { i.setSelectionRange(n, n); } catch (e) {} } }, 50);
+}
+function rpStEdCancel() { RP.sed = null; RP.sev = null; rpRerender(); }
+async function rpStEdSave(sid) {
+  if (RP.busy) return;
+  const inp = document.getElementById('st_ed'), t = String((inp && inp.value) || RP.sev || '').trim();
+  if (!t) return toast('اكتب الخطوة أولاً', null, 'er');
+  RP.busy = true;
+  try {
+    const res = await call('apiRepStepEdit', sid, t);
+    RP.sed = null; RP.sev = null;
+    await rpTickReload();
+    RP.busy = false; rpRerender(); if (!(res && res.same)) toast('تم تعديل الخطوة');
   } catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
 }
 async function rpStTick(sid, undo) {
