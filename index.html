@@ -391,8 +391,6 @@ details.rul summary{min-height:44px}
 .gdone svg{color:var(--green);flex:none;margin-top:3px}
 .gcur{background:var(--acc-soft);border-radius:var(--r);padding:16px 14px;margin-top:12px;font-size:17px;font-weight:600;line-height:1.7}
 .gcur small{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-bottom:4px}
-.gok{width:100%;margin-top:14px}
-.gok:disabled{opacity:.45;cursor:default}
 .gqt{font-size:17px;font-weight:600;line-height:1.6;margin-bottom:12px}
 .gopts{display:flex;flex-direction:column;gap:8px}
 .gopts button{font:inherit;font-size:15px;text-align:right;border:1.5px solid var(--line2);background:var(--surface);color:var(--text);border-radius:var(--r);padding:13px 14px;cursor:pointer}
@@ -1340,7 +1338,6 @@ html:root .pform .ipj button:not(.on){background:var(--surface)!important}
 html:root .ivsum{background:var(--acc-soft);color:var(--acc-dk);border-radius:16px;padding:10px 14px;font-size:14px;line-height:1.6;margin:4px 0 2px}
 html:root .ivsum.bad{background:#F6ECEA;color:var(--red)}
 .etabs.e4.e3{grid-template-columns:repeat(3,minmax(0,1fr))!important}
-html:root .note.bad .attok{display:flex;width:100%;min-height:44px;margin-top:10px;justify-content:center;background:rgba(255,255,255,.7)!important;color:var(--red)!important;border:0!important}
 /* الإصدار 121: نافذة تأكيد المخالفة، وأعمال «متابعة الأعمال الموكلة»، و«اطّلع» في القائمة، وبطاقة مخالفات اليوم */
 .cfv{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
 .cfv>span{color:var(--muted);flex:none}.cfv>b{text-align:start}.cfv>b.nw{font-weight:400}.cfv small{font-weight:400;color:var(--muted)}
@@ -1572,6 +1569,12 @@ html:root .qdet b{font-weight:500;color:var(--text)}
 html:root .qdet>.qimg{margin:6px 0 2px}
 html:root .qdet>.qacts{justify-content:flex-start;gap:16px;flex-wrap:wrap}
 html:root .qdet .qacts .qlnk{min-height:44px;padding:0;text-decoration:underline;text-underline-offset:3px}
+/* الإصدار 137: زرّين بس للإقرار والإغلاق: «فهمت» (.ackb) لأي شي يخبرك بشي، و«إغلاق» (.clsb) لأي نافذة تطالعها (قراري) */
+html:root .ackb,html:root .clsb{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:44px;margin-top:10px;padding:0 16px;border:0;border-radius:999px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer}
+html:root .ackb{background:#fff;color:var(--acc-dk);box-shadow:inset 0 0 0 1px var(--acc-ring)}
+html:root .ackb.r,html:root .note.bad .ackb{color:var(--red);box-shadow:inset 0 0 0 1px rgba(156,80,72,.25)}
+html:root .ackb:disabled{opacity:.5;cursor:default}
+html:root .clsb{background:var(--fill);color:var(--muted)}
 </style>
 </head>
 <body>
@@ -1581,9 +1584,9 @@ html:root .qdet .qacts .qlnk{min-height:44px;padding:0;text-decoration:underline
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=136"></script>
+<script src="api.js?v=137"></script>
 <script>
-const APP_VER = '136';
+const APP_VER = '137';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -1771,7 +1774,7 @@ function attStepsHtml(r, me) {
 }
 function attBadHtml(d) {
   const lim = addDays(d.today, -30), b = (d.att || []).filter(x => x.bad && !x.badSeen && x.date >= lim), me = BOOT.page === 'emp' && !S.empPreview;
-  return b.map(x => `<div class="note bad" style="margin-top:8px"><div style="flex:1"><b>تسجيل غير صحيح</b> · <span>${esc(dayLabel(x.date))}</span><div><b>المدير العام يقول:</b> ${esc(x.badReason)}</div>${me ? `<button class="btn2 attok" onclick="attSeen('${x.id}',this)">فهمت</button>` : ''}</div></div>`).join('');
+  return b.map(x => `<div class="note bad" style="margin-top:8px"><div style="flex:1"><b>تسجيل غير صحيح</b> · <span>${esc(dayLabel(x.date))}</span><div><b>المدير العام يقول:</b> ${esc(x.badReason)}</div>${me ? `<button class="ackb attok" onclick="attSeen('${x.id}',this)">${I('check', 16, 2.5)}فهمت</button>` : ''}</div></div>`).join('');
 }
 /* الإصدار 113: الموظف يضغط «فهمت» فيختفي التنبيه، واليوم يبقى «غير صحيح» في السجل */
 async function attSeen(id, btn) {
@@ -1785,7 +1788,7 @@ function violHtml(d) {
   const v = d.viol || [], n = v.length, me = BOOT.page === 'emp' && !S.empPreview;
   if (!n) return '';
   const tl = n === 1 ? 'تم رصد مخالفة' : n === 2 ? 'تم رصد مخالفتين' : 'تم رصد ' + n + (n <= 10 ? ' مخالفات' : ' مخالفة');
-  return `<div class="note bad" style="margin-top:8px"><div style="flex:1"><b>${tl}</b> · <span>اليوم</span>${v.map(x => `<div class="vl"><b>${esc(critL(x.crit))}</b>${x.note ? ' — ' + esc(x.note).replace(/\n/g, '<br>') : ''}</div>`).join('')}${me ? `<button class="btn2 attok" onclick="violSeen(this)">فهمت</button>` : ''}</div></div>`;
+  return `<div class="note bad" style="margin-top:8px"><div style="flex:1"><b>${tl}</b> · <span>اليوم</span>${v.map(x => `<div class="vl"><b>${esc(critL(x.crit))}</b>${x.note ? ' — ' + esc(x.note).replace(/\n/g, '<br>') : ''}</div>`).join('')}${me ? `<button class="ackb attok" onclick="violSeen(this)">${I('check', 16, 2.5)}فهمت</button>` : ''}</div></div>`;
 }
 async function violSeen(btn) {
   if (btn) btn.disabled = true;
@@ -3247,7 +3250,7 @@ function openInvD(id) {
     ${x.status === 'ok' && x.kind === 'inv' ? '<div class="g2b">' : ''}${x.status === 'ok' && x.kind === 'inv' ? `<button class="btn2" onclick="askInvFix('${id}')">${I('pencil', 15)}تصحيح المبلغ</button>` : ''}
     <button class="btn2" onclick="askWarranty('${id}')">${x.warrantyUntil ? 'عدّل الضمان' : 'أضف ضمان'}</button>${x.status === 'ok' && x.kind === 'inv' ? '</div>' : ''}
     <button class="btn2 rd" id="ivddel" onclick="delInvD('${id}')">حذف الفاتورة</button>
-    <button class="btn2" style="border:0" onclick="ovClose()">إغلاق</button></div>`);
+    <button class="clsb" onclick="ovClose()">إغلاق</button></div>`);
   x.photos.forEach(async f => {
     try {
       const u = S.ic[f] && S.ic[f] !== 'loading' ? S.ic[f] : await call('apiInvImgAdmin', BOOT.key, id, f);
@@ -3837,7 +3840,7 @@ function renderGuide() {
   const n = g.points.length;
   let body;
   if (r.review) {
-    body = `<ol class="gall">${g.points.map(p => `<li>${esc(p)}</li>`).join('')}</ol><button class="btn2" style="width:100%;margin-top:14px" onclick="closeGuide()">رجوع</button>`;
+    body = `<ol class="gall">${g.points.map(p => `<li>${esc(p)}</li>`).join('')}</ol><button class="clsb" onclick="closeGuide()">إغلاق</button>`;
   } else if (r.stage === 'q') {
     body = `<div class="gbar"><div style="width:100%"></div></div>
       <div class="gqt">${esc(g.q.text)}</div>
@@ -3847,7 +3850,7 @@ function renderGuide() {
     body = `<div class="gbar"><div style="width:${Math.round(r.i / (n + (g.q ? 1 : 0)) * 100)}%"></div></div>
       ${g.points.slice(0, r.i).map(p => `<div class="gdone">${I('check', 15, 3)}<span>${esc(p)}</span></div>`).join('')}
       <div class="gcur"><small>${r.i + 1} من ${n}</small>${esc(g.points[r.i])}</div>
-      <button class="btn2 cu gok" id="gok" disabled onclick="nextPoint()">فهمت (بعد ${r.left} ثواني)</button>`;
+      <button class="ackb gok" id="gok" disabled onclick="nextPoint()">فهمت (بعد ${r.left} ثواني)</button>`;
     S.grT = setInterval(() => {
       r.left--;
       const b = $('#gok');
@@ -4620,7 +4623,7 @@ function rpCardHtml(r, o) {
   const dec = rpArr(r.decide), up = rpArr(r.up), cur = rpArr(r.cur), ord = up.filter(x => cur.includes(x)).concat(cur.filter(x => !up.includes(x)));
   const nc = cur.length, nl = rpArr(r.later).length, nd = rpArr(r.done).length, age = rpAgeDays(r), me = (o.d || {}).id;
   const notes = rpArr(r.notes), last = notes[notes.length - 1];
-  const npd = rpPendL(r).length + rpReqL(r).length + rpAreqL(r).length + rpLreqP(r).length + rqPendN(r) + duReqL(r).length, nret = o.emp ? rpArr(r.cur).filter(x => { const k = rpTk(r, x); return rpSt(k) === 'ret' && k.by === me; }).length : 0;
+  const npd = rpPendL(r).length + rpReqL(r).length + rpAreqL(r).length + rpLreqP(r).length + rqPendN(r) + duReqL(r).length, nret = o.emp ? rpArr(r.cur).filter(x => { const k = rpTk(r, x); return rpSt(k) === 'ret' && k.by === me && rpRetOn(r, k); }).length : 0;
   const chip = o.share ? '<span class="rchip new">تنبيه</span>' : !o.emp && npd ? `<span class="rchip dec">بانتظار اعتمادك (${npd})</span>` : nret ? '<span class="rchip old">أُعيد إليك عمل</span>' : rpPend(r) ? `<span class="rchip dec">${o.emp ? 'بانتظار المدير العام' : 'بانتظار قرارك'}</span>` : rpIsNew(r, me) ? '<span class="rchip new">تحديث جديد</span>' : age > 3 ? `<span class="rchip old">بدون تحديث من ${age} ${age <= 10 ? 'أيام' : 'يوماً'}</span>` : '';
   const st = [nc ? `<span><i></i>${nc === 1 ? 'عمل حالي واحد' : nc === 2 ? 'عملان حاليان' : nc + ' حالية'}</span>` : '',
     nl ? `<span><i class="l"></i>${nl === 1 ? 'عمل لاحق واحد' : nl === 2 ? 'عملان لاحقان' : nl + ' لاحقة'}</span>` : '',
@@ -4810,7 +4813,7 @@ function rpDetailHtml(isAdmin) {
   if (!r) return '';
   /* الإصدار 86: تقرير واحد مستمر للمشروع. انشال «التقارير السابقة» والترقيم، وصار فيه «بانتظار الاعتماد» */
   const dec = rpArr(r.decide), up = rpArr(r.up), pend = rpPendL(r), cur = rpArr(r.cur).filter(x => !pend.includes(x));
-  const tags = cur.map(x => { const nw = rpNowOf(r, x); if (nw && nw.apr && rpSt(rpTk(r, x)) !== 'ret' && Date.now() - nw.apr < 3 * 864e5) return ['معتمد', 'g', `<small class="tkt">اعتُمد نقله للحالية · ${esc(rpTickWhen(nw.apr))}</small>`]; return up.includes(x) && rpUpFresh(r, x) ? ['حان وقته', 'g'] : rpSt(rpTk(r, x)) === 'ret' ? ['أُعيد للعمل', 'r'] : null; });
+  const tags = cur.map(x => { const nw = rpNowOf(r, x); if (nw && nw.apr && rpSt(rpTk(r, x)) !== 'ret' && Date.now() - nw.apr < 3 * 864e5) return ['معتمد', 'g', `<small class="tkt">اعتُمد نقله للحالية · ${esc(rpTickWhen(nw.apr))}</small>`]; return up.includes(x) && rpUpFresh(r, x) ? ['حان وقته', 'g'] : rpRetOn(r, rpTk(r, x)) ? ['أُعيد للعمل', 'r'] : null; });
   const notes = rpArr(r.notes);
   let h = `<button class="back" onclick="rpClose()">${I('arrow-right', 17)}${isAdmin ? 'التقارير' : 'تقاريري'}</button><h2>${esc(rpPName(r.proj))}</h2>
     <div class="rpmeta">${I('file-text', 15)}<span>آخر تحديث: ${esc(rpUpdBy(r))} · ${esc(rpTickWhen(r.upd || r.ts * 1000))}${r.edited && rpUpdBy(r) !== 'المدير العام' ? ' · <span class="edt">عدّله المدير العام</span>' : ''}</span></div>`;
@@ -4839,7 +4842,7 @@ function rpDetailHtml(isAdmin) {
   if (isAdmin) h += pendH; /* الإصدار 130: عند الموظف تنزل بعد الأعمال الحالية ومطوية */
   /* الإصدار 136: «لها خطوات» ما يحسب العمل اللي خطوته الوحيدة «اعتماد السعر» (نفس عدد الحلقات) */
   /* الإصدار 134: رأس «الأعمال الحالية» شريط فاتح بخط تحته عشان يبان إنه راس القائمة، وتحته سطر ملخص بالأعداد (اللي فوق صفر بس) */
-  const sumP = ordm ? [] : [[cur.filter(x => rpSt(rpTk(r, x)) === 'ret').length, 'أُعيد للعمل'], [cur.filter(x => stOf(r, x).some(s => !/^q/.test(String(s.id || '')))).length, 'لها خطوات'], [cur.filter(x => rqOf(r, x).some(q => q.st === 'ok')).length, 'بسعر معتمد']].filter(a => a[0]);
+  const sumP = ordm ? [] : [[cur.filter(x => rpRetOn(r, rpTk(r, x))).length, 'أُعيد للعمل'], [cur.filter(x => stOf(r, x).some(s => !/^q/.test(String(s.id || '')))).length, 'لها خطوات'], [cur.filter(x => rqOf(r, x).some(q => q.st === 'ok')).length, 'بسعر معتمد']].filter(a => a[0]);
   const sumH = sumP.length ? `<div class="rsum">${sumP.map(a => `<span>${a[0]} ${a[1]}</span>`).join(' · ')}</div>` : '';
   h += `<div class="rpcard now"><div class="rchw"><div class="rch"><span class="ci">${I('list-checks', 16)}</span>الأعمال الحالية<span class="cn">${cur.length}</span>${rpCanTick(r, isAdmin) && cur.length && !ordm ? `<button class="rchb rhi ${RP.hint ? 'on' : ''}" onclick="RP.hint=!RP.hint;rpRerender()" aria-label="طريقة الاستخدام" aria-expanded="${!!RP.hint}">${I('info', 16)}</button>` : ''}${canOrd ? (ordm ? `<button class="rchb dn fl" onclick="rpOrdDone()">تم</button>` : `<button class="rchb" onclick="rpOrdStart('${r.id}')">${I('list-checks', 15)}رتّب</button>`) : ''}</div>${sumH}</div>${ordm ? rpOrdHtml() : rpCanTick(r, isAdmin) && cur.length ? rpTickList(r, cur, tags, isAdmin) : rpItems(cur, tags, 'cur', (rpLast(r.proj) || {}).id === r.id ? r : null, isAdmin)}${rpCanTick(r, isAdmin) && !ordm ? rpCurAddHtml(r) + (cur.length ? rqAddBtn(r) : '') : ''}</div>`;
   if (!isAdmin) h += pendH;
@@ -5072,7 +5075,7 @@ function rpDraw() {
   if (!f) return;
   if (f.sent) {
     ovOpen(`<div class="rok"><div class="rokc">${I('check', 30, 2.5)}</div><b>تم حفظ التقرير</b><div>${esc(rpPName(f.proj))}</div><div class="sub">${esc(dayLabel(rpToday()))}</div>${f.nDone ? `<div class="rokm">${I('check-check', 14)}${f.nDone <= 2 || f.nDone > 10 ? 'نُقل ' : 'نُقلت '}${rpNDone(f.nDone)} إلى الأعمال المنجزة</div>` : ''}${f.moved.length ? `<div class="rokm">${I('clock', 14)}انتقل إلى الأعمال الحالية: ${esc(f.moved.join('، '))}</div>` : ''}${f.lq ? `<div class="rokm">${I('hourglass', 14)}${f.lq === 1 ? 'أُرسل عمل لاحق جديد' : 'أُرسل ' + f.lq + ' أعمال لاحقة جديدة'} للمدير العام، ويُضاف بعد موافقته</div>` : ''}${f.asked ? `<div class="rokm">${I('hourglass', 14)}${f.asked === 1 ? 'أُرسل طلب نقل عمل واحد إلى الأعمال الحالية' : 'أُرسل طلب نقل ' + f.asked + ' أعمال إلى الأعمال الحالية'}، بانتظار اعتماد المدير العام</div>` : ''}${f.dupNote ? `<div class="rokm">${I('info', 14)}وصل التقرير من المحاولة الأولى، ولم تُضَف التعديلات التي أجريتها بعدها</div>` : ''}</div>
-      <button class="btn2 cu qbig" onclick="ovClose()">حسناً</button>`);
+      <button class="ackb" onclick="ovClose()">${I('check', 16, 2.5)}فهمت</button>`);
     return;
   }
   const ap = rpProjs().slice().sort((a, b) => (b.mine ? 1 : 0) - (a.mine ? 1 : 0));
@@ -5486,14 +5489,26 @@ function rpCanTick(r, isAdmin) {
 /* الإصدار 136: القائمة اللي فيها دوائر بدون سطر «n من N · الآن» (العدد في الدائرة والخطوات تنفتح منها، قراري).
    لما تخلص الخطوات (غير خطوة اعتماد السعر) سطر قصير يقول إن العمل جاهز. القائمة اللي بدون دوائر (rpItems) يبقى فيها stNowHtml */
 function stDoneLine(ss, k) { return ss.length && !ss.some(s => !s.done) && ss.some(s => !/^q/.test(String(s.id || ''))) && rpSt(k) !== 'pend' ? `<small class="snow">${I('list-checks', 13)}<span><span>الخطوات منجزة</span> · <b>بانتظار إنجاز العمل</b></span></small>` : ''; }
+/* الإصدار 137: «أُعيد للعمل» تنبيه يختفي بـ«فهمت» لكل شخص لحاله (rep_ret_seen بوقت الإرجاع retAt، فتغيير الاسم ما يرجّعه والإرجاع الجديد يطلع من جديد) */
+function rsMe() { return BOOT.page === 'emp' || S.empPreview ? ((S.empData || {}).id || '') : 'admin'; }
+function rpRetOn(r, k) { if (rpSt(k) !== 'ret') return false; const me = rsMe(); return !rpArr(r && r.rseen).some(z => Number(z.at) === Number(k.retAt) && z.who === me); }
+async function rpRetSeen(id, at, btn) {
+  if (btn) btn.disabled = true;
+  try {
+    await call('apiRepRetSeen', id, at);
+    const r = (RP.reps || []).find(x => x.id === id);
+    if (r) r.rseen = rpArr(r.rseen).concat([{at: Number(at), who: rsMe()}]);
+    rpRerender();
+  } catch (e) { if (btn) btn.disabled = false; toastErr(e); }
+}
 function rpTickList(r, cur, tags, isAdmin) {
   const all = rpArr(r.cur);
   const hint = `<div class="rhint cwh">${I('info', 13)}<span><span>${isAdmin ? 'الدائرة: أُنجز' : 'الدائرة: أنجزته ويُرسل للمدير العام للاعتماد'}</span> · <span>الرقم أو الاسم: الخطوات</span>${isAdmin ? ` · <span class="nw2">${I('ellipsis', 13, 2.6)}: تنبيه وموعد وتأجيل</span>` : ''}</span></div>`;
   return (RP.hint ? hint : '') + '<ul class="tkl">' + cur.map((x, i) => {
-    const j = all.indexOf(x), k = rpTk(r, x), ret = rpSt(k) === 'ret', qb = rqBlock(r, x, j, isAdmin);
+    const j = all.indexOf(x), k = rpTk(r, x), ret = rpRetOn(r, k), qb = rqBlock(r, x, j, isAdmin);
     const ss = stOf(r, x), sl = ss.filter(s => !s.done).length, so = RP.sopen === stKey(r, x), lc = [qb ? 'hq' : '', ss.length ? 'stp' : '', so ? 'so' : ''].filter(Boolean).join(' ');
     const lead = ss.length && sl ? `<button class="spc" style="--p:${Math.round((ss.length - sl) / ss.length * 100)}" onclick="rpStToggle('${r.id}',${j})" aria-label="الخطوات" aria-expanded="${so}"><span>${ss.length - sl}/${ss.length}</span></button>` : `<button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button>`;
-    return `<li${lc ? ` class="${lc}"` : ''}>${lead}<span><span class="wtx" onclick="rpStToggle('${r.id}',${j})">${esc(x)}</span>${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${rqTag(r, x, isAdmin)}${duLine(r, x, isAdmin)}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}` : ''}${stDoneLine(ss, k)}${rqOkLines(r, x, j, isAdmin)}${rpAddLine(r, x)}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell imore" onclick="rpMoreOpen('${r.id}',${j})" aria-label="إجراءات العمل">${I('ellipsis', 18, 2.6)}</button>` : ''}</li>${so ? `<li class="sli"><div class="spn">${stPanelHtml(r, x, j, ss, isAdmin)}</div></li>` : ''}${qb ? `<li class="qli"><div class="qsub">${qb}</div></li>` : ''}`;
+    return `<li${lc ? ` class="${lc}"` : ''}>${lead}<span><span class="wtx" onclick="rpStToggle('${r.id}',${j})">${esc(x)}</span>${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${rqTag(r, x, isAdmin)}${duLine(r, x, isAdmin)}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}${k.retAt ? `<button class="ackb r" onclick="rpRetSeen('${r.id}',${Number(k.retAt) || 0},this)">${I('check', 16, 2.5)}فهمت</button>` : ''}` : ''}${stDoneLine(ss, k)}${rqOkLines(r, x, j, isAdmin)}${rpAddLine(r, x)}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell imore" onclick="rpMoreOpen('${r.id}',${j})" aria-label="إجراءات العمل">${I('ellipsis', 18, 2.6)}</button>` : ''}</li>${so ? `<li class="sli"><div class="spn">${stPanelHtml(r, x, j, ss, isAdmin)}</div></li>` : ''}${qb ? `<li class="qli"><div class="qsub">${qb}</div></li>` : ''}`;
   }).join('') + '</ul>';
 }
 /* الإصدار 124: نافذة ⋯ عندي: نفس الإجراءات بكلام. التنبيه والتأجيل يفتحون نوافذهم الحالية */
@@ -5597,7 +5612,7 @@ function duDraw() {
     <div class="err">${esc(f.err)}</div>
     <button class="btn2 cu qbig" ${f.busy ? 'disabled' : ''} onclick="duSave()">${f.busy && !f.arm ? 'جاري الحفظ…' : I('alarm-clock', 17) + (f.did ? 'حفظ الموعد' : 'تحديد الموعد')}</button>
     ${f.did ? `<button class="btn2 rd" style="width:100%;margin-top:8px" ${f.busy ? 'disabled' : ''} onclick="duDel()">${I('x', 15)}${f.arm ? 'اضغط مرة ثانية لإلغاء الموعد' : 'إلغاء الموعد'}</button>` : ''}
-    <button class="btn2" style="width:100%;margin-top:8px" onclick="RP.du=null;ovClose()">إغلاق</button>`);
+    <button class="clsb" onclick="RP.du=null;ovClose()">إغلاق</button>`);
 }
 async function duSave() {
   const f = RP.du; if (!f || f.busy) return;

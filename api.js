@@ -839,6 +839,7 @@
     async apiRepStepAdd(id, item, txt) { const r = await rpc('rep_step_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), txt: String(txt || '') }); flush(); return r; },
     async apiRepStepTick(sid, undo) { return rpc('rep_step_tick', { k: CRED.k || '', t: CRED.t || '', sid: String(sid || ''), undo: !!undo }); },
     async apiRepStepDel(sid) { return rpc('rep_step_del', { k: CRED.k || '', t: CRED.t || '', sid: String(sid || '') }); },
+    async apiRepRetSeen(id, at) { const r = await rpc('rep_ret_seen', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), rat: Number(at) || 0 }); return r; }, /* v137: «فهمت» على «أُعيد للعمل» */
     async apiRepCurAdd(id, item) { const r = await rpc('rep_cur_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || '') }); flush(); return r; }, /* v117 */
     async apiRepLaterAdd(id, item, aft) { const r = await rpc('rep_later_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), aft: String(aft || '') }); flush(); return r; }, /* v117 */
     async apiRepCurOrder(id, items) { return rpc('rep_cur_order', { k: CRED.k || '', id: String(id || ''), items: (items || []).map(String) }); },
