@@ -1547,6 +1547,19 @@ html:root .rchw .rch .ci,html:root .rchw .rch .cn{background:#fff}
 html:root .rsum{font-size:13px;color:var(--acc-dk);line-height:1.5;margin-top:4px}
 html:root .rpcard.now .tkl>li:not(.sli):not(.qli){padding-top:12px}
 html:root .rpcard.now .tkl>li:not(.sli):not(.qli):not(.hq):not(.so){padding-bottom:12px}
+/* الإصدار 135: سطر «أضافه …» بأيقونة مثل باقي سطور العمل، و«إنجاز العمل» سطر لحاله تحت الخطوات */
+html:root .addl{display:flex;gap:5px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:5px;line-height:1.5}
+html:root .addl>svg{flex:none;margin-top:3px}
+html:root .addl>span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html:root .sfin{display:flex;align-items:center;gap:10px;margin-top:4px;padding:8px 0 6px;border-top:1px solid var(--line2);font-size:15px;line-height:1.6}
+html:root .sfin>span{flex:1;min-width:0}
+html:root .sfin b{font-weight:500}
+html:root .sfin small{display:block;font-size:12px;color:var(--muted)}
+html:root .sfin .sk{flex:none;width:26px;height:26px;border-radius:999px;padding:0;border:2px solid var(--green);background:#fff;cursor:pointer;position:relative}
+html:root .sfin .sk:before{content:"";position:absolute;inset:-9px}
+html:root .sfin.on{background:var(--green-soft);border-radius:14px;margin:6px -8px 0;padding:8px;border-top:0}
+html:root .sfin.off .sk{border-style:dashed;border-color:var(--line2);cursor:default}
+html:root .sfin.off b{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -1556,9 +1569,9 @@ html:root .rpcard.now .tkl>li:not(.sli):not(.qli):not(.hq):not(.so){padding-bott
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=134"></script>
+<script src="api.js?v=135"></script>
 <script>
-const APP_VER = '134';
+const APP_VER = '135';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -3308,7 +3321,7 @@ function askInvAdd() {
     <div class="sub" style="margin:6px 0 4px">من الدافع؟</div>
     <div class="segc wr">${[['', 'أنا']].concat(d.employees.map(e => [e.id, 'عهدة ' + shortName(e.name)])).map(o => `<button class="${f.emp === o[0] ? 'on' : ''}" onclick="S.ai.emp='${o[0]}';askInvAdd()">${esc(o[1])}</button>`).join('')}</div>
     <label class="tgl"><span>عليها ضمان؟</span><input type="checkbox" ${f.wOn ? 'checked' : ''} onchange="S.ai.wOn=this.checked;if(this.checked&&!S.ai.w)S.ai.w=12;askInvAdd()"></label>
-    ${f.wOn ? `<div class="wchips">${[[6, '6 أشهر'], [12, 'سنة'], [24, 'سنتين']].map(c => `<button class="${!f.wc && f.w === c[0] ? 'on' : ''}" onclick="S.ai.w=${c[0]};S.ai.wc=false;askInvAdd()">${c[1]}</button>`).join('')}<button class="${f.wc ? 'on' : ''}" onclick="S.ai.wc=true;askInvAdd()">غيره</button></div>
+    ${f.wOn ? `<div class="wchips">${WCH.map(c => `<button class="${!f.wc && f.w === c[0] ? 'on' : ''}" onclick="S.ai.w=${c[0]};S.ai.wc=false;askInvAdd()">${c[1]}</button>`).join('')}<button class="${f.wc ? 'on' : ''}" onclick="S.ai.wc=true;askInvAdd()">غيره</button></div>
       ${f.wc ? `<input inputmode="numeric" placeholder="كم شهر؟" value="${f.w || ''}" oninput="S.ai.w=Number(String(this.value).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)))||0">` : ''}` : ''}
     <div class="shots">${f.shots.map((s, i) => shotTile(s, `S.ai.shots.splice(${i},1);askInvAdd()`)).join('')}
     ${f.shots.length < 3 ? `<label class="madd">${I('paperclip', 20)}إرفاق فاتورة (اختياري)<input type="file" accept="${ACC_INV}" multiple style="display:none" onchange="pickAi(this)"></label>` : ''}</div>
@@ -3364,6 +3377,8 @@ async function delGive(id) {
   try { S.data = await call('apiInvDelete', BOOT.key, id); S.armed = null; ovClose(); renderAdmin(); toast('تم الحذف', () => delRestore(0, id)); }
   catch (e) { S.armed = null; $('#gerr').textContent = e; }
 }
+/* الإصدار 135: مدد الضمان لين 5 سنوات (القاعدة تقبل لين 120 شهر، و«غيره» يبقى) */
+const WCH = [[6, '6 أشهر'], [12, 'سنة'], [24, 'سنتين'], [36, '3 سنوات'], [48, '4 سنوات'], [60, '5 سنوات']];
 function askWarranty(id) {
   const x = ((S.data.inv || {}).items || []).find(v => v.id === id);
   if (!x) return;
@@ -3371,7 +3386,7 @@ function askWarranty(id) {
   S.wsel = x.warrantyUntil || '';
   const chip = (m, t) => { const u = addMonths(from, m); return `<button class="${S.wsel === u ? 'on' : ''}" onclick="S.wsel='${u}';$('#wd').value='${u}';document.querySelectorAll('.wchips button').forEach(b=>b.classList.remove('on'));this.classList.add('on')">${t}</button>`; };
   ovOpen(`<label class="shh">ضمان «${esc(x.desc)}»</label><div class="sub">من تاريخ الشراء ${dmy(from)}</div>
-    <div class="wchips">${chip(6, '6 أشهر')}${chip(12, 'سنة')}${chip(24, 'سنتين')}</div>
+    <div class="wchips">${WCH.map(c => chip(c[0], c[1])).join('')}</div>
     <label class="sub" for="wd">أو اختر تاريخ نهاية الضمان</label>
     <input id="wd" type="date" value="${esc(S.wsel)}" onchange="S.wsel=this.value;document.querySelectorAll('.wchips button').forEach(b=>b.classList.remove('on'))">
     <div class="err" id="werr"></div>
@@ -4232,7 +4247,7 @@ function invFormHtml(d) {
     <div class="segc">${[['cash', 'العهدة'], ['own', 'من حسابي الخاص'], ['card', 'المدير العام']].map(o => `<button class="${(f.paidBy || 'cash') === o[0] ? 'on' : ''}" onclick="S.inv.paidBy='${o[0]}';rerenderEmp()">${o[1]}</button>`).join('')}</div>
     <div class="sub" style="margin-top:-4px">${f.paidBy === 'card' ? 'لا تُخصم من عهدتك' : f.paidBy === 'own' ? 'تُعاد لك بعد اعتماد المدير العام' : 'تُخصم من العهدة التي معك'}</div>
     ${ed ? '' : `<label class="tgl"><span>عليها ضمان؟</span><input type="checkbox" ${f.wOn ? 'checked' : ''} onchange="S.inv.wOn=this.checked;if(this.checked&&!S.inv.w)S.inv.w=12;rerenderEmp()"></label>`}
-    ${!ed && f.wOn ? `<div class="wchips">${[[6, '6 أشهر'], [12, 'سنة'], [24, 'سنتين']].map(c => `<button class="${!f.wc && f.w === c[0] ? 'on' : ''}" onclick="S.inv.w=${c[0]};S.inv.wc=false;rerenderEmp()">${c[1]}</button>`).join('')}<button class="${f.wc ? 'on' : ''}" onclick="S.inv.wc=true;rerenderEmp()">غيره</button></div>
+    ${!ed && f.wOn ? `<div class="wchips">${WCH.map(c => `<button class="${!f.wc && f.w === c[0] ? 'on' : ''}" onclick="S.inv.w=${c[0]};S.inv.wc=false;rerenderEmp()">${c[1]}</button>`).join('')}<button class="${f.wc ? 'on' : ''}" onclick="S.inv.wc=true;rerenderEmp()">غيره</button></div>
       ${f.wc ? `<input inputmode="numeric" placeholder="كم شهر؟" value="${f.w || ''}" oninput="S.inv.w=Number(String(this.value).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)))||0">` : ''}` : ''}
     <div class="ivsum${API.parseAmt(f.amount) > 0 ? '' : ' bad'}" id="ivsum" aria-live="polite">${ivSumHtml()}</div>
     <button class="btn" ${S.busy || S.ishotLoading ? 'disabled' : ''} onclick="sendInv()">${S.busy ? 'جاري الإرسال…' : I('send', 17) + (ed ? 'إعادة الإرسال' : 'إرسال')}</button>
@@ -4673,9 +4688,14 @@ async function krUndel(id) {
   try { S.data = await call('apiIdeaUndel', BOOT.key, id); if (S.view === 'set') renderAdmin(); else rpRerender(); toast('أُعيدت'); } catch (e) { toastErr(e); }
 }
 
+/* الإصدار 135: سطر «أضافه …» تحت العمل الحالي اللي أضافه الموظف (rep_adds، المدير العام ما يرجع) */
+function rpAddOf(r, item) { return rpArr(r && r.adds).find(a => a.item === item) || null; }
+/* سطر واحد (قراري): الوقت بدون اسم اليوم، واللي يزيد ينقطع بنقاط */
+function rpAddWhen(ms) { const d = nfDay(ms); if (d === rpToday()) return 'اليوم ' + nfTime(ms); const x = new Date(d + 'T12:00:00'); return x.getDate() + ' ' + MONTHS_AR[x.getMonth()] + ' ' + nfTime(ms); }
+function rpAddLine(r, item) { const a = rpAddOf(r, item); return a ? `<small class="addl">${I('user-round', 13)}<span><span>أضافه ${esc(shortName(a.name || ''))}</span> · <span>${esc(rpAddWhen(a.at))}</span></span></small>` : ''; }
 function rpItems(arr, tags, cls, r, isAdmin) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
-  return '<ul class="rpi ' + (cls || '') + '">' + arr.map((x, i) => { const qb = r ? rqBlock(r, x, rpArr(r.cur).indexOf(x), isAdmin) : ''; const ss = r && cls === 'cur' ? stOf(r, x) : []; return `<li>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${r ? rqTag(r, x, isAdmin) : ''}${r && cls === 'cur' ? duLine(r, x, isAdmin) : ''}${ss.length ? stNowHtml(ss) : ''}${r ? rqOkLines(r, x, rpArr(r.cur).indexOf(x), isAdmin) : ''}${qb ? `<div class="qsub">${qb}</div>` : ''}</li>`; }).join('') + '</ul>';
+  return '<ul class="rpi ' + (cls || '') + '">' + arr.map((x, i) => { const qb = r ? rqBlock(r, x, rpArr(r.cur).indexOf(x), isAdmin) : ''; const ss = r && cls === 'cur' ? stOf(r, x) : []; return `<li>${esc(x)}${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${r ? rqTag(r, x, isAdmin) : ''}${r && cls === 'cur' ? duLine(r, x, isAdmin) : ''}${ss.length ? stNowHtml(ss) : ''}${r ? rqOkLines(r, x, rpArr(r.cur).indexOf(x), isAdmin) : ''}${r && cls === 'cur' ? rpAddLine(r, x) : ''}${qb ? `<div class="qsub">${qb}</div>` : ''}</li>`; }).join('') + '</ul>';
 }
 function rpLaterHtml(arr) {
   if (!arr.length) return '<div class="rpe">لا يوجد</div>';
@@ -5457,7 +5477,7 @@ function rpTickList(r, cur, tags, isAdmin) {
     const j = all.indexOf(x), k = rpTk(r, x), ret = rpSt(k) === 'ret', qb = rqBlock(r, x, j, isAdmin);
     const ss = stOf(r, x), sl = ss.filter(s => !s.done).length, so = RP.sopen === stKey(r, x), lc = [qb ? 'hq' : '', ss.length ? 'stp' : '', so ? 'so' : ''].filter(Boolean).join(' ');
     const lead = ss.length && sl ? `<button class="spc" style="--p:${Math.round((ss.length - sl) / ss.length * 100)}" onclick="rpStToggle('${r.id}',${j})" aria-label="الخطوات" aria-expanded="${so}"><span>${ss.length - sl}/${ss.length}</span></button>` : `<button class="tkb" onclick="rpTick('${r.id}',${j},this)" aria-label="تم الإنجاز"><i></i></button>`;
-    return `<li${lc ? ` class="${lc}"` : ''}>${lead}<span><span class="wtx" onclick="rpStToggle('${r.id}',${j})">${esc(x)}</span>${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${rqTag(r, x, isAdmin)}${duLine(r, x, isAdmin)}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}` : ''}${ss.length ? stNowHtml(ss) : ''}${rqOkLines(r, x, j, isAdmin)}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell imore" onclick="rpMoreOpen('${r.id}',${j})" aria-label="إجراءات العمل">${I('ellipsis', 18, 2.6)}</button>` : ''}</li>${so ? `<li class="sli"><div class="spn">${stPanelHtml(r, x, j, ss, isAdmin)}</div></li>` : ''}${qb ? `<li class="qli"><div class="qsub">${qb}</div></li>` : ''}`;
+    return `<li${lc ? ` class="${lc}"` : ''}>${lead}<span><span class="wtx" onclick="rpStToggle('${r.id}',${j})">${esc(x)}</span>${tags && tags[i] ? `<span class="tg2 ${tags[i][1] || ''}">${tags[i][0]}</span>${tags[i][2] || ''}` : ''}${rqTag(r, x, isAdmin)}${duLine(r, x, isAdmin)}${ret ? `<small class="retn">${I('rotate-ccw', 12)}${k.un && !k.retNote ? 'أعاده المدير العام من الأعمال المنجزة' : 'ملاحظة المدير العام: ' + esc(k.retNote || '')} · ${esc(rpTickWhen(k.retAt))}</small>${k.un ? rpTickDoc(k) : ''}` : ''}${ss.length ? stNowHtml(ss) : ''}${rqOkLines(r, x, j, isAdmin)}${rpAddLine(r, x)}${rpAlertLine(r, x, isAdmin)}</span>${isAdmin ? `<button class="ibell imore" onclick="rpMoreOpen('${r.id}',${j})" aria-label="إجراءات العمل">${I('ellipsis', 18, 2.6)}</button>` : ''}</li>${so ? `<li class="sli"><div class="spn">${stPanelHtml(r, x, j, ss, isAdmin)}</div></li>` : ''}${qb ? `<li class="qli"><div class="qsub">${qb}</div></li>` : ''}`;
   }).join('') + '</ul>';
 }
 /* الإصدار 124: نافذة ⋯ عندي: نفس الإجراءات بكلام. التنبيه والتأجيل يفتحون نوافذهم الحالية */
@@ -5879,8 +5899,8 @@ document.addEventListener('pointerdown', ev => {
   g.addEventListener('pointermove', move); g.addEventListener('pointerup', up); g.addEventListener('pointercancel', up);
 });
 /* الإصدار 114: خطوات تحت العمل الحالي. العمل اللي له خطوات مكان دائرته رقم (2/5)، وتحت اسمه الخطوة الحالية وشريط.
-   الضغط على اسم العمل يفتح خطواته وخانة «خطوة جديدة». الخطوات اللي بالنص تنأشر بدون اعتماد، وآخر خطوة هي إنجاز العمل نفسه (rpTick)،
-   فعند الموظف تطلب التوثيق وتروح «بانتظار الاعتماد». الخطوة اللي تبدأ بـ«دفعة» عليها علامة بس */
+   الضغط على اسم العمل يفتح خطواته وخانة «خطوة جديدة». الخطوات تنأشر بدون اعتماد، ومن 135 آخر خطوة مثلها، و«إنجاز العمل» سطر لحاله تحتها (rpTick)
+   يتفعل بعد ما تخلص الخطوات، وعند الموظف يطلب التوثيق ويروح «بانتظار الاعتماد». الخطوة اللي تبدأ بـ«دفعة» عليها علامة بس */
 function stOf(r, item) { return rpArr(r && r.steps).filter(s => s && s.item === item); }
 function stKey(r, item) { return r.id + '|' + item; }
 function stMe() { return BOOT.page === 'admin' ? 'admin' : (S.empData ? S.empData.id : ''); }
@@ -5895,14 +5915,16 @@ function stPanelHtml(r, x, j, ss, isAdmin) {
   const me = stMe(), left = ss.filter(s => !s.done).length, c = ss.find(s => !s.done);
   let h = ss.length ? '<ul class="sst">' + ss.map(s => {
     /* الإصدار 126: خطوة «اعتماد السعر» (رقمها يبدأ بـ q) تتغير من السعر نفسه («تراجع عن الاعتماد»)، فما لها تراجع ولا حذف هنا */
-    const qs = /^q/.test(String(s.id || '')), last = !s.done && left === 1, canUn = !qs && s.done && (isAdmin || s.doneBy === me), canDel = !qs && (isAdmin || (!s.done && s.by === me)), arm = RP.sarm === s.id;
+    const qs = /^q/.test(String(s.id || '')), canUn = !qs && s.done && (isAdmin || s.doneBy === me), canDel = !qs && (isAdmin || (!s.done && s.by === me)), arm = RP.sarm === s.id;
     const bt = s.done
       ? `<button class="sk" ${canUn ? `onclick="rpStTick('${s.id}',true)" aria-label="تراجع عن الخطوة"` : 'disabled aria-label="خطوة منجزة"'}>${I('check', 14, 2.5)}</button>`
-      : `<button class="sk" onclick="${last ? `rpTick('${r.id}',${j},this)` : `rpStTick('${s.id}',false)`}" aria-label="${last ? 'تم الإنجاز' : 'تمت الخطوة'}"></button>`;
+      : `<button class="sk" onclick="rpStTick('${s.id}',false)" aria-label="تمت الخطوة"></button>`;
     const meta = s.done ? (s.doneBy === 'admin' ? 'المدير العام' : shortName(s.doneName || '')) + ' · ' + rpTickWhen(s.done) : s.by !== 'admin' ? 'أضافها ' + shortName(s.name || '') : '';
     return `<li class="${s.done ? 'ok' : s === c ? 'cur' : 'nx'}">${bt}<span>${esc(s.t)}${s.pay ? `<span class="spay">${I('banknote', 12)}دفعة</span>` : ''}${meta ? `<small>${esc(meta)}</small>` : ''}</span>${canDel ? `<button class="sdel${arm ? ' arm' : ''}" onclick="rpStDel('${s.id}')" aria-label="حذف الخطوة">${arm ? 'حذف؟' : I('x', 14, 2.5)}</button>` : ''}</li>`;
   }).join('') + '</ul>' : '';
-  if (left === 1) h += `<div class="rhint">${I('info', 13)}${isAdmin ? 'آخر خطوة تنهي العمل وتنقله للأعمال المنجزة' : 'آخر خطوة تُنهي العمل، ويُرسل إلى المدير العام للاعتماد'}</div>`;
+  /* الإصدار 135: آخر خطوة خطوة عادية، و«إنجاز العمل» سطر لحاله تحت الخطوات يتفعل بعد ما تخلص (قراري) */
+  if (ss.length) { const pd = !isAdmin && rpSt(rpTk(r, x)) === 'pend';
+    h += `<div class="sfin ${left ? 'off' : 'on'}"><button class="sk" ${left ? 'disabled' : `onclick="rpTick('${r.id}',${j},this)"`} aria-label="إنجاز العمل"></button><span><b>إنجاز العمل</b><small>${left ? 'أنجز الخطوات أولاً' : pd ? 'بانتظار الاعتماد' : isAdmin ? 'ينتقل إلى الأعمال المنجزة' : 'يُرسل إلى المدير العام للاعتماد'}</small></span></div>`; }
   return h + `<div class="sadd"><input id="st_new" placeholder="خطوة جديدة" maxlength="200" value="${esc(RP.sd || '')}" oninput="RP.sd=this.value" onkeydown="if(event.key==='Enter')rpStAdd('${r.id}',${j})"><button onclick="rpStAdd('${r.id}',${j})">${I('plus', 14)}إضافة</button></div>`;
 }
 function rpStToggle(id, j) {
