@@ -91,7 +91,8 @@
 
   function norm(r) {
     r.employees = (r.employees || []).map(e => ({ id: e.id, name: e.name, salary: Number(e.salary) || 0, max: Number(e.max) || 0,
-      token: e.token || '', active: e.active !== false, track: !!e.track, attend: !!e.attend, guide: !!e.guide, lang: e.lang || 'ar', payDay: Number(e.payDay) || 28, payNext: !!e.payNext }));
+      token: e.token || '', active: e.active !== false, track: !!e.track, attend: !!e.attend, guide: !!e.guide, lang: e.lang || 'ar', payDay: Number(e.payDay) || 28, payNext: !!e.payNext,
+      stops: Array.isArray(e.stops) ? e.stops.filter(s => s && s.from).map(s => ({ from: String(s.from), to: String(s.to || ''), at: Number(s.at) || 0 })) : [] })); /* 141 */
     r.guides = (r.guides || []).map(g => Object.assign({}, g, { points: Array.isArray(g.points) ? g.points : [], q: g.q && typeof g.q === 'object' ? g.q : null }));
     r.greads = (r.greads || []).map(x => Object.assign({}, x, { secs: Number(x.secs) || 0, wrong: Number(x.wrong) || 0 }));
     r.attendance = (r.attendance || []).map(x => Object.assign({}, x, { homeLat: x.homeLat == null ? null : Number(x.homeLat), homeLng: x.homeLng == null ? null : Number(x.homeLng), inLat: x.inLat == null ? null : Number(x.inLat), inLng: x.inLng == null ? null : Number(x.inLng),
@@ -251,6 +252,10 @@
     return y + '-' + String(m).padStart(2, '0') + '-' + String(Math.min(28, Math.max(1, emp.payDay || 28))).padStart(2, '0');
   }
   const rr2 = n => Math.round(n * 100) / 100;
+  /* الإصدار 141: إيقاف الراتب (إجازة بدون راتب). الشهر موقوف إذا from <= الشهر < to، و to فاضي = موقوف للحين.
+     الشهر الموقوف ما ينحسب ولا يطلع مستحق أو متأخر، وقسط السلفة يتأجل معه. الشهر المصروف يبقى مصروف */
+  function stopOn_(emp, mk) { return (emp.stops || []).some(s => s.from <= mk && (!s.to || mk < s.to)); }
+  function stopNow_(emp) { const s = (emp.stops || []).filter(x => !x.to)[0]; return s ? s.from : ''; }
   const fromP_ = p => Number((p.details && p.details.fromParts) || 0);
   function payDetails_(f) {
     return { base: f.base, bonus: f.bonus, max: f.max, /* 119: points و target انشالوا (ما تنقرا) */
@@ -266,6 +271,7 @@
     const rows = monthsRange_(startMonth_(emp, logs, fin), now).map(mk => {
       const p = pays.filter(x => x.month === mk)[0];
       if (p) return { month: mk, label: monthLabel_(mk), closed: true, due: p.amount, cap: fromP_(p), via: !!(p.details && p.details.part), date: p.date, payId: p.id };
+      if (stopOn_(emp, mk)) return { month: mk, label: monthLabel_(mk), closed: false, due: 0, cap: 0, stop: true }; /* 141 */
       const f = finMonth_(emp, fin, logs, mk);
       return { month: mk, label: f.label, closed: false, due: Math.max(0, f.net), cap: Math.max(0, f.net), dueDate: f.due, f: f };
     });
@@ -284,12 +290,13 @@
     });
     const open = [], months = rows.map((r, i) => {
       if (r.closed) return { month: r.month, label: r.label, due: r.due, paid: r.due, left: 0, closed: true, via: r.via, date: r.date, payId: r.payId };
+      if (r.stop) return { month: r.month, label: r.label, due: 0, paid: 0, left: 0, closed: false, stop: true }; /* 141 */
       r.f.credit = got[i]; open.push(r.f);
       return { month: r.month, label: r.label, due: r.due, paid: got[i], left: rr2(r.due - got[i]), closed: false, dueDate: r.dueDate, full: r.due > 0 && got[i] >= r.due };
     });
     const due = rr2(months.reduce((x, m) => x + m.due, 0)), paid = rr2(months.reduce((x, m) => x + m.paid, 0));
     const real = hist.filter(h => h.id !== '_new');
-    return { show: real.length > 0 || open.length > 1, open: open, months: months.slice(-12), parts: real.slice().reverse(), due: due, paid: paid, left: rr2(due - paid),
+    return { show: real.length > 0 || open.length > 1 || months.some(m => m.stop), open: open, months: months.slice(-12), parts: real.slice().reverse(), due: due, paid: paid, left: rr2(due - paid),
       lastPart: real.length ? real[real.length - 1].id : '', preview: extra ? hist[hist.length - 1] : null,
       close: extra ? months.filter(m => !m.closed && m.full).map(m => m.month) : [] };
   }
@@ -377,7 +384,7 @@
       const per = Math.ceil(l.amount / l.months); let rem = l.amount, due = 0;
       monthsRange_(l.start, mk).forEach(m => {
         const p = m !== mk ? pays[m] : null;
-        const take = p ? Number((p.details && p.details.loanParts && p.details.loanParts[l.id]) || 0) : Math.max(0, Math.min(per, rem));
+        const take = p ? Number((p.details && p.details.loanParts && p.details.loanParts[l.id]) || 0) : stopOn_(emp, m) ? 0 : Math.max(0, Math.min(per, rem)); /* 141: الشهر الموقوف بدون قسط */
         if (m === mk) due = take;
         rem = rr2(rem - take);
       });
@@ -479,6 +486,7 @@
       month: calcMonth_(emp, logs, now),
       fin: finMonth_(emp, fin, logs, now),
       sal: salSt_(emp, fin, logs, now),
+      stop: stopNow_(emp), stopNow: stopOn_(emp, now), /* 141 */
       entries: groups_(mine.filter(l => l.date.slice(0, 7) === now)),
       /* الإصدار 121: مخالفات اليوم اللي وصله إشعارها وما ضغط «فهمت» (تختفي 12 الليل بتوقيت الرياض) */
       viol: mine.filter(l => l.type === '-' && l.at && !l.seen && l.at.slice(0, 10) === todayS)
@@ -486,7 +494,7 @@
       history: monthsRange_(startMonth_(emp, logs, fin), now).reverse().map(mk => {
         const f = finMonth_(emp, fin, logs, mk);
         return { month: mk, label: monthLabel_(mk), bonus: f.bonus, net: f.net,
-          paid: f.paid, paidAmount: f.paidAmount, paidDate: f.paidDate };
+          paid: f.paid, paidAmount: f.paidAmount, paidDate: f.paidDate, stop: !f.paid && stopOn_(emp, mk) };
       }),
       loans: loanBalances_(emp, fin),
       tx: txList_(fin.filter(f => f.emp === emp.id)).slice(0, 30),
@@ -538,7 +546,7 @@
         const mine = logs.filter(l => l.emp === e.id);
         const sal = salSt_(e, fin, logs, now);
         return {
-          id: e.id, name: e.name, salary: e.salary, max: e.max, token: e.token, track: e.track, attend: e.attend, guide: e.guide, lang: e.lang, payDay: e.payDay, payNext: e.payNext, sal: sal, prevMonths: prevMonths_(e, fin, logs), seen: (RAW.seen || {})[e.id] || 0, left: (RAW.left || {})[e.id] || 0,
+          id: e.id, name: e.name, salary: e.salary, max: e.max, token: e.token, track: e.track, attend: e.attend, guide: e.guide, lang: e.lang, payDay: e.payDay, payNext: e.payNext, stop: stopNow_(e), stops: e.stops, sal: sal, prevMonths: prevMonths_(e, fin, logs), seen: (RAW.seen || {})[e.id] || 0, left: (RAW.left || {})[e.id] || 0,
           month: calcMonth_(e, logs, now),
           recent: groups_(mine).slice(0, 15),
           unpaid: sal.open,
@@ -840,6 +848,15 @@
     async apiRepStepTick(sid, undo) { return rpc('rep_step_tick', { k: CRED.k || '', t: CRED.t || '', sid: String(sid || ''), undo: !!undo }); },
     async apiRepStepEdit(sid, txt) { return rpc('rep_step_edit', { k: CRED.k || '', t: CRED.t || '', sid: String(sid || ''), txt: String(txt || '') }); }, /* v138: تعديل نص الخطوة */
     async apiRepStepDel(sid) { return rpc('rep_step_del', { k: CRED.k || '', t: CRED.t || '', sid: String(sid || '') }); },
+    /* v141: الموظف يطلب حذف خطوته (أو يلغي الطلب)، والمدير العام يعتمد أو يرفض */
+    async apiRepStepDelReq(sid, undo) { const r = await rpc('rep_step_del_req', { t: CRED.t || '', sid: String(sid || ''), undo: !!undo }); if (!undo) flush(); return r; },
+    async apiRepStepDelRev(sid, ok) { const r = await rpc('rep_step_del_rev', { k: CRED.k || '', sid: String(sid || ''), ok: !!ok }); flush(); return r; },
+    /* v141: إيقاف الراتب وإعادته من شهر */
+    async apiEmpPayStop(k, id, stop, month) {
+      if (!/^\d{4}-\d{2}$/.test(String(month || ''))) throw new Error('اختر الشهر');
+      await rpc('emp_pay_stop', { k: k, id: String(id || ''), stop: !!stop, month: String(month) });
+      return reloadAdmin(k);
+    },
     async apiRepRetSeen(id, at) { const r = await rpc('rep_ret_seen', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), rat: Number(at) || 0 }); return r; }, /* v137: «فهمت» على «أُعيد للعمل» */
     async apiRepCurAdd(id, item) { const r = await rpc('rep_cur_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || '') }); flush(); return r; }, /* v117 */
     async apiRepLaterAdd(id, item, aft) { const r = await rpc('rep_later_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), aft: String(aft || '') }); flush(); return r; }, /* v117 */

@@ -1697,6 +1697,19 @@ html:root .pg-fin .fvf select{-webkit-appearance:none;appearance:none;background
   html:root.adm .pg-set .tbr.on{background:var(--acc-soft)!important}
   html:root.adm .pg-set .setv .blk:first-child{margin-top:8px}
 }
+/* ===== الإصدار 141: مواعيد اليوم عند الموظف، طلب حذف الخطوة، إيقاف الراتب ===== */
+html:root .fxs.one.wft.etd{margin-top:16px}
+html:root .sdel.rq{min-width:0;padding:0 12px;margin:-4px 0 -4px -4px;border-radius:999px;background:var(--fill);color:var(--muted);font-size:13px;font-weight:500;white-space:nowrap;min-height:44px}
+html:root .sdel.rq.arm{background:var(--red-soft);color:var(--red);font-weight:600}
+html:root .sst small.drq{display:flex;align-items:center;gap:4px;color:var(--amber)}
+html:root .pstc .pstp{display:flex;align-items:center;gap:12px}
+html:root .pstp .k{flex:1;min-width:0;font-size:15px;font-weight:500}
+html:root .pstp .k small{display:block;font-size:13px;font-weight:400;color:var(--muted)}
+html:root .pstp .tg{flex:none;border:0;cursor:pointer}
+html:root .pstf{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+html:root .pstf .dp{display:flex;align-items:center;justify-content:space-between;gap:12px}
+html:root .sltg.stp{background:var(--fill);color:var(--muted)}
+html:root .note.pstn{margin:0 0 12px}
 </style>
 </head>
 <body>
@@ -1706,9 +1719,9 @@ html:root .pg-fin .fvf select{-webkit-appearance:none;appearance:none;background
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=140"></script>
+<script src="api.js?v=141"></script>
 <script>
-const APP_VER = '140';
+const APP_VER = '141';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -2658,7 +2671,7 @@ function empFacts(e) {
 function fmN(n) { return (Math.round(n * 100) / 100).toLocaleString('en-US'); }
 function teamEmp(d, e) {
   const m = e.month, f = empFacts(e);
-  const sal = f.cur ? fmN(f.left(f.cur)) + ' · ' + dueL(f.cur.due) : f.late.length ? 'متأخر ' + fmN(f.lateSum) : e.salary ? 'مصروف' : '';
+  const sal = e.stop && !f.un.length ? 'موقوف من ' + MONTHS_AR[+e.stop.slice(5, 7) - 1] : f.cur ? fmN(f.left(f.cur)) + ' · ' + dueL(f.cur.due) : f.late.length ? 'متأخر ' + fmN(f.lateSum) : e.salary ? 'مصروف' : ''; /* 141 */
   /* الإصدار 132: نوع الموظف شريحة جنب الاسم، واللي ينتظرك سطر واحد (الأحمر: الرواتب والعهدة بالسالب) بدل شرائح تحت البطاقة */
   const nd = r => f.needs.filter(x => !!x.r === r).map(x => esc(x.c) + (x.a != null ? ' <b>' + fmN(x.a) + '</b>' : '')).join(' · ');
   const chips = (nd(true) ? `<div class="tnd r">${nd(true)}</div>` : '') + (nd(false) ? `<div class="tnd a">${nd(false)}</div>` : '');
@@ -2686,7 +2699,7 @@ function renderEmpFile(e) {
       <button onclick="askRet('${id}', ${Math.max(0, f.p.c)})">${I('rotate-ccw', 18)}أعاد لي</button></div>`;
   const lv = [m.misses ? m.misses + ' تقصير' : '', m.stars ? m.stars + ' مميز' : ''].filter(Boolean).join(' · ');
   const bd = (t, r) => ` <span class="badge ${r ? 'rd' : 'a'}">${t}</span>`;
-  const salV = f.un.length > 1 ? f.un.length + ' شهور · المتبقي ' + M(f.leftAll, '', 't') + (f.lateSum ? bd('متأخر ' + fmN(f.lateSum), 1) : '') : f.cur ? M(f.left(f.cur), '', 't') + ' · ' + dueL(f.cur.due) : f.late.length ? M(f.lateSum, '', 't') + bd('متأخر', 1) : e.salary ? 'مصروف' : 'لم يُحدَّد له راتب';
+  const salV = e.stop && !f.un.length ? 'موقوف من ' + esc(ymName(e.stop)) : f.un.length > 1 ? f.un.length + ' شهور · المتبقي ' + M(f.leftAll, '', 't') + (f.lateSum ? bd('متأخر ' + fmN(f.lateSum), 1) : '') : f.cur ? M(f.left(f.cur), '', 't') + ' · ' + dueL(f.cur.due) : f.late.length ? M(f.lateSum, '', 't') + bd('متأخر', 1) : e.salary ? 'مصروف' : 'لم يُحدَّد له راتب';
   const cuV = f.p.c < 0 ? M(-f.p.c, '−', 'neg') + bd('بالسالب', 1) : f.p.c > 0 ? 'معه ' + M(f.p.c, '', 't') : 'لا توجد معه عهدة';
   const setV = (e.salary ? 'راتب ' + fmN(e.salary) : 'بدون راتب') + (m.track ? ' · متابعة فقط' : ' · حافز ' + fmN(e.max || 0));
   h += `<div class="tbh2">العمل</div><div class="tbl2">${m.track ? tbRow('history', 'المواقف', lv || 'لا يوجد', `tsub('${id}','log')`) : tbRow('sparkles', 'الحافز والمواقف', M(m.bonus, '', 'pos') + (lv ? ` <span class="lv">· ${lv}</span>` : ''), `tsub('${id}','bonus')`)}${e.attend ? tbRow('map-pin', 'الحضور', teamAttVal(d, e), `openAttLog('${id}')`) : ''}</div>
@@ -3743,13 +3756,15 @@ function salAdminHtml(e, f) {
   }
   const act = f ? formHtml(e, f) : salActHtml(e).replace(/<div class="hair"><\/div>$/, '');
   if (act) h += `<div class="card slac">${act}</div>`;
+  h += payStopHtml(e); /* 141 */
   const uBy = {}; unp.forEach(u => { uBy[u.month] = u; });
   const pmU = unp.length ? (unp.find(u => S.fx.pm === e.id + u.month) || unp.find(u => S.armed === 'pay_' + e.id + u.month) || unp[0]) : null;
   const ms = st.show ? st.months.slice() : [];
   unp.forEach(u => { if (!ms.some(m => m.month === u.month)) ms.push({month: u.month, label: u.label, due: Math.max(0, u.net), paid: u.credit || 0, left: n(Math.max(0, u.net - (u.credit || 0))), closed: false}); });
   ms.sort((a, b) => a.month < b.month ? -1 : a.month > b.month ? 1 : 0);
-  const isCl = m => m.closed || (!uBy[m.month] && m.left <= 0);
+  const isCl = m => !m.stop && (m.closed || (!uBy[m.month] && m.left <= 0));
   const head = m => {
+    if (m.stop) return `<div class="h"><b>راتب ${esc(m.label)}</b><span class="sltg stp">موقوف</span></div><div class="s"><span>لا يُحتسب أثناء إيقاف الراتب</span><span></span></div>`; /* 141 */
     const u = uBy[m.month], ds = u ? dueState(u, today) : '', pc = m.due > 0 ? Math.round(m.paid / m.due * 100) : 100;
     const stc = m.closed || m.left <= 0 ? ['g', m.closed ? 'مسدد' : 'لا شيء'] : m.paid > 0 ? ['a', 'جزئي'] : ['', 'غير مسدد'];
     return `<div class="h"><b>راتب ${esc(m.label)}</b>${u ? `<span class="sltg ${ds === 'late' ? 'w' : ds === 'today' ? 'a' : ''}">${ds === 'late' ? 'متأخر' : ds === 'today' ? 'مستحق اليوم' : 'لم يُصرف'}</span>` : ''}<span class="sltg ${stc[0]}">${stc[1]}</span></div>
@@ -3764,11 +3779,35 @@ function salAdminHtml(e, f) {
   };
   const op = ms.filter(m => !isCl(m)), cl = ms.filter(isCl), fold = cl.length > 1 && !S.fx.cm;
   h += `<div class="card slms2">${ctitle('calendar', 'الشهور')}
-    ${op.map(row).join('')}${!unp.length ? `<div class="row" style="margin-top:8px"><b>الراتب</b><span class="badge">${I('check', 12, 3)} كل الرواتب مصروفة</span></div>` : ''}
+    ${op.map(row).join('')}${!unp.length && !e.stop ? `<div class="row" style="margin-top:8px"><b>الراتب</b><span class="badge">${I('check', 12, 3)} كل الرواتب مصروفة</span></div>` : ''}
     ${cl.length > 1 ? `<button class="dtog" style="padding:10px 0 6px" onclick="S.fx.cm=!S.fx.cm;renderFin()" aria-expanded="${!fold}">شهور مسددة (${cl.length})${fold ? '' : ' · إخفاء'}</button>` : ''}${fold ? '' : cl.map(row).join('')}
     ${e.loans.length ? `<div class="hair"></div><div class="lbl" style="margin-top:0">${I('hand-coins', 14)}السلف</div>
       ${e.loans.map(l => `<div class="row"><span>سلفة ${sar(l.amount)} <span class="sub">· ${dmy(l.date)}</span></span><span class="sub">المتبقي ${sar(l.remaining)}</span></div>`).join('')}` : ''}</div>`;
   return h;
+}
+/* الإصدار 141: «إيقاف الراتب» (قراري: مفتاح أشغله وقت الإجازة وأطفيه لما يرجع). الإيقاف والإعادة بالشهر، والافتراضي الشهر الحالي */
+function mkAdd(mk, n) { let y = +mk.slice(0, 4), m = +mk.slice(5, 7) + n; while (m > 12) { m -= 12; y++; } while (m < 1) { m += 12; y--; } return y + '-' + String(m).padStart(2, '0'); }
+function payStopHtml(e) {
+  const cur = (S.data.today || '').slice(0, 7), on = !!e.stop, f = S.ps && S.ps.emp === e.id ? S.ps : null;
+  let h = `<div class="card pstc"><div class="pstp"><span class="k">إيقاف الراتب<small>${on ? 'موقوف من ' + esc(ymName(e.stop)) : 'للإجازة بدون راتب. الشهور الموقوفة لا تُحتسب'}</small></span><button class="tg st ${on ? 'on' : ''}" role="switch" aria-checked="${on}" aria-label="إيقاف الراتب" onclick="payStopOpen('${e.id}')"></button></div>`;
+  if (f) {
+    const paid = {}; ((e.sal || {}).months || []).forEach(m => { if (m.closed) paid[m.month] = 1; });
+    const m0 = ((e.sal || {}).months || [])[0], lo = mkAdd(cur, -2), from = on ? e.stop : m0 && m0.month > lo ? m0.month : lo, ms = [];
+    for (let mk = from; mk <= mkAdd(cur, 2); mk = mkAdd(mk, 1)) if (on || !paid[mk]) ms.push(mk);
+    if (ms.indexOf(f.month) < 0) f.month = ms.indexOf(cur) >= 0 ? cur : ms[0];
+    h += `<div class="pstf"><label class="dp"><span>${on ? 'يعود الراتب من شهر' : 'يتوقف من شهر'}</span><select id="ps_mon" onchange="S.ps.month=this.value">${ms.map(mk => `<option value="${mk}" ${f.month === mk ? 'selected' : ''}>${esc(ymName(mk))}</option>`).join('')}</select></label>
+      <div class="sub" style="margin:8px 0 12px">${on ? 'الشهور قبل هذا الشهر تبقى موقوفة ولا تُحتسب.' : 'الشهر المختار وما بعده لا يُحتسب ولا يظهر متأخراً حتى تعيد الصرف. الشهر الذي عمل جزءاً منه اتركه واخصم منه.'}</div>
+      <div class="grid2"><button class="btn2 cu" onclick="payStopSave('${e.id}',this)">${on ? 'تأكيد إعادة الصرف' : 'تأكيد الإيقاف'}</button><button class="btn2" onclick="S.ps=null;renderFin()">إلغاء</button></div><div class="err" id="ps_err"></div></div>`;
+  }
+  return h + '</div>';
+}
+function payStopOpen(id) { S.ps = S.ps && S.ps.emp === id ? null : {emp: id, month: (S.data.today || '').slice(0, 7)}; renderFin(); }
+async function payStopSave(id, btn) {
+  const e = empById(id), f = S.ps; if (!e || !f) return;
+  const stop = !e.stop, mk = f.month;
+  if (btn) btn.disabled = true;
+  try { S.data = await call('apiEmpPayStop', BOOT.key, id, stop, mk); S.ps = null; S.form = null; renderAdmin(); toast(stop ? 'أُوقف الراتب من ' + ymName(mk) : 'أُعيد الراتب من ' + ymName(mk), null, 'ok'); }
+  catch (x) { if (btn) btn.disabled = false; const el = document.getElementById('ps_err'); if (el) el.textContent = x && x.message ? x.message : String(x); else toastErr(x); }
 }
 /* الإصدار 83: كشف المستحقات والدفعات. للمدير: تسجيل دفعة وحذف آخر دفعة. للموظف: عرض بس */
 function salCardHtml(e, admin) {
@@ -4343,7 +4382,9 @@ function empPayHtml(d) {
       ${m.improve ? `<div class="imp">${I('triangle-alert', 14)}<div><b>ركّز على ${esc(critL(m.improve.crit))}:</b> ${esc(m.improve.text)}</div></div>` : ''}
       ${!m.track && !m.misses ? next : ''}
     </div>` : '';
-  return `
+  /* الإصدار 141: الراتب موقوف (إجازة بدون راتب) */
+  const stopN = d.stop ? `<div class="note info pstn">${I('clock', 16)}<div><b>الراتب موقوف من ${esc(ymName(d.stop))}</b><br>الشهور الموقوفة لا تُحتسب حتى يعيد المدير العام الصرف.</div></div>` : '';
+  return stopN + `
     ${m.track ? `<div class="card" style="margin-top:16px">${kpis}${next}</div>` : ''}
     ${salCard}
     ${salCardHtml({id: d.id, sal: d.sal}, false)}
@@ -4694,7 +4735,7 @@ function rpLreqShow(r) { const n = Date.now(); return rpArr(r && r.lreq).filter(
 /* الإصدار 124: «حان وقته» يطلع يومين من دخول العمل للحالية (upAt من القاعدة). اللي ما له وقت ما يطلع عليه */
 function rpUpFresh(r, x) { const t = Number(((r && r.upAt) || {})[x]) || 0; return t > 0 && Date.now() - t < 2 * 864e5; }
 function rpNowOf(r, t) { const a = rpArr(r && r.nows); for (let i = a.length - 1; i >= 0; i--) if (a[i].t === t) return a[i]; return null; }
-function rpWait(r) { return !!(rpPend(r) || rpPendL(r).length || rpReqL(r).length || rpAreqL(r).length || rpLreqP(r).length || rqPendN(r) || duReqL(r).length); }
+function rpWait(r) { return !!(rpPend(r) || rpPendL(r).length || rpReqL(r).length || rpAreqL(r).length || rpLreqP(r).length || rqPendN(r) || duReqL(r).length || stDelL(r).length); }
 function rpNPend() { return rpProjs().filter(p => rpWait(rpLast(p.id))).length; }
 function rpUpdBy(r) { return r.updBy ? (r.updBy === 'المدير العام' ? r.updBy : shortName(r.updBy)) : rpBy(r); }
 function rpBy(r) { return r.by === 'admin' ? 'المدير العام' : shortName(r.byName || ''); }
@@ -4779,7 +4820,7 @@ function rpAgeDays(r) { const t = rpToday(), u = rpUpdMs(r); if (!t || !u) retur
 function rpSummaryHtml() {
   const ps = rpProjs(), withR = ps.filter(p => rpLast(p.id)), none = ps.filter(p => !rpLast(p.id));
   rpSeedSeen();
-  const rank = r => rpPend(r) || rpPendL(r).length || rpReqL(r).length || rpAreqL(r).length || rpLreqP(r).length || duReqL(r).length ? 2 : rpIsNew(r) ? 1 : 0;
+  const rank = r => rpPend(r) || rpPendL(r).length || rpReqL(r).length || rpAreqL(r).length || rpLreqP(r).length || duReqL(r).length || stDelL(r).length ? 2 : rpIsNew(r) ? 1 : 0;
   withR.sort((a, b) => { const ra = rpLast(a.id), rb = rpLast(b.id); return rank(rb) - rank(ra) || (rb.upd || 0) - (ra.upd || 0); });
   /* الإصدار 140: مربعان أعلى الصفحة بنفس مكان وشكل ومقاسات مربعي الفريق: ما ينتظر اعتمادك (نفس عدد «التقارير (n)»)، ومواعيد اليوم (تفتح قائمتها تحتها) */
   const pp = ps.map(p => rpLast(p.id)).filter(rpWait), du = duToday(), op = !!(S.fo && S.fo.dtd);
@@ -5028,7 +5069,7 @@ function rpDetailHtml(isAdmin) {
   const lat = rpArr(r.later), nh = rpHistOf(r.proj).reduce((a, g) => a + g.items.length, 0);
   const canOrd = isAdmin && rpCanTick(r, true) && cur.length > 1, ordm = canOrd && RP.ord && RP.ord.id === r.id;
   if (r.ord && cur.length > 1 && !tags[0]) tags[0] = ['الأهم', 'tgtop'];
-  const pendH = rpPendHtml(r, pend, isAdmin, isAdmin ? rpReqL(r) : [], isAdmin ? rpLreqP(r) : [], isAdmin ? rpAreqL(r) : [], isAdmin ? duReqL(r) : []);
+  const pendH = rpPendHtml(r, pend, isAdmin, isAdmin ? rpReqL(r) : [], isAdmin ? rpLreqP(r) : [], isAdmin ? rpAreqL(r) : [], isAdmin ? duReqL(r) : [], isAdmin ? stDelL(r) : []);
   if (isAdmin) h += pendH; /* الإصدار 130: عند الموظف تنزل بعد الأعمال الحالية ومطوية */
   /* الإصدار 136: «لها خطوات» ما يحسب العمل اللي خطوته الوحيدة «اعتماد السعر» (نفس عدد الحلقات) */
   /* الإصدار 134: رأس «الأعمال الحالية» شريط فاتح بخط تحته عشان يبان إنه راس القائمة، وتحته سطر ملخص بالأعداد (اللي فوق صفر بس) */
@@ -5046,13 +5087,13 @@ function rpDetailHtml(isAdmin) {
   return h;
 }
 /* الإصدار 86: بطاقة «بانتظار الاعتماد». للمدير العام زرّين: اعتماد الإنجاز، أو إرجاع للعمل مع ملاحظة تظهر للموظف */
-function rpPendHtml(r, pend, isAdmin, reqs, lqs, aqs, dqs) {
-  reqs = reqs || []; lqs = lqs || []; aqs = aqs || []; dqs = dqs || [];
-  if (!pend.length && !reqs.length && !lqs.length && !aqs.length && !dqs.length) return '';
+function rpPendHtml(r, pend, isAdmin, reqs, lqs, aqs, dqs, sqs) {
+  reqs = reqs || []; lqs = lqs || []; aqs = aqs || []; dqs = dqs || []; sqs = sqs || []; /* 141: طلبات حذف الخطوات */
+  if (!pend.length && !reqs.length && !lqs.length && !aqs.length && !dqs.length && !sqs.length) return '';
   const all = rpArr(r.cur);
-  const pdo = isAdmin || RP.pdOpen === r.id, nP = pend.length + reqs.length + lqs.length + aqs.length + dqs.length; /* الإصدار 130: عند الموظف للاطلاع، مطوية بعددها */
+  const pdo = isAdmin || RP.pdOpen === r.id, nP = pend.length + reqs.length + lqs.length + aqs.length + dqs.length + sqs.length; /* الإصدار 130: عند الموظف للاطلاع، مطوية بعددها */
   if (!pdo) return `<div class="rpcard pd cl"><div class="rch rchx" role="button" tabindex="0" aria-expanded="false" onclick="RP.pdOpen='${r.id}';rpRerender()"><span class="ci">${I('hourglass', 16)}</span><span class="fot"><span>بانتظار الاعتماد</span><small class="fom">أُرسلت إلى المدير العام</small></span><span class="cn">${nP}</span><span class="rchv">${I('chevron-down', 16)}</span></div></div>`;
-  return `<div class="rpcard pd"><div class="rch${isAdmin ? '' : ' rchx'}"${isAdmin ? '' : ` role="button" tabindex="0" aria-expanded="true" onclick="RP.pdOpen=null;rpRerender()"`}><span class="ci">${I('hourglass', 16)}</span>بانتظار الاعتماد<span class="cn">${nP}</span>${isAdmin ? '' : `<span class="rchv">${I('chevron-up', 16)}</span>`}</div><ul class="pdl">${lqs.map(x => rpLreqItem(r, x)).join('')}${reqs.map(x => rpReqItem(r, x)).join('')}${aqs.map(x => rpAreqItem(r, x)).join('')}${dqs.map(d => duReqItem(r, d)).join('')}${pend.map(x => {
+  return `<div class="rpcard pd"><div class="rch${isAdmin ? '' : ' rchx'}"${isAdmin ? '' : ` role="button" tabindex="0" aria-expanded="true" onclick="RP.pdOpen=null;rpRerender()"`}><span class="ci">${I('hourglass', 16)}</span>بانتظار الاعتماد<span class="cn">${nP}</span>${isAdmin ? '' : `<span class="rchv">${I('chevron-up', 16)}</span>`}</div><ul class="pdl">${lqs.map(x => rpLreqItem(r, x)).join('')}${reqs.map(x => rpReqItem(r, x)).join('')}${aqs.map(x => rpAreqItem(r, x)).join('')}${dqs.map(d => duReqItem(r, d)).join('')}${sqs.map(x => stDelItem(r, x)).join('')}${pend.map(x => {
     const k = rpTk(r, x), i = all.indexOf(x), rv = RP.rv && RP.rv.id === r.id && RP.rv.t === x;
     const who = k.by === 'admin' ? 'المدير العام' : shortName(k.name || '');
     let act = '';
@@ -5133,6 +5174,9 @@ function rpEmpHtml(d, isPreview) {
   if (rpSeen() === null) lsSet('rp_seen', JSON.stringify(RP.reps.map(r => r.id).slice(-300)));
   let h = '';
   if (RP.sent) h += `<div class="note good rsent" style="margin-top:16px">${I('circle-check', 16)}<div><b>تم تحديث تقرير ${esc(rpPName(RP.sent.proj))}</b><br>${esc(dayLabel(RP.sent.date))}</div></div>`;
+  /* الإصدار 141: مربع «مواعيد اليوم» بنفس شكل مربع المدير العام، بمواعيد الموظف نفسه، ويفتح قائمته تحته */
+  { const du = duToday(d.id), op = !!(S.fo && S.fo.dtd);
+    h += `<div class="fxs one wft etd">${du.n ? `<button class="tap${du.late ? ' due' : ''}${op ? ' on' : ''}" onclick="foTog('dtd',0)" aria-expanded="${op}"><b>مواعيد اليوم</b><span class="tvn">${du.n}</span><small>${esc(du.sub)}</small><span class="chv">${I(op ? 'x' : 'chevron-left', 14)}</span></button>` : '<div><b>مواعيد اليوم</b><span class="tvn">0</span><small>لا مواعيد إنجاز اليوم</small></div>'}</div>${du.n && op ? `<div class="rpcard fo dtd"><div class="fob">${du.body}</div></div>` : ''}`; }
   if (!isPreview) h += `<button class="btn2 cu qbig" style="margin-top:16px" onclick="rpOpenForm(null,false)">${I('file-text', 17)}تحديث تقرير</button>`;
   const withR = ps.filter(p => rpLast(p.id)), none = ps.filter(p => !rpLast(p.id));
   rpSeedSeen();
@@ -5888,15 +5932,16 @@ async function duRev(did, ok, btn) {
 }
 /* «مواعيد اليوم» أول صفحة التقارير عندي: مواعيد اليوم كلها، والضغط على الموعد يفتح تقريره */
 /* الإصدار 140: مواعيد اليوم بيانات (العدد، سطر المربع، القائمة) بدل بطاقة مطوية. المربع في rpSummaryHtml */
-function duToday() {
+/* الإصدار 141: me = رقم الموظف، يرجّع مواعيده هو فقط (مربع «مواعيد اليوم» في «تقاريري») */
+function duToday(me) {
   const t = nfDay(Date.now()), a = [];
-  rpProjs().forEach(p => { const r = rpLast(p.id); rpArr(r && r.dues).forEach(d => { if ((d.st === 'on' && nfDay(d.due) === t) || (d.st === 'miss' && nfDay(d.due) === t && rpArr(r.cur).includes(d.item))) a.push([r, d]); }); });
+  rpProjs().forEach(p => { const r = rpLast(p.id); rpArr(r && r.dues).forEach(d => { if (me && d.emp !== me) return; if ((d.st === 'on' && nfDay(d.due) === t) || (d.st === 'miss' && nfDay(d.due) === t && rpArr(r.cur).includes(d.item))) a.push([r, d]); }); });
   if (!a.length) return {n: 0};
   a.sort((x, y) => x[1].due - y[1].due);
   const now = Date.now(), nx = a.find(x => x[1].st === 'on' && x[1].due > now), nl = a.filter(x => x[1].st === 'miss' || x[1].due <= now).length;
   const sub = [nx ? 'الأقرب ' + nfTime(nx[1].due) : '', nl ? (nl === 1 ? 'فات واحد' : 'فات ' + nl) : ''].filter(Boolean).join(' · ');
-  const st = (r, d) => { const k = rpTk(r, d.item); return d.st === 'miss' ? ['r', d.viol ? 'فات · سُجّلت مخالفة' : 'فات الموعد'] : rpSt(k) === 'pend' && (k.at || 0) <= d.due ? ['ok', 'بانتظار اعتمادك'] : d.due <= now ? ['r', 'فات الموعد'] : d.req ? ['g', 'طلب تمديد'] : [d.due - now <= 36e5 ? 'g' : '', duLeft(d.due)]; };
-  return {n: a.length, sub: sub, late: nl, body: `<ul class="dtl">${a.map(([r, d]) => { const s = st(r, d); return `<li role="button" tabindex="0" onclick="rpOpen('${r.id}')"><b class="nw2 ${s[0]}">${nfTime(d.due)}</b><span><span class="dtt">${esc(d.item)}</span><small>${esc(rpPName(r.proj))} · ${esc(shortName(d.name || ''))}</small></span><small class="dts ${s[0]}">${esc(s[1])}</small></li>`; }).join('')}</ul>`};
+  const st = (r, d) => { const k = rpTk(r, d.item); return d.st === 'miss' ? ['r', d.viol ? 'فات · سُجّلت مخالفة' : 'فات الموعد'] : rpSt(k) === 'pend' && (k.at || 0) <= d.due ? ['ok', me ? 'بانتظار الاعتماد' : 'بانتظار اعتمادك'] : d.due <= now ? ['r', 'فات الموعد'] : d.req ? ['g', 'طلب تمديد'] : [d.due - now <= 36e5 ? 'g' : '', duLeft(d.due)]; };
+  return {n: a.length, sub: sub, late: nl, body: `<ul class="dtl">${a.map(([r, d]) => { const s = st(r, d); return `<li role="button" tabindex="0" onclick="rpOpen('${r.id}')"><b class="nw2 ${s[0]}">${nfTime(d.due)}</b><span><span class="dtt">${esc(d.item)}</span><small>${esc(rpPName(r.proj))}${me ? '' : ' · ' + esc(shortName(d.name || ''))}</small></span><small class="dts ${s[0]}">${esc(s[1])}</small></li>`; }).join('')}</ul>`};
 }
 function rpLreqRows(r) {
   const a = rpLreqShow(r);
@@ -6138,15 +6183,16 @@ function stPanelHtml(r, x, j, ss, isAdmin) {
   const me = stMe(), left = ss.filter(s => !s.done).length, c = ss.find(s => !s.done), pnd = !isAdmin && rpSt(rpTk(r, x)) === 'pend';
   let h = ss.length ? '<ul class="sst">' + ss.map(s => {
     /* الإصدار 126: خطوة «اعتماد السعر» (رقمها يبدأ بـ q) تتغير من السعر نفسه («تراجع عن الاعتماد»)، فما لها تراجع ولا حذف هنا */
-    const qs = /^q/.test(String(s.id || '')), canUn = !qs && s.done && (isAdmin || s.doneBy === me), canDel = !qs && (isAdmin || (!s.done && s.by === me)), arm = RP.sarm === s.id;
+    const qs = /^q/.test(String(s.id || '')), canUn = !qs && s.done && (isAdmin || s.doneBy === me), canDel = !qs && isAdmin, canReq = !qs && !isAdmin && !s.done && s.by === me, rq = !!s.dreq, arm = RP.sarm === s.id; /* 141: الموظف يطلب الحذف، والمدير العام يحذف */
     const bt = s.done
       ? `<button class="sk" ${canUn ? `onclick="rpStTick('${s.id}',true)" aria-label="تراجع عن الخطوة"` : 'disabled aria-label="خطوة منجزة"'}>${I('check', 14, 2.5)}</button>`
       : `<button class="sk" onclick="rpStTick('${s.id}',false)" aria-label="تمت الخطوة"></button>`;
     const meta = s.done ? (s.doneBy === 'admin' ? 'المدير العام' : shortName(s.doneName || '')) + ' · ' + rpTickWhen(s.done) : s.by !== 'admin' ? 'أضافها ' + shortName(s.name || '') : '';
     /* الإصدار 138: تعديل نص الخطوة بالضغط عليه (قراري): أنا أي خطوة حتى المنجزة، والموظف خطواته اللي ما خلصت وما ينتظر العمل الاعتماد، وخطوة السعر لا */
-    const canEd = !qs && (isAdmin || (!s.done && s.by === me && !pnd));
+    const canEd = !qs && (isAdmin || (!s.done && s.by === me && !pnd && !rq));
+    const dq = rq ? `<small class="drq">${I('clock', 12)}${isAdmin ? 'طلب حذف من ' + esc(shortName(s.name || '')) : 'طلب حذف · بانتظار اعتماد المدير العام'}</small>` : '';
     if (canEd && RP.sed === s.id) return `<li class="${s.done ? 'ok' : s === c ? 'cur' : 'nx'} sedl">${bt}<span class="sed"><input id="st_ed" maxlength="200" value="${esc(RP.sev == null ? s.t : RP.sev)}" aria-label="تعديل الخطوة" oninput="RP.sev=this.value" onkeydown="if(event.key==='Enter')rpStEdSave('${s.id}');else if(event.key==='Escape')rpStEdCancel()"><button class="sedb" onclick="rpStEdSave('${s.id}')">حفظ</button><button class="sedc" onclick="rpStEdCancel()">إلغاء</button></span></li>`;
-    return `<li class="${s.done ? 'ok' : s === c ? 'cur' : 'nx'}">${bt}<span${canEd ? ` class="stt" role="button" tabindex="0" aria-label="تعديل الخطوة" onclick="rpStEdOpen('${s.id}')"` : ''}>${esc(s.t)}${canEd ? `<i class="stpen">${I('pencil', 13)}</i>` : ''}${s.pay ? `<span class="spay">${I('banknote', 12)}دفعة</span>` : ''}${meta ? `<small>${esc(meta)}</small>` : ''}</span>${canDel ? `<button class="sdel${arm ? ' arm' : ''}" onclick="rpStDel('${s.id}')" aria-label="حذف الخطوة">${arm ? 'حذف؟' : I('x', 14, 2.5)}</button>` : ''}</li>`;
+    return `<li class="${s.done ? 'ok' : s === c ? 'cur' : 'nx'}">${bt}<span${canEd ? ` class="stt" role="button" tabindex="0" aria-label="تعديل الخطوة" onclick="rpStEdOpen('${s.id}')"` : ''}>${esc(s.t)}${canEd ? `<i class="stpen">${I('pencil', 13)}</i>` : ''}${s.pay ? `<span class="spay">${I('banknote', 12)}دفعة</span>` : ''}${meta ? `<small>${esc(meta)}</small>` : ''}${dq}</span>${canDel ? `<button class="sdel${arm ? ' arm' : ''}" onclick="rpStDel('${s.id}')" aria-label="حذف الخطوة">${arm ? 'حذف؟' : I('x', 14, 2.5)}</button>` : canReq ? `<button class="sdel rq${arm && !rq ? ' arm' : ''}" onclick="rpStDelReq('${s.id}',${rq})">${rq ? 'إلغاء الطلب' : arm ? 'تأكيد الطلب؟' : 'طلب حذف'}</button>` : ''}</li>`;
   }).join('') + '</ul>' : '';
   /* الإصدار 135: آخر خطوة خطوة عادية، و«إنجاز العمل» سطر لحاله تحت الخطوات يتفعل بعد ما تخلص (قراري) */
   if (ss.length) { const pd = !isAdmin && rpSt(rpTk(r, x)) === 'pend';
@@ -6210,6 +6256,25 @@ async function rpStDel(sid) {
   RP.busy = true; RP.sarm = null;
   try { await call('apiRepStepDel', sid); await rpTickReload(); RP.busy = false; rpRerender(); toast('تم حذف الخطوة'); }
   catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
+/* الإصدار 141: طلب حذف خطوة (بضغطتين)، وإلغاء الطلب (بضغطة)، واعتماد المدير العام أو رفضه */
+async function rpStDelReq(sid, undo) {
+  if (RP.busy) return;
+  if (!undo && RP.sarm !== sid) { RP.sarm = sid; rpRerender(); return; }
+  RP.busy = true; RP.sarm = null;
+  try { await call('apiRepStepDelReq', sid, !!undo); await rpTickReload(); RP.busy = false; rpRerender(); toast(undo ? 'أُلغي طلب الحذف' : 'أُرسل طلب الحذف إلى المدير العام'); }
+  catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
+async function rpStDelRev(sid, ok, btn) {
+  if (RP.busy) return;
+  RP.busy = true; if (btn) btn.disabled = true;
+  try { await call('apiRepStepDelRev', sid, !!ok); await rpTickReload(); RP.busy = false; rpRerender(); if (typeof shellSync === 'function') shellSync(); toast(ok ? 'تم حذف الخطوة' : 'رُفض طلب الحذف'); }
+  catch (e) { RP.busy = false; toastErr(e); try { await rpTickReload(); } catch (x) {} rpRerender(); }
+}
+function stDelL(r) { const c = rpArr(r && r.cur); return rpArr(r && r.steps).filter(s => s.dreq && c.includes(s.item)); }
+function stDelItem(r, s) {
+  const act = rpCanTick(r, true) ? `<div class="grid2 pdb"><button class="btn2 cu" onclick="rpStDelRev('${s.id}',true,this)">${I('check', 16, 2.5)}اعتماد الحذف</button><button class="btn2 rd" onclick="rpStDelRev('${s.id}',false,this)">${I('x', 15)}رفض</button></div>` : '';
+  return `<li><div class="pt">${esc(s.item)}</div><div class="pm"><b>طلب حذف خطوة</b> · ${esc(shortName(s.name || ''))} · ${esc(rpTickWhen(s.dreq))}</div><div class="pm">الخطوة: <b>${esc(s.t)}</b></div>${act}</li>`;
 }
 async function rpTickReload() { rpApply(await callT(20000, 'apiRepList')); RP.stale = false; rfBar(); }
 async function rpTick(id, i, btn) {
