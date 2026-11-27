@@ -1710,6 +1710,20 @@ html:root .pstf{margin-top:12px;padding-top:12px;border-top:1px solid var(--line
 html:root .pstf .dp{display:flex;align-items:center;justify-content:space-between;gap:12px}
 html:root .sltg.stp{background:var(--fill);color:var(--muted)}
 html:root .note.pstn{margin:0 0 12px}
+/* ===== الإصدار 142: موعد مجدول ===== */
+html:root .dul.sc{color:var(--acc-dk);background:var(--acc-soft);border-radius:10px;padding:5px 8px}
+html:root .dul.sc.now{color:#85642B;background:var(--amber-soft)}
+html:root .dul.sc.now svg{color:var(--amber)}
+/* إصلاح من 141: مربع «مواعيد اليوم» عند الموظف بدون موعد فائت كان يطلع زر بدون تنسيق (التنسيق كان لمربعات المدير العام فقط) */
+html:root .fxs.one.etd>button.tap:not(.due){background:var(--fill);border:0;border-radius:20px;padding:11px 10px;min-width:0;text-align:right;font:inherit;color:inherit;cursor:pointer;position:relative}
+html:root .fxs.one.etd>button.tap:not(.due) b{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-bottom:6px}
+html:root .fxs.one.etd>button.tap:not(.due) small{display:block;font-size:12px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html:root .fxs.one.etd>button.tap:not(.due) .chv{position:absolute;left:8px;top:9px;color:var(--muted);display:flex}
+html[dir=ltr]:root .fxs.one.etd>button.tap:not(.due){text-align:left}
+html[dir=ltr]:root .fxs.one.etd>button.tap:not(.due) .chv{right:8px;left:auto}
+html:root .fxs.one.etd .tvn{display:block;line-height:1.6;font-size:15px;font-weight:600}
+html:root .fxs.one.etd button.due .tvn{color:var(--red)}
+html:root .sheet .dui.dunote{text-align:start}
 </style>
 </head>
 <body>
@@ -1719,9 +1733,9 @@ html:root .note.pstn{margin:0 0 12px}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=141"></script>
+<script src="api.js?v=142"></script>
 <script>
-const APP_VER = '141';
+const APP_VER = '142';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -5751,7 +5765,9 @@ function rpMoreOpen(id, j) {
   const item = rpArr(r.cur)[j]; if (item == null) return;
   ovOpen(`<label class="shh">${esc(item)}</label><div class="sub" style="margin:-6px 0 8px">إجراءات العمل</div>
     <button class="btn2 mact" onclick="rpShareOpen('${id}',${j})">${I('bell', 17)}تنبيه الموظف على هذا العمل</button>
-    <button class="btn2 mact" onclick="duOpen('${id}',${j})">${I('alarm-clock', 17)}${(duOf(r, item) || {}).st === 'on' ? 'تعديل موعد الإنجاز' : 'تحديد موعد الإنجاز'}</button>
+    ${(() => { const d0 = duOf(r, item), on = d0 && d0.st === 'on' ? d0 : null, mt = !!on && on.kind === 'meet'; /* 142 */
+      return (mt ? '' : `<button class="btn2 mact" onclick="duOpen('${id}',${j})">${I('alarm-clock', 17)}${on ? 'تعديل موعد الإنجاز' : 'تحديد موعد الإنجاز'}</button>`)
+        + (on && !mt ? '' : `<button class="btn2 mact" onclick="duOpen('${id}',${j},'meet')">${I('calendar', 17)}${mt ? 'تعديل الموعد المجدول' : 'تحديد موعد مجدول'}</button>`); })()}
     <button class="btn2 mact" onclick="rpDefOpen('${id}',${j})">${I('clock', 17)}تأجيل إلى الأعمال اللاحقة</button>
     <button class="btn2 mact" onclick="ovClose();rpStToggle('${id}',${j})">${I('list-checks', 17)}الخطوات</button>
     <button class="btn2" style="width:100%;margin-top:8px" onclick="ovClose()">إلغاء</button>`);
@@ -5789,8 +5805,22 @@ function duWarnAt(due) {
   }
   return Math.max(t, Date.now());
 }
+/* الإصدار 142: سطر الموعد المجدول (زيارة، استلام): بدون مخالفة ولا طلب تمديد، وبعد وقته «حان الموعد» وزر «تم الموعد» للمسؤول وللمدير العام */
+function meetLine(r, d, isAdmin) {
+  const mine = !isAdmin && d.emp === duMe(), sep = ' · ', now = Date.now(), due = d.due <= now;
+  const who = mine || d.emp === 'admin' ? '' : `${sep}<span>المسؤول:</span> <span>${esc(shortName(d.name || ''))}</span>`;
+  const can = (mine || isAdmin) && now >= d.due - 36e5 && !S.empPreview && !S.preview;
+  return `<small class="dul sc${due ? ' now' : ''}">${I('calendar', 13)}<span><span>موعد مجدول:</span> ${duWhenH(d.due)}${d.note ? sep + '<span class="dnt">' + esc(d.note) + '</span>' : ''}${sep}<span>${due ? 'حان الموعد' : duLeft(d.due)}</span>${who}${can ? `${sep}<button class="qlnk" onclick="meetDone('${d.id}',this)">تم الموعد</button>` : ''}</span></small>`;
+}
+async function meetDone(did, btn) {
+  if (RP.busy) return;
+  RP.busy = true; if (btn) btn.disabled = true;
+  try { await call('apiMeetDone', did); await rpTickReload(); RP.busy = false; rpRerender(); toast('تم الموعد'); }
+  catch (e) { RP.busy = false; toastErr(e); rpRerender(); }
+}
 function duLine(r, item, isAdmin) {
   const d = duOf(r, item); if (!d) return '';
+  if (d.kind === 'meet') return meetLine(r, d, isAdmin);
   const mine = !isAdmin && d.emp === duMe(), k = rpTk(r, item), sep = ' · ';
   const who = mine ? '' : `${sep}<span>المسؤول:</span> <span>${esc(shortName(d.name || ''))}</span>`;
   if (d.st === 'miss') return `<small class="dul r">${I('alarm-clock', 13)}<span><span>فات الموعد</span> (${duWhenH(d.due)})${d.viol ? sep + `<span>${mine ? 'سُجّلت عليك مخالفة' : 'سُجّلت مخالفة'}</span>` : ''}${who}</span></small>`;
@@ -5809,14 +5839,15 @@ function duEmpDef(r, item) {
   return rpShareDefault(r, item).filter(id => id !== 'admin' && es.includes(id))[0] || '';
 }
 function duRid() { return (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)); }
-function duOpen(id, j) {
+function duOpen(id, j, kind) {
   const r = (RP.reps || []).find(x => x.id === id); if (!r) return;
   const item = rpArr(r.cur)[j]; if (item == null) return;
-  const d0 = duOf(r, item), on = d0 && d0.st === 'on' ? d0 : null;
+  const d0 = duOf(r, item), on = d0 && d0.st === 'on' ? d0 : null, mt = on ? on.kind === 'meet' : kind === 'meet'; /* 142 */
   let day, time;
   if (on) { day = nfDay(on.due); time = duHM(on.due); }
   else { const n = Date.now(), h = +duHM(n).slice(0, 2) + 3 + (duHM(n).slice(3) !== '00' ? 1 : 0); if (h <= 20) { day = nfDay(n); time = String(h).padStart(2, '0') + ':00'; } else { day = duDayAdd(nfDay(n), 1); time = '12:00'; } }
-  RP.du = {id: id, item: item, did: on ? on.id : '', emp0: on ? on.emp : '', day: day, time: time, dx: false, emp: on ? on.emp : duEmpDef(r, item), err: '', busy: false, arm: false, rid: duRid()};
+  const e0 = on ? (on.emp === 'admin' ? '' : on.emp) : '';
+  RP.du = {id: id, item: item, did: on ? on.id : '', emp0: e0, day: day, time: time, dx: false, emp: on ? e0 : duEmpDef(r, item), err: '', busy: false, arm: false, rid: duRid(), kind: mt ? 'meet' : 'due', note: on && mt ? on.note || '' : ''};
   duDraw();
 }
 function duSet(k, v) { const f = RP.du; if (!f || f.busy) return; f[k] = v; f.err = ''; f.arm = false; f.rid = duRid(); duDraw(); }
@@ -5831,37 +5862,43 @@ function duDraw() {
   const f = RP.du, r = f && (RP.reps || []).find(x => x.id === f.id);
   if (!f || !r) return;
   const es = S.data.employees || [], ms = duMs(f.day, f.time), nm = id => shortName((es.find(e => e.id === id) || {}).name || '');
-  const wa = ms ? duWarnAt(ms) : 0, ok = ms > Date.now() + 5 * 6e4 && f.emp;
-  const pv = !ok ? '' : `<div class="dupv"><div><b>${esc(nm(f.emp))}</b>: <span>${esc(duWhen(ms))}</span></div>
+  const mt = f.kind === 'meet', wa = ms ? duWarnAt(ms) : 0, ok = ms > Date.now() + 5 * 6e4 && (mt || f.emp);
+  /* 142: الموعد المجدول: تذكير الليلة السابقة 9 م وتنبيه قبله بساعة، بدون مخالفة */
+  const ra = ms ? Date.parse(duDayAdd(nfDay(ms), -1) + 'T21:00:00+03:00') : 0, hr = ms - 36e5 > Date.now() + 6e4;
+  const pv = !ok ? '' : mt ? `<div class="dupv"><div><b>${esc(f.emp ? nm(f.emp) : 'بدون موظف')}</b>: <span>${esc(duWhen(ms))}</span></div>
+    <small>${ra > Date.now() + 6e4 ? `${f.emp ? 'يصلكما' : 'يصلك'} تذكير ${esc(duWhen(ra))}${hr ? '، وتنبيه قبل الموعد بساعة' : ''}` : hr ? `${f.emp ? 'يصلكما' : 'يصلك'} تنبيه قبل الموعد بساعة` : 'الموعد قريب، بدون تذكير'}</small>
+    <small>لا تُسجَّل مخالفة تلقائياً. عند الموعد يظهر زر «تم الموعد»${f.emp ? ' للموظف ولك' : ''}</small>
+    ${f.did && f.emp0 && f.emp !== f.emp0 ? `<small>يُلغى الموعد عن ${esc(nm(f.emp0))} ويصله إشعار</small>` : ''}</div>` : `<div class="dupv"><div><b>${esc(nm(f.emp))}</b>: <span>${esc(duWhen(ms))}</span></div>
     <small>${wa > Date.now() + 6e4 ? `يصله تذكير كل 3 ساعات وقت الدوام، وتنبيه أخير ${esc(duWhen(wa))}` : 'يصله التنبيه الأخير الآن'}، ويصلك إشعار معه</small>
     <small>إذا ما أنجزه قبل الموعد تنزل عليه مخالفة «متابعة الأعمال الموكلة» تلقائياً، وتقدر تتراجع عنها من صفحة التقييم</small>
     ${f.did && f.emp !== f.emp0 ? `<small>ينلغي الموعد عن ${esc(nm(f.emp0))} ويصله إشعار</small>` : ''}</div>`;
-  ovOpen(`<label class="shh">${f.did ? 'تعديل موعد الإنجاز' : 'تحديد موعد الإنجاز'}</label>
+  ovOpen(`<label class="shh">${mt ? (f.did ? 'تعديل الموعد المجدول' : 'تحديد موعد مجدول') : f.did ? 'تعديل موعد الإنجاز' : 'تحديد موعد الإنجاز'}</label>
     <div class="sub" style="margin:-6px 0 8px">${esc(f.item)} · ${esc(rpPName(r.proj))}</div>
+    ${mt ? `<div class="qlab">${I('file-text', 14)}وصف الموعد</div><input id="du_note" class="dui dunote" maxlength="120" value="${esc(f.note || '')}" placeholder="وصف الموعد (اختياري)" aria-label="وصف الموعد" oninput="RP.du.note=this.value">` : ''}
     <div class="qlab">${I('calendar', 14)}اليوم</div>
     ${duDayChips(f, 'duSet')}
     <div class="qlab">${I('user', 14)}الموظف المسؤول</div>
-    <div class="qch">${es.map(e => `<button class="${f.emp === e.id ? 'on' : ''}" onclick="duSet('emp','${e.id}')">${esc(shortName(e.name))}</button>`).join('')}</div>
+    <div class="qch">${es.map(e => `<button class="${f.emp === e.id ? 'on' : ''}" onclick="duSet('emp','${e.id}')">${esc(shortName(e.name))}</button>`).join('')}${mt ? `<button class="${!f.emp ? 'on' : ''}" onclick="duSet('emp','')">بدون موظف</button>` : ''}</div>
     ${pv}
     <div class="err">${esc(f.err)}</div>
-    <button class="btn2 cu qbig" ${f.busy ? 'disabled' : ''} onclick="duSave()">${f.busy && !f.arm ? 'جاري الحفظ…' : I('alarm-clock', 17) + (f.did ? 'حفظ الموعد' : 'تحديد الموعد')}</button>
+    <button class="btn2 cu qbig" ${f.busy ? 'disabled' : ''} onclick="duSave()">${f.busy && !f.arm ? 'جاري الحفظ…' : I(mt ? 'calendar' : 'alarm-clock', 17) + (f.did || mt ? 'حفظ الموعد' : 'تحديد الموعد')}</button>
     ${f.did ? `<button class="btn2 rd" style="width:100%;margin-top:8px" ${f.busy ? 'disabled' : ''} onclick="duDel()">${I('x', 15)}${f.arm ? 'اضغط مرة ثانية لإلغاء الموعد' : 'إلغاء الموعد'}</button>` : ''}
     <button class="clsb" onclick="RP.du=null;ovClose()">إغلاق</button>`);
 }
 async function duSave() {
   const f = RP.du; if (!f || f.busy) return;
   const ms = duMs(f.day, f.time);
-  f.err = !ms ? 'اختر اليوم والساعة' : ms <= Date.now() + 5 * 6e4 ? 'اختر موعداً بعد الوقت الحالي' : ms > Date.now() + 90 * 864e5 ? 'اختر موعداً خلال 90 يوماً' : !f.emp ? 'اختر الموظف' : '';
+  f.err = !ms ? 'اختر اليوم والساعة' : ms <= Date.now() + 5 * 6e4 ? 'اختر موعداً بعد الوقت الحالي' : ms > Date.now() + 90 * 864e5 ? 'اختر موعداً خلال 90 يوماً' : !f.emp && f.kind !== 'meet' ? 'اختر الموظف' : '';
   if (f.err) return duDraw();
   f.busy = true; f.arm = false; duDraw();
   let res;
-  try { res = await call('apiDueSet', f.id, f.item, f.emp, f.day + ' ' + f.time, f.rid) || {}; }
+  try { res = (f.kind === 'meet' ? await call('apiMeetSet', f.id, f.item, f.emp, f.day + ' ' + f.time, f.note || '', f.rid) : await call('apiDueSet', f.id, f.item, f.emp, f.day + ' ' + f.time, f.rid)) || {}; }
   catch (e) { f.busy = false; f.err = String(e); if (RP.du === f) duDraw(); else toastErr(e); return; }
   RP.du = null; ovClose();
   try { await rpTickReload(); } catch (e) {}
   rpRerender();
   const nm = shortName(((S.data.employees || []).find(e => e.id === f.emp) || {}).name || '');
-  toast(res.same ? 'الموعد نفسه، ما تغيّر شي' : res.dup ? 'تم حفظ الموعد' : (res.ext ? 'تغيّر الموعد، ووصل ' : 'تحدّد الموعد، ووصل ') + nm + ' إشعار');
+  toast(res.same ? 'الموعد نفسه، ما تغيّر شي' : res.dup || (f.kind === 'meet' && !f.emp) ? 'تم حفظ الموعد' : (res.ext ? 'تغيّر الموعد، ووصل ' : 'تحدّد الموعد، ووصل ') + nm + ' إشعار');
 }
 async function duDel() {
   const f = RP.du; if (!f || f.busy || !f.did) return;
@@ -5871,7 +5908,7 @@ async function duDel() {
   catch (e) { f.busy = false; f.arm = false; f.err = String(e); if (RP.du === f) duDraw(); else toastErr(e); return; }
   RP.du = null; ovClose();
   try { await rpTickReload(); } catch (e) {}
-  rpRerender(); toast('أُلغي الموعد، ووصل الموظف إشعار');
+  rpRerender(); toast(f.kind === 'meet' && !f.emp0 ? 'أُلغي الموعد' : 'أُلغي الموعد، ووصل الموظف إشعار');
 }
 /* طلب التمديد من الموظف المسؤول */
 function duReqOpen(id, did) {
@@ -5938,10 +5975,10 @@ function duToday(me) {
   rpProjs().forEach(p => { const r = rpLast(p.id); rpArr(r && r.dues).forEach(d => { if (me && d.emp !== me) return; if ((d.st === 'on' && nfDay(d.due) === t) || (d.st === 'miss' && nfDay(d.due) === t && rpArr(r.cur).includes(d.item))) a.push([r, d]); }); });
   if (!a.length) return {n: 0};
   a.sort((x, y) => x[1].due - y[1].due);
-  const now = Date.now(), nx = a.find(x => x[1].st === 'on' && x[1].due > now), nl = a.filter(x => x[1].st === 'miss' || x[1].due <= now).length;
-  const sub = [nx ? 'الأقرب ' + nfTime(nx[1].due) : '', nl ? (nl === 1 ? 'فات واحد' : 'فات ' + nl) : ''].filter(Boolean).join(' · ');
-  const st = (r, d) => { const k = rpTk(r, d.item); return d.st === 'miss' ? ['r', d.viol ? 'فات · سُجّلت مخالفة' : 'فات الموعد'] : rpSt(k) === 'pend' && (k.at || 0) <= d.due ? ['ok', me ? 'بانتظار الاعتماد' : 'بانتظار اعتمادك'] : d.due <= now ? ['r', 'فات الموعد'] : d.req ? ['g', 'طلب تمديد'] : [d.due - now <= 36e5 ? 'g' : '', duLeft(d.due)]; };
-  return {n: a.length, sub: sub, late: nl, body: `<ul class="dtl">${a.map(([r, d]) => { const s = st(r, d); return `<li role="button" tabindex="0" onclick="rpOpen('${r.id}')"><b class="nw2 ${s[0]}">${nfTime(d.due)}</b><span><span class="dtt">${esc(d.item)}</span><small>${esc(rpPName(r.proj))}${me ? '' : ' · ' + esc(shortName(d.name || ''))}</small></span><small class="dts ${s[0]}">${esc(s[1])}</small></li>`; }).join('')}</ul>`};
+  const now = Date.now(), nx = a.find(x => x[1].st === 'on' && x[1].due > now), nl = a.filter(x => x[1].kind !== 'meet' && (x[1].st === 'miss' || x[1].due <= now)).length; /* 142: المجدول ما ينحسب «فات» */
+  const sub = [nx ? 'الأقرب ' + nfTime(nx[1].due) : '', nl ? (nl === 1 ? 'فات واحد' : 'فات ' + nl) : '', a.some(x => x[1].kind === 'meet' && x[1].st === 'on' && x[1].due <= now) ? 'حان الموعد' : ''].filter(Boolean).join(' · ');
+  const st = (r, d) => { const k = rpTk(r, d.item); return d.kind === 'meet' ? [d.due <= now ? 'g' : '', d.due <= now ? 'حان الموعد' : 'موعد مجدول'] : d.st === 'miss' ? ['r', d.viol ? 'فات · سُجّلت مخالفة' : 'فات الموعد'] : rpSt(k) === 'pend' && (k.at || 0) <= d.due ? ['ok', me ? 'بانتظار الاعتماد' : 'بانتظار اعتمادك'] : d.due <= now ? ['r', 'فات الموعد'] : d.req ? ['g', 'طلب تمديد'] : [d.due - now <= 36e5 ? 'g' : '', duLeft(d.due)]; };
+  return {n: a.length, sub: sub, late: nl, body: `<ul class="dtl">${a.map(([r, d]) => { const s = st(r, d); return `<li role="button" tabindex="0" onclick="rpOpen('${r.id}')"><b class="nw2 ${s[0]}">${nfTime(d.due)}</b><span><span class="dtt">${esc(d.kind === 'meet' && d.note ? d.note : d.item)}</span><small>${esc(rpPName(r.proj))}${me || !d.name ? '' : ' · ' + esc(shortName(d.name))}</small></span><small class="dts ${s[0]}">${esc(s[1])}</small></li>`; }).join('')}</ul>`};
 }
 function rpLreqRows(r) {
   const a = rpLreqShow(r);

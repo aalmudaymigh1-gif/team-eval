@@ -1110,6 +1110,9 @@
     async apiRepAlert(id, item, emps, msg, rid) { const r = await rpc('rep_alert', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), emps: emps || [], msg: String(msg || ''), rid: String(rid || '') }); flush(); return r; },
     /* الإصدار 133: موعد إنجاز العمل: التحديد والإلغاء مني، وطلب التمديد من الموظف المسؤول، واعتماده أو رفضه */
     async apiDueSet(id, item, emp, due, rid) { const r = await rpc('rep_due_set', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), emp: String(emp || ''), due: String(due || ''), rid: String(rid || '') }); flush(); return r; },
+    /* v142: موعد مجدول (emp فاضي = بدون موظف)، و«تم الموعد» */
+    async apiMeetSet(id, item, emp, due, note, rid) { const r = await rpc('rep_meet_set', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), emp: String(emp || ''), due: String(due || ''), note: String(note || ''), rid: String(rid || '') }); flush(); return r; },
+    async apiMeetDone(did) { const r = await rpc('rep_meet_done', { k: CRED.k || '', t: CRED.t || '', did: String(did || '') }); flush(); return r; },
     async apiDueDel(did) { const r = await rpc('rep_due_del', { k: CRED.k || '', did: String(did || '') }); flush(); return r; },
     async apiDueReq(did, due, note, undo) { const r = await rpc('rep_due_req', { t: CRED.t || '', did: String(did || ''), due: String(due || ''), note: String(note || ''), undo: !!undo }); if (!undo) flush(); return r; },
     async apiDueRev(did, ok, note) { const r = await rpc('rep_due_rev', { k: CRED.k || '', did: String(did || ''), ok: !!ok, note: String(note || '') }); flush(); return r; },
