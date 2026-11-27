@@ -1724,6 +1724,13 @@ html[dir=ltr]:root .fxs.one.etd>button.tap:not(.due) .chv{right:8px;left:auto}
 html:root .fxs.one.etd .tvn{display:block;line-height:1.6;font-size:15px;font-weight:600}
 html:root .fxs.one.etd button.due .tvn{color:var(--red)}
 html:root .sheet .dui.dunote{text-align:start}
+/* الإصدار 143: رسالة صرف الراتب: خانتها في نافذة الصرف عندي، وبطاقتها فوق صفحة الموظف لين يضغط «فهمت» */
+html:root .pmf{margin-top:12px}
+html:root .pmf textarea{min-height:92px;line-height:1.7}
+html:root .pmn{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:var(--muted)}
+html:root .paymc{margin-top:8px;background:var(--acc-soft);border-color:transparent;box-shadow:none}
+html:root .paymc .pmw{font-size:13px;color:var(--muted);margin-top:6px}
+html:root .paymc .pmt{font-size:15px;line-height:1.7;margin-top:8px;color:var(--text)}
 </style>
 </head>
 <body>
@@ -1733,9 +1740,9 @@ html:root .sheet .dui.dunote{text-align:start}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=142"></script>
+<script src="api.js?v=143"></script>
 <script>
-const APP_VER = '142';
+const APP_VER = '143';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -2458,7 +2465,7 @@ function renderRec() {
       <button class="btn${!S.misses.length && !S.star ? ' quiet' : ''}" id="saveBtn" onclick="save()">${I('check', 19, 2.5)}${label}</button></div></div></div></div>`;
 }
 
-/* الإصدار 106: ملخص يوم الموظف فوق التقييم. للقراءة فقط: الحضور، المهام اللي أنجزها، الأعمال اللي أشّرها في التقارير، وفواتيره */
+/* الإصدار 106: ملخص يوم الموظف فوق التقييم. للقراءة فقط: الحضور، المهام اللي أنجزها، الأعمال اللي أنجزها في التقارير، وفواتيره */
 function daySum(emp, date) {
   const d = S.data, o = {att: null, ticks: null, inv: 0, invSum: 0};
   if (emp.attend) {
@@ -2478,7 +2485,7 @@ function daySumHtml(emp, date) {
   const o = daySum(emp, date), cell = (v, l, c, s) => `<div class="${c || ''}"><b>${v}</b><span>${l}${s ? ' · ' + s : ''}</span></div>`;
   const grid = `<div class="dsum${o.att ? '' : ' n3'}">
     ${o.att ? cell(esc(o.att.v), 'الحضور', 'at ' + o.att.c, o.att.s) : ''}
-    ${cell(o.ticks === null ? (RP.failed ? '—' : '…') : o.ticks, o.ticks === 1 ? 'عمل أشّر عليه' : 'أعمال أشّر عليها')}
+    ${cell(o.ticks === null ? (RP.failed ? '—' : '…') : o.ticks, o.ticks === 1 ? 'عمل أنجزه' : 'أعمال أنجزها')}
     ${cell(o.inv, o.inv === 1 ? 'فاتورة' : 'فواتير', '', o.inv ? M(o.invSum, '', 't') : '')}</div>`;
   /* الإصدار 131: «ملخص اليوم» سطر واحد بأرقامه، والضغط يفتح البطاقات نفسها */
   const tk = o.ticks === null ? (RP.failed ? '—' : '…') : o.ticks === 1 ? 'عمل واحد' : o.ticks === 2 ? 'عملان' : o.ticks + (o.ticks === 0 || (o.ticks >= 3 && o.ticks <= 10) ? ' أعمال' : ' عمل');
@@ -3635,7 +3642,15 @@ function payHtml(e, u, bare) {
     </div>
     ${amtPvHtml(S.pv && S.pv[pdk] != null ? S.pv[pdk] : '', 'apv_pay')}
     <div class="dprops pdate"><label class="dp"><span>تاريخ التسليم</span><input type="date" id="pd_${pdk}" value="${pdv}" max="${today}" onchange="S.pd['${pdk}']=this.value"></label></div>
+    ${payMsgBox(e, u, pdk)}
     <div class="err" id="perr_${e.id}${u.month}"></div>`;
+}
+/* الإصدار 143: الرسالة اللي تروح للموظف مع إشعار «تم تحويل راتبك». تنبني من أرقامه (API.payMsg) وتنعدل قبل الصرف، واللي ما له حافز يوصله الإشعار بدون رسالة */
+function payMsgBox(e, u, pdk) {
+  S.pm = S.pm || {};
+  const auto = API.payMsg(e.id, u.month);
+  if (!auto) return `<div class="pmn">${I('bell', 14)}<span>يصله إشعار «تم تحويل راتبك».</span></div>`;
+  return `<div class="field pmf"><span>رسالة تصله مع إشعار «تم تحويل راتبك»</span><textarea id="pm_${pdk}" rows="3" maxlength="200" aria-label="رسالة الموظف" oninput="S.pm['${pdk}']=this.value">${esc(S.pm[pdk] != null ? S.pm[pdk] : auto)}</textarea><div class="sub">من أرقامه هذا الشهر. عدّلها أو امسحها قبل الصرف.</div></div>`;
 }
 
 function salaryTable(u) {
@@ -3711,6 +3726,7 @@ async function pay(emp, month) {
   const k = 'pay_' + emp + month;
   if (S.armed !== k) { S.armed = k; renderFin(); return; }
   const v = $('#pay_' + emp + month).value, dt = ($('#pd_' + emp + month) || {}).value || '';
+  const pmEl = $('#pm_' + emp + month), pmv = pmEl ? pmEl.value : undefined; /* 143 */
   /* الإصدار 92: المبلغ أقل من الباقي له: الافتراضي يتسجل دفعة والشهر يبقى مفتوح، وإقفال الشهر بالمبلغ الناقص يحتاج اختيار صريح */
   const pe = empById(emp), pu = pe && (pe.unpaid || []).find(u => u.month === month), need = pu ? Math.max(0, Math.round((pu.net - (pu.credit || 0)) * 100) / 100) : 0, nv = API.parseAmt(v);
   if (!pay.force && pu && nv > 0 && nv < need - 0.005) {
@@ -3727,7 +3743,7 @@ async function pay(emp, month) {
   }
   pay.force = false;
   lockBtn('جاري تسجيل الصرف…');
-  try { S.data = await call('apiPay', BOOT.key, {emp, month, amount: v, date: dt}); S.armed = null; if (S.pd) delete S.pd[emp + month]; if (S.pv) delete S.pv[emp + month]; renderAdmin(); toast('تسجل الصرف' + (dt && dt !== S.data.today ? ' بتاريخ ' + dmy(dt) : '')); }
+  try { S.data = await call('apiPay', BOOT.key, {emp, month, amount: v, date: dt, msg: pmv}); S.armed = null; if (S.pd) delete S.pd[emp + month]; if (S.pv) delete S.pv[emp + month]; if (S.pm) delete S.pm[emp + month]; renderAdmin(); toast('تسجل الصرف' + (dt && dt !== S.data.today ? ' بتاريخ ' + dmy(dt) : '')); }
   catch (e) { S.armed = null; renderFin(); toastErr(e); }
 }
 
@@ -3907,7 +3923,7 @@ async function saveMove(emp) {
 async function savePrev(emp) {
   const f = S.form; if (!f) return;
   lockBtn('جاري تسجيل الصرف…');
-  try { S.data = await call('apiPay', BOOT.key, {emp: emp, month: $('#mv_mon').value, amount: $('#mv_amt').value, date: $('#mv_date').value}); S.form = null; renderAdmin(); toast('تسجل الصرف'); }
+  try { S.data = await call('apiPay', BOOT.key, {emp: emp, month: $('#mv_mon').value, amount: $('#mv_amt').value, date: $('#mv_date').value, quiet: true}); S.form = null; renderAdmin(); toast('تسجل الصرف'); }
   catch (err) { renderFin(); const x = $('#mverr'); if (x) x.textContent = err; else toastErr(err); }
 }
 async function savePart(id) {
@@ -4352,7 +4368,7 @@ function renderEmp(d, isPreview) {
   if (rsub) { $('#app').innerHTML = `<div class="top"><div><h1></h1></div></div><div id="view">${rsub}</div>`; rpHead(); rpAfterDetail(); return; }
   $('#app').innerHTML = `
     ${isPreview ? `<button class="back" onclick="closePreview()">${I('arrow-right', 17)}رجوع للفريق</button><div class="note info">${I('eye', 16)}هذه معاينة، ويرى الموظف الصفحة نفسها.</div>` : ''}
-    <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>`}</div>${isPreview ? '' : pushHtml()}${mainTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) + violHtml(d) : ''}
+    <div class="top"><div><h1>${esc(d.name)}</h1><div class="sub">${esc(S.etab === 'pay' ? d.month.label : dayLabel(d.today))}</div></div>${isPreview ? '' : `<div class="topr">${nfBell()}<button class="rf" onclick="refresh()" aria-label="تحديث">${I('refresh-cw', 18)}</button></div>`}</div>${isPreview ? '' : pushHtml()}${mainTab ? attCardHtml(d, isPreview) + guideBannerHtml(d) + violHtml(d) : ''}${mainTab || S.etab === 'pay' ? payMsgHtml(d) : ''}
     <div class="segc etabs e4 e3"><button class="${S.etab === 'rep' ? 'on' : ''}" onclick="S.etab='rep';RP.sent=null;RP.open=null;RP.hist=null;rerenderEmp()">تقاريري</button><button class="${S.etab === 'inv' ? 'on' : ''}" onclick="S.etab='inv';rerenderEmp()">فواتيري${nRetInv ? '<span class="nb">' + nRetInv + '</span>' : ''}</button><button class="${S.etab === 'pay' ? 'on' : ''}" onclick="S.etab='pay';rerenderEmp()">راتبي</button></div>
     ${S.etab === 'inv' ? empInvHtml(d, isPreview) : S.etab === 'rep' ? rpEmpHtml(d, isPreview) + guideDoneHtml(d) : empPayHtml(d)}`;
   if (!isPreview) prefetchImgs();
@@ -4368,6 +4384,17 @@ function foTog(k, def) {
   /* الإصدار 131: صفحات المدير ترسم الجزء نفسه بس عشان ما يرجع التمرير فوق */
   if (BOOT.page === 'admin' && !S.preview && !NF.open) { if (S.view === 'rec') return renderRec(); if (S.view === 'task' && (RP.open || RP.hist)) return rpRerender(); if (S.view === 'team') return renderTeam(); if (S.view === 'fin') return renderFin(); }
   redrawAny();
+}
+/* الإصدار 143: بطاقة «تم تحويل راتبك» فوق صفحة الموظف (تقاريري وراتبي) لين يضغط «فهمت». النص والتاريخ كل واحد بعنصر عشان الترجمة */
+function payMsgHtml(d) {
+  const p = d.payMsg; if (!p) return '';
+  const me = BOOT.page === 'emp' && !S.empPreview;
+  return `<div class="card paymc">${ctitle('banknote', 'تم تحويل راتبك')}<div class="pmw"><span>راتب ${esc(p.label)}</span>${p.date ? ` · <span>${dmy(p.date)}</span>` : ''}</div>${p.msg ? `<div class="pmt">${esc(p.msg)}</div>` : ''}${me ? `<button class="ackb" onclick="payMsgSeen('${p.id}',this)">${I('check', 16, 2.5)}فهمت</button>` : ''}</div>`;
+}
+async function payMsgSeen(id, btn) {
+  if (btn) btn.disabled = true;
+  try { const r = await call('apiPayMsgSeen', BOOT.token, id); renderEmp(r, false); }
+  catch (e) { if (btn) btn.disabled = false; toastErr(String(e && e.message || e)); }
 }
 function empPayHtml(d) {
   const m = d.month, f = d.fin;

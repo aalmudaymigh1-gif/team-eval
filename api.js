@@ -9,7 +9,7 @@
   let CRED = {};
   /* الإصدار 109: تعديل الفاتورة وإضافة فاتورة المدير والميزانية واعتماد المهمة يكتبون إشعار (للموظف أو تنبيه ميزانية)، فينرسل فورًا */
   /* الإصدار 121: المخالفة والموقف المميز وحذفها وإضافة عمل لمخالفة اليوم وحذف يوم الحضور كلها ترسل فورًا (بدون مهلة الدقيقتين) */
-  const NOTIFY = ['inv_approve', 'inv_return', 'inv_fix', 'inv_upd', 'inv_edit', 'inv_add', 'proj_budget', 'att_bad', 'att_bad_undo', 'log_add', 'log_del', 'log_note_add', 'att_del'];
+  const NOTIFY = ['fin_add', 'sal_part', 'inv_approve', 'inv_return', 'inv_fix', 'inv_upd', 'inv_edit', 'inv_add', 'proj_budget', 'att_bad', 'att_bad_undo', 'log_add', 'log_del', 'log_note_add', 'att_del'];
   function flush() {
     fetch(FN_URL, { method: 'POST', headers: { apikey: SB_KEY, 'Content-Type': 'application/json' }, body: '{"op":"flush"}', keepalive: true }).catch(() => {});
   }
@@ -301,12 +301,43 @@
       close: extra ? months.filter(m => !m.closed && m.full).map(m => m.month) : [] };
   }
   /* الشهور اللي تنقفل بالدفعة (نفس الحساب في «دفعة راتب» واعتماد فاتورة «راتب موظف») */
-  function closeParts_(st) {
+  function closeParts_(st, emp) {
     return st.close.map(mk => {
       const f = st.open.filter(m => m.month === mk)[0], det = payDetails_(f);
       det.fromParts = Math.max(0, f.net);
+      if (emp) { det.pn = 1; const msg = payMsg_(emp, RAW.fin, RAW.logs, mk, f); if (msg) { det.msg = msg; det.msgAuto = 1; } } /* 143 */
       return { month: mk, amount: Math.max(0, f.net), details: det };
     });
+  }
+  /* الإصدار 143: رسالة التحفيز مع صرف الراتب، من أرقام الموظف الفعلية في ذاك الشهر (بصوت المدير العام).
+     فاضية لـ«متابعة فقط» واللي حافزه صفر. أي تغيير في نص هنا لازم يتغير معه نمطه في i18n/pats.tsv */
+  function starsTx_(n) { return n === 1 ? 'موقف مميز واحد' : n === 2 ? 'موقفين مميزين' : n + (n <= 10 ? ' مواقف مميزة' : ' موقف مميز'); }
+  function payMsg_(emp, fin, logs, mk, f) {
+    f = f || finMonth_(emp, fin, logs, mk);
+    const b = Number(f.bonus) || 0, max = Number(f.max) || 0;
+    if (f.track || !(b > 0) || !(max > 0)) return '';
+    const n = v => rr2(v).toLocaleString('en-US');
+    const c = calcMonth_(emp, logs, mk), s0 = startMonth_(emp, logs, fin), pm = prevMonth_(mk);
+    if (b >= max) {
+      let streak = 1, m = pm;
+      while (m >= s0 && !stopOn_(emp, m)) { const x = finMonth_(emp, fin, logs, m); if (!(x.max > 0) || x.bonus < x.max) break; streak++; m = prevMonth_(m); }
+      if (streak === 2) return 'الحافز كامل ' + n(b) + ' ريال للشهر الثاني ورا بعض. ثابت ما شاء الله، كمّل كذا.';
+      if (streak > 2) return 'الحافز كامل ' + n(b) + ' ريال لـ' + streak + (streak <= 10 ? ' شهور' : ' شهر') + ' ورا بعض. ثابت ما شاء الله، كمّل كذا.';
+      if (!c.misses) return 'ولا تقصير هالشهر، والحافز كامل ' + n(b) + ' ريال. كفو يا بطل، تستاهله.';
+      return 'الحافز كامل ' + n(b) + ' ريال. كفو يا بطل، كمّل كذا.';
+    }
+    const pf = pm >= s0 && !stopOn_(emp, pm) ? finMonth_(emp, fin, logs, pm) : null, pb = pf && pf.max > 0 ? Number(pf.bonus) || 0 : null;
+    if (pb != null && b > pb) return 'حافزك ' + n(b) + ' ريال، زاد ' + n(b - pb) + ' عن الشهر اللي فات. شغلك يتكلم عنك، وعقبال ما تاخذه كامل.';
+    if (pb != null && b < pb) return 'حافزك ' + n(b) + ' ريال. الشهر اللي فات كان أحسن، وأعرف إنك تقدر ترجع له.';
+    if (c.stars) return 'حافزك ' + n(b) + ' ريال، وسجّلت ' + starsTx_(c.stars) + ' هالشهر، وهذا اللي يفرّق. وعقبال ما تاخذه كامل.';
+    return 'حافزك ' + n(b) + ' ريال جبته بفعلك. كفو يا بطل، وعقبال ما تاخذه كامل.';
+  }
+  /* بطاقة «تم تحويل راتبك» عند الموظف: آخر صرف وصله إشعاره (pn) وما ضغط «فهمت»، خلال 14 يوم */
+  function payCard_(emp, fin, today) {
+    const lim = new Date(Date.parse(today + 'T00:00:00Z') - 14 * 864e5).toISOString().slice(0, 10);
+    const p = fin.filter(f => f.kind === 'pay' && f.emp === emp.id && f.details && f.details.pn && !f.details.quiet && !f.details.seen && (f.date || String(f.ts || '').slice(0, 10)) >= lim)
+      .sort((x, y) => x.ts < y.ts ? 1 : x.ts > y.ts ? -1 : 0)[0];
+    return p ? { id: p.id, label: monthLabel_(p.month), date: p.date || '', msg: String(p.details.msg || '') } : null;
   }
   function prevMonth_(mk) { let y = Number(mk.slice(0, 4)), m = Number(mk.slice(5, 7)) - 1; if (m < 1) { m = 12; y--; } return y + '-' + String(m).padStart(2, '0'); }
   /* الإصدار 85: الشهور اللي قبل بداية الحساب (12 شهر) وما لها صرف، عشان يقدر يسجّل راتب قديم على شهره */
@@ -487,6 +518,7 @@
       fin: finMonth_(emp, fin, logs, now),
       sal: salSt_(emp, fin, logs, now),
       stop: stopNow_(emp), stopNow: stopOn_(emp, now), /* 141 */
+      payMsg: payCard_(emp, fin, todayS), /* 143 */
       entries: groups_(mine.filter(l => l.date.slice(0, 7) === now)),
       /* الإصدار 121: مخالفات اليوم اللي وصله إشعارها وما ضغط «فهمت» (تختفي 12 الليل بتوقيت الرياض) */
       viol: mine.filter(l => l.type === '-' && l.at && !l.seen && l.at.slice(0, 10) === todayS)
@@ -776,6 +808,13 @@
       if (date < mk + '-01') throw new Error('تاريخ التسليم قبل شهر الراتب. لو الراتب لشهر قبل، اختر الشهر من «راتب شهر سابق»');
       const details = payDetails_(f);
       if (cr > 0) details.fromParts = cr;
+      /* 143: الإشعار والرسالة. quiet = راتب شهر سابق ينسجل للدفاتر بس، بدون إشعار */
+      if (x.quiet) details.quiet = 1;
+      else {
+        const auto = payMsg_(emp, RAW.fin, RAW.logs, mk, f), msg = x.msg == null ? auto : String(x.msg).replace(/\s+/g, ' ').trim().slice(0, 200);
+        details.pn = 1;
+        if (msg) { details.msg = msg; if (msg === auto) details.msgAuto = 1; }
+      }
       return adminDo(k, 'fin_add', { date: date, emp: emp.id, kind: 'pay', amount: rr2(cashv + cr), months: 0, start: '', month: mk,
         note: String(x.note || '').slice(0, 200), details: details });
     },
@@ -805,10 +844,17 @@
       const month = /^\d{4}-\d{2}$/.test(x.month || '') ? x.month : '';
       const st = salSt_(emp, RAW.fin, RAW.logs, nowMonth(), { amount: amount, month: month, date: date });
       if (st.preview.extra > 0.001) throw new Error('المبلغ أكثر من المتبقي (' + rr2(amount - st.preview.extra).toLocaleString('en-US') + ')');
-      const close = closeParts_(st);
+      const close = closeParts_(st, emp);
       return adminDo(k, 'sal_part', { emp: emp.id, amount: amount, date: date, month: month, note: String(x.note || '').trim().slice(0, 200), close: close });
     },
     /* الإصدار 85: معاينة توزيع الدفعة قبل الحفظ (من البيانات المحمّلة) */
+    /* الإصدار 143: الرسالة المقترحة لصرف راتب شهر (فاضية لو ما له حافز) */
+    payMsg(empId, mk) {
+      const emp = RAW && empById(empId);
+      if (!emp) return '';
+      const st = salSt_(emp, RAW.fin, RAW.logs, nowMonth());
+      return payMsg_(emp, RAW.fin, RAW.logs, mk, st.open.filter(m => m.month === mk)[0]);
+    },
     salPreview(empId, amount, month) {
       const emp = RAW && empById(empId), a = parseAmt_(amount) || 0;
       if (!emp || !(a > 0)) return null;
@@ -965,7 +1011,7 @@
         const amount = rr2(Number(x.amount) || 0);
         const st = salSt_(emp, RAW.fin, RAW.logs, nowMonth(), { amount: amount, month: '', date: String(x.ts || '').slice(0, 10) });
         if (st.preview.extra > 0.001) throw new Error('المبلغ أكثر من المتبقي لـ' + emp.name + ' (' + rr2(amount - st.preview.extra).toLocaleString('en-US') + ')، صحّح المبلغ أو أعدها');
-        a.sal = { close: closeParts_(st) };
+        a.sal = { close: closeParts_(st, emp) };
       }
       return adminDo(k, 'inv_approve', a);
     },
@@ -1034,6 +1080,13 @@
     async apiAttSeen(token, id) { return empDo(token, 'att_seen', { id: String(id || '') }); },
     /* الإصدار 121: «فهمت» على بطاقة مخالفات اليوم */
     async apiLogSeen(token) { return empDo(token, 'log_seen', {}); },
+    /* الإصدار 143: «فهمت» على بطاقة تحويل الراتب */
+    async apiPayMsgSeen(token, id) {
+      await rpc('pay_msg_seen', { t: token, id: String(id || '') });
+      const f = RAW && RAW.fin.filter(x => x.id === id)[0];
+      if (f) f.details = Object.assign({}, f.details, { seen: '1' });
+      return empPayload_(empById(RAW.me));
+    },
     async apiGuideAdd(k, x) {
       const title = String(x.title || '').trim().slice(0, 120);
       if (!title) throw new Error('اكتب عنوان التوجيه');
