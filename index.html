@@ -1731,6 +1731,13 @@ html:root .pmn{display:flex;align-items:center;gap:6px;margin-top:10px;font-size
 html:root .paymc{margin-top:8px;background:var(--acc-soft);border-color:transparent;box-shadow:none}
 html:root .paymc .pmw{font-size:13px;color:var(--muted);margin-top:6px}
 html:root .paymc .pmt{font-size:15px;line-height:1.7;margin-top:8px;color:var(--text)}
+/* الإصدار 144: صفحة النسخة الاحتياطية. .bkw = آخر تنزيل قديم (أكثر من 7 أيام) أو لم يُنزَّل */
+html:root .bkc .bkt{display:block;font-size:15px;font-weight:600;margin-bottom:4px}
+html:root .bkc .bkr{margin:12px 0}
+html:root .bkc #bkpr{margin-top:12px}
+html:root .bkc .bkh{margin-top:12px}
+html:root .bkw{color:var(--amber)}
+html:root #bkerr:empty{display:none}
 </style>
 </head>
 <body>
@@ -1740,9 +1747,9 @@ html:root .paymc .pmt{font-size:15px;line-height:1.7;margin-top:8px;color:var(--
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=143"></script>
+<script src="api.js?v=144"></script>
 <script>
-const APP_VER = '143';
+const APP_VER = '144';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -4158,6 +4165,7 @@ function renderSet() {
       ${row('link', 'lock', 'الدخول والأجهزة', '')}
     </div></div>
     <div class="blk"><div class="lab">${I('archive', 14)}البيانات</div><div class="tbl2">
+      ${row('bak', 'download', 'نسخة احتياطية', bakRowV(d))}
       ${row('files', 'folder-x', 'الملفات غير المستخدمة', S.clean ? (S.clean.count + ' ملف') : '', "ssub('files');loadClean()")}
       ${row('del', 'trash-2', 'المحذوفات', (d.deleted || []).length ? String((d.deleted || []).length) : '')}
     </div></div></div>`;
@@ -4192,6 +4200,7 @@ function renderSet() {
       <button class="btn2 ${S.armed==='rot'?'arm':''}" style="width:100%" onclick="rotateKey()">${S.armed==='rot'?'تأكيد: أبطل الرابط القديم':'أبطل الرابط القديم'}</button>
       <button class="btn2 ${S.armed==='out'?'arm':''}" style="width:100%;margin-top:8px" onclick="logoutHere()">${S.armed==='out'?'تأكيد: الخروج من هذا الجهاز':'الخروج من هذا الجهاز'}</button>
       <div class="err" id="lkerr"></div></div>`);
+  if (k === 'bak') return page('نسخة احتياطية', bakPageHtml(d));
   if (k === 'files') return page('الملفات غير المستخدمة', filesPageHtml());
   if (k === 'del') return page('المحذوفات', delPageHtml());
   if (k === 'rules') return page('شرح الحافز', `<div class="card">${rulesHtml(st)}</div>`);
@@ -4200,7 +4209,41 @@ function renderSet() {
   S.ssub = null;
   $('#view').innerHTML = list();
 }
-function ssub(k) { S.ssub = k; S.armed = null; S.ed = null; renderSet(); toTop(); }
+function ssub(k) { S.ssub = k; S.armed = null; S.ed = null; if (k !== 'bak') S.bak = null; renderSet(); toTop(); }
+/* الإصدار 144: النسخة الاحتياطية. يومية تلقائية داخل القاعدة (backup_run كل ليلة، آخر 14 يوم)، وتنزيل ملف على خطوتين:
+   «تجهيز» يجيب البيانات، و«حفظ الملف» يفتح ورقة المشاركة من الضغطة نفسها (الآيفون يرفضها بعد انتظار الشبكة). بدون زر استرجاع عمداً */
+function bakAgo(s, today) { if (!s) return null; const n = Math.round((Date.parse(today + 'T00:00:00Z') - Date.parse(String(s).slice(0, 10) + 'T00:00:00Z')) / 864e5); return isFinite(n) ? Math.max(0, n) : null; }
+function bakDays(n) { return n === 0 ? 'اليوم' : n === 1 ? 'أمس' : n === 2 ? 'قبل يومين' : 'قبل ' + n + (n <= 10 ? ' أيام' : ' يوماً'); }
+function bakDlTx(d) { const n = bakAgo((d.backup || {}).dl, d.today); return {late: n == null || n > 7, tx: n == null ? 'لم تُنزَّل نسخة بعد' : 'آخر تنزيل: ' + bakDays(n)}; }
+function bakRowV(d) { const x = bakDlTx(d); return x.late ? `<span class="bkw">${x.tx}</span>` : x.tx; }
+function bakPageHtml(d) {
+  const na = bakAgo((d.backup || {}).auto, d.today), x = bakDlTx(d), f = S.bak;
+  return `<div class="card bkc"><b class="bkt">نسخة يومية تلقائية</b><div class="sub">${na == null ? 'تبدأ الليلة الساعة 3:00 ص' : 'آخر نسخة: ' + bakDays(na)} · يُحتفظ بآخر 14 يوماً</div></div>
+    <div class="card bkc"><b class="bkt">تنزيل نسخة إلى جهازك</b><div class="sub${x.late ? ' bkw' : ''}" id="bkdl">${x.tx}</div>
+      ${f ? `<div class="note good bkr">${I('check', 16, 2.5)}<div>النسخة جاهزة · ${f.kb} كيلوبايت</div></div><button class="btn cu" id="bksv" style="width:100%" onclick="bakSave()">${I('download', 18)}حفظ الملف</button>`
+          : `<button class="btn2 cu" id="bkpr" style="width:100%" onclick="bakPrep(this)">${I('download', 16)}تجهيز نسخة الآن</button>`}
+      <div class="sub bkh">احفظ الملف في iCloud أو «الملفات». يشمل كل البيانات، ولا يشمل رموز الدخول ولا الصور.</div><div class="err" id="bkerr"></div></div>
+    <div class="note info">${I('info', 16)}<div>الاسترجاع من نسخة يتم يدوياً بتاريخها. لا يوجد زر استرجاع هنا حتى لا تُمسح بيانات بالخطأ.</div></div>`;
+}
+async function bakPrep(btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'جارٍ التجهيز…'; }
+  try {
+    const r = await call('apiBackupGet', BOOT.key), text = JSON.stringify(r.file);
+    S.bak = {text: text, name: 'team-backup-' + String((r.file && r.file.at) || S.data.today).slice(0, 10) + '.json', kb: Math.max(1, Math.round(new Blob([text]).size / 1024))};
+    S.data = r.data; renderSet();
+  } catch (e) { renderSet(); const el = $('#bkerr'); if (el) el.textContent = String((e && e.message) || e); }
+}
+async function bakSave() {
+  const f = S.bak; if (!f) return;
+  const blob = new Blob([f.text], {type: 'application/json'});
+  try {
+    const file = new File([blob], f.name, {type: 'application/json'});
+    if (navigator.canShare && navigator.canShare({files: [file]})) { await navigator.share({files: [file]}); return; }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = f.name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  toast('تم تنزيل الملف');
+}
 
 function projectsCard(d) {
   const ps = d.projects || [], act = ps.filter(p => !p.archived), arch = ps.filter(p => p.archived);

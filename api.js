@@ -574,6 +574,7 @@
       yesterday: addDay(todayS, -1),
       month: monthLabel_(now),
       settings: settings_(),
+      backup: { auto: String((RAW.settings || {}).BACKUP_AUTO_AT || ''), dl: String((RAW.settings || {}).BACKUP_DL_AT || '') }, /* 144 */
       employees: emps.map(e => {
         const mine = logs.filter(l => l.emp === e.id);
         const sal = salSt_(e, fin, logs, now);
@@ -848,6 +849,12 @@
       return adminDo(k, 'sal_part', { emp: emp.id, amount: amount, date: date, month: month, note: String(x.note || '').trim().slice(0, 200), close: close });
     },
     /* الإصدار 85: معاينة توزيع الدفعة قبل الحفظ (من البيانات المحمّلة) */
+    /* الإصدار 144: تنزيل نسخة احتياطية: كل جداول البيانات بدون رموز الدخول (backup_get في القاعدة) */
+    async apiBackupGet(k) {
+      const d = await rpc('backup_get', { k: k });
+      if (RAW && RAW.settings) RAW.settings.BACKUP_DL_AT = String((d && d.at) || '');
+      return { file: d, data: adminPayload_() };
+    },
     /* الإصدار 143: الرسالة المقترحة لصرف راتب شهر (فاضية لو ما له حافز) */
     payMsg(empId, mk) {
       const emp = RAW && empById(empId);
