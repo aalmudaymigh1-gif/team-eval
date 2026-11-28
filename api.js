@@ -79,14 +79,37 @@
   const gemp = (t, op, a) => rpc('guide_emp', { t: t, op: op, a: a || {} });
 
   let RAW = null;
+  /* الإصدار 145: اتفاقات المقاولين والفنيين. قائمة مستقلة (agr_list في القاعدة)، وفشلها لا يوقف التحميل */
+  let AGR = [], AGRMAP = {};
+  function agrNorm_(l) {
+    AGR = (Array.isArray(l) ? l : []).map(a => ({ id: String(a.id), project: String(a.project || ''), item: String(a.item || ''), sup: String(a.sup || ''), unit: String(a.unit || ''), dur: String(a.dur || ''),
+      amount: Number(a.amount) || 0, st: a.st === 'closed' ? 'closed' : 'open', quote: String(a.quote || ''), at: String(a.at || ''), paid: Number(a.paid) || 0, pend: Number(a.pend) || 0,
+      pays: (Array.isArray(a.pays) ? a.pays : []).map(p => ({ id: String(p.id), amount: Number(p.amount) || 0, st: String(p.st || ''), ts: String(p.ts || ''), desc: String(p.desc || ''), emp: String(p.emp || ''), paidBy: String(p.paidBy || '') })),
+      mine: (Array.isArray(a.mine) ? a.mine : []).map(String) }));
+    AGRMAP = {};
+    AGR.forEach(a => { a.pays.forEach(p => { AGRMAP[p.id] = a.id; }); a.mine.forEach(i => { AGRMAP[i] = a.id; }); });
+  }
+  async function agrLoad_() { try { agrNorm_(await rpc('agr_list', { k: CRED.k || '', t: CRED.t || '' })); } catch (e) {} }
+  /* ربط الفاتورة بالاتفاق بعد حفظها (inv_agr_set). فشل الربط لا يفشّل الفاتورة: ترجع بعلامة __agrErr */
+  async function agrAfter_(out, cred, ref, agr, again) {
+    if (agr === undefined || agr === null || !ref) return out;
+    if (!agr && !AGRMAP[ref]) return out;
+    if (agr && AGRMAP[ref] === agr) return out;
+    try {
+      await rpc('inv_agr_set', { k: cred.k || '', t: cred.t || '', ref: String(ref), agr: String(agr) }); await agrLoad_();
+      const o2 = again(); if (out.__dup) o2.__dup = true; return o2;
+    } catch (e) { out.__agrErr = String((e && e.message) || e); return out; }
+  }
   /* الإصدار 60: التحميل الخفيف (آخر 90 يوم). من 118 ما فيه رجوع للدوال القديمة admin_raw و emp_raw */
   async function loadAdmin(k) {
     CRED = { k: k };
-    RAW = norm(await rpc('admin_raw2', { k: k, days: 90 })); return RAW;
+    const r = await Promise.all([rpc('admin_raw2', { k: k, days: 90 }), agrLoad_()]);
+    RAW = norm(r[0]); return RAW;
   }
   async function loadEmp(t) {
     CRED = { t: t };
-    RAW = norm(await rpc('emp_raw2', { t: t, days: 90 })); return RAW;
+    const r = await Promise.all([rpc('emp_raw2', { t: t, days: 90 }), agrLoad_()]);
+    RAW = norm(r[0]); return RAW;
   }
 
   function norm(r) {
@@ -502,7 +525,7 @@
     return { id: x.id, ts: x.ts, emp: x.emp, kind: x.kind, amount: x.amount, desc: x.desc, project: x.project,
       pname: x.project ? (pmap[x.project] || '') : '', nph: x.photos.length, photos: x.photos, status: x.status, reason: x.reason,
       method: x.method || '', warrantyUntil: x.warrantyUntil || '', vendor: x.vendor || '', cat: x.cat || '', salEmp: x.cat === 'sal' ? (x.salEmp || '') : '', task: x.task || '', taskDeleted: !!x.taskDeleted,
-      paidBy: ['card', 'own', 'ret'].indexOf(x.paidBy) >= 0 ? x.paidBy : 'cash', oldAmount: x.oldAmount == null ? null : Number(x.oldAmount) };
+      paidBy: ['card', 'own', 'ret'].indexOf(x.paidBy) >= 0 ? x.paidBy : 'cash', oldAmount: x.oldAmount == null ? null : Number(x.oldAmount), agr: AGRMAP[x.id] || '' /* 145 */ };
   }
 
   function empPayload_(emp) {
@@ -544,6 +567,7 @@
       }).filter(g => RAW.greads.some(x => x.guide === g.id && x.emp === emp.id)),
       att: RAW.attendance.filter(x => x.emp === emp.id),
       attCfg: attCfg_(),
+      agrs: AGR, /* 145 */
       inv: Object.assign(invParts_(inv, emp.id), { balance: invParts_(inv, emp.id).c, owed: invParts_(inv, emp.id).t,
         items: inv.slice().reverse().slice(0, 60).map(x => invOut_(x, pmap)) })
     };
@@ -575,6 +599,7 @@
       month: monthLabel_(now),
       settings: settings_(),
       backup: { auto: String((RAW.settings || {}).BACKUP_AUTO_AT || ''), dl: String((RAW.settings || {}).BACKUP_DL_AT || '') }, /* 144 */
+      agrs: AGR, /* 145 */
       employees: emps.map(e => {
         const mine = logs.filter(l => l.emp === e.id);
         const sal = salSt_(e, fin, logs, now);
@@ -613,6 +638,7 @@
   async function adminDo(k, op, a) {
     const x2 = await exec2('admin_exec2', { k: k }, op, a);
     CRED = { k: k }; RAW = norm(x2.raw);
+    if (/^inv_|^del_restore$/.test(op)) await agrLoad_(); /* 145: المدفوع يتغير مع الاعتماد والحذف */
     if (NOTIFY.indexOf(op) >= 0) flush();
     const out = adminPayload_();
     if (x2.r && x2.r.dup) out.__dup = true;
@@ -621,6 +647,7 @@
   async function empDo(t, op, a) {
     const x2 = await exec2('emp_exec2', { t: t }, op, a);
     CRED = { t: t }; RAW = norm(x2.raw);
+    if (/^inv_/.test(op)) await agrLoad_(); /* 145 */
     flush();
     const emp = empById(RAW.me);
     if (!emp) throw new Error('الرابط غير صالح');
@@ -894,8 +921,8 @@
     async apiRepLaterPut(id, item, why, aft) { const r = await rpc('rep_later_put', { k: CRED.k || '', id: String(id || ''), item: String(item || ''), why: String(why || ''), aft: String(aft || '') }); flush(); return r; }, /* v117 */
     async apiRepNoteDel(id, at, txt) { return rpc('rep_note_del', { k: CRED.k || '', id: String(id || ''), at: Number(at) || 0, txt: String(txt || '') }); },
     async apiRepQuoteAdd(id, item, a) { const r = await rpc('rep_quote_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), a: a || {} }); flush(); return r; }, /* v117 */
-    async apiRepQuoteOk(qid, undo) { const r = await rpc('rep_quote_ok', { k: CRED.k || '', qid: String(qid || ''), undo: !!undo }); flush(); return r; }, /* v117 */
-    async apiRepQuoteDel(qid) { return rpc('rep_quote_del', { k: CRED.k || '', t: CRED.t || '', qid: String(qid || '') }); },
+    async apiRepQuoteOk(qid, undo) { const r = await rpc('rep_quote_ok', { k: CRED.k || '', qid: String(qid || ''), undo: !!undo }); flush(); await agrLoad_(); return r; }, /* v117، ومن 145 الاعتماد ينشئ الاتفاق */
+    async apiRepQuoteDel(qid) { const r = await rpc('rep_quote_del', { k: CRED.k || '', t: CRED.t || '', qid: String(qid || '') }); await agrLoad_(); return r; },
     /* الإصدار 114: خطوات تحت العمل الحالي */
     async apiRepStepAdd(id, item, txt) { const r = await rpc('rep_step_add', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), txt: String(txt || '') }); flush(); return r; },
     async apiRepStepTick(sid, undo) { return rpc('rep_step_tick', { k: CRED.k || '', t: CRED.t || '', sid: String(sid || ''), undo: !!undo }); },
@@ -992,7 +1019,8 @@
       const paths = await empUpload(token, dataUrls, 3);
       if (!paths.length) throw new Error('صوّر الفاتورة');
       const w = Math.round(Number(x.warranty) || 0);
-      return empDo(token, 'inv_add', { cid: String(x.cid || ''), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), salEmp: x.cat === 'sal' ? String(x.salEmp || '') : '', project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
+      const out = await empDo(token, 'inv_add', { cid: String(x.cid || ''), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), salEmp: x.cat === 'sal' ? String(x.salEmp || '') : '', project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
+      return agrAfter_(out, { t: token }, String(x.cid || ''), x.cat === 'wage' ? x.agr : undefined, () => empPayload_(empById(RAW.me))); /* 145 */
     },
     /* الإصدار 74: تصحيح فاتورة رجّعها المدير العام وإعادة إرسالها بنفس السجل */
     async apiInvResend(token, id, x, dataUrls, keep) {
@@ -1005,7 +1033,8 @@
       const paths = old.concat(await empUpload(token, dataUrls || [], Math.max(0, 3 - old.length)));
       if (!paths.length) throw new Error('صوّر الفاتورة');
       if (x.cat === 'sal' && !x.salEmp) throw new Error('اختر الموظف الذي سلّمته الراتب');
-      return empDo(token, 'inv_resend', { id: String(id), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), salEmp: x.cat === 'sal' ? String(x.salEmp || '') : '', project: String(x.project || ''), photos: paths, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
+      const out = await empDo(token, 'inv_resend', { id: String(id), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), salEmp: x.cat === 'sal' ? String(x.salEmp || '') : '', project: String(x.project || ''), photos: paths, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
+      return agrAfter_(out, { t: token }, String(id), x.agr === undefined ? undefined : (x.cat === 'wage' ? x.agr : ''), () => empPayload_(empById(RAW.me))); /* 145 */
     },
 
     /* الإصدار 116: فاتورة «راتب موظف» لما تنعتمد تنسجل دفعة من راتب الشخص (نفس توزيع «دفعة راتب»). المبلغ الزايد عن اللي له يوقف الاعتماد */
@@ -1047,8 +1076,14 @@
       const list = (dataUrls || []).slice(0, 3), paths = [];
       for (const d of list) paths.push(d && d.pdf ? await pdfUp_(k, '', d.pdf) : await API.apiUploadImg(k, d));
       const w = Math.round(Number(x.warranty) || 0);
-      return adminDo(k, 'inv_add', { emp: x.emp || '', amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), project: x.project || '',
+      const before = new Set(RAW.invoices.map(v => v.id));
+      const out = await adminDo(k, 'inv_add', { emp: x.emp || '', amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), project: x.project || '',
         photos: paths, paidBy: x.emp ? 'cash' : 'card', warranty: w >= 1 && w <= 120 ? addMonths_(RAW.today, w) : '' });
+      if (!x.agr || x.cat !== 'wage') return out;
+      /* 145: الفاتورة الجديدة تُعرف بالفرق عن القائمة قبل الحفظ، ثم تُربط بالاتفاق */
+      const nw = RAW.invoices.filter(v => !before.has(v.id) && v.kind === 'inv' && v.project === x.project && Math.abs(v.amount - amount) < 0.005)[0];
+      if (!nw) { out.__agrErr = 'لم تُربط الفاتورة بالاتفاق'; return out; }
+      return agrAfter_(out, { k: k }, nw.id, x.agr, adminPayload_);
     },
     async apiInvEdit(k, id, x) {
       const n = cleanAmount_(x.amount);
@@ -1058,9 +1093,28 @@
       x = x || {};
       const desc = String(x.desc || '').trim().slice(0, 200);
       if (!desc) throw new Error('اكتب وصف المشتريات');
-      return adminDo(k, 'inv_upd', { id: String(id), amount: String(cleanAmount_(x.amount)), desc: desc, project: String(x.project || ''), vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''),
+      const out = await adminDo(k, 'inv_upd', { id: String(id), amount: String(cleanAmount_(x.amount)), desc: desc, project: String(x.project || ''), vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''),
         paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash', warranty: /^\d{4}-\d{2}-\d{2}$/.test(String(x.warranty || '')) ? x.warranty : '' });
+      return agrAfter_(out, { k: k }, String(id), x.agr === undefined ? undefined : (x.cat === 'wage' ? x.agr : ''), adminPayload_); /* 145 */
     },
+    /* الإصدار 145: الاتفاقات. ربط فاتورة باتفاق بدون تعديل غيره، وعمليات الاتفاق (إضافة، تعديل المبلغ، إقفال، إعادة فتح، حذف) */
+    async apiInvAgr(k, id, agr) {
+      if (!RAW || CRED.k !== k) await loadAdmin(k);
+      await rpc('inv_agr_set', { k: k, t: '', ref: String(id), agr: String(agr || '') }); await agrLoad_();
+      return adminPayload_();
+    },
+    async apiAgrExec(k, op, a) {
+      a = Object.assign({}, a || {});
+      if (op === 'add') {
+        a.item = String(a.item || '').trim().slice(0, 120); a.sup = String(a.sup || '').trim().slice(0, 80);
+        if (!a.item) throw new Error('اكتب اسم الاتفاق');
+      }
+      if (op === 'add' || op === 'upd') a.amount = String(cleanAmount_(a.amount));
+      if (!RAW || CRED.k !== k) await loadAdmin(k);
+      await rpc('agr_exec', { k: k, op: String(op), a: a }); await agrLoad_();
+      return adminPayload_();
+    },
+    agrs() { return AGR; },
     async apiInvMatch(k, id, on) { return adminDo(k, 'inv_match', { id: id, on: !!on }); },
     async apiProjBudget(k, id, budget) { return adminDo(k, 'proj_budget', { id: id, budget: String(budget == null ? '' : budget) }); },
     async apiInvCat(k, id, cat) { return adminDo(k, 'inv_cat', { id: id, cat: String(cat || '') }); },
@@ -1151,7 +1205,7 @@
       if (v) flush();
       return r;
     },
-    async apiRepEdit(id, a) { const r = await rpc('rep_edit', { k: CRED.k || '', id: String(id || ''), a: a || {} }); flush(); return r; },
+    async apiRepEdit(id, a) { const r = await rpc('rep_edit', { k: CRED.k || '', id: String(id || ''), a: a || {} }); flush(); await agrLoad_(); return r; },
     async apiRepTick(id, item, undo, files, note) {
       const r = await rpc('rep_tick', { k: CRED.k || '', t: CRED.t || '', id: String(id || ''), item: String(item || ''), undo: !!undo, files: (files || []).map(f => ({ p: f.p, t: f.t })), note: String(note || '') });
       flush();
