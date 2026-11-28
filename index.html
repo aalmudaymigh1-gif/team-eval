@@ -1771,9 +1771,9 @@ html:root .agil{margin-top:4px}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=146"></script>
+<script src="api.js?v=147"></script>
 <script>
-const APP_VER = '146';
+const APP_VER = '147';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -2142,7 +2142,7 @@ function askAttBad(id) {
   ovOpen(`<label class="shh" for="abr">تسجيل غير صحيح</label>
     <div class="sub" style="margin:-6px 0 10px">${esc(dayLabel(r.date))}. يظهر على اليوم «غير صحيح» ولا تُحتسب ساعاته، ويصل الموظف إشعار بالسبب.</div>
     <input id="abr" placeholder="السبب" maxlength="300" onkeydown="if(event.key==='Enter')doAttBad('${id}')">
-    <div class="sub" style="margin:8px 0 0">${paid ? 'راتب هذا الشهر مصروف ومقفل: تُوضع العلامة والسبب دون تقصير.' : 'يُسجَّل عليه تقصير «الأمانة والمصداقية». وإذا كان التقصير نفسه مسجّلاً في هذا اليوم فلن يتكرر.'}</div>
+    <div class="sub" style="margin:8px 0 0">يُسجَّل عليه تقصير «الأمانة والمصداقية». وإذا كان التقصير نفسه مسجّلاً في هذا اليوم فلن يتكرر.${paid ? ' راتب هذا الشهر صُرف، فيُحتسب التقصير في حافز ' + esc(cryMonth(r.emp, r.date) || 'الشهر التالي') + '.' : ''}</div>
     <div class="err" id="aberr"></div>
     <div class="g21"><button class="btn2 arm" onclick="doAttBad('${id}')">سجّله غير صحيح</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
   setTimeout(() => { const i = $('#abr'); if (i) i.focus(); }, 80);
@@ -2476,7 +2476,8 @@ function renderRec() {
       ${emp.id ? `<div class="empi">${esc(emp.name)} · ${empSub(emp)}</div>` : ''}</div>
     <div class="blk dline"><div class="lab">${I('calendar', 14)}التاريخ</div>
       ${segc([['today','اليوم'],['yest','أمس'],['other','تاريخ آخر']], S.dateMode, 'setDate')}
-      ${S.dateMode==='other' ? `<input type="date" value="${S.date}" max="${d.today}" onchange="S.date=this.value;renderRec()">` : ''}</div>
+      ${S.dateMode==='other' ? `<input type="date" value="${S.date}" max="${d.today}" onchange="S.date=this.value;renderRec()">` : ''}
+      ${cryNote(emp.id, S.date)}</div>
     ${emp.id && !trk ? daySumHtml(emp, S.date) : ''}</div>
     <div class="pmain"><div class="blk r-perf"><div class="lab">${I('sparkles', 14)}الأداء — اضغط على ما قصّر فيه</div><div class="gcard">${perf.map(c => row(c, '')).join('')}</div></div>
     ${emp.id && S.misses.includes(FOL) ? folHtml(emp) : ''}
@@ -2496,6 +2497,12 @@ function renderRec() {
       <button class="btn${!S.misses.length && !S.star ? ' quiet' : ''}" id="saveBtn" onclick="save()">${I('check', 19, 2.5)}${label}</button></div></div></div></div>`;
 }
 
+/* الإصدار 147: راتب شهر اليوم المختار مصروف؟ ما يُسجَّل لا يُقفل، يُرحَّل لأول شهر لم يُصرف (الحسبة في القاعدة و api.js) */
+function cryMonth(empId, date) { return empId && !S.preview && API.carryMonth ? API.carryMonth(empId, date) : ''; }
+function cryNote(empId, date) {
+  const m = cryMonth(empId, date), e = empById(empId);
+  return m && e && !e.track ? `<div class="sub flrn cryn">${I('info', 13)}راتب هذا الشهر صُرف. ما يُسجَّل لهذا اليوم يُحتسب في حافز ${esc(m)}.</div>` : '';
+}
 /* الإصدار 106: ملخص يوم الموظف فوق التقييم. للقراءة فقط: الحضور، المهام اللي أنجزها، الأعمال اللي أنجزها في التقارير، وفواتيره */
 function daySum(emp, date) {
   const d = S.data, o = {att: null, ticks: null, inv: 0, invSum: 0};
@@ -2603,6 +2610,7 @@ function save() {
     ${gen && S.misses.some(c => c !== FOL) ? row('الملاحظة', esc(gen), 'nw') : ''}${S.misses.includes(FOL) && fnt ? row(S.misses.length > 1 ? 'متابعة الأعمال' : 'الملاحظة', esc(fnt).replace(/\n/g, '<br>'), 'nw') : ''}
     ${S.star ? row('موقف مميز', esc(S.starNote.trim()) + (e.track ? '' : ' · ' + M(st.star, '+', 't')), 'nw') : ''}
     ${e.track ? row('الخصم', 'متابعة فقط') : row('الخصم', ded ? M(ded, '', 't') : 'بدون خصم جديد', ded ? 'neg' : '')}
+    ${!e.track && cryMonth(S.emp, S.date) ? row('يُحتسب في', 'حافز ' + esc(cryMonth(S.emp, S.date))) : ''}
     <div class="g21"><button class="btn2 cu" onclick="ovClose();doSave()">${I('check', 16, 2.5)}تأكيد</button><button class="btn2" onclick="ovClose()">إلغاء</button></div>`);
 }
 
@@ -2618,7 +2626,7 @@ async function doSave() {
     S.misses = []; S.star = false; S.starNote = ''; S.note = ''; folReset(); S.dateMode = 'today'; S.date = S.data.today;
     S.busy = false;
     renderAdmin();
-    toast((res.appended ? 'أُضيف إلى مخالفة اليوم عند ' + name : 'تم الحفظ لـ ' + name) + (res.skipped ? ' (' + res.skipped + ' مسجّل اليوم مسبقاً)' : ''), undoLast);
+    toast((res.appended ? 'أُضيف إلى مخالفة اليوم عند ' + name : 'تم الحفظ لـ ' + name) + (res.skipped ? ' (' + res.skipped + ' مسجّل اليوم مسبقاً)' : '') + (res.carry ? ' · يُحتسب في حافز ' + res.carry : ''), undoLast);
   } catch (e) {
     S.busy = false; renderRec(); $('#err').textContent = e;
   }
@@ -2814,7 +2822,7 @@ function floorNote(m) { return !m.track && m.base - m.deduct + m.reward + m.clea
 function entryHtml(x, canDelete, noAmt) {
   const del = canDelete ? `<button class="del ${S.armed===x.id?'arm':''}" onclick="armLog('${x.id}')">${S.armed===x.id?'تأكيد الحذف':I('trash-2', 15)}</button>` : '';
   return `<div class="ent"><div class="ico ${x.type==='+'?'s':'m'}">${I(x.type==='+' ? 'star' : 'x', 15, 2.5)}</div>
-    <div class="t"><div>${x.type==='+' ? 'موقف مميز' : x.crits.map(c => esc(critL(c))).join('، ')}${x.note ? ' — ' + esc(x.note).replace(/\n/g, '<br>') : ''}</div><div class="d">${dmy(x.date)}${noAmt ? '' : x.dup ? '<span> · </span><span>مكرر بنفس اليوم</span>' : x.over ? '<span> · </span><span>فوق حد المكافأة</span>' : ''}${x.type === '-' && x.at && BOOT.page === 'admin' && !S.preview ? '<span> · </span>' + (x.seen ? `<span class="sn ok">اطّلع عليها ${esc(t12(x.seen))}</span>` : '<span class="sn no">لم يطّلع</span>') : ''}</div></div>
+    <div class="t"><div>${x.type==='+' ? 'موقف مميز' : x.crits.map(c => esc(critL(c))).join('، ')}${x.note ? ' — ' + esc(x.note).replace(/\n/g, '<br>') : ''}</div><div class="d">${dmy(x.date)}${x.acc && !noAmt ? '<span> · </span><span class="acc">' + (x.type === '+' ? 'تُحتسب في حافز ' : 'تُحتسب من حافز ') + esc(x.acc) + '</span>' : ''}${noAmt ? '' : x.dup ? '<span> · </span><span>مكرر بنفس اليوم</span>' : x.over ? '<span> · </span><span>فوق حد المكافأة</span>' : ''}${x.type === '-' && x.at && BOOT.page === 'admin' && !S.preview ? '<span> · </span>' + (x.seen ? `<span class="sn ok">اطّلع عليها ${esc(t12(x.seen))}</span>` : '<span class="sn no">لم يطّلع</span>') : ''}</div></div>
     ${noAmt ? '' : `<div class="p">${M(Math.abs(x.pts), x.pts > 0 ? '+' : x.pts < 0 ? '−' : '')}</div>`}${del}</div>`;
 }
 

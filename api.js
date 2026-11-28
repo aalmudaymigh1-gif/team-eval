@@ -372,6 +372,24 @@
     return out;
   }
   function isPaid_(fin, empId, mk) { return fin.some(f => f.kind === 'pay' && f.emp === empId && f.month === mk); }
+  /* الإصدار 147: ما يُسجَّل بعد صرف راتب شهره (تقصير أو موقف مميز) لا يُقفل: القاعدة ترحّله (الزناد log_carry_t و att_log_day)
+     لأول شهر لم يُصرف وغير موقوف، وتحفظ يومه الحقيقي في for. الحسبة تبقى على تاريخ الترحيل، و«مرة باليوم» على اليوم الحقيقي */
+  const logDay_ = l => l.for || l.date;
+  function carryTo_(emp, fin, date) {
+    const mk = String(date || '').slice(0, 7);
+    if (!emp || !isPaid_(fin, emp.id, mk)) return '';
+    let m = mk;
+    /* الإيقاف المفتوح (بدون نهاية) لا يُتخطى، وإلا يضيع السجل بعد سنتين. مثل att_log_day في القاعدة */
+    for (let i = 0; i < 24; i++) { m = nextMonth_(m); if (!isPaid_(fin, emp.id, m) && !(emp.stops || []).some(x => x.to && x.from <= m && m < x.to)) break; }
+    return m;
+  }
+  /* 147: «مرة باليوم» على اليوم الحقيقي حتى عبر الشهور: المحسوب هو الأقدم تاريخ احتساب، والمرحّل بعده لنفس اليوم والمعيار مكرر.
+     الحسبة (calcMonth_) والقائمة (groups_) والإشعار (log_push_ins) على القاعدة نفسها */
+  function firstDay_(logs) {
+    const m = {};
+    (logs || []).forEach(l => { if (l.type !== '-') return; const k = l.emp + '|' + logDay_(l) + '|' + l.crit; if (!m[k] || l.date < m[k]) m[k] = l.date; });
+    return m;
+  }
   function startMonth_(emp, logs, fin) {
     let s = (RAW.settings && RAW.settings.START) || '2026-11';
     logs.forEach(l => { if (l.emp === emp.id && l.date.slice(0, 7) < s) s = l.date.slice(0, 7); });
@@ -404,13 +422,13 @@
     const sn = snap_(emp.id, mk);
     if (sn) emp = Object.assign({}, emp, { max: Number(sn.max) || 0, track: !!sn.track });
     const st = sn ? settings_(sn.st || {}) : settings_();
-    const seen = {}, mMap = {};
+    const seen = {}, mMap = {}, fd = firstDay_(logs);
     let misses = 0, trust = 0, stars = 0;
     logs.forEach(l => {
       if (l.emp !== emp.id || l.date.slice(0, 7) !== mk) return;
       if (l.type === '+') { if (l.crit === STAR_CRIT) stars++; return; }
-      const k = l.date + '|' + l.crit;
-      if (seen[k]) return;
+      const k = logDay_(l) + '|' + l.crit; /* 147 */
+      if (seen[k] || fd[l.emp + '|' + k] < l.date) return; /* مكرر لليوم الحقيقي في شهر قبله (مخالفة قبل الصرف) */
       seen[k] = true;
       if (heavy(l.crit)) trust++; else misses++;
       mMap[l.crit] = (mMap[l.crit] || 0) + (heavy(l.crit) ? 3 : 1);
@@ -483,13 +501,14 @@
   }
   /* الإصدار 117: مبلغ كل موقف في القائمة نفس اللي انحسب في الحافز (calcMonth_): المعيار ينحسب مرة باليوم،
      والمكافأة تقف عند حدها بالشهر، والمبالغ من إعدادات الشهر المثبتة. المكرر يبقى ظاهر بعلامة ومبلغه صفر */
-  function groups_(rows) {
-    const map = {}, order = [], seen = {}, acc = {};
+  function groups_(rows, all) {
+    const map = {}, order = [], seen = {}, acc = {}, fd = firstDay_(all || rows);
     rows.forEach(l => {
       if (l.type === '+' && l.crit !== STAR_CRIT) return;
       const mk = l.date.slice(0, 7), sn = snap_(l.emp, mk), st = sn ? settings_(sn.st || {}) : settings_();
       const g = l.group + l.type;
-      if (!map[g]) { map[g] = { id: l.group, date: l.date, type: l.type, crits: [], note: l.note, notes: [], pts: 0, dup: false, over: false, at: '', seen: '', unseen: false }; order.push(g); }
+      if (!map[g]) { map[g] = { id: l.group, date: logDay_(l), type: l.type, crits: [], note: l.note, notes: [], pts: 0, dup: false, over: false, at: '', seen: '', unseen: false,
+        acc: l.for ? monthLabel_(mk) : '' /* 147: اليوم الحقيقي، وشهر الاحتساب لو ترحّل */ }; order.push(g); }
       if (l.type === '+') {
         const ak = l.emp + '|' + mk, got = acc[ak] || 0, add = Math.max(0, Math.min(st.star, st.starCap - got));
         acc[ak] = got + add; map[g].pts += add; if (add < st.star) map[g].over = true;
@@ -501,8 +520,8 @@
       if (nt && map[g].notes.indexOf(nt) < 0) map[g].notes.push(nt);
       map[g].note = map[g].notes.join('\n');
       if (l.at) { if (!map[g].at || l.at < map[g].at) map[g].at = l.at; if (!l.seen) map[g].unseen = true; else if (l.seen > map[g].seen) map[g].seen = l.seen; }
-      const k = l.emp + '|' + l.date + '|' + l.crit;
-      if (seen[k]) { map[g].dup = true; return; }
+      const k = l.emp + '|' + logDay_(l) + '|' + l.crit; /* 147 */
+      if (seen[k] || fd[k] < l.date) { map[g].dup = true; return; }
       seen[k] = true;
       map[g].pts -= heavy(l.crit) ? st.trust : st.miss;
     });
@@ -544,7 +563,7 @@
       sal: salSt_(emp, fin, logs, now),
       stop: stopNow_(emp), stopNow: stopOn_(emp, now), /* 141 */
       payMsg: payCard_(emp, fin, todayS), /* 143 */
-      entries: groups_(mine.filter(l => l.date.slice(0, 7) === now)),
+      entries: groups_(mine.filter(l => l.date.slice(0, 7) === now), mine),
       /* الإصدار 121: مخالفات اليوم اللي وصله إشعارها وما ضغط «فهمت» (تختفي 12 الليل بتوقيت الرياض) */
       viol: mine.filter(l => l.type === '-' && l.at && !l.seen && l.at.slice(0, 10) === todayS)
         .sort((a, b) => a.at < b.at ? -1 : a.at > b.at ? 1 : 0).map(l => ({ id: l.id, crit: l.crit, note: l.note || '', at: l.at })),
@@ -707,7 +726,7 @@
       if (!RAW || CRED.k !== k) await loadAdmin(k);
       if (!RAW.employees.some(e => e.id === x.emp)) throw new Error('اختر الموظف');
       if (!/^\d{4}-\d{2}-\d{2}$/.test(String(x.date || ''))) throw new Error('التاريخ غير صحيح');
-      if (isPaid_(RAW.fin, x.emp, x.date.slice(0, 7))) throw new Error('راتب هذا الشهر مصروف ومقفل، لا يمكن التسجيل فيه');
+      const carry = carryTo_(empById(x.emp), RAW.fin, x.date); /* 147: الشهر المصروف لا يقفل التسجيل، يُرحَّل */
       let misses = (x.misses || []).filter((c, i, a) => a.indexOf(c) === i && CRITERIA.some(k2 => k2.n === c));
       const starNote = x.star ? String(x.star.note || '').trim().slice(0, 300) : '';
       if (x.star && !starNote) throw new Error('اكتب ما قام به في الموقف المميز');
@@ -715,7 +734,7 @@
       const notes = x.notes && typeof x.notes === 'object' ? x.notes : {};
       const gen = String(x.note || '').trim().slice(0, 300);
       const noteOf = c => Object.prototype.hasOwnProperty.call(notes, c) ? String(notes[c] || '').trim().slice(0, c === FOLLOW ? 1000 : 300) : gen;
-      const day = RAW.logs.filter(l => l.emp === x.emp && l.date === x.date && l.type === '-');
+      const day = RAW.logs.filter(l => l.emp === x.emp && logDay_(l) === x.date && l.type === '-');
       const sameDay = day.map(l => l.crit);
       /* «متابعة الأعمال الموكلة» متسجلة بنفس اليوم: الأعمال الجديدة تنضاف لملاحظتها بدون خصم جديد */
       let append = null;
@@ -723,7 +742,7 @@
         const old = day.filter(l => l.crit === FOLLOW && !/^bad/.test(l.group || '')).pop();
         const have = String(old ? old.note || '' : '').split('\n').map(s => s.trim());
         const add = noteOf(FOLLOW).split('\n').map(s => s.trim()).filter((s, i, a) => s && have.indexOf(s) < 0 && a.indexOf(s) === i).join('\n');
-        if (old && add) append = { id: old.id, add: add };
+        if (old && add && !isPaid_(RAW.fin, old.emp, old.date.slice(0, 7))) append = { id: old.id, add: add }; /* 147: مخالفة قبل الصرف في شهر مصروف مقفلة، لا يُضاف إليها */
       }
       const before = misses.length;
       misses = misses.filter(c => sameDay.indexOf(c) < 0);
@@ -738,12 +757,15 @@
         out = await adminDo(k, 'log_add', { rows: rows });
       }
       out.lastId = grp; out.lastNote = append; out.skipped = skipped; out.appended = !!append;
+      out.carry = carry && grp ? monthLabel_(carry) : '';
       return out;
     },
 
     /* الإصدار 121: «تراجع» بعد إضافة عمل لمخالفة اليوم: يشيل السطر المضاف بس */
     /* معايير التقصير المسجلة للموظف بهاليوم (للتنبيه في نافذة التأكيد) */
-    dayMisses(emp, date) { return RAW ? RAW.logs.filter(l => l.emp === emp && l.date === date && l.type === '-').map(l => l.crit) : []; },
+    dayMisses(emp, date) { return RAW ? RAW.logs.filter(l => l.emp === emp && logDay_(l) === date && l.type === '-').map(l => l.crit) : []; },
+    /* 147: شهر احتساب ما يُسجَّل في هذا اليوم لو راتب شهره مصروف، وإلا '' */
+    carryMonth(emp, date) { const m = RAW ? carryTo_(empById(emp), RAW.fin, date) : ''; return m ? monthLabel_(m) : ''; },
     async apiNoteUndo(k, n) {
       if (!RAW || CRED.k !== k) await loadAdmin(k);
       return adminDo(k, 'log_note_add', { id: n.id, add: n.add, undo: '1' });
