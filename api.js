@@ -81,6 +81,8 @@
   let RAW = null;
   /* الإصدار 145: اتفاقات المقاولين والفنيين. قائمة مستقلة (agr_list في القاعدة)، وفشلها لا يوقف التحميل */
   let AGR = [], AGRMAP = {};
+  /* 146: الاتفاق يُربط بفاتورة «أجور» أو «مواد» (اتفاقات التفصيل والتوريد تُسجَّل مواد) */
+  const agrCat_ = c => c === 'wage' || c === 'mat';
   function agrNorm_(l) {
     AGR = (Array.isArray(l) ? l : []).map(a => ({ id: String(a.id), project: String(a.project || ''), item: String(a.item || ''), sup: String(a.sup || ''), unit: String(a.unit || ''), dur: String(a.dur || ''),
       amount: Number(a.amount) || 0, st: a.st === 'closed' ? 'closed' : 'open', quote: String(a.quote || ''), at: String(a.at || ''), paid: Number(a.paid) || 0, pend: Number(a.pend) || 0,
@@ -1020,7 +1022,7 @@
       if (!paths.length) throw new Error('صوّر الفاتورة');
       const w = Math.round(Number(x.warranty) || 0);
       const out = await empDo(token, 'inv_add', { cid: String(x.cid || ''), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), salEmp: x.cat === 'sal' ? String(x.salEmp || '') : '', project: String(x.project || ''), photos: paths, warranty: w > 0 && w <= 120 ? w : 0, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
-      return agrAfter_(out, { t: token }, String(x.cid || ''), x.cat === 'wage' ? x.agr : undefined, () => empPayload_(empById(RAW.me))); /* 145 */
+      return agrAfter_(out, { t: token }, String(x.cid || ''), agrCat_(x.cat) ? x.agr : undefined, () => empPayload_(empById(RAW.me))); /* 145 */
     },
     /* الإصدار 74: تصحيح فاتورة رجّعها المدير العام وإعادة إرسالها بنفس السجل */
     async apiInvResend(token, id, x, dataUrls, keep) {
@@ -1034,7 +1036,7 @@
       if (!paths.length) throw new Error('صوّر الفاتورة');
       if (x.cat === 'sal' && !x.salEmp) throw new Error('اختر الموظف الذي سلّمته الراتب');
       const out = await empDo(token, 'inv_resend', { id: String(id), amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), salEmp: x.cat === 'sal' ? String(x.salEmp || '') : '', project: String(x.project || ''), photos: paths, paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash' });
-      return agrAfter_(out, { t: token }, String(id), x.agr === undefined ? undefined : (x.cat === 'wage' ? x.agr : ''), () => empPayload_(empById(RAW.me))); /* 145 */
+      return agrAfter_(out, { t: token }, String(id), x.agr === undefined ? undefined : (agrCat_(x.cat) ? x.agr : ''), () => empPayload_(empById(RAW.me))); /* 145 */
     },
 
     /* الإصدار 116: فاتورة «راتب موظف» لما تنعتمد تنسجل دفعة من راتب الشخص (نفس توزيع «دفعة راتب»). المبلغ الزايد عن اللي له يوقف الاعتماد */
@@ -1079,7 +1081,7 @@
       const before = new Set(RAW.invoices.map(v => v.id));
       const out = await adminDo(k, 'inv_add', { emp: x.emp || '', amount: amount, desc: desc, vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''), project: x.project || '',
         photos: paths, paidBy: x.emp ? 'cash' : 'card', warranty: w >= 1 && w <= 120 ? addMonths_(RAW.today, w) : '' });
-      if (!x.agr || x.cat !== 'wage') return out;
+      if (!x.agr || !agrCat_(x.cat)) return out;
       /* 145: الفاتورة الجديدة تُعرف بالفرق عن القائمة قبل الحفظ، ثم تُربط بالاتفاق */
       const nw = RAW.invoices.filter(v => !before.has(v.id) && v.kind === 'inv' && v.project === x.project && Math.abs(v.amount - amount) < 0.005)[0];
       if (!nw) { out.__agrErr = 'لم تُربط الفاتورة بالاتفاق'; return out; }
@@ -1095,7 +1097,7 @@
       if (!desc) throw new Error('اكتب وصف المشتريات');
       const out = await adminDo(k, 'inv_upd', { id: String(id), amount: String(cleanAmount_(x.amount)), desc: desc, project: String(x.project || ''), vendor: String(x.vendor || '').trim(), cat: String(x.cat || ''),
         paidBy: x.paidBy === 'card' || x.paidBy === 'own' ? x.paidBy : 'cash', warranty: /^\d{4}-\d{2}-\d{2}$/.test(String(x.warranty || '')) ? x.warranty : '' });
-      return agrAfter_(out, { k: k }, String(id), x.agr === undefined ? undefined : (x.cat === 'wage' ? x.agr : ''), adminPayload_); /* 145 */
+      return agrAfter_(out, { k: k }, String(id), x.agr === undefined ? undefined : (agrCat_(x.cat) ? x.agr : ''), adminPayload_); /* 145 */
     },
     /* الإصدار 145: الاتفاقات. ربط فاتورة باتفاق بدون تعديل غيره، وعمليات الاتفاق (إضافة، تعديل المبلغ، إقفال، إعادة فتح، حذف) */
     async apiInvAgr(k, id, agr) {

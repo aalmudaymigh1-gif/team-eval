@@ -1771,9 +1771,9 @@ html:root .agil{margin-top:4px}
 <div class="tst" id="tst"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="api.js?v=145"></script>
+<script src="api.js?v=146"></script>
 <script>
-const APP_VER = '145';
+const APP_VER = '146';
 let verAt = 0, DOC_LM = Date.parse(document.lastModified);
 /* الإصدار 86: أي طلب للتحقق من التحديث له مهلة، عشان السحب للتحديث ما يعلّق بصمت إذا النت متقطع */
 function fetchT(u, o, ms) {
@@ -3320,7 +3320,8 @@ function agrRoom(a, invId) {
 }
 function agrObj(st) { return st === 'S.inv' ? S.inv : st === 'S.ai' ? S.ai : st === 'S.ie' ? S.ie : null; }
 /* الجارية التي بقي لها شيء، والمربوط حالياً يبقى ظاهراً حتى لو تسدد أو أُقفل */
-function agrList(f) { return f && f.cat === 'wage' && f.project ? agrAll().filter(a => a.project === f.project && ((a.st === 'open' && agrLeft(a) > 0) || a.id === f.agr)) : []; }
+function agrCat(c) { return c === 'wage' || c === 'mat'; } /* 146: «مواد» مع «أجور» */
+function agrList(f) { return f && agrCat(f.cat) && f.project ? agrAll().filter(a => a.project === f.project && ((a.st === 'open' && agrLeft(a) > 0) || a.id === f.agr)) : []; }
 function agrCur(f) { return f && f.agr ? agrList(f).find(a => a.id === f.agr) || null : null; }
 function agrVal(f) { const a = agrCur(f); return a ? a.id : ''; }
 function agrBoxIn(st, invId) {
@@ -3372,7 +3373,7 @@ function agrOpen(id, keep) {
     <div class="cbt"><i class="${left < 0 ? 'r' : a.paid ? '' : 'n'}" style="width:${Math.max(Math.min(pct, 100), 1)}%"></i></div>
     ${a.pend ? `<div class="sub" style="margin-top:8px">بانتظار الاعتماد ${M(a.pend, '', 't')}</div>` : ''}
     <div class="sech">الدفعات<span>${a.pays.length}</span></div>
-    ${a.pays.length ? a.pays.map(pay).join('') : '<div class="sub">لا توجد دفعات بعد. تُربط من فاتورة ببند «أجور».</div>'}
+    ${a.pays.length ? a.pays.map(pay).join('') : '<div class="sub">لا توجد دفعات بعد. تُربط من فاتورة ببند «أجور» أو «مواد».</div>'}
     ${g.ed ? `<div class="sub" style="margin:14px 0 4px">المبلغ المتفق</div><input id="agam" class="qtt" inputmode="decimal" value="${esc(g.amount)}" oninput="S.ag.amount=this.value;amtPv(this.value,'apv_ag')" onkeydown="if(event.key==='Enter')agrSave()">${amtPvHtml(g.amount, 'apv_ag')}
       <div class="g21" style="margin-top:10px"><button class="btn2 cu" id="agsv" onclick="agrSave()">حفظ</button><button class="btn2" onclick="S.ag.ed=false;agrOpen('${id}',true)">إلغاء</button></div>`
     : `<div class="grid2" style="margin-top:14px"><button class="btn2" onclick="S.ag.ed=true;S.ag.amount='${a.amount}';agrOpen('${id}',true)">${I('pencil', 15)}تعديل المبلغ المتفق</button><button class="btn2" onclick="agrDo('${a.st === 'open' ? 'close' : 'open'}',{id:'${id}'},'${id}')">${a.st === 'open' ? 'إقفال الاتفاق' : 'إعادة فتح الاتفاق'}</button></div>
